@@ -88,7 +88,10 @@ class PlayerContext {
     
     static func register(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
-        networkMonitor.listeners[id] = listener
+        if networkMonitor.listeners[id] == nil {
+            weak var weakListener = listener
+            networkMonitor.listeners[id] = weakListener
+        }
         Logger.shared.debug("\(networkMonitor.listeners.count) network listeners")
     }
     static func unregister(listener: NetworkListener) {

@@ -45,6 +45,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         }
     }
     private var sessionStarted: Date?
+
     
     init(mediaUrl: URL, pipeline: AudioPipeline, inclMetadata: Bool = true) {
         self.url = mediaUrl
@@ -55,13 +56,12 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         configuration.networkServiceType = NSURLRequest.NetworkServiceType.avStreaming
         configuration.timeoutIntervalForRequest = 10.0
         super.init()
-        Logger.loading.notice("classical4")
+        PlayerContext.register(listener: self)
     }
     
     deinit {
         Logger.loading.debug()
-        stopDataRequest()
-        session = nil
+        stopRequestData()
     }
     
     func requestData(from url: URL) {
@@ -69,11 +69,17 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         startSession(configuration: configuration)
     }
     
+    func stopRequestData() {
+        Logger.loading.debug()
+        endSession()
+        PlayerContext.unregister(listener: self)
+        stalled = false
+    }
+
     fileprivate func startSession(configuration: URLSessionConfiguration) {
         Logger.loading.debug()
         sessionStarted = Date()
         session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
-        PlayerContext.register(listener: self)
         var request: URLRequest = URLRequest(url: url)
         if withMetadata {
             request.setValue("1", forHTTPHeaderField: "Icy-MetaData")
@@ -81,11 +87,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         sessionData = session?.dataTask(with: request)
         sessionData?.resume()
     }
-    
-    func stopDataRequest() {
+
+    private func endSession() {
         if let session = session {
             session.invalidateAndCancel()
-            PlayerContext.unregister(listener: self)
         }
     }
     
@@ -102,8 +107,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     }
     
     fileprivate func resumeRequestData() {
-        stopDataRequest()
         Logger.loading.debug()
+        endSession()
         startSession(configuration: configuration)
         pipeline.resume()
         pipeline.pipelineListener.problem(.solved, "resume loading data")
@@ -125,12 +130,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     // MARK: session begins
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {        Logger.loading.notice("didReceive response called")
-        stalled = false
         if let started = sessionStarted {
             pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
         }
         completionHandler(Foundation.URLSession.ResponseDisposition.allow)
-        
         if response is HTTPURLResponse {
             handleMetadata(response as! HTTPURLResponse)
         }
@@ -194,6 +197,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         if Logger.verbose { Logger.loading.debug("recieved \(data.count) bytes, total \(dataTask.countOfBytesReceived)") }
         
         if dataTask.state == .running {
+            stalled = false
             pipeline.decodingQueue.async {
                 self.pipeline.process(data: data)
             }

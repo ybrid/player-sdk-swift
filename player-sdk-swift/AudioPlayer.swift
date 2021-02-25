@@ -103,12 +103,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     }
      
     public func stop() {
-        guard state != .stopped  else {
-            pipeline?.setStopping()
-            self.stopPlaying()
-            return
-        }
-        pipeline?.setStopping()
+        pipeline?.stopProcessing()
         playerQueue.async {
             self.stopPlaying()
             self.state = .stopped
@@ -123,8 +118,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     private func stopPlaying() {
         playback?.stop()
-        loader?.stopDataRequest()
-        loader = nil
+        loader?.stopRequestData()
         pipeline?.dispose()
     }
     
@@ -134,9 +128,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
         switch state {
         case .stopped:
             Logger.shared.debug("should not begin playing.")
-            pipeline?.setStopping()
+            pipeline?.stopProcessing()
             playback.stop()
-            loader?.stopDataRequest()
+            loader?.stopRequestData()
             pipeline?.dispose()
             return
         case .playing:

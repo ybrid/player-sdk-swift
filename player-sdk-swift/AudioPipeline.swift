@@ -91,7 +91,7 @@ class AudioPipeline : DecoderListener
         Logger.decoding.debug()
     }
     
-    func setStopping() {
+    func stopProcessing() {
         stopping = true
         decoder?.stopping = true
     }
