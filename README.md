@@ -70,7 +70,7 @@ We use XCode version 12 with swift 4 and CocoaPods 1.10.
 Choose a new version number, let's say ```0.4.2```. In the following steps you have to type that number three times. 
 
 First generate a new 'YbridPlayerSDK.xcframework'.  
-1. Open ```player-sdk-swift.xcworkspace``` with XCode. In the properties editor, on target ```player-sdk-swift``` select ```General``` and change ```Version``` to the new number. Close the workspace.
+1. Open ```Config.xcconfig``` with an editor of you choice and change the value of ```MARKETING_VERSION``` to the new number an save it.
 2. On a terminal, in the project's root directory execute
    ```shell 
    ./build.sh
