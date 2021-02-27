@@ -162,7 +162,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         Logger.testing.error("-- problem '\(text ?? "(nil)")'")
     }
     
-    func durationPlaying(_ seconds: TimeInterval?) {
+    func playingSince(_ seconds: TimeInterval?) {
         if let since = seconds {
             Logger.testing.debug("-- + playing since \(since.S)")
         }
@@ -173,12 +173,12 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
             Logger.testing.notice("-- + connected after \(connected.S)")
         }
     }
-    func durationReady(_ seconds: TimeInterval?) {
+    func durationReadyToPlay(_ seconds: TimeInterval?) {
         if let ready = seconds {
             Logger.testing.notice("-- + ready after \(ready.S)")
         }
     }
-    func durationBuffer(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let buffer = currentSeconds {
             Logger.testing.debug("-- + buffer \(buffer.S)")
         }

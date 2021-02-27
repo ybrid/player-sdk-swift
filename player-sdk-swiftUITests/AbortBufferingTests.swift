@@ -210,19 +210,19 @@ class AbortingListener : AudioPlayerListener  {
         }
     }
     
-    func durationReady(_ seconds: TimeInterval?) {
+    func durationReadyToPlay(_ seconds: TimeInterval?) {
         hasPlayed = true
         
         guard let duration = seconds else {
-            Logger.testing.error("-- durationReady is nil")
+            Logger.testing.error("-- durationReadyToPlay is nil")
             return
         }
         guard let state = player?.state else {
-            XCTFail("durationReady -- player without state.")
+            XCTFail("-- player without state.")
             return
         }
         
-        Logger.testing.notice("durationReady -- state is \(state)")
+        Logger.testing.notice("-- state is \(state)")
         switch state {
         case .stopped:
             XCTFail("-- should not begin playing.")
@@ -244,14 +244,14 @@ class AbortingListener : AudioPlayerListener  {
         Logger.testing.notice("-- problem is \(text ?? "(nil)")")
         problemCount += 1
     }
-    func durationPlaying(_ seconds: TimeInterval?) {
+    func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
         } else {
             Logger.testing.notice("-- no playing duration ")
         }
     }
-    func durationBuffer(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let bufferLength = currentSeconds {
             Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
         }

@@ -53,11 +53,19 @@ class TestAudioPlayerListener : AudioPlayerListener {
         Logger.testing.notice("-- problem is \(text ?? "(nil)")")
     }
 
-    func durationPlaying(_ seconds: TimeInterval?) {
+    func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
         } else {
             Logger.testing.notice("-- reset playing duration ")
+        }
+    }
+
+    func durationReadyToPlay(_ seconds: TimeInterval?) {
+        if let duration = seconds {
+            Logger.testing.notice("-- begin playing audio after \(duration.S) seconds ")
+        } else {
+            Logger.testing.notice("-- reset buffered until playing duration ")
         }
     }
 
@@ -69,15 +77,7 @@ class TestAudioPlayerListener : AudioPlayerListener {
         }
     }
 
-    func durationReady(_ seconds: TimeInterval?) {
-        if let duration = seconds {
-            Logger.testing.notice("-- begin playing audio after \(duration.S) seconds ")
-        } else {
-            Logger.testing.notice("-- reset buffered until playing duration ")
-        }
-    }
-
-    func durationBuffer(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let bufferLength = currentSeconds {
             Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
         }

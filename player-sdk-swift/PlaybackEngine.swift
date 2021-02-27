@@ -91,7 +91,7 @@ class PlaybackEngine : Playback {
         Logger.playing.debug()
         
         if let playingSince = playbackBuffer?.playingSince {
-            self.playerListener?.durationPlaying(playingSince)
+            self.playerListener?.playingSince(playingSince)
         }
 
         stopTimer()
@@ -124,11 +124,11 @@ class PlaybackEngine : Playback {
     }
     
     @objc func tick() {
-        playerListener?.durationPlaying(playbackBuffer?.playingSince)
+        playerListener?.playingSince(playbackBuffer?.playingSince)
         
         let bufferedS = playbackBuffer?.takeCare()
         let avrgBuffS = metrics.averagedBufferS(bufferedS)
-        playerListener?.durationBuffer(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
+        playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
     }
     
     

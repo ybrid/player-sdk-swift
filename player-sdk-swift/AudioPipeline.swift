@@ -163,7 +163,7 @@ class AudioPipeline : DecoderListener
         
         if firstPCM {
             firstPCM = false
-            playerListener?.durationReady(Date().timeIntervalSince(self.started))
+            playerListener?.durationReadyToPlay(Date().timeIntervalSince(self.started))
         }
     }
     

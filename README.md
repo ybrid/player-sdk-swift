@@ -42,16 +42,16 @@ let player = AudioPlayer(mediaUrl: url, listener: nil)
 player.play()
 // of course the program must not end here
 ```
-As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it to the AudioPlayer via the listener parameter above. You will also receive metadata, timing information, and hints on possible problems like network stalls. 
+As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it to the AudioPlayer via the listener parameter above. You will also receive changes of metadata, hints on possible problems like network stalls and timing information.
 ```swift
 public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)
     func displayTitleChanged(_ title: String?)
     func currentProblem(_ text: String?)
+    func playingSince(_ seconds: TimeInterval?)
+    func durationReadyToPlay(_ seconds: TimeInterval?)
     func durationConnected(_ seconds: TimeInterval?)
-    func durationReady(_ seconds: TimeInterval?)
-    func durationPlaying(_ seconds: TimeInterval?)
-    func durationBuffer(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
 }
 ```
 The PlaybackStates are 

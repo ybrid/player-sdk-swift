@@ -14,10 +14,10 @@ public protocol AudioPlayerListener : AnyObject {
   func stateChanged(_ state: YbridPlayerSDK.PlaybackState)
   func displayTitleChanged(_ title: Swift.String?)
   func currentProblem(_ text: Swift.String?)
+  func playingSince(_ seconds: Foundation.TimeInterval?)
+  func durationReadyToPlay(_ seconds: Foundation.TimeInterval?)
   func durationConnected(_ seconds: Foundation.TimeInterval?)
-  func durationReady(_ seconds: Foundation.TimeInterval?)
-  func durationPlaying(_ seconds: Foundation.TimeInterval?)
-  func durationBuffer(averagedSeconds: Foundation.TimeInterval?, currentSeconds: Foundation.TimeInterval?)
+  func bufferSize(averagedSeconds: Foundation.TimeInterval?, currentSeconds: Foundation.TimeInterval?)
 }
 public enum PlaybackState {
   case buffering

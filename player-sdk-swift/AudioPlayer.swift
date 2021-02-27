@@ -30,10 +30,10 @@ public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)
     func displayTitleChanged(_ title: String?)
     func currentProblem(_ text: String?)
+    func playingSince(_ seconds: TimeInterval?)
+    func durationReadyToPlay(_ seconds: TimeInterval?)
     func durationConnected(_ seconds: TimeInterval?)
-    func durationReady(_ seconds: TimeInterval?)
-    func durationPlaying(_ seconds: TimeInterval?)
-    func durationBuffer(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
 }
 
 public enum PlaybackState {
