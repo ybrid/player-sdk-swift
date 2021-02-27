@@ -21,8 +21,7 @@ target 'player-sdk-swift' do
   end
 
   target 'player-sdk-swiftMacTests' do
-    pod 'YbridOgg'#, '0.7.2' #:path => '~/github/ogg-swift' 0.7.3 tested -> ok
-    pod 'YbridOpus'#, '0.7.0'
+    platform :osx, '10.10'
   end
 
 end

@@ -61,7 +61,6 @@
 		1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */; };
 		1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
 		1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
-		17CBC71B25DFD51900B2F7E7 /* AbortBufferingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */; };
 		17CBC8CA25E2517F00B2F7E7 /* player_sdk_swift.h in Headers */ = {isa = PBXBuildFile; fileRef = 170703D325D2F44400549B8A /* player_sdk_swift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17CBC8CC25E2517F00B2F7E7 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
 		17CBC8CD25E2517F00B2F7E7 /* AudioDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8025D565970055C973 /* AudioDecoder.swift */; };
@@ -82,13 +81,15 @@
 		17CBC8DC25E2517F00B2F7E7 /* AudioDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7E25D565970055C973 /* AudioDataLoader.swift */; };
 		17CBC8DD25E2517F00B2F7E7 /* AudioData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7F25D565970055C973 /* AudioData.swift */; };
 		17CBC8DE25E2517F00B2F7E7 /* MetadataExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8E25D565A10055C973 /* MetadataExtractor.swift */; };
+		17CD394525E8FCE10085B274 /* AbortBufferingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */; };
+		17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */; };
 		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		2088CECD835FBD183B4DC801 /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */; };
 		359F457B7FAB28D802B89782 /* Pods_player_sdk_swift_mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */; };
 		98E6DEF77CC3F257968EDFB3 /* Pods_player_sdk_swift_player_sdk_swiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */; };
 		A7C540EFD8E2E63E1F563645 /* Pods_player_sdk_swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */; };
-		C51763B6E8C1BF15C1F5285C /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E751A1720B8218902ECE3E76 /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework */; };
+		E0C09D7B502B64A784EEE675 /* Pods_player_sdk_swiftMacTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B25B77D58F64BED822856A6 /* Pods_player_sdk_swiftMacTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,23 +150,25 @@
 		1799DD8725D599190055C973 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevelopingPlayerTests.swift; sourceTree = "<group>"; };
 		1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITestsHelper.swift; sourceTree = "<group>"; };
-		17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
 		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
 		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
 		2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; sourceTree = "<group>"; };
+		3B25B77D58F64BED822856A6 /* Pods_player_sdk_swiftMacTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swiftMacTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_mac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BB772A87BF6338AA117007C /* Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig"; sourceTree = "<group>"; };
 		6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D0496725427F3FD4A74F7D9 /* Pods-player-sdk-swiftMacTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swiftMacTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swiftMacTests/Pods-player-sdk-swiftMacTests.release.xcconfig"; sourceTree = "<group>"; };
 		991CDE7474FFE647B3373FAF /* Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig"; sourceTree = "<group>"; };
 		A0C75C4F738E424DAEAF1B37 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		BE0856401F9F5CF6116F1D63 /* Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C707C8FA256682B5F811E49E /* Pods-player-sdk-swiftMacTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swiftMacTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swiftMacTests/Pods-player-sdk-swiftMacTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C7D7220EC3563F25C6773962 /* Pods-player-sdk-swift_mac.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.debug.xcconfig"; sourceTree = "<group>"; };
 		DB5D1B57C01FE7817A26FFD9 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		E751A1720B8218902ECE3E76 /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_player_sdk_swiftMacTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,7 +192,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C51763B6E8C1BF15C1F5285C /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework in Frameworks */,
+				E0C09D7B502B64A784EEE675 /* Pods_player_sdk_swiftMacTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,19 +259,10 @@
 		170703DD25D2F44400549B8A /* player-sdk-swiftTests */ = {
 			isa = PBXGroup;
 			children = (
-				17404BA925E4F08900051988 /* component */,
 				1799DD3125D580D40055C973 /* unit */,
 				170703E025D2F44400549B8A /* Info.plist */,
 			);
 			path = "player-sdk-swiftTests";
-			sourceTree = "<group>";
-		};
-		17404BA925E4F08900051988 /* component */ = {
-			isa = PBXGroup;
-			children = (
-				17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */,
-			);
-			path = component;
 			sourceTree = "<group>";
 		};
 		1799DCA225D565DB0055C973 /* mpeg */ = {
@@ -310,6 +304,7 @@
 		1799DD8425D599190055C973 /* player-sdk-swiftUITests */ = {
 			isa = PBXGroup;
 			children = (
+				17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */,
 				17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */,
 				1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */,
 				1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */,
@@ -363,6 +358,8 @@
 				991CDE7474FFE647B3373FAF /* Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig */,
 				C7D7220EC3563F25C6773962 /* Pods-player-sdk-swift_mac.debug.xcconfig */,
 				1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */,
+				C707C8FA256682B5F811E49E /* Pods-player-sdk-swiftMacTests.debug.xcconfig */,
+				7D0496725427F3FD4A74F7D9 /* Pods-player-sdk-swiftMacTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -372,9 +369,9 @@
 			children = (
 				525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */,
 				6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */,
-				E751A1720B8218902ECE3E76 /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework */,
 				004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */,
 				51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */,
+				3B25B77D58F64BED822856A6 /* Pods_player_sdk_swiftMacTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -635,7 +632,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift-player-sdk-swiftMacTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swiftMacTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -692,15 +689,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swiftMacTests/Pods-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swiftMacTests/Pods-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swiftMacTests/Pods-player-sdk-swiftMacTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D869D22E14FFB49A710712F3 /* [CP] Check Pods Manifest.lock */ = {
@@ -789,7 +786,6 @@
 				1799DD3D25D580D40055C973 /* PlaybackEngineTests.swift in Sources */,
 				1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */,
 				1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */,
-				17CBC71B25DFD51900B2F7E7 /* AbortBufferingTests.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
 				1799DD3E25D580D40055C973 /* PlaybackBufferTests.swift in Sources */,
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
@@ -815,6 +811,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
 				1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */,
 				1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */,
@@ -830,6 +827,7 @@
 				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
 				17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */,
 				1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */,
+				17CD394525E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1107,7 +1105,7 @@
 		};
 		1796DCCB25D5272C00B5439F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */;
+			baseConfigurationReference = C707C8FA256682B5F811E49E /* Pods-player-sdk-swiftMacTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -1136,7 +1134,7 @@
 		};
 		1796DCCC25D5272C00B5439F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6BB772A87BF6338AA117007C /* Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig */;
+			baseConfigurationReference = 7D0496725427F3FD4A74F7D9 /* Pods-player-sdk-swiftMacTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";

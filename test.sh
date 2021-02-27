@@ -28,24 +28,54 @@
 # Usage: no parameters, settings mostly defined in xcode xcodeworkspace
 # 
 
-scheme=player-sdk-swiftUITests
-target=player-sdk-swiftUITests
+scheme=player-sdk-swiftIOSTests
+target=player-sdk-swiftIOSTests
 testing="-only-testing $target/DevelopingPlayerTests"
 
 dd=./DerivedData
 # clean up?
 #rm -rfd $dd
 
+logbase="test-"
+rm -f "$logbase*.log"
 
 # platform=iphonesimulator
-# echo "testing on $platform...."
-# xcodebuild -scheme $scheme -destination "name=iPhone 11 Pro" -sdk $platform \
-#  test $testing
+# device="iPhone 11 Pro"
+# logfile=$logbase$device.log
+# echo "testing with $platform on $device"
+# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+#   -destination "name=$device" -sdk $platform \
+#   test $testing 2>&1 > "$logfile"
+# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# echo "$result, see $logfile"
+# echo "---------------------------------"
 
+# device="iPhone 6s"
+# logfile=$logbase$device.log
+# echo "testing with $platform on $device"
+# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+#   -destination "platform=iOS Simulator,OS=11.4,name=$device" -sdk $platform \
+#   test $testing 2>&1 > "$logfile"
+# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# echo "$result, see $logfile"
+# echo "---------------------------------"
+
+
+scheme=player-sdk-swiftMacTests
+target=player-sdk-swiftMacTests
+testing="-only-testing $target/DevelopingPlayerTests"
 platform=macosx
-echo "building for $platform..."
-xcodebuild -scheme $scheme -destination='My Mac' -sdk $platform \
-  test $testing
+device="My Mac"
+echo "testing with $platform on $device"
+logfile=$logbase$device.log
+xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+  -destination='$device' -sdk $platform \
+  test $testing 2>&1 > "$logfile"
+result=`cat "$logfile" | grep -e "\*\* TEST"`
+echo "$result, see $logfile"
+echo "---------------------------------"
+
+
 
 
 

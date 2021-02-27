@@ -32,28 +32,21 @@ import YbridOgg
 
 class DevelopingPlayerTests: XCTestCase {
  
-    func test01_PlayerBundle() {
+    func test01_LoggerNonVerbose() {
+        XCTAssertFalse(Logger.verbose)
+    }
+    
+    func test02_PlayerBundle() {
         let version = checkBundle(id: "io.ybrid.player-sdk-swift", expectedName: "YbridPlayerSDK")
         XCTAssertNotNil(version)
 //        XCTAssertEqual("0.6.1", version)
     }
 
-    func test02_VersionString() {
+    func test03_VersionString() {
         Logger.verbose = false
         let version = AudioPlayer.versionString
         Logger.testing.notice("-- \(version)")
         XCTAssert(version.contains("YbridPlayerSDK"), "should contain player-sdk-swiftTests")
-    }
-
-    func test03_PlayMp3() {
-        Logger.verbose = true
-        let url = URL.init(string: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")!
-        let playerListener = TestAudioPlayerListener()
-        let player = AudioPlayer(mediaUrl: url, listener: playerListener)
-        player.play()
-        sleep(6)
-        player.stop()
-        sleep(1)
     }
     
      private func checkBundle(id:String, expectedName:String) -> String? {
@@ -108,16 +101,6 @@ class DevelopingPlayerTests: XCTestCase {
         ogg_sync_clear(&oggSyncState)
         print("-- ogg_sync_state() is '\(oggSyncState)\'")
         XCTAssertEqual(0, oggSyncState.returned)
-    }
-    
-    func test08_PlayOpus() {
-        Logger.verbose = false
-        let opus = URL.init(string:  "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")!
-        let player = AudioPlayer(mediaUrl: opus, listener: nil)
-        player.play()
-        sleep(6)
-        player.stop()
-        sleep(1)
     }
 
 }

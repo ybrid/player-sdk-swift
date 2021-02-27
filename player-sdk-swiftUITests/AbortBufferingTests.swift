@@ -66,7 +66,7 @@ class AbortBufferingTests: XCTestCase {
 
     func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
         Logger.verbose = true
-        var interval:TimeInterval = 0.010
+        var interval:TimeInterval = 1
         repeat {
             let aborting = playMp3AndAbort(afterConnect:interval)
             
@@ -266,7 +266,4 @@ extension PlaybackEngine {
     }
 }
 
-extension Logger {
-    static let testing: Logger = Logger(category: "testing")
-}
 

@@ -93,6 +93,6 @@ fastlane/test_output
 iOSInjectionProject/
 
 # by nacamar GmbH
-build-*.log
+*.log
 #*.xcframework/
 *.xcframework.zip
