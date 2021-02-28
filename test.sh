@@ -23,14 +23,14 @@
 # SOFTWARE.
 
 #
-# Test framework on platforms.
+# Test player framework on platforms.
 #
-# Usage: no parameters, settings mostly defined in xcode xcodeworkspace
+# Usage: no parameters
 # 
 
 scheme=player-sdk-swiftIOSTests
 target=player-sdk-swiftIOSTests
-testing="-only-testing $target/DevelopingPlayerTests"
+testing="-only-testing:$target/DevelopingPlayerTests -only-testing:$target/UseAudioPlayerTests"
 
 dd=./DerivedData
 # clean up?
@@ -39,17 +39,18 @@ dd=./DerivedData
 logbase="test-"
 rm -f "$logbase*.log"
 
-# platform=iphonesimulator
-# device="iPhone 11 Pro"
-# logfile=$logbase$device.log
-# echo "testing with $platform on $device"
-# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
-#   -destination "name=$device" -sdk $platform \
-#   test $testing 2>&1 > "$logfile"
-# result=`cat "$logfile" | grep -e "\*\* TEST"`
-# echo "$result, see $logfile"
-# echo "---------------------------------"
+platform=iphonesimulator
+device="iPhone 11 Pro"
+logfile=$logbase$device.log
+echo "testing with $platform on $device"
+xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+  -destination "name=$device" -sdk $platform \
+  test $testing 2>&1 > "$logfile"
+result=`cat "$logfile" | grep -e "\*\* TEST"`
+echo "$result, see $logfile"
+echo "---------------------------------"
 
+## Will fail as long as iOS Simulators with iOS < 14 cannot run AudioEngine
 # device="iPhone 6s"
 # logfile=$logbase$device.log
 # echo "testing with $platform on $device"
@@ -60,22 +61,32 @@ rm -f "$logbase*.log"
 # echo "$result, see $logfile"
 # echo "---------------------------------"
 
-
-scheme=player-sdk-swiftMacTests
-target=player-sdk-swiftMacTests
-testing="-only-testing $target/DevelopingPlayerTests"
-platform=macosx
-device="My Mac"
-echo "testing with $platform on $device"
-logfile=$logbase$device.log
-xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
-  -destination='$device' -sdk $platform \
-  test $testing 2>&1 > "$logfile"
-result=`cat "$logfile" | grep -e "\*\* TEST"`
-echo "$result, see $logfile"
-echo "---------------------------------"
-
+# ## Will fail as long as AVAudioSession is not correctly activated
+# platform=iphoneos
+# #device="Nacamars iPad Air" # iOS 12
+# #device="Nacamar's iPad Mini" # iOS 9
+# device="iPhone von Florian" # iOS 14
+# echo "testing with $platform on $device"
+# logfile=$logbase$device.log
+# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+#   -destination "platform=iOS,name=$device" -sdk $platform \
+#   test $testing 2>&1 > "$logfile"
+# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# echo "$result, see $logfile"
+# echo "---------------------------------"
 
 
-
+# platform=macosx
+# scheme=player-sdk-swiftMacTests
+# target=player-sdk-swiftMacTests
+# testing="-only-testing $target/DevelopingPlayerTests"
+# device="My Mac"
+# echo "testing with $platform on $device"
+# logfile=$logbase$device.log
+# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+#   -destination='$device' -sdk $platform \
+#   test $testing 2>&1 > "$logfile"
+# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# echo "$result, see $logfile"
+# echo "---------------------------------"
 
