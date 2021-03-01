@@ -80,7 +80,7 @@ class AudioPipeline : DecoderListener
     //    }
     
     weak var playerListener:AudioPlayerListener?
-    let decodingQueue = DispatchQueue(label: "de.addradio.decoding", qos: PlayerContext.processingPriority)
+    let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?) {
         self.pipelineListener = pipelineListener

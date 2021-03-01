@@ -189,7 +189,7 @@ class Wait {
         self.exec = exec
         return self
     }
-    let concurrentQueue = DispatchQueue(label: "de.addradio.Wait")
+    let concurrentQueue = DispatchQueue(label: "io.ybrid.playing.wait")
     func go(_ maxS: Int, _ every:TimeInterval) -> TimeInterval? {
         wait = true
         let maxUs = UInt32(maxS*1000000)

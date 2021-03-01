@@ -79,7 +79,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     let streamUrl: URL
     let icyMetadata: Bool = true
     
-    private let playerQueue = DispatchQueue(label: "io.ybrid.player-sdk")
+    private let playerQueue = DispatchQueue(label: "io.ybrid.playing")
     
     var loader: AudioDataLoader?
     var pipeline: AudioPipeline?

@@ -48,7 +48,7 @@ class MpegData : AudioData {
 
     let packages:Dequeue = Dequeue<Package>()
     class Dequeue<T> {
-        private let queue = DispatchQueue(label: "de.addradio.source", qos: PlayerContext.processingPriority)
+        private let queue = DispatchQueue(label: "io.ybrid.decoding.source", qos: PlayerContext.processingPriority)
         
         private var packages = [T]()
         

@@ -224,7 +224,7 @@ class PlaybackBuffer {
     }
 
     class ThreadsafeDequeue<T> {
-        let queue = DispatchQueue(label: "de.addradio.chunks", qos: PlayerContext.processingPriority)
+        let queue = DispatchQueue(label: "io.ybrid.playing.chunks", qos: PlayerContext.processingPriority)
 
         private var element = [T]()
         var count:Int {queue.sync { element.count } }
