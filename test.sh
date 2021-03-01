@@ -30,14 +30,14 @@
 
 scheme=player-sdk-swiftIOSTests
 target=player-sdk-swiftIOSTests
-testing="-only-testing:$target/DevelopingPlayerTests -only-testing:$target/UseAudioPlayerTests"
+testing="-only-testing:$target/DevelopingPlayerTests"
+testing="$testing -only-testing:$target/UseAudioPlayerTests"
 
 dd=./DerivedData
-# clean up?
-#rm -rfd $dd
 
 logbase="test-"
 rm -f "$logbase*.log"
+grepToStdoutPattern="^\s*Executed\s\d+\stests|^\*\* TEST"
 
 platform=iphonesimulator
 device="iPhone 11 Pro"
@@ -46,7 +46,7 @@ echo "testing with $platform on $device"
 xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
   -destination "name=$device" -sdk $platform \
   test $testing 2>&1 > "$logfile"
-result=`cat "$logfile" | grep -e "\*\* TEST"`
+result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
 echo "$result, see $logfile"
 echo "---------------------------------"
 
@@ -57,7 +57,7 @@ echo "---------------------------------"
 # xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
 #   -destination "platform=iOS Simulator,OS=11.4,name=$device" -sdk $platform \
 #   test $testing 2>&1 > "$logfile"
-# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
 # echo "$result, see $logfile"
 # echo "---------------------------------"
 
@@ -71,7 +71,7 @@ echo "---------------------------------"
 # xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
 #   -destination "platform=iOS,name=$device" -sdk $platform \
 #   test $testing 2>&1 > "$logfile"
-# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
 # echo "$result, see $logfile"
 # echo "---------------------------------"
 
@@ -86,7 +86,7 @@ echo "---------------------------------"
 # xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
 #   -destination='$device' -sdk $platform \
 #   test $testing 2>&1 > "$logfile"
-# result=`cat "$logfile" | grep -e "\*\* TEST"`
+# result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
 # echo "$result, see $logfile"
 # echo "---------------------------------"
 
