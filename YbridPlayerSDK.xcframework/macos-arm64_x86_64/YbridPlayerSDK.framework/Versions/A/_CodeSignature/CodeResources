@@ -6,22 +6,11 @@
 	<dict>
 		<key>Resources/Info.plist</key>
 		<data>
-		qEzSAVWB+5KEEmP3//nkpKMtsl8=
+		O0jbdv5DTQBPiwkhiMbErhmcv1c=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Headers/YbridPlayerSDK-Swift.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			juE6t65VpXci29SDLJz3nPClz8A=
-			</data>
-			<key>hash2</key>
-			<data>
-			QK0VwmmGgthjvk7NRRaaow+/c9EYOMww6gs1f2F+KDo=
-			</data>
-		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-macos.swiftdoc</key>
 		<dict>
 			<key>hash</key>
@@ -158,22 +147,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			C57WXvOWQxUZQGJGtetGZ+MeO94=
+			4js9WjDwK8RS3kvGmKoa6a717fU=
 			</data>
 			<key>hash2</key>
 			<data>
-			dAlGRWKRWDllw0SIXBplL7hsjMmWeOER86YtjXsncR0=
+			8RE397GeLdtGaeekX59qz50wMOozzm9GQo1Kfnl4EBw=
 			</data>
 		</dict>
 		<key>Resources/Info.plist</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			qEzSAVWB+5KEEmP3//nkpKMtsl8=
+			O0jbdv5DTQBPiwkhiMbErhmcv1c=
 			</data>
 			<key>hash2</key>
 			<data>
-			7+miZYM1YDu6eXgk8mw0Nuoldq6byDqYg546xjReQr8=
+			z69RmZqHzfg+C6zgx9nk2yxxAt60LndPkgpebkweVs4=
 			</data>
 		</dict>
 	</dict>

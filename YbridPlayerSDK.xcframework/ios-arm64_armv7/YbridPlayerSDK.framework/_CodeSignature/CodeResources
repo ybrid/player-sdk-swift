@@ -4,13 +4,9 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Headers/YbridPlayerSDK-Swift.h</key>
-		<data>
-		leemJfGMyMvc2Q/MkDDgh/ttXdA=
-		</data>
 		<key>Info.plist</key>
 		<data>
-		YyXxzXrurzzrcZuz0uoDzKyPOLU=
+		CrrUaaE6grWFu6muF1p5Yg2DWZY=
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm.swiftdoc</key>
 		<data>
@@ -22,7 +18,7 @@
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm.swiftmodule</key>
 		<data>
-		uodX2iRpVJY5s9ijDqnRrV6x6Es=
+		nmjrVeRv+zR5pioDr596WCNkK/U=
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
@@ -34,7 +30,7 @@
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		VPBofplu1MBCYBhKz2VqzJL8RWE=
+		5nr/Nmb8tYtcg9ayD1pMaH540mE=
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -46,7 +42,7 @@
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		VPBofplu1MBCYBhKz2VqzJL8RWE=
+		5nr/Nmb8tYtcg9ayD1pMaH540mE=
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7-apple-ios.swiftdoc</key>
 		<data>
@@ -58,7 +54,7 @@
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7-apple-ios.swiftmodule</key>
 		<data>
-		uodX2iRpVJY5s9ijDqnRrV6x6Es=
+		nmjrVeRv+zR5pioDr596WCNkK/U=
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7.swiftdoc</key>
 		<data>
@@ -70,26 +66,15 @@
 		</data>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7.swiftmodule</key>
 		<data>
-		uodX2iRpVJY5s9ijDqnRrV6x6Es=
+		nmjrVeRv+zR5pioDr596WCNkK/U=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
-		C57WXvOWQxUZQGJGtetGZ+MeO94=
+		cJ7o7dqjZpnD8g9MHoxUPRz6Ink=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Headers/YbridPlayerSDK-Swift.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			leemJfGMyMvc2Q/MkDDgh/ttXdA=
-			</data>
-			<key>hash2</key>
-			<data>
-			wBbPjs8pTFVV4pBgrMOk1AzB6UgUqfjTZvwdSUrARuY=
-			</data>
-		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm.swiftdoc</key>
 		<dict>
 			<key>hash</key>
@@ -116,11 +101,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			uodX2iRpVJY5s9ijDqnRrV6x6Es=
+			nmjrVeRv+zR5pioDr596WCNkK/U=
 			</data>
 			<key>hash2</key>
 			<data>
-			/l0Aj1gchQJ/l7FnC2IP9jGLtsP5NC63y1QuDgZQheE=
+			kYidkoHHFf57n2FHaVENktdw45t/Dors+w6yXAfscfE=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
@@ -149,11 +134,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			VPBofplu1MBCYBhKz2VqzJL8RWE=
+			5nr/Nmb8tYtcg9ayD1pMaH540mE=
 			</data>
 			<key>hash2</key>
 			<data>
-			p9SZ9yGJn+VdqWPwJddcg9qgmXa/LWleNMYkHtXKSRM=
+			r2Q7M4ACcJdz/44oAoWRo1Wp2rCzpTtEf3wCmM3SxQ0=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64.swiftdoc</key>
@@ -182,11 +167,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			VPBofplu1MBCYBhKz2VqzJL8RWE=
+			5nr/Nmb8tYtcg9ayD1pMaH540mE=
 			</data>
 			<key>hash2</key>
 			<data>
-			p9SZ9yGJn+VdqWPwJddcg9qgmXa/LWleNMYkHtXKSRM=
+			r2Q7M4ACcJdz/44oAoWRo1Wp2rCzpTtEf3wCmM3SxQ0=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7-apple-ios.swiftdoc</key>
@@ -215,11 +200,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			uodX2iRpVJY5s9ijDqnRrV6x6Es=
+			nmjrVeRv+zR5pioDr596WCNkK/U=
 			</data>
 			<key>hash2</key>
 			<data>
-			/l0Aj1gchQJ/l7FnC2IP9jGLtsP5NC63y1QuDgZQheE=
+			kYidkoHHFf57n2FHaVENktdw45t/Dors+w6yXAfscfE=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/armv7.swiftdoc</key>
@@ -248,22 +233,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			uodX2iRpVJY5s9ijDqnRrV6x6Es=
+			nmjrVeRv+zR5pioDr596WCNkK/U=
 			</data>
 			<key>hash2</key>
 			<data>
-			/l0Aj1gchQJ/l7FnC2IP9jGLtsP5NC63y1QuDgZQheE=
+			kYidkoHHFf57n2FHaVENktdw45t/Dors+w6yXAfscfE=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			C57WXvOWQxUZQGJGtetGZ+MeO94=
+			cJ7o7dqjZpnD8g9MHoxUPRz6Ink=
 			</data>
 			<key>hash2</key>
 			<data>
-			dAlGRWKRWDllw0SIXBplL7hsjMmWeOER86YtjXsncR0=
+			wMeuhz66CNifyMS1BohAs6u21rUUP0tw/5QUgFRcESU=
 			</data>
 		</dict>
 	</dict>
