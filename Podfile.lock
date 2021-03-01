@@ -1,0 +1,20 @@
+PODS:
+  - YbridOgg (0.7.2)
+  - YbridOpus (0.7.0)
+
+DEPENDENCIES:
+  - YbridOgg
+  - YbridOpus
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - YbridOgg
+    - YbridOpus
+
+SPEC CHECKSUMS:
+  YbridOgg: 7269d379ae601fcdc5b1ceba3e2cbf46b6c4b629
+  YbridOpus: 617534d0c4252633801a60c629acd3a28df7cd07
+
+PODFILE CHECKSUM: 2ad6597b1364d6a31fa2ac6cf49d682477d7386c
+
+COCOAPODS: 1.10.0

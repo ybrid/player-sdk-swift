@@ -1,0 +1,20 @@
+/usr/bin/codesign --force --sign F45B6CC8C0CEDBF75E5ED70D1965135EEC902542  -dvvv --preserve-metadata=identifier,entitlements '/Users/florian/github/player-sdk-swift/DerivedData/Build/Products/Debug/YbridOpus.framework' > sign_opus.log
+
+Executable=/Users/florian/github/player-sdk-swift/DerivedData/Build/Products/Debug/YbridOpus.framework/Versions/Current/YbridOpus
+Identifier=io.ybrid.opus-swift
+Format=bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20400 size=4588 flags=0x2(adhoc) hashes=137+3 location=embedded
+Hash type=sha256 size=32
+CandidateCDHash sha1=94ddcd06ea42500ec0b439630de8e282ca6d19f6
+CandidateCDHashFull sha1=94ddcd06ea42500ec0b439630de8e282ca6d19f6
+CandidateCDHash sha256=8b95d3ef4ce726f7a86ebe3827aa3578f526c065
+CandidateCDHashFull sha256=8b95d3ef4ce726f7a86ebe3827aa3578f526c0652ed7d89526a4efc992908da2
+Hash choices=sha1,sha256
+CMSDigest=695e8d9594f06927e277e0616f14be4eb8abf6277b06c1ed3f55f7e6c6678902
+CMSDigestType=2
+CDHash=8b95d3ef4ce726f7a86ebe3827aa3578f526c065
+Signature=adhoc
+Info.plist entries=23
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=8
+Internal requirements count=0 size=12

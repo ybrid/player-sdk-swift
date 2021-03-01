@@ -1,0 +1,56 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.3.2 effective-4.1.50 (swiftlang-1200.0.45 clang-1200.0.32.28)
+// swift-module-flags: -target i386-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 4 -enforce-exclusivity=checked -O -module-name YbridPlayerSDK
+import AVFoundation
+import Foundation
+import Network
+import Swift
+import SystemConfiguration
+import YbridOgg
+import YbridOpus
+import os.log
+import os
+public protocol AudioPlayerListener : AnyObject {
+  func stateChanged(_ state: YbridPlayerSDK.PlaybackState)
+  func displayTitleChanged(_ title: Swift.String?)
+  func currentProblem(_ text: Swift.String?)
+  func durationConnected(_ seconds: Foundation.TimeInterval?)
+  func durationReady(_ seconds: Foundation.TimeInterval?)
+  func durationPlaying(_ seconds: Foundation.TimeInterval?)
+  func durationBuffer(averagedSeconds: Foundation.TimeInterval?, currentSeconds: Foundation.TimeInterval?)
+}
+public enum PlaybackState {
+  case buffering
+  case playing
+  case stopped
+  public static func == (a: YbridPlayerSDK.PlaybackState, b: YbridPlayerSDK.PlaybackState) -> Swift.Bool
+  public var hashValue: Swift.Int {
+    get
+  }
+  public func hash(into hasher: inout Swift.Hasher)
+}
+public class AudioPlayer {
+  public static var versionString: Swift.String {
+    get
+  }
+  public var state: YbridPlayerSDK.PlaybackState {
+    get
+    set
+  }
+  public init(mediaUrl: Foundation.URL, listener: YbridPlayerSDK.AudioPlayerListener?)
+  @objc deinit
+  public func play()
+  public func stop()
+}
+public class Logger {
+  public static var verbose: Swift.Bool
+  public static let shared: YbridPlayerSDK.Logger
+  public init(category: Swift.String = "")
+  public func info(_ message: Swift.String = "", fullSourcePath: Swift.String = #file, functionWithParameters: Swift.String = #function, line: Swift.Int = #line)
+  public func notice(_ message: Swift.String = "", fullSourcePath: Swift.String = #file, functionWithParameters: Swift.String = #function, line: Swift.Int = #line)
+  public func debug(_ message: Swift.String = "", fullSourcePath: Swift.String = #file, functionWithParameters: Swift.String = #function, line: Swift.Int = #line)
+  public func error(_ message: Swift.String = "", fullSourcePath: Swift.String = #file, functionWithParameters: Swift.String = #function, line: Swift.Int = #line)
+  @objc deinit
+}
+extension YbridPlayerSDK.PlaybackState : Swift.Equatable {}
+extension YbridPlayerSDK.PlaybackState : Swift.Hashable {}

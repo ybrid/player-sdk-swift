@@ -1,0 +1,1331 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 51;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		170703E125D2F44400549B8A /* player_sdk_swift.h in Headers */ = {isa = PBXBuildFile; fileRef = 170703D325D2F44400549B8A /* player_sdk_swift.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
+		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
+		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
+		1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
+		17404C8625E78DCC00051988 /* YbridPlayerSDK.framework in Resources */ = {isa = PBXBuildFile; fileRef = 170703D025D2F44400549B8A /* YbridPlayerSDK.framework */; };
+		1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
+		1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
+		1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
+		1799DC8425D565970055C973 /* AudioDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7E25D565970055C973 /* AudioDataLoader.swift */; };
+		1799DC8525D565970055C973 /* AudioData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7F25D565970055C973 /* AudioData.swift */; };
+		1799DC8625D565970055C973 /* AudioDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8025D565970055C973 /* AudioDecoder.swift */; };
+		1799DC8F25D565A10055C973 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8D25D565A10055C973 /* Logger.swift */; };
+		1799DC9025D565A10055C973 /* MetadataExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8E25D565A10055C973 /* MetadataExtractor.swift */; };
+		1799DC9725D565B30055C973 /* PlaybackBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9425D565B30055C973 /* PlaybackBuffer.swift */; };
+		1799DC9825D565B30055C973 /* PlaybackScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9525D565B30055C973 /* PlaybackScheduling.swift */; };
+		1799DC9925D565B30055C973 /* PlaybackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9625D565B30055C973 /* PlaybackEngine.swift */; };
+		1799DC9E25D565BB0055C973 /* PlayerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9D25D565BB0055C973 /* PlayerContext.swift */; };
+		1799DCAB25D565DB0055C973 /* MpegData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA325D565DB0055C973 /* MpegData.swift */; };
+		1799DCAC25D565DB0055C973 /* MpegDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA425D565DB0055C973 /* MpegDecoder.swift */; };
+		1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA625D565DB0055C973 /* OpusData.swift */; };
+		1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA725D565DB0055C973 /* OpusDecoder.swift */; };
+		1799DCAF25D565DB0055C973 /* OggContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA825D565DB0055C973 /* OggContainer.swift */; };
+		1799DCB025D565DB0055C973 /* FrameSkipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA925D565DB0055C973 /* FrameSkipper.swift */; };
+		1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCAA25D565DB0055C973 /* OpusMapping.swift */; };
+		1799DCC525D566AF0055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
+		1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8E25D565A10055C973 /* MetadataExtractor.swift */; };
+		1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
+		1799DCC825D566AF0055C973 /* AudioData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7F25D565970055C973 /* AudioData.swift */; };
+		1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7E25D565970055C973 /* AudioDataLoader.swift */; };
+		1799DCCA25D566AF0055C973 /* AudioDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8025D565970055C973 /* AudioDecoder.swift */; };
+		1799DCCB25D566AF0055C973 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8D25D565A10055C973 /* Logger.swift */; };
+		1799DCCC25D566AF0055C973 /* PlaybackBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9425D565B30055C973 /* PlaybackBuffer.swift */; };
+		1799DCCD25D566AF0055C973 /* PlaybackScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9525D565B30055C973 /* PlaybackScheduling.swift */; };
+		1799DCCE25D566AF0055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
+		1799DCCF25D566AF0055C973 /* PlaybackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9625D565B30055C973 /* PlaybackEngine.swift */; };
+		1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9D25D565BB0055C973 /* PlayerContext.swift */; };
+		1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA425D565DB0055C973 /* MpegDecoder.swift */; };
+		1799DCD525D566BB0055C973 /* MpegData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA325D565DB0055C973 /* MpegData.swift */; };
+		1799DCD925D566C00055C973 /* OpusDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA725D565DB0055C973 /* OpusDecoder.swift */; };
+		1799DCDA25D566C00055C973 /* OggContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA825D565DB0055C973 /* OggContainer.swift */; };
+		1799DCDB25D566C00055C973 /* OpusMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCAA25D565DB0055C973 /* OpusMapping.swift */; };
+		1799DCDC25D566C00055C973 /* FrameSkipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA925D565DB0055C973 /* FrameSkipper.swift */; };
+		1799DCDD25D566C00055C973 /* OpusData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA625D565DB0055C973 /* OpusData.swift */; };
+		1799DD3A25D580D40055C973 /* OpusMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3225D580D40055C973 /* OpusMappingTests.swift */; };
+		1799DD3B25D580D40055C973 /* PlayerMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3325D580D40055C973 /* PlayerMetricsTests.swift */; };
+		1799DD3C25D580D40055C973 /* CustomErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3425D580D40055C973 /* CustomErrorTests.swift */; };
+		1799DD3D25D580D40055C973 /* PlaybackEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3525D580D40055C973 /* PlaybackEngineTests.swift */; };
+		1799DD3E25D580D40055C973 /* PlaybackBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3625D580D40055C973 /* PlaybackBufferTests.swift */; };
+		1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3725D580D40055C973 /* DequeTests.swift */; };
+		1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3825D580D40055C973 /* MetadataExtractorTests.swift */; };
+		1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */; };
+		1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
+		1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
+		17CBC71B25DFD51900B2F7E7 /* AbortBufferingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */; };
+		17CBC8CA25E2517F00B2F7E7 /* player_sdk_swift.h in Headers */ = {isa = PBXBuildFile; fileRef = 170703D325D2F44400549B8A /* player_sdk_swift.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		17CBC8CC25E2517F00B2F7E7 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
+		17CBC8CD25E2517F00B2F7E7 /* AudioDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8025D565970055C973 /* AudioDecoder.swift */; };
+		17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
+		17CBC8CF25E2517F00B2F7E7 /* PlaybackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9625D565B30055C973 /* PlaybackEngine.swift */; };
+		17CBC8D025E2517F00B2F7E7 /* PlayerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9D25D565BB0055C973 /* PlayerContext.swift */; };
+		17CBC8D125E2517F00B2F7E7 /* PlaybackBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9425D565B30055C973 /* PlaybackBuffer.swift */; };
+		17CBC8D225E2517F00B2F7E7 /* PlaybackScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC9525D565B30055C973 /* PlaybackScheduling.swift */; };
+		17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA625D565DB0055C973 /* OpusData.swift */; };
+		17CBC8D425E2517F00B2F7E7 /* MpegData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA325D565DB0055C973 /* MpegData.swift */; };
+		17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCAA25D565DB0055C973 /* OpusMapping.swift */; };
+		17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA725D565DB0055C973 /* OpusDecoder.swift */; };
+		17CBC8D725E2517F00B2F7E7 /* FrameSkipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA925D565DB0055C973 /* FrameSkipper.swift */; };
+		17CBC8D825E2517F00B2F7E7 /* OggContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA825D565DB0055C973 /* OggContainer.swift */; };
+		17CBC8D925E2517F00B2F7E7 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
+		17CBC8DA25E2517F00B2F7E7 /* MpegDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DCA425D565DB0055C973 /* MpegDecoder.swift */; };
+		17CBC8DB25E2517F00B2F7E7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8D25D565A10055C973 /* Logger.swift */; };
+		17CBC8DC25E2517F00B2F7E7 /* AudioDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7E25D565970055C973 /* AudioDataLoader.swift */; };
+		17CBC8DD25E2517F00B2F7E7 /* AudioData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7F25D565970055C973 /* AudioData.swift */; };
+		17CBC8DE25E2517F00B2F7E7 /* MetadataExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8E25D565A10055C973 /* MetadataExtractor.swift */; };
+		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
+		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
+		2088CECD835FBD183B4DC801 /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */; };
+		359F457B7FAB28D802B89782 /* Pods_player_sdk_swift_mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */; };
+		A7C540EFD8E2E63E1F563645 /* Pods_player_sdk_swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		17404AA125E3CFC400051988 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 170703C725D2F44400549B8A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17CBC8C725E2517F00B2F7E7;
+			remoteInfo = "player-sdk-swift_mac";
+		};
+		1799DDCC25D59F4B0055C973 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 170703C725D2F44400549B8A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 170703CF25D2F44400549B8A;
+			remoteInfo = "player-sdk-swift";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_player_sdk_swiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1211D52BA84AB827B2CDEABF /* Pods-player-sdk-swift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.release.xcconfig"; sourceTree = "<group>"; };
+		170703D025D2F44400549B8A /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		170703D325D2F44400549B8A /* player_sdk_swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = player_sdk_swift.h; sourceTree = "<group>"; };
+		170703D425D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		170703E025D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
+		1799DC7C25D565970055C973 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
+		1799DC7D25D565970055C973 /* DataAccumulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataAccumulator.swift; sourceTree = "<group>"; };
+		1799DC7E25D565970055C973 /* AudioDataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDataLoader.swift; sourceTree = "<group>"; };
+		1799DC7F25D565970055C973 /* AudioData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioData.swift; sourceTree = "<group>"; };
+		1799DC8025D565970055C973 /* AudioDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDecoder.swift; sourceTree = "<group>"; };
+		1799DC8D25D565A10055C973 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		1799DC8E25D565A10055C973 /* MetadataExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataExtractor.swift; sourceTree = "<group>"; };
+		1799DC9425D565B30055C973 /* PlaybackBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackBuffer.swift; sourceTree = "<group>"; };
+		1799DC9525D565B30055C973 /* PlaybackScheduling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackScheduling.swift; sourceTree = "<group>"; };
+		1799DC9625D565B30055C973 /* PlaybackEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackEngine.swift; sourceTree = "<group>"; };
+		1799DC9D25D565BB0055C973 /* PlayerContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerContext.swift; sourceTree = "<group>"; };
+		1799DCA325D565DB0055C973 /* MpegData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MpegData.swift; sourceTree = "<group>"; };
+		1799DCA425D565DB0055C973 /* MpegDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MpegDecoder.swift; sourceTree = "<group>"; };
+		1799DCA625D565DB0055C973 /* OpusData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpusData.swift; sourceTree = "<group>"; };
+		1799DCA725D565DB0055C973 /* OpusDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpusDecoder.swift; sourceTree = "<group>"; };
+		1799DCA825D565DB0055C973 /* OggContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OggContainer.swift; sourceTree = "<group>"; };
+		1799DCA925D565DB0055C973 /* FrameSkipper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameSkipper.swift; sourceTree = "<group>"; };
+		1799DCAA25D565DB0055C973 /* OpusMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpusMapping.swift; sourceTree = "<group>"; };
+		1799DD3225D580D40055C973 /* OpusMappingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpusMappingTests.swift; sourceTree = "<group>"; };
+		1799DD3325D580D40055C973 /* PlayerMetricsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerMetricsTests.swift; sourceTree = "<group>"; };
+		1799DD3425D580D40055C973 /* CustomErrorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomErrorTests.swift; sourceTree = "<group>"; };
+		1799DD3525D580D40055C973 /* PlaybackEngineTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackEngineTests.swift; sourceTree = "<group>"; };
+		1799DD3625D580D40055C973 /* PlaybackBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackBufferTests.swift; sourceTree = "<group>"; };
+		1799DD3725D580D40055C973 /* DequeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DequeTests.swift; sourceTree = "<group>"; };
+		1799DD3825D580D40055C973 /* MetadataExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataExtractorTests.swift; sourceTree = "<group>"; };
+		1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackSchedulingTests.swift; sourceTree = "<group>"; };
+		1799DD8325D599190055C973 /* player-sdk-swiftIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftIOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1799DD8725D599190055C973 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevelopingPlayerTests.swift; sourceTree = "<group>"; };
+		1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITestsHelper.swift; sourceTree = "<group>"; };
+		17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
+		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
+		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
+		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
+		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
+		2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; sourceTree = "<group>"; };
+		51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_mac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6BB772A87BF6338AA117007C /* Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig"; sourceTree = "<group>"; };
+		6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		991CDE7474FFE647B3373FAF /* Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig"; sourceTree = "<group>"; };
+		A0C75C4F738E424DAEAF1B37 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		BE0856401F9F5CF6116F1D63 /* Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C7D7220EC3563F25C6773962 /* Pods-player-sdk-swift_mac.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.debug.xcconfig"; sourceTree = "<group>"; };
+		DB5D1B57C01FE7817A26FFD9 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E751A1720B8218902ECE3E76 /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_player_sdk_swift_player_sdk_swiftMacTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		170703CD25D2F44400549B8A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7C540EFD8E2E63E1F563645 /* Pods_player_sdk_swift.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		170703D625D2F44400549B8A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1796DCC225D5272C00B5439F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1799DD8025D599190055C973 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2088CECD835FBD183B4DC801 /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17CBC8DF25E2517F00B2F7E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				359F457B7FAB28D802B89782 /* Pods_player_sdk_swift_mac.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		170703C625D2F44400549B8A = {
+			isa = PBXGroup;
+			children = (
+				1707040825D2F70000549B8A /* Config.xcconfig */,
+				170703D225D2F44400549B8A /* player-sdk-swift */,
+				170703DD25D2F44400549B8A /* player-sdk-swiftTests */,
+				1799DD8425D599190055C973 /* player-sdk-swiftUITests */,
+				170703D125D2F44400549B8A /* Products */,
+				3F7B41F7F7B1F25031E24BC3 /* Pods */,
+				CD74541583E8F4781EB436C1 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		170703D125D2F44400549B8A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				170703D025D2F44400549B8A /* YbridPlayerSDK.framework */,
+				170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */,
+				1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */,
+				1799DD8325D599190055C973 /* player-sdk-swiftIOSTests.xctest */,
+				17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		170703D225D2F44400549B8A /* player-sdk-swift */ = {
+			isa = PBXGroup;
+			children = (
+				17CBC9B425E3C36000B2F7E7 /* decoding */,
+				17CBC9B325E3C33B00B2F7E7 /* playing */,
+				17CBC9B225E3C30F00B2F7E7 /* loading */,
+				170703D425D2F44400549B8A /* Info.plist */,
+				170703D325D2F44400549B8A /* player_sdk_swift.h */,
+				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
+				1799DC8D25D565A10055C973 /* Logger.swift */,
+				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
+				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
+			);
+			path = "player-sdk-swift";
+			sourceTree = "<group>";
+		};
+		170703DD25D2F44400549B8A /* player-sdk-swiftTests */ = {
+			isa = PBXGroup;
+			children = (
+				17404BA925E4F08900051988 /* component */,
+				1799DD3125D580D40055C973 /* unit */,
+				170703E025D2F44400549B8A /* Info.plist */,
+			);
+			path = "player-sdk-swiftTests";
+			sourceTree = "<group>";
+		};
+		17404BA925E4F08900051988 /* component */ = {
+			isa = PBXGroup;
+			children = (
+				17CBC71A25DFD51900B2F7E7 /* AbortBufferingTests.swift */,
+			);
+			path = component;
+			sourceTree = "<group>";
+		};
+		1799DCA225D565DB0055C973 /* mpeg */ = {
+			isa = PBXGroup;
+			children = (
+				1799DCA325D565DB0055C973 /* MpegData.swift */,
+				1799DCA425D565DB0055C973 /* MpegDecoder.swift */,
+			);
+			path = mpeg;
+			sourceTree = "<group>";
+		};
+		1799DCA525D565DB0055C973 /* opus */ = {
+			isa = PBXGroup;
+			children = (
+				1799DCA625D565DB0055C973 /* OpusData.swift */,
+				1799DCA725D565DB0055C973 /* OpusDecoder.swift */,
+				1799DCA825D565DB0055C973 /* OggContainer.swift */,
+				1799DCA925D565DB0055C973 /* FrameSkipper.swift */,
+				1799DCAA25D565DB0055C973 /* OpusMapping.swift */,
+			);
+			path = opus;
+			sourceTree = "<group>";
+		};
+		1799DD3125D580D40055C973 /* unit */ = {
+			isa = PBXGroup;
+			children = (
+				1799DD3225D580D40055C973 /* OpusMappingTests.swift */,
+				1799DD3325D580D40055C973 /* PlayerMetricsTests.swift */,
+				1799DD3425D580D40055C973 /* CustomErrorTests.swift */,
+				1799DD3525D580D40055C973 /* PlaybackEngineTests.swift */,
+				1799DD3625D580D40055C973 /* PlaybackBufferTests.swift */,
+				1799DD3725D580D40055C973 /* DequeTests.swift */,
+				1799DD3825D580D40055C973 /* MetadataExtractorTests.swift */,
+				1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */,
+			);
+			path = unit;
+			sourceTree = "<group>";
+		};
+		1799DD8425D599190055C973 /* player-sdk-swiftUITests */ = {
+			isa = PBXGroup;
+			children = (
+				17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */,
+				1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */,
+				1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */,
+				17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */,
+				1799DD8725D599190055C973 /* Info.plist */,
+			);
+			path = "player-sdk-swiftUITests";
+			sourceTree = "<group>";
+		};
+		17CBC9B225E3C30F00B2F7E7 /* loading */ = {
+			isa = PBXGroup;
+			children = (
+				1799DC7E25D565970055C973 /* AudioDataLoader.swift */,
+				1799DC7D25D565970055C973 /* DataAccumulator.swift */,
+				1799DC8E25D565A10055C973 /* MetadataExtractor.swift */,
+			);
+			name = loading;
+			sourceTree = "<group>";
+		};
+		17CBC9B325E3C33B00B2F7E7 /* playing */ = {
+			isa = PBXGroup;
+			children = (
+				1799DC9425D565B30055C973 /* PlaybackBuffer.swift */,
+				1799DC9625D565B30055C973 /* PlaybackEngine.swift */,
+				1799DC9525D565B30055C973 /* PlaybackScheduling.swift */,
+			);
+			name = playing;
+			sourceTree = "<group>";
+		};
+		17CBC9B425E3C36000B2F7E7 /* decoding */ = {
+			isa = PBXGroup;
+			children = (
+				1799DCA525D565DB0055C973 /* opus */,
+				1799DCA225D565DB0055C973 /* mpeg */,
+				1799DC8025D565970055C973 /* AudioDecoder.swift */,
+				1799DC7F25D565970055C973 /* AudioData.swift */,
+			);
+			name = decoding;
+			sourceTree = "<group>";
+		};
+		3F7B41F7F7B1F25031E24BC3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */,
+				1211D52BA84AB827B2CDEABF /* Pods-player-sdk-swift.release.xcconfig */,
+				DB5D1B57C01FE7817A26FFD9 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig */,
+				A0C75C4F738E424DAEAF1B37 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig */,
+				2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */,
+				6BB772A87BF6338AA117007C /* Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig */,
+				BE0856401F9F5CF6116F1D63 /* Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig */,
+				991CDE7474FFE647B3373FAF /* Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig */,
+				C7D7220EC3563F25C6773962 /* Pods-player-sdk-swift_mac.debug.xcconfig */,
+				1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		CD74541583E8F4781EB436C1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				525FCEE918E5A888D6340241 /* Pods_player_sdk_swift.framework */,
+				6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */,
+				E751A1720B8218902ECE3E76 /* Pods_player_sdk_swift_player_sdk_swiftMacTests.framework */,
+				004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */,
+				51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		170703CB25D2F44400549B8A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				170703E125D2F44400549B8A /* player_sdk_swift.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17CBC8C925E2517F00B2F7E7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17CBC8CA25E2517F00B2F7E7 /* player_sdk_swift.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		170703CF25D2F44400549B8A /* player-sdk-swift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 170703E425D2F44400549B8A /* Build configuration list for PBXNativeTarget "player-sdk-swift" */;
+			buildPhases = (
+				F4DE7AFE52F2EF013EB3AD5B /* [CP] Check Pods Manifest.lock */,
+				170703CB25D2F44400549B8A /* Headers */,
+				170703CC25D2F44400549B8A /* Sources */,
+				170703CD25D2F44400549B8A /* Frameworks */,
+				170703CE25D2F44400549B8A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "player-sdk-swift";
+			productName = "player-sdk-swift";
+			productReference = 170703D025D2F44400549B8A /* YbridPlayerSDK.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		170703D825D2F44400549B8A /* player-sdk-swiftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 170703E725D2F44400549B8A /* Build configuration list for PBXNativeTarget "player-sdk-swiftTests" */;
+			buildPhases = (
+				5A8F0022049D52232BF8A54D /* [CP] Check Pods Manifest.lock */,
+				170703D525D2F44400549B8A /* Sources */,
+				170703D625D2F44400549B8A /* Frameworks */,
+				170703D725D2F44400549B8A /* Resources */,
+				16B2CD4FFAD4DE960C9BBC55 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "player-sdk-swiftTests";
+			productName = "player-sdk-swiftTests";
+			productReference = 170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		1796DCC425D5272C00B5439F /* player-sdk-swiftMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1796DCCA25D5272C00B5439F /* Build configuration list for PBXNativeTarget "player-sdk-swiftMacTests" */;
+			buildPhases = (
+				4E062310F2974F7C7F515B07 /* [CP] Check Pods Manifest.lock */,
+				1796DCC125D5272C00B5439F /* Sources */,
+				1796DCC225D5272C00B5439F /* Frameworks */,
+				1796DCC325D5272C00B5439F /* Resources */,
+				D2E7607ADF60131B209B2072 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17404AA225E3CFC400051988 /* PBXTargetDependency */,
+			);
+			name = "player-sdk-swiftMacTests";
+			productName = "player-sdk-swiftMacTests";
+			productReference = 1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		1799DD8225D599190055C973 /* player-sdk-swiftIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1799DD8825D599190055C973 /* Build configuration list for PBXNativeTarget "player-sdk-swiftIOSTests" */;
+			buildPhases = (
+				D869D22E14FFB49A710712F3 /* [CP] Check Pods Manifest.lock */,
+				1799DD7F25D599190055C973 /* Sources */,
+				1799DD8025D599190055C973 /* Frameworks */,
+				1799DD8125D599190055C973 /* Resources */,
+				48E47510E6D385935664400C /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1799DDCD25D59F4B0055C973 /* PBXTargetDependency */,
+			);
+			name = "player-sdk-swiftIOSTests";
+			productName = "player-sdk-swiftUITests";
+			productReference = 1799DD8325D599190055C973 /* player-sdk-swiftIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		17CBC8C725E2517F00B2F7E7 /* player-sdk-swift_mac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17CBC8E325E2517F00B2F7E7 /* Build configuration list for PBXNativeTarget "player-sdk-swift_mac" */;
+			buildPhases = (
+				70DFD789398FE28777D0C39C /* [CP] Check Pods Manifest.lock */,
+				17CBC8C925E2517F00B2F7E7 /* Headers */,
+				17CBC8CB25E2517F00B2F7E7 /* Sources */,
+				17CBC8DF25E2517F00B2F7E7 /* Frameworks */,
+				17CBC8E225E2517F00B2F7E7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "player-sdk-swift_mac";
+			productName = "player-sdk-swift";
+			productReference = 17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		170703C725D2F44400549B8A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					170703CF25D2F44400549B8A = {
+						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
+					};
+					170703D825D2F44400549B8A = {
+						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
+					};
+					1796DCC425D5272C00B5439F = {
+						CreatedOnToolsVersion = 12.4;
+					};
+					1799DD8225D599190055C973 = {
+						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
+					};
+				};
+			};
+			buildConfigurationList = 170703CA25D2F44400549B8A /* Build configuration list for PBXProject "player-sdk-swift" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 170703C625D2F44400549B8A;
+			productRefGroup = 170703D125D2F44400549B8A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				170703CF25D2F44400549B8A /* player-sdk-swift */,
+				170703D825D2F44400549B8A /* player-sdk-swiftTests */,
+				1799DD8225D599190055C973 /* player-sdk-swiftIOSTests */,
+				17CBC8C725E2517F00B2F7E7 /* player-sdk-swift_mac */,
+				1796DCC425D5272C00B5439F /* player-sdk-swiftMacTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		170703CE25D2F44400549B8A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		170703D725D2F44400549B8A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1796DCC325D5272C00B5439F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1799DD8125D599190055C973 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17404C8625E78DCC00051988 /* YbridPlayerSDK.framework in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17CBC8E225E2517F00B2F7E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		16B2CD4FFAD4DE960C9BBC55 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftTests/Pods-player-sdk-swift-player-sdk-swiftTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		48E47510E6D385935664400C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftIOSTests/Pods-player-sdk-swift-player-sdk-swiftIOSTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4E062310F2974F7C7F515B07 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift-player-sdk-swiftMacTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5A8F0022049D52232BF8A54D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift-player-sdk-swiftTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		70DFD789398FE28777D0C39C /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift_mac-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D2E7607ADF60131B209B2072 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D869D22E14FFB49A710712F3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift-player-sdk-swiftIOSTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F4DE7AFE52F2EF013EB3AD5B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-player-sdk-swift-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		170703CC25D2F44400549B8A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */,
+				1799DC8625D565970055C973 /* AudioDecoder.swift in Sources */,
+				1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */,
+				1799DC9925D565B30055C973 /* PlaybackEngine.swift in Sources */,
+				1799DC9E25D565BB0055C973 /* PlayerContext.swift in Sources */,
+				1799DC9725D565B30055C973 /* PlaybackBuffer.swift in Sources */,
+				1799DC9825D565B30055C973 /* PlaybackScheduling.swift in Sources */,
+				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
+				1799DCAB25D565DB0055C973 /* MpegData.swift in Sources */,
+				1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */,
+				1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */,
+				1799DCB025D565DB0055C973 /* FrameSkipper.swift in Sources */,
+				1799DCAF25D565DB0055C973 /* OggContainer.swift in Sources */,
+				1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */,
+				1799DCAC25D565DB0055C973 /* MpegDecoder.swift in Sources */,
+				1799DC8F25D565A10055C973 /* Logger.swift in Sources */,
+				1799DC8425D565970055C973 /* AudioDataLoader.swift in Sources */,
+				1799DC8525D565970055C973 /* AudioData.swift in Sources */,
+				1799DC9025D565A10055C973 /* MetadataExtractor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		170703D525D2F44400549B8A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1799DCCD25D566AF0055C973 /* PlaybackScheduling.swift in Sources */,
+				1799DCC825D566AF0055C973 /* AudioData.swift in Sources */,
+				1799DCCC25D566AF0055C973 /* PlaybackBuffer.swift in Sources */,
+				1799DCDB25D566C00055C973 /* OpusMapping.swift in Sources */,
+				1799DCDA25D566C00055C973 /* OggContainer.swift in Sources */,
+				1799DCCA25D566AF0055C973 /* AudioDecoder.swift in Sources */,
+				1799DD3D25D580D40055C973 /* PlaybackEngineTests.swift in Sources */,
+				1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */,
+				1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */,
+				17CBC71B25DFD51900B2F7E7 /* AbortBufferingTests.swift in Sources */,
+				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
+				1799DD3E25D580D40055C973 /* PlaybackBufferTests.swift in Sources */,
+				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
+				1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */,
+				1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */,
+				1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */,
+				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
+				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,
+				1799DD3C25D580D40055C973 /* CustomErrorTests.swift in Sources */,
+				1799DD3A25D580D40055C973 /* OpusMappingTests.swift in Sources */,
+				1799DCDD25D566C00055C973 /* OpusData.swift in Sources */,
+				1799DCCE25D566AF0055C973 /* AudioPipeline.swift in Sources */,
+				1799DCDC25D566C00055C973 /* FrameSkipper.swift in Sources */,
+				1799DCD525D566BB0055C973 /* MpegData.swift in Sources */,
+				1799DCCF25D566AF0055C973 /* PlaybackEngine.swift in Sources */,
+				1799DCC525D566AF0055C973 /* AudioPlayer.swift in Sources */,
+				1799DCD925D566C00055C973 /* OpusDecoder.swift in Sources */,
+				1799DD3B25D580D40055C973 /* PlayerMetricsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1796DCC125D5272C00B5439F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
+				1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */,
+				1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */,
+				1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1799DD7F25D599190055C973 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
+				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
+				17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */,
+				1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17CBC8CB25E2517F00B2F7E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17CBC8CC25E2517F00B2F7E7 /* DataAccumulator.swift in Sources */,
+				17CBC8CD25E2517F00B2F7E7 /* AudioDecoder.swift in Sources */,
+				17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */,
+				17CBC8CF25E2517F00B2F7E7 /* PlaybackEngine.swift in Sources */,
+				17CBC8D025E2517F00B2F7E7 /* PlayerContext.swift in Sources */,
+				17CBC8D125E2517F00B2F7E7 /* PlaybackBuffer.swift in Sources */,
+				17CBC8D225E2517F00B2F7E7 /* PlaybackScheduling.swift in Sources */,
+				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
+				17CBC8D425E2517F00B2F7E7 /* MpegData.swift in Sources */,
+				17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */,
+				17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */,
+				17CBC8D725E2517F00B2F7E7 /* FrameSkipper.swift in Sources */,
+				17CBC8D825E2517F00B2F7E7 /* OggContainer.swift in Sources */,
+				17CBC8D925E2517F00B2F7E7 /* AudioPlayer.swift in Sources */,
+				17CBC8DA25E2517F00B2F7E7 /* MpegDecoder.swift in Sources */,
+				17CBC8DB25E2517F00B2F7E7 /* Logger.swift in Sources */,
+				17CBC8DC25E2517F00B2F7E7 /* AudioDataLoader.swift in Sources */,
+				17CBC8DD25E2517F00B2F7E7 /* AudioData.swift in Sources */,
+				17CBC8DE25E2517F00B2F7E7 /* MetadataExtractor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17404AA225E3CFC400051988 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17CBC8C725E2517F00B2F7E7 /* player-sdk-swift_mac */;
+			targetProxy = 17404AA125E3CFC400051988 /* PBXContainerItemProxy */;
+		};
+		1799DDCD25D59F4B0055C973 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 170703CF25D2F44400549B8A /* player-sdk-swift */;
+			targetProxy = 1799DDCC25D59F4B0055C973 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		170703E225D2F44400549B8A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1707040825D2F70000549B8A /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(inherited)";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TEST_HOST = "";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		170703E325D2F44400549B8A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1707040825D2F70000549B8A /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(inherited)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TEST_HOST = "";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		170703E525D2F44400549B8A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(inherited)";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				INFOPLIST_FILE = "player-sdk-swift/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				PRODUCT_NAME = YbridPlayerSDK;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TEST_HOST = "";
+			};
+			name = Debug;
+		};
+		170703E625D2F44400549B8A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1211D52BA84AB827B2CDEABF /* Pods-player-sdk-swift.release.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(inherited)";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				INFOPLIST_FILE = "player-sdk-swift/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				PRODUCT_NAME = YbridPlayerSDK;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SKIP_INSTALL = YES;
+				TEST_HOST = "";
+			};
+			name = Release;
+		};
+		170703E825D2F44400549B8A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE0856401F9F5CF6116F1D63 /* Pods-player-sdk-swift-player-sdk-swiftTests.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J327NUG776;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "player-sdk-swiftTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		170703E925D2F44400549B8A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 991CDE7474FFE647B3373FAF /* Pods-player-sdk-swift-player-sdk-swiftTests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J327NUG776;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "player-sdk-swiftTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		1796DCCB25D5272C00B5439F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				INFOPLIST_FILE = "player-sdk-swiftUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					YbridPlayerSDK,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swiftMacTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				TARGETED_DEVICE_FAMILY = 6;
+			};
+			name = Debug;
+		};
+		1796DCCC25D5272C00B5439F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6BB772A87BF6338AA117007C /* Pods-player-sdk-swift-player-sdk-swiftMacTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				INFOPLIST_FILE = "player-sdk-swiftUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					YbridPlayerSDK,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swiftMacTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				TARGETED_DEVICE_FAMILY = 6;
+			};
+			name = Release;
+		};
+		1799DD8925D599190055C973 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DB5D1B57C01FE7817A26FFD9 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.debug.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J327NUG776;
+				INFOPLIST_FILE = "player-sdk-swiftUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"@loader_path",
+				);
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swiftIOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1799DD8A25D599190055C973 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A0C75C4F738E424DAEAF1B37 /* Pods-player-sdk-swift-player-sdk-swiftIOSTests.release.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J327NUG776;
+				INFOPLIST_FILE = "player-sdk-swiftUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"@loader_path",
+				);
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swiftIOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		17CBC8E425E2517F00B2F7E7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C7D7220EC3563F25C6773962 /* Pods-player-sdk-swift_mac.debug.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				INFOPLIST_FILE = "player-sdk-swift/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				PRODUCT_NAME = YbridPlayerSDK;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TEST_HOST = "";
+			};
+			name = Debug;
+		};
+		17CBC8E525E2517F00B2F7E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = J327NUG776;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				INFOPLIST_FILE = "player-sdk-swift/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "io.ybrid.player-sdk-swift";
+				PRODUCT_NAME = YbridPlayerSDK;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SKIP_INSTALL = YES;
+				TEST_HOST = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		170703CA25D2F44400549B8A /* Build configuration list for PBXProject "player-sdk-swift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				170703E225D2F44400549B8A /* Debug */,
+				170703E325D2F44400549B8A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		170703E425D2F44400549B8A /* Build configuration list for PBXNativeTarget "player-sdk-swift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				170703E525D2F44400549B8A /* Debug */,
+				170703E625D2F44400549B8A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		170703E725D2F44400549B8A /* Build configuration list for PBXNativeTarget "player-sdk-swiftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				170703E825D2F44400549B8A /* Debug */,
+				170703E925D2F44400549B8A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1796DCCA25D5272C00B5439F /* Build configuration list for PBXNativeTarget "player-sdk-swiftMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1796DCCB25D5272C00B5439F /* Debug */,
+				1796DCCC25D5272C00B5439F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1799DD8825D599190055C973 /* Build configuration list for PBXNativeTarget "player-sdk-swiftIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1799DD8925D599190055C973 /* Debug */,
+				1799DD8A25D599190055C973 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17CBC8E325E2517F00B2F7E7 /* Build configuration list for PBXNativeTarget "player-sdk-swift_mac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17CBC8E425E2517F00B2F7E7 /* Debug */,
+				17CBC8E525E2517F00B2F7E7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 170703C725D2F44400549B8A /* Project object */;
+}

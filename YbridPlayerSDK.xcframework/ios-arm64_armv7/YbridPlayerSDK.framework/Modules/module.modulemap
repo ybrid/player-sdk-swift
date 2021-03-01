@@ -1,0 +1,4 @@
+framework module YbridPlayerSDK {
+  header "YbridPlayerSDK-Swift.h"
+  requires objc
+}
