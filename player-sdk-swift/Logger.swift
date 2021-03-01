@@ -23,12 +23,22 @@
 // SOFTWARE.
 //
 
+//
+// All logging of the player uses the unified logging system.
+//
+// The logger subsystem is 'io.ybrid.player-sdk-swift'.
+// The player uses the internal categories 'loading', 'decoding', 'playing'.
+//
+// Messages not corresponding only to one of this internal components are logged on the
+// public shared instance.
+//
+
 import Foundation
 import os.log
 
 public class Logger {
     
-    /// enable or disable frequent debug level logging
+    /// enable or disable frequent or continous debug level logging
     public static var verbose:Bool = false
     
     public static let shared: Logger = Logger()

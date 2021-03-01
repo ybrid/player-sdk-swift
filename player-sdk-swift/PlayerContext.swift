@@ -23,6 +23,10 @@
 // SOFTWARE.
 //
 
+// Playing audio always operates in the context of the operating system.
+//
+// It interacts with other apps playing audio. We interact with AVAudioSession from the os.
+// Streaming audio requires a network. We monitor the state of network connection.
 
 import AVFoundation
 import Network
@@ -137,7 +141,7 @@ class PlayerContext {
                 let isConnected = (path.status == .satisfied)
                 self.updateConnected(isConnected)
             }
-            monitor.start(queue: DispatchQueue(label: "de.addradio.networkMonitor"))
+            monitor.start(queue: DispatchQueue(label: "io.ybrid.networkMonitor"))
         }
         
         func updateConnected(_ isConnected:Bool) {

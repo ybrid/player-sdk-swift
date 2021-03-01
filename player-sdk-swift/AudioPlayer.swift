@@ -23,23 +23,32 @@
 // SOFTWARE.
 //
 
+// Playing audio.
 
 import AVFoundation
 
+// called back while processing
 public protocol AudioPlayerListener : class {
+    // the playback state has changed
     func stateChanged(_ state: PlaybackState)
+    // metadata to the content currently playing has changed
     func displayTitleChanged(_ title: String?)
+    // message text concerning failures
     func currentProblem(_ text: String?)
+    // duration of audio presented already, called every 0.2 seconds
     func playingSince(_ seconds: TimeInterval?)
+    // duration between triggering play and first audio presented
     func durationReadyToPlay(_ seconds: TimeInterval?)
+    // duration between triggering play and first response from the media url
     func durationConnected(_ seconds: TimeInterval?)
+    // duration of playback cached, currently and averaged over the last 3 seconds. Called every 0.2 seconds.
     func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
 }
 
 public enum PlaybackState {
-    case buffering
-    case playing
-    case stopped
+    case buffering // audio will play (preparing or stalling)
+    case playing // audio is playing
+    case stopped // no audio will play
 }
 
 public class AudioPlayer: BufferListener, PipelineListener {
@@ -78,6 +87,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     private weak var playerListener:AudioPlayerListener?
     
+    // get ready for playing
+    // mediaUrl - the provided audio. Supports mp3, aac and opus.
+    // listener - object to be called back from the player process
     public init(mediaUrl: URL, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.streamUrl = mediaUrl
@@ -91,6 +103,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     // MARK: actions
     
+    // Asynchronously start playback of audio of the given media url as soon as possible.
     public func play() {
         guard state == .stopped  else {
             Logger.shared.notice("already running")
@@ -101,7 +114,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
             self.playWhenReady()
         }
     }
-     
+    
+    // Stop playback immediatly and clean up asychronously.
     public func stop() {
         pipeline?.stopProcessing()
         playerQueue.async {
