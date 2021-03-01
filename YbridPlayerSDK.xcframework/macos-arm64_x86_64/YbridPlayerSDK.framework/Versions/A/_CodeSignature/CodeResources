@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/Info.plist</key>
 		<data>
-		DqjGkdPjuTBV0Ij43N2iEjMKCfU=
+		qEzSAVWB+5KEEmP3//nkpKMtsl8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -22,26 +22,15 @@
 			QK0VwmmGgthjvk7NRRaaow+/c9EYOMww6gs1f2F+KDo=
 			</data>
 		</dict>
-		<key>Headers/player_sdk_swift.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			T8cs5DgMc+DZ1yk+XnRGmr+XhvY=
-			</data>
-			<key>hash2</key>
-			<data>
-			LGRl+YW+Cpu6SgoK7fThBFl69sDb0M88zSzwCXb6QMI=
-			</data>
-		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-macos.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			lr/mfyWMgCneRZfhiE8LjQoG8T4=
+			gxwcAyryj/ztSopRv0ixk6x/2Hs=
 			</data>
 			<key>hash2</key>
 			<data>
-			G3SVxFJMKejDx413PWXUW5/wU12buwL0fjtgjBfLzH8=
+			DJiuYeF8NQ5noQaG76ZosmuVuUKlv2S19cTEvPeRrTE=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64-apple-macos.swiftinterface</key>
@@ -70,11 +59,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			lr/mfyWMgCneRZfhiE8LjQoG8T4=
+			gxwcAyryj/ztSopRv0ixk6x/2Hs=
 			</data>
 			<key>hash2</key>
 			<data>
-			G3SVxFJMKejDx413PWXUW5/wU12buwL0fjtgjBfLzH8=
+			DJiuYeF8NQ5noQaG76ZosmuVuUKlv2S19cTEvPeRrTE=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/arm64.swiftinterface</key>
@@ -103,11 +92,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			YoUJSi7KO2MgkLmNmH44t4+8M00=
+			v+FjUA/dfihEPM9Y+MVy2nzZE+Y=
 			</data>
 			<key>hash2</key>
 			<data>
-			KRcs/hxMEcGgTVV5RiC1vhw1hp9lE+BRWknkw9Rd1BA=
+			kI/nyJfdUBP2YyKlAU4SGsg8rcv8G6wRFwpDvET+mL8=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/x86_64-apple-macos.swiftinterface</key>
@@ -136,11 +125,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			YoUJSi7KO2MgkLmNmH44t4+8M00=
+			v+FjUA/dfihEPM9Y+MVy2nzZE+Y=
 			</data>
 			<key>hash2</key>
 			<data>
-			KRcs/hxMEcGgTVV5RiC1vhw1hp9lE+BRWknkw9Rd1BA=
+			kI/nyJfdUBP2YyKlAU4SGsg8rcv8G6wRFwpDvET+mL8=
 			</data>
 		</dict>
 		<key>Modules/YbridPlayerSDK.swiftmodule/x86_64.swiftinterface</key>
@@ -180,11 +169,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			DqjGkdPjuTBV0Ij43N2iEjMKCfU=
+			qEzSAVWB+5KEEmP3//nkpKMtsl8=
 			</data>
 			<key>hash2</key>
 			<data>
-			L9CGijQKRztuaGSo2+ObIR2A5+MNqBN3ScZcU/hbSZQ=
+			7+miZYM1YDu6eXgk8mw0Nuoldq6byDqYg546xjReQr8=
 			</data>
 		</dict>
 	</dict>
