@@ -5,7 +5,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'YbridPlayerSDK'
-  s.version          = '0.6.4'
+  s.version          = '0.6.5'
   s.summary          = 'Audio player SDK for iOS.'
   s.description      = <<-DESC
 Audio player SDK written in Swift supports audio codecs mp3, acc and opus.
