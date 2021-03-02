@@ -1,6 +1,0 @@
-framework module YbridPlayerSDK {
-  header "YbridPlayerSDK-Swift.h"
-
-  export *
-  module YbridPlayerSDK { export * }
-}

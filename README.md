@@ -10,11 +10,11 @@ This audio player offers
 - compatibility: currently supports audio codecs mp3, aac, and opus
 - stability
 
-
 ## How to use
-Four lines of Swift code to listen to the your radio:
+After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the Framework into your own project use the following lines of Swift code to listen to the your radio:
 ```swift
 import YbridPlayerSDK
+
 let url = URL.init(string: "https://stagecast.ybrid.io/adaptive-demo")!
 let player = AudioPlayer(mediaUrl: url, listener: nil)
 player.play()
@@ -43,7 +43,7 @@ public enum PlaybackState {
 In case of network stalls, the state will change from playing to buffering at the time of exhausted audio buffer. Try it out! After reconnecting to a network, the player will resume.
 
 ## Development environment
-We use XCode version 12 with swift 4 and CocoaPods 1.10. According to the nature of evolved XCFrameworks, player-sdk-swift.xcworkspace should be compatible with elder versions of XCode. 
+We use XCode version 12 with swift 4 and CocoaPods 1.10. According to the nature of evolved XCFrameworks, 'player-sdk-swift.xcworkspace' should be compatible with elder versions of XCode. 
 
 To generate the release artefact 'YbridPlayerSDK.xcframework' we use a shell script written for macOS's terminal, currently version 11.2. Since it basically wrap xcodebuild commands it should be easily translated to other operating systems.
 
@@ -51,16 +51,14 @@ To generate the release artefact 'YbridPlayerSDK.xcframework' we use a shell scr
 'YbridPlayerSDK.xcframework' uses 'YbridOpus.xcframework' and 'YbridOgg.xcframework'. 
 
 ### if you use CocoaPods 
-The podspec of the YbridPlayerSDK is currently hosted at [ybrid/Private-Cocoapods](https://github.com/ybrid/Private-Cocoapods). The Cocoa Podfile of a project using this audio player, should look like
+The Cocoa Podfile of a project using this audio player, should look like
 ```ruby
 platform :ios, '9.0'
 install! 'cocoapods', :disable_input_output_paths => true
 target 'app-example-ios' do
   use_frameworks!
-  source 'git@github.com:ybrid/Private-Cocoapods.git'
+  source 'https://github.com/CocoaPods/Specs.git'
   pod 'YbridPlayerSDK'
-  target 'app-example-iosUITests' do
-  end
 end
 ```
 ### if you don't use CocoaPods
@@ -69,43 +67,14 @@ If you manage packages in another way you may download the neccessary XCFramewok
 2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
 3. YbridOpus.xcframework.zip from [ybrid/opus-swift/releases](https://github.com/ybrid/opus-swift/releases) 
 
-Usually, you would copy these zips into a directory called 'Frameworks' of your project. In the properties editor, drag and drop them into the section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab.
+Unzip the files into a directory called 'Frameworks' of your XCode project. In the properties editor, drag and drop the directories into the section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. 
 Please report any issue to tell us your need.
 
-
-## Generating a new release
-Choose a new version number, let's say ```0.4.2```. In the following steps you have to type that number three times. 
-
-First generate a new 'YbridPlayerSDK.xcframework'.  
-1. Open ```Config.xcconfig``` with an editor of you choice and change the value of ```MARKETING_VERSION``` to the new number an save it.
-2. On a terminal, in the project's root directory execute
-   ```shell 
-   ./build.sh
-   ```
-
-Then publish the new YbridPlayerSDK.xcframework' to CocoaPods
-1. Ensure the podspec is valid by executing
-    ```shell
-    ./pod_check.sh
-2. Edit the version number in 'YbridPlayerSDK.podspec'. If you work in a branch, be sure to mention it 
-    ```ruby
-    s.version = '0.4.2'
-    ...
-    s.source = { :git => 'git@github.com:ybrid/player-sdk-swift', :branch => 'dev', :tag => s.version.to_s }
-    ```
-3. tag the git repository with the new version number
-4. push everything including the tag to origin
-5. call 
-   ```shell
-   ./pod_push.sh
-   ```
-and stay ready because you have to have to enter your password to the git repositories serveral times.
-
-## further documentation
+## Further documentation
 Where can I get more help?
 A good start to dive into technical details is [the overview](https://github.com/ybrid/overview) 
 
-## contributing
+## Contributing
 You are welcome to [contribute](https://github.com/ybrid/player-sdk-swift/blob/master/CONTRIBUTING.md) in many ways.
 
 # Licenses

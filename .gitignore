@@ -94,5 +94,5 @@ iOSInjectionProject/
 
 # by nacamar GmbH
 *.log
-#*.xcframework/
+*.xcframework
 *.xcframework.zip
