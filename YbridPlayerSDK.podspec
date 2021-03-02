@@ -1,11 +1,11 @@
 #
-# please run `pod_check.sh` to ensure this is a valid spec before submitting.
-# ensure built xcframework, this podspec and corresponding tag are pushed ti orig
-# submitting 'pod_push.sh'
+# Run `pod_check.sh` to ensure this is a valid spec before submitting.
+# 
+# Submit this version to Cocoapod with 'pod_push.sh'.
 #
 Pod::Spec.new do |s|
   s.name             = 'YbridPlayerSDK'
-  s.version          = '0.6.5'
+  s.version          = '0.7.0'
   s.summary          = 'Audio player SDK for iOS.'
   s.description      = <<-DESC
 Audio player SDK written in Swift supports audio codecs mp3, acc and opus.
@@ -66,9 +66,9 @@ This XCFramework runs on iOS devices and simulators version 9 to 14.
   
                       LICENSE
                   }
-  s.author           = { 'Florian Nowotny' => 'Florian.Nowotny@nacamar.de' }
-  s.source           = { :git => 'git@github.com:ybrid/player-sdk-swift.git', :tag => s.version.to_s }
-
+  s.author = { 'Florian Nowotny' => 'Florian.Nowotny@nacamar.de' }
+  s.source = { :http => 'https://github.com/ybrid/player-sdk-swift/releases/download/'+s.version.to_s+'/YbridPlayerSDK.xcframework.zip'}
+  
   s.swift_version = '4.0'
   s.ios.deployment_target = '9.0'
   s.osx.deployment_target = '10.10'
@@ -82,6 +82,6 @@ This XCFramework runs on iOS devices and simulators version 9 to 14.
   s.framework    = 'YbridPlayerSDK'
   s.vendored_frameworks = 'YbridPlayerSDK.xcframework'
 
-  s.dependency 'YbridOgg'#, '0.7.2'
-  s.dependency 'YbridOpus'#, '0.7.0'
+  s.dependency 'YbridOgg'
+  s.dependency 'YbridOpus'
 end
