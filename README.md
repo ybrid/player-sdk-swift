@@ -11,7 +11,7 @@ This audio player offers
 - stability
 
 ## How to use
-After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the Framework into your own project use the following lines of Swift code to listen to the your radio:
+After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the Framework into your project, use the following lines of Swift code to listen to your radio:
 ```swift
 import YbridPlayerSDK
 
@@ -40,12 +40,12 @@ public enum PlaybackState {
     case stopped
 }
 ```
-In case of network stalls, the state will change from playing to buffering at the time of exhausted audio buffer. Try it out! After reconnecting to a network, the player will resume.
+In case of network stalls, the state will change from playing to buffering at the time of exhausting audio buffer. Try it out! After reconnecting to a network, the player will resume.
 
 ## Development environment
 We use XCode version 12 with swift 4 and CocoaPods 1.10. According to the nature of evolved XCFrameworks, 'player-sdk-swift.xcworkspace' should be compatible with elder versions of XCode. 
 
-To generate the release artefact 'YbridPlayerSDK.xcframework' we use a shell script written for macOS's terminal, currently version 11.2. Since it basically wrap xcodebuild commands it should be easily translated to other operating systems.
+To generate the release artifact 'YbridPlayerSDK.xcframework', we use a shell script written for macOS's terminal, currently version 11.2. Since it wraps xcodebuild commands, it should be easily translated to other operating systems.
 
 ## Integration 
 'YbridPlayerSDK.xcframework' uses 'YbridOpus.xcframework' and 'YbridOgg.xcframework'. 
@@ -54,7 +54,6 @@ To generate the release artefact 'YbridPlayerSDK.xcframework' we use a shell scr
 The Cocoa Podfile of a project using this audio player, should look like
 ```ruby
 platform :ios, '9.0'
-install! 'cocoapods', :disable_input_output_paths => true
 target 'app-example-ios' do
   use_frameworks!
   source 'https://github.com/CocoaPods/Specs.git'
@@ -62,7 +61,7 @@ target 'app-example-ios' do
 end
 ```
 ### if you don't use CocoaPods
-If you manage packages in another way you may download the neccessary XCFramewoks and embed them into your own project manually. Take the following assets from the latest release
+If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release
 1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases)
 2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
 3. YbridOpus.xcframework.zip from [ybrid/opus-swift/releases](https://github.com/ybrid/opus-swift/releases) 
@@ -71,8 +70,7 @@ Unzip the files into a directory called 'Frameworks' of your XCode project. In t
 Please report any issue to tell us your need.
 
 ## Further documentation
-Where can I get more help?
-A good start to dive into technical details is [the overview](https://github.com/ybrid/overview) 
+An excellent start to dive into technical details is [the overview](https://github.com/ybrid/overview) 
 
 ## Contributing
 You are welcome to [contribute](https://github.com/ybrid/player-sdk-swift/blob/master/CONTRIBUTING.md) in many ways.
