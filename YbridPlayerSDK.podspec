@@ -5,7 +5,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'YbridPlayerSDK'
-  s.version          = '0.7.0'
+  s.version          = '0.7.1'
   s.summary          = 'Audio player SDK for iOS.'
   s.description      = <<-DESC
 Audio player SDK written in Swift supports audio codecs mp3, acc and opus.
@@ -77,8 +77,7 @@ This XCFramework runs on iOS devices and simulators version 9 to 14.
 
   # ## helpful for development pods, but submitting fails
   # s.source_files = 'player-sdk-swift/**/*.{swift}'
-  # s.module_name = 'YbridPlayerSDK'
-
+  
   s.framework    = 'YbridPlayerSDK'
   s.vendored_frameworks = 'YbridPlayerSDK.xcframework'
 
