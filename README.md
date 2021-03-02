@@ -1,5 +1,5 @@
 # player-sdk-swift
-This audio player is written in Swift 4 and runs on iPhones and iPads from ios 9 to ios 14. 
+This audio player is written in Swift 4 and runs on iPhones and iPads from iOS 9 to iOS 14. 
 
 An example app using this player SDK can be run from the XCode-Project in the repository [app-example-ios](https://github.com/ybrid/app-example-ios).
 
@@ -50,7 +50,7 @@ To generate the release artifact 'YbridPlayerSDK.xcframework', we use a shell sc
 ## Integration 
 'YbridPlayerSDK.xcframework' uses 'YbridOpus.xcframework' and 'YbridOgg.xcframework'. 
 
-### if you use CocoaPods 
+### If you use CocoaPods 
 The Cocoa Podfile of a project using this audio player, should look like
 ```ruby
 platform :ios, '9.0'
@@ -60,7 +60,7 @@ target 'app-example-ios' do
   pod 'YbridPlayerSDK'
 end
 ```
-### if you don't use CocoaPods
+### If you don't use CocoaPods
 If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release
 1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases)
 2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
