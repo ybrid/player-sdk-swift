@@ -76,4 +76,4 @@ An excellent start to dive into technical details is [the overview](https://gith
 You are welcome to [contribute](https://github.com/ybrid/player-sdk-swift/blob/master/CONTRIBUTING.md) in many ways.
 
 # Licenses
-This project uses [ogg-swift](https://github.com/ybrid/ogg-swift) and [opus-swift](https://github.com/ybrid/opus-swift) witch are MIT licensed. Ogg and Opus carry BSD licenses, see 3rd party section in [LICENSE](https://github.com/ybrid/app-example-ios/blob/master/LICENSE) file.
+This project uses [ogg-swift](https://github.com/ybrid/ogg-swift) and [opus-swift](https://github.com/ybrid/opus-swift) witch are MIT licensed. Ogg and Opus carry BSD licenses, see 3rd party section in [LICENSE](https://github.com/ybrid/player-sdk-swift/blob/master/LICENSE) file.

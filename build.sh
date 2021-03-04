@@ -61,15 +61,14 @@ xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
     -archivePath "$archivesPath/$platform.xcarchive" $opts > "build-$platform.log"
 cp -R "$archivesPath/$platform.xcarchive/$generatedPath" "$builtPath/Archive-$platform"
 
-# currently broken because opus does not correctly support opus
-# platform=maccatalyst
+platform=maccatalyst
+# currently broken because swift-opus does not correctly support opus on catalyst
 # echo "building for $platform...."
 # xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
 #     archs="x86_64h" -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
 #     -derivedDataPath $dd -archivePath "$archivesPath/$platform.xcarchive" $opts > "build-$platform.log"
 # cp -R "$archivesPath/$platform.xcarchive/$generatedPath" "$builtPath/Archive-$platform"
 
-# broken when Podfile configured for ios, ok when configured for osx
 platform=macosx
 scheme=player-sdk-swift_mac
 echo "building for $platform..."
@@ -94,8 +93,7 @@ cmd="$cmd -output $xcFramework"
 #echo $cmd
 $cmd
 
+echo "generating $xcFramework.zip including LICENSE file..."
 cp LICENSE $xcFramework
-
-echo "please generate $xcFramework.zip including LICENSE file..."
-# zip -q -r $xcFramework.zip $xcFramework
-# echo "done."
+zip -q -r $xcFramework.zip $xcFramework
+echo "done."
