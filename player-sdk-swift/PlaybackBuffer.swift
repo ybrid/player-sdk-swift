@@ -48,6 +48,10 @@ class PlaybackBuffer {
         return scheduling.audioSince
     }
     
+    var size: TimeInterval? {
+        return cachedChunks.duration + (scheduling.remainingS ?? 0.0)
+    }
+    
     private let cachedChunks:ChunkCache
     let scheduling:PlaybackScheduling /// visible for unit tests
     fileprivate typealias bufferinfo = (caching:TimeInterval,remaining:TimeInterval)

@@ -67,11 +67,9 @@ class AudioPipeline : DecoderListener
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
     
-    private var icyTitle: String? {
-        didSet {
-            playerListener?.displayTitleChanged(icyTitle)
-        }
-    }
+
+    
+    var displayTitle: String?
     private var icyUrl: String?
     //    {
     //        didSet {
@@ -81,6 +79,8 @@ class AudioPipeline : DecoderListener
     
     weak var playerListener:AudioPlayerListener?
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
+    let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
+    
     
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?) {
         self.pipelineListener = pipelineListener
@@ -188,6 +188,20 @@ class AudioPipeline : DecoderListener
         }
     }
 
+    fileprivate func notifyMetadata(displayTitle:String) {
+        if self.displayTitle == nil {
+            self.displayTitle = displayTitle
+            self.playerListener?.displayTitleChanged("\(displayTitle)")
+        }
+        
+        if let timeToMetadataPlaying = buffer?.size {
+            metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
+                self.displayTitle = displayTitle
+                self.playerListener?.displayTitleChanged(displayTitle)
+            }
+        }
+    }
+    
     
     // MARK: processing steps
     
@@ -197,8 +211,9 @@ class AudioPipeline : DecoderListener
         }
         let treatedData = mdExtractor.handle(payload: data, metadataCallback: { (metadata:[String:String]) in
             Logger.decoding.debug("extracted metadata is \(metadata)")
-            let streamTitle = metadata["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
-            self.icyTitle = streamTitle
+            if let streamTitle = metadata["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
+                self.notifyMetadata(displayTitle: streamTitle)
+            }
             let streamUrl = metadata["StreamUrl"]
             self.icyUrl = streamUrl
         })
