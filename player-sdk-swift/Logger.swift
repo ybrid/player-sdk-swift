@@ -101,7 +101,7 @@ public class Logger {
     @available(iOS 10, macOS 10.12, *)
     fileprivate func logit(_ type: OSLogType, _ message: String, _ fullSourcePath: String, _ functionWithParameters: String, _ line: Int) {
         loggerQueue.async {
-            os_log("%@.%@-%d %@", log: self.log!, type: type, self.getFileName(fullSourcePath), self.getFunctionName(functionWithParameters), line, "\(message)")
+            os_log("%{public}@.%{public}@-%d %{public}@", log: self.log!, type: type, self.getFileName(fullSourcePath), self.getFunctionName(functionWithParameters), line, "\(message)")
         }
     }
     
