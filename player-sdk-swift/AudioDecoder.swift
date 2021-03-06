@@ -25,9 +25,10 @@
 
 import AVFoundation
 
-protocol DecoderListener  {
+protocol DecoderListener: class  {
     func onFormatChanged(_ srcFormat : AVAudioFormat)
     func pcmReady(pcmBuffer: AVAudioPCMBuffer)
+    func metadataReady(displayTitle: String)
 }
 
 class AudioDecoder : AudioDataListener {
@@ -40,15 +41,15 @@ class AudioDecoder : AudioDataListener {
     internal init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener) throws {
         self.listener = decodingListener
     }
+
+    // MARK: audio data listener
+
+    func onFormatChanged(_ srcFormat: AVAudioFormat) {
+        listener.onFormatChanged(srcFormat)
+    }
     
     func pcmReady(pcmBuffer: AVAudioPCMBuffer) {
         listener.pcmReady(pcmBuffer: pcmBuffer)
-    }
-    
-    // MARK: audio data listener
-    
-    func onFormatChanged(_ srcFormat: AVAudioFormat) {
-        listener.onFormatChanged(srcFormat)
     }
     
     // MARK: must be overridden

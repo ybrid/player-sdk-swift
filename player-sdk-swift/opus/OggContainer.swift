@@ -43,7 +43,6 @@ class OggContainer {
     }
     
     var opusListener:OpusDataListener?
-    weak var delegate:AudioPlayerListener?
     init(delegate: AudioPlayerListener?) throws {
         if let info = Bundle(identifier: OggContainer.oggBundleIdentifier)?.infoDictionary {
             Logger.decoding.debug("bundle \(OggContainer.oggBundleIdentifier) info \(info)")
@@ -52,7 +51,6 @@ class OggContainer {
             let build = info["CFBundleVersion"]  ?? "(unknown)"
             Logger.decoding.notice("using \(name) version \(version) (build \(build))")
         }
-        self.delegate = delegate
         _ = try oggSyncInit()
     }
     
@@ -111,7 +109,7 @@ class OggContainer {
         let serialno = ogg_page_serialno(&page)
         
         if isBeginOfOpusStream(&page) {
-            let newStream = try OpusData(serialno, opusListener: opusListener!, delegate: delegate)
+            let newStream = try OpusData(serialno, opusListener: opusListener!)
             selectedStream?.1.dispose()
             selectedStream = (serialno,newStream)
             return newStream

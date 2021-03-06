@@ -61,15 +61,13 @@ class AudioPipeline : DecoderListener
     var started = Date()
     var resumed = false
     var firstPCM = true
+    var firstMetadata = true
     var stopping = false
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
     
-
-    
-    var displayTitle: String?
     private var icyUrl: String?
     //    {
     //        didSet {
@@ -106,6 +104,7 @@ class AudioPipeline : DecoderListener
     func resume() {
         started = Date()
         firstPCM = true
+        firstMetadata = true
         resumed = true
     }
     
@@ -158,6 +157,10 @@ class AudioPipeline : DecoderListener
     }
     
     func pcmReady(pcmBuffer:AVAudioPCMBuffer) -> () {
+        guard !self.stopping else {
+            Logger.decoding.debug("stopping pipeline, ignoring pcm data")
+            return
+        }
         
         buffer?.put(buffer: pcmBuffer)
         
@@ -165,6 +168,20 @@ class AudioPipeline : DecoderListener
             firstPCM = false
             playerListener?.durationReadyToPlay(Date().timeIntervalSince(self.started))
         }
+    }
+    
+    func metadataReady(displayTitle: String) {
+        if firstMetadata {
+            firstMetadata = false
+            notifyMetadata(displayTitle: displayTitle)
+        }
+        
+        if let timeToMetadataPlaying = buffer?.size {
+            metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
+                self.notifyMetadata(displayTitle: displayTitle)
+            }
+        }
+
     }
     
     // MARK: "main" method
@@ -188,20 +205,6 @@ class AudioPipeline : DecoderListener
         }
     }
 
-    fileprivate func notifyMetadata(displayTitle:String) {
-        if self.displayTitle == nil {
-            self.displayTitle = displayTitle
-            self.playerListener?.displayTitleChanged("\(displayTitle)")
-        }
-        
-        if let timeToMetadataPlaying = buffer?.size {
-            metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                self.displayTitle = displayTitle
-                self.playerListener?.displayTitleChanged(displayTitle)
-            }
-        }
-    }
-    
     
     // MARK: processing steps
     
@@ -212,7 +215,7 @@ class AudioPipeline : DecoderListener
         let treatedData = mdExtractor.handle(payload: data, metadataCallback: { (metadata:[String:String]) in
             Logger.decoding.debug("extracted metadata is \(metadata)")
             if let streamTitle = metadata["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
-                self.notifyMetadata(displayTitle: streamTitle)
+                self.metadataReady(displayTitle: streamTitle)
             }
             let streamUrl = metadata["StreamUrl"]
             self.icyUrl = streamUrl
@@ -229,7 +232,7 @@ class AudioPipeline : DecoderListener
         return accu.chunk(data)
     }
     
-    func decode(data: Data) {
+    private func decode(data: Data) {
         guard !self.stopping else {
             Logger.decoding.debug("stopping pipeline, ignoring data")
             return
@@ -252,6 +255,14 @@ class AudioPipeline : DecoderListener
                 self.pipelineListener.problem(ProblemType.fatal, "cannot convert audio data")
             }
         }
+    }
+    
+    fileprivate func notifyMetadata(displayTitle:String) {
+        guard !self.stopping else {
+            Logger.decoding.debug("stopping pipeline, ignoring metadata")
+            return
+        }
+        self.playerListener?.displayTitleChanged("\(displayTitle)")
     }
     
     ///  delegate for visibility

@@ -29,6 +29,7 @@ import YbridOgg
 protocol OpusDataListener : AudioDataListener {
     func preskip(preskip:Int) -> ()
     func convert(package:AudioData.Package, granularPos:Int64?) throws
+    func metadataReady(displayTitle: String)
 }
 
 class OpusData : AudioData {
@@ -46,10 +47,8 @@ class OpusData : AudioData {
     }
     var aborted = false
     weak var opusListener:OpusDataListener?
-    weak var playerListener:AudioPlayerListener?
     
-    init(_ serial: Int32, opusListener: OpusDataListener, delegate:AudioPlayerListener?) throws {
-        self.playerListener = delegate
+    init(_ serial: Int32, opusListener: OpusDataListener) throws {
         self.opusListener = opusListener
         try super.init(audioContentType: kAudioFormatOpus, listener: opusListener)
         self.serial = try bos(serial)
@@ -239,7 +238,8 @@ class OpusData : AudioData {
         if combinedTitle.count > 0 {
             // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
             // TODO version
-            playerListener?.displayTitleChanged( combinedTitle)
+//            playerListener?.displayTitleChanged( combinedTitle)
+            opusListener?.metadataReady(displayTitle: combinedTitle)
         }
         return true
     }
