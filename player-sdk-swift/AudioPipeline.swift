@@ -170,15 +170,15 @@ class AudioPipeline : DecoderListener
         }
     }
     
-    func metadataReady(displayTitle: String) {
+    func metadataReady(_ metadata: Metadata) {
         if firstMetadata {
             firstMetadata = false
-            notifyMetadata(displayTitle: displayTitle)
+            notifyMetadata(displayTitle: metadata.combinedTitle)
         }
         
         if let timeToMetadataPlaying = buffer?.size {
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                self.notifyMetadata(displayTitle: displayTitle)
+                self.notifyMetadata(displayTitle: metadata.combinedTitle)
             }
         }
 
@@ -215,7 +215,7 @@ class AudioPipeline : DecoderListener
         let treatedData = mdExtractor.handle(payload: data, metadataCallback: { (metadata:[String:String]) in
             Logger.decoding.debug("extracted metadata is \(metadata)")
             if let streamTitle = metadata["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
-                self.metadataReady(displayTitle: streamTitle)
+                self.metadataReady(Metadata(combinedTitle: streamTitle))
             }
             let streamUrl = metadata["StreamUrl"]
             self.icyUrl = streamUrl

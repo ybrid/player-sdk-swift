@@ -142,8 +142,8 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
         }
     }
 
-    func metadataReady(displayTitle: String) {
-        super.listener.metadataReady(displayTitle: displayTitle)
+    func metadataReady(_ metadata: Metadata) {
+        super.listener.metadataReady(metadata)
     }
     
     // MARK: helpers

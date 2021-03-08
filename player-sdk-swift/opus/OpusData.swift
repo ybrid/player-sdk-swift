@@ -29,7 +29,7 @@ import YbridOgg
 protocol OpusDataListener : AudioDataListener {
     func preskip(preskip:Int) -> ()
     func convert(package:AudioData.Package, granularPos:Int64?) throws
-    func metadataReady(displayTitle: String)
+    func metadataReady(_ metadata: Metadata)
 }
 
 class OpusData : AudioData {
@@ -239,7 +239,8 @@ class OpusData : AudioData {
             // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
             // TODO version
 //            playerListener?.displayTitleChanged( combinedTitle)
-            opusListener?.metadataReady(displayTitle: combinedTitle)
+            let metadata = Metadata(combinedTitle: combinedTitle)
+            opusListener?.metadataReady(metadata)
         }
         return true
     }

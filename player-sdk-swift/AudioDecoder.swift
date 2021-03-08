@@ -28,7 +28,7 @@ import AVFoundation
 protocol DecoderListener: class  {
     func onFormatChanged(_ srcFormat : AVAudioFormat)
     func pcmReady(pcmBuffer: AVAudioPCMBuffer)
-    func metadataReady(displayTitle: String)
+    func metadataReady(_ metadata: Metadata)
 }
 
 class AudioDecoder : AudioDataListener {

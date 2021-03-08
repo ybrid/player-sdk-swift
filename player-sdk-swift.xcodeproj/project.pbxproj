@@ -11,6 +11,9 @@
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
 		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
+		1732222225F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
+		1732222325F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
+		1732222425F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
 		17404C8625E78DCC00051988 /* YbridPlayerSDK.framework in Resources */ = {isa = PBXBuildFile; fileRef = 170703D025D2F44400549B8A /* YbridPlayerSDK.framework */; };
 		1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
 		1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
@@ -115,6 +118,7 @@
 		170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		170703E025D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		1732222125F614BC00AEC833 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
 		1799DC7C25D565970055C973 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -248,6 +252,7 @@
 				1799DC8D25D565A10055C973 /* Logger.swift */,
 				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
 				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
+				1732222125F614BC00AEC833 /* Metadata.swift */,
 			);
 			path = "player-sdk-swift";
 			sourceTree = "<group>";
@@ -747,6 +752,7 @@
 			files = (
 				1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */,
 				1799DC8625D565970055C973 /* AudioDecoder.swift in Sources */,
+				1732222225F614BC00AEC833 /* Metadata.swift in Sources */,
 				1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */,
 				1799DC9925D565B30055C973 /* PlaybackEngine.swift in Sources */,
 				1799DC9E25D565BB0055C973 /* PlayerContext.swift in Sources */,
@@ -785,6 +791,7 @@
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
 				1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */,
 				1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */,
+				1732222325F614BC00AEC833 /* Metadata.swift in Sources */,
 				1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,
@@ -831,6 +838,7 @@
 			files = (
 				17CBC8CC25E2517F00B2F7E7 /* DataAccumulator.swift in Sources */,
 				17CBC8CD25E2517F00B2F7E7 /* AudioDecoder.swift in Sources */,
+				1732222425F614BC00AEC833 /* Metadata.swift in Sources */,
 				17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */,
 				17CBC8CF25E2517F00B2F7E7 /* PlaybackEngine.swift in Sources */,
 				17CBC8D025E2517F00B2F7E7 /* PlayerContext.swift in Sources */,
