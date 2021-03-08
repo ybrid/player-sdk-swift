@@ -229,19 +229,8 @@ class OpusData : AudioData {
             return false
         }
         Logger.decoding.notice("OpusTags \(opusTags.debugDescription)")
-        
-        let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
-        let playout = relevant
-            .filter { opusTags.comments[$0] != nil }
-            .map { opusTags.comments[$0]! }
-        let combinedTitle = playout.joined(separator: " - ")
-        if combinedTitle.count > 0 {
-            // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
-            // TODO version
-//            playerListener?.displayTitleChanged( combinedTitle)
-            let metadata = Metadata(combinedTitle: combinedTitle)
-            opusListener?.metadataReady(metadata)
-        }
+        let metadata = Metadata(opusComments: opusTags.comments)
+        opusListener?.metadataReady(metadata)
         return true
     }
     

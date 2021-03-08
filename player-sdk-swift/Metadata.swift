@@ -27,7 +27,7 @@ import Foundation
 
 
 
-public class Metadata {
+class Metadata {
     
 //    public enum type {
 //        case music
@@ -36,15 +36,43 @@ public class Metadata {
 //
 //    var id: String?
 //    var artist: String?
+//    var title: String?
+   
 //    var companions: [String] = []
 //    var description: String?
-//    var title: String?
 //    var durationMillies: Int?
 //    var type: type = .unknown
   
-    var combinedTitle: String
+    var combinedTitle: String?
+    var opusComments: [String:String]?
+    
     
     init(combinedTitle:String) {
         self.combinedTitle = combinedTitle
+    }
+    
+    init(opusComments:[String:String]) {
+        self.opusComments = opusComments
+    }
+    
+    func displayTitle() -> String? {
+        if combinedTitle != nil {
+            return combinedTitle!
+        }
+        
+        if opusComments != nil {
+            let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
+            let playout = relevant
+                .filter { opusComments![$0] != nil }
+                .map { opusComments![$0]! }
+            let displayTitle = playout.joined(separator: " - ")
+            if displayTitle.count > 0 {
+                // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
+                // TODO version
+                return displayTitle
+            }
+        }
+
+        return nil
     }
 }

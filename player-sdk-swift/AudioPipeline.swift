@@ -69,11 +69,11 @@ class AudioPipeline : DecoderListener
     private var buffer: PlaybackBuffer?
     
     private var icyUrl: String?
-    //    {
-    //        didSet {
-    //            playerListener?.currentUrlDidChange(to: icyUrl)
-    //        }
-    //    }
+//        {
+//            didSet {
+//                Logger.loading.notice("\(icyUrl)")
+//            }
+//        }
     
     weak var playerListener:AudioPlayerListener?
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
@@ -173,12 +173,13 @@ class AudioPipeline : DecoderListener
     func metadataReady(_ metadata: Metadata) {
         if firstMetadata {
             firstMetadata = false
-            notifyMetadata(displayTitle: metadata.combinedTitle)
+            notifyMetadataChanged(metadata)
+            return
         }
         
         if let timeToMetadataPlaying = buffer?.size {
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                self.notifyMetadata(displayTitle: metadata.combinedTitle)
+                self.notifyMetadataChanged(metadata)
             }
         }
 
@@ -257,9 +258,13 @@ class AudioPipeline : DecoderListener
         }
     }
     
-    fileprivate func notifyMetadata(displayTitle:String) {
+    fileprivate func notifyMetadataChanged(_ metadata:Metadata) {
         guard !self.stopping else {
             Logger.decoding.debug("stopping pipeline, ignoring metadata")
+            return
+        }
+        guard let displayTitle = metadata.displayTitle() else {
+            Logger.decoding.notice("no metadata to notifiy")
             return
         }
         self.playerListener?.displayTitleChanged("\(displayTitle)")
