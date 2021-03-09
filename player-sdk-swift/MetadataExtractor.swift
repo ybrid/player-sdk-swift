@@ -42,7 +42,7 @@ class MetadataExtractor {
     }
     
     deinit {
-        Logger.decoding.debug()
+        Logger.loading.debug()
     }
     
     fileprivate class PayloadCollector {
@@ -57,7 +57,7 @@ class MetadataExtractor {
         
         func appendUntilEnd(of: Data, idx: Int) -> Int {
             guard idx < of.count else {
-                Logger.decoding.error("-guard: \(name).appendUntilEnd \(idx) >= \(of.count)!")
+                Logger.loading.error("-guard: \(name).appendUntilEnd \(idx) >= \(of.count)!")
                 return 0
             }
             self.data.append(of.subdata(in: (idx..<of.count)))
@@ -67,7 +67,7 @@ class MetadataExtractor {
         
         func appendCount(of: Data, index: Int, count: Int) -> Int {
             guard index+count <= of.count else {
-                Logger.decoding.error("-guard: \(name).appendCount \(index)+\(count) > \(of.count)!")
+                Logger.loading.error("-guard: \(name).appendCount \(index)+\(count) > \(of.count)!")
                 return 0
             }
             self.data.append(of.subdata(in: (index..<index+count)))
@@ -89,19 +89,19 @@ class MetadataExtractor {
                     index += audio.appendUntilEnd(of: payload, idx: index)
                 }
                 nextMetadataAt -= payload.count
-//                Logger.decode.debug("audio.UntilEnd index=\(index), nMd=\(nextMetadataAt)")
+                if Logger.verbose { Logger.loading.debug("audio.UntilEnd index=\(index), nMd=\(nextMetadataAt)") }
                 break iteratePayload
             }
             
             // audio until metadata
             if index < nextMetadataAt {
                 index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
-//                Logger.decode.debug("audio.Count index=\(index), nMd=\(nextMetadataAt)")
+                if Logger.verbose { Logger.loading.debug("audio.Count index=\(index), nMd=\(nextMetadataAt)") }
                 continue iteratePayload
             }
             
             guard index == nextMetadataAt else {
-                Logger.decoding.error("-guard: index=\(index) and nMd=\(nextMetadataAt) must be equal")
+                Logger.loading.error("-guard: index=\(index) and nMd=\(nextMetadataAt) must be equal")
                 break iteratePayload
             }
             
@@ -119,7 +119,7 @@ class MetadataExtractor {
             if index+mdLength > payload.count {
                 index += metadata.appendUntilEnd(of: payload, idx: index)
                 nextMetadataAt = index + intervalBytes - payload.count
-//                Logger.decode.debug("metadata.UntilEnd index=\(index), nMd=\(nextMetadataAt)")
+                if Logger.verbose { Logger.loading.debug("metadata.UntilEnd index=\(index), nMd=\(nextMetadataAt)") }
                 break iteratePayload
             }
             
@@ -127,13 +127,13 @@ class MetadataExtractor {
             index += metadata.appendCount(of: payload, index: index, count: mdLength)
             metadataReset(metadataCallback)
             nextMetadataAt = index + intervalBytes
-//            Logger.decode.debug("metadata.Count index=\(index), nMd=\(nextMetadataAt)")
+            if Logger.verbose { Logger.loading.debug("metadata.Count index=\(index), nMd=\(nextMetadataAt)") }
             
         } while (index <= payload.count)
         
         
         if metadata.data.count > 0 {
-            Logger.decoding.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes")
+            Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes")
         }
         totalBytesAudio += UInt32(audio.data.count)
         return audio.data
@@ -143,7 +143,7 @@ class MetadataExtractor {
         if let callback = metadataCallback {
             totalBytesExtracted += UInt32(metadata.data.count)
             let flatMd = String(decoding: metadata.data, as: UTF8.self)
-            Logger.decoding.info("metadata is \(flatMd)")
+            Logger.loading.info("metadata is \(flatMd)")
             let result = parseMetadata(mdString: flatMd)
             callback(result)
         }
@@ -157,7 +157,7 @@ class MetadataExtractor {
         for entry in entries {
             let property:[String] = entry.split(separator: "=", maxSplits: 1).map(String.init)
             guard property.count == 2 else {
-                Logger.decoding.error("cannot parse metadata entry '\(entry)'")
+                Logger.loading.error("cannot parse metadata entry '\(entry)'")
                 continue
             }
             let key = property[0]
@@ -169,7 +169,7 @@ class MetadataExtractor {
             case "StreamUrl", "StreamTitle":
                 result.updateValue(value, forKey: key)
             default:
-                Logger.decoding.notice("unused metadata key ’\(property[0]) with value \(property[1])")
+                Logger.loading.notice("unused metadata key ’\(property[0]) with value \(property[1])")
             }
         }
         return result
