@@ -155,26 +155,22 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    func problem(_ type: ProblemType, _ message: String) {
-        
+    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ message:String) {
         playerListener?.currentProblem(message)
-        switch type {
-        case .solved:
+        Logger.shared.error("\(level) error in \(component): \(message)")
+        switch level {
+        case .notice:
             DispatchQueue.global().async {
                 sleep(5) ; self.playerListener?.currentProblem(nil)
             }
-        case .notice:
-            Logger.shared.notice(message)
-        case .stalled:
+        case .recoverable:
             Logger.shared.notice(message)
         case .fatal:
             Logger.shared.error(message)
             stop()
-        case .unknown:
-            Logger.shared.notice(message)
         }
     }
-    
+        
     // MARK: BufferListener
     
     func stateChanged(_ bufferState: PlaybackBuffer.BufferState) {

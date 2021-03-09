@@ -111,7 +111,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         endSession()
         startSession(configuration: configuration)
         pipeline.resume()
-        pipeline.pipelineListener.problem(.solved, "resume loading data")
+        pipeline.pipelineListener.error(ErrorLevel.notice, ErrorComponent.loading, "resume loading data")
     }
     
     fileprivate func networkStalled(_ problemText:String) {
@@ -120,10 +120,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             return
         }
         stalled = true
-        pipeline.pipelineListener.problem(.stalled, problemText)
         pipeline.decodingQueue.async {
             self.pipeline.flushAudio()
         }
+        pipeline.pipelineListener.error(ErrorLevel.recoverable, ErrorComponent.loading, problemText)
     }
 
     
@@ -158,26 +158,24 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     }
     
     private func handleMediaType(_ response: URLResponse, _ session: URLSession) {
-        let mimeType = response.mimeType
+        guard let mimeType = response.mimeType else {
+            endSession()
+            pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, "missing mimeType")
+            return
+        }
         let expectedLength = response.expectedContentLength
-        let type:AudioFileTypeID
-        do {
-            type = try getAudioFileType(mimeType)
-        } catch {
-            Logger.loading.error(error.localizedDescription)
-            session.invalidateAndCancel()
-            pipeline.pipelineListener.problem(ProblemType.fatal, "cannot process \(mimeType ?? "no mediaType")")
+        guard let type = getAudioFileType(mimeType) else {
+            endSession()
+            pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, "cannot process \(mimeType)")
             return
         }
         
-        Logger.loading.debug("will recieve \(expectedLength) bytes of \(mimeType!)")
+        Logger.loading.debug("will recieve \(expectedLength) bytes of \(mimeType)")
         pipeline.prepareAudio(audioContentType: type)
     }
     
-    private func getAudioFileType(_ mimeType:String?) throws -> AudioFileTypeID {
-        guard let mimeType = mimeType else {
-            throw PipelineError(.cannotProcess,"missing mimeType")
-        }
+    private func getAudioFileType(_ mimeType:String) -> AudioFileTypeID? {
+
         switch mimeType {
         case "audio/mpeg":
             return kAudioFileMP3Type
@@ -186,7 +184,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         case "application/ogg", "audio/ogg", "application/octet-stream":
             return kAudioFormatOpus
         default:
-            throw PipelineError(.cannotProcess,"mimeType \(mimeType)")
+            return nil
         }
     }
 
@@ -213,20 +211,19 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         }
         
         if let error = error {
-            guard let handling = LoadingErrors.mapCFNetworkErrors(error, stalling: stalled) else {
+            guard let handling = LoadingError.mapCFNetworkErrors(error, stalling: stalled) else {
                 Logger.loading.info("loading stopped")
                 return
             }
             
             Logger.loading.debug("error is \(error.self)")
             switch handling.type {
-            case .stalled:
+            case .recoverable:
                 networkStalled(handling.msg)
+            case .fatal:
+                pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, handling.msg)
             default:
-                pipeline.pipelineListener.problem(handling.type, handling.msg)
-                pipeline.decodingQueue.async {
-                    self.pipeline.flushAudio()
-                }
+                pipeline.pipelineListener.error(ErrorLevel.notice, ErrorComponent.loading, handling.msg)
             }
         }
     }

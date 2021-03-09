@@ -25,14 +25,30 @@
 
 import Foundation
 
-class LoadingErrors {
+
+
+class LoadingError : LocalizedError {
+    
+    enum ErrorKind {
+        case cannotProcess
+        case cannotConvert
+    }
+    let kind:ErrorKind
+    var message:String
+    init(_ kind:ErrorKind, _ message:String) {
+        self.kind = kind; self.message = message
+    }
+    var errorDescription: String? {
+        return String(format:"%@.%@ %@",String(describing: Self.self), String(describing: kind), message)
+    }
+
     
     private class CodeMap {
         let code:Int
         let message:String?
-        let type:ProblemType
-        var whileStallingType:ProblemType?
-        init(_ code:Int, _ message:String?, _ type:ProblemType, _ whileStalling:ProblemType? = nil) {
+        let type:ErrorLevel
+        var whileStallingType:ErrorLevel?
+        init(_ code:Int, _ message:String?, _ type:ErrorLevel, _ whileStalling:ErrorLevel? = nil) {
             self.code = code
             self.message = message
             self.type = type
@@ -41,17 +57,17 @@ class LoadingErrors {
     }
     
     static private var networkCodeMaps: [CodeMap] = [
-        CodeMap(-1001, "timed out loading data", .stalled),
+        CodeMap(-1001, "timed out loading data", .recoverable),
         CodeMap(-1002, "unsupported URL", .fatal),
-        CodeMap(-1003, "host not found", .fatal, .stalled),
-        CodeMap(-1005, "connection lost", .stalled),
-        CodeMap(-1009, "offline?", .fatal, .stalled),
+        CodeMap(-1003, "host not found", .fatal, .recoverable),
+        CodeMap(-1005, "connection lost", .recoverable),
+        CodeMap(-1009, "offline?", .fatal, .recoverable),
         CodeMap(-1022, "not https", .fatal),
         CodeMap(-1200, "cannot connect over SSL",.fatal),
         CodeMap(-997, nil, .notice)
     ]
     
-    static func mapCFNetworkErrors(_ error: Error, stalling: Bool) -> (type:ProblemType,msg: String)? {
+    static func mapCFNetworkErrors(_ error: Error, stalling: Bool) -> (type:ErrorLevel,msg: String)? {
         let nserr = error as NSObject
         let code = nserr.value(forKey: "code") as! NSNumber.IntegerLiteralType
         if code == -999 {
@@ -67,7 +83,7 @@ class LoadingErrors {
             }
             return (mapping.type, mapping.message ?? error.localizedDescription)
         }
-        return( .unknown, error.localizedDescription)
+        return(.notice, error.localizedDescription)
     }
 }
 

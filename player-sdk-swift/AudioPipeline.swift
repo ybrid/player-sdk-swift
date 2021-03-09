@@ -27,31 +27,27 @@ import AVFoundation
  
 protocol PipelineListener: class {
     func ready(playback: Playback)
-    func problem(_ type: ProblemType, _ message:String)
+    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ message:String)
 }
 
-enum ProblemType {
+enum ErrorLevel {
     case fatal
-    case stalled
+    case recoverable
     case notice
-    case unknown
-    case solved
 }
 
-class PipelineError: LocalizedError {
-    enum ErrorKind {
-        case cannotProcess
-        case cannotConvert
-    }
-    let kind:ErrorKind
-    var message:String
-    init(_ kind:ErrorKind, _ message:String) {
-        self.kind = kind; self.message = message
-    }
-    var errorDescription: String? {
-        return String(format:"%@.%@ %@",String(describing: Self.self), String(describing: kind), message)
-    }
+enum ErrorComponent {
+    case loading
+    case decoding
+    case playing
 }
+//
+//enum ErrorCause {
+//    case loading
+//    case decoding
+//    case playing
+//}
+//
 
 class AudioPipeline : DecoderListener
 {
@@ -126,7 +122,7 @@ class AudioPipeline : DecoderListener
             }
         } catch {
             Logger.decoding.error("cannot read data source, reason \(error.localizedDescription)")
-            pipelineListener.problem(ProblemType.fatal, "cannot read data source")
+            pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, error.localizedDescription)
             return
         }
     }
@@ -149,7 +145,7 @@ class AudioPipeline : DecoderListener
             }
         } catch {
             Logger.decoding.error(error.localizedDescription)
-            pipelineListener.problem(ProblemType.fatal, "problem with audio format")
+            pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, "problem with audio format")
             return
         }
     }
@@ -251,7 +247,7 @@ class AudioPipeline : DecoderListener
                     return
                 }
                 Logger.decoding.error(error.localizedDescription)
-                self.pipelineListener.problem(ProblemType.fatal, "cannot convert audio data")
+                self.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, "cannot convert audio data")
             }
         }
     }
