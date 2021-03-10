@@ -45,7 +45,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         }
     }
     private var sessionStarted: Date?
-
+    
     
     init(mediaUrl: URL, pipeline: AudioPipeline, inclMetadata: Bool = true) {
         self.url = mediaUrl
@@ -75,7 +75,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         PlayerContext.unregister(listener: self)
         stalled = false
     }
-
+    
     fileprivate func startSession(configuration: URLSessionConfiguration) {
         Logger.loading.debug()
         sessionStarted = Date()
@@ -87,8 +87,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         sessionData = session?.dataTask(with: request)
         sessionData?.resume()
     }
-
-    private func endSession() {
+    
+    fileprivate func endSession() {
         if let session = session {
             session.invalidateAndCancel()
         }
@@ -111,10 +111,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         endSession()
         startSession(configuration: configuration)
         pipeline.resume()
-        pipeline.pipelineListener.error(ErrorLevel.notice, ErrorComponent.loading, ErrorKindBase.noError.rawValue, "resume loading data")
+        pipeline.pipelineListener.error(ErrorLevel.notice, ErrorComponent.loading, ErrorKind.noError, "resume loading data")
     }
     
-    fileprivate func networkStalled(_ cause:LoadingError.ErrorKind, _ problemText:String) {
+    fileprivate func networkStalled(_ cause:ErrorKind, _ text:String) {
         guard PlayerContext.networkMonitor.isConnectedToNetwork() == false else {
             resumeRequestData()
             return
@@ -123,9 +123,9 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         pipeline.decodingQueue.async {
             self.pipeline.flushAudio()
         }
-        pipeline.pipelineListener.error(ErrorLevel.recoverable, ErrorComponent.loading, cause.rawValue, problemText)
+        pipeline.pipelineListener.error(ErrorLevel.recoverable, ErrorComponent.loading, cause, text)
     }
-
+    
     // MARK: session begins
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {        Logger.loading.debug("didReceive response for task \(dataTask.taskIdentifier) called")
@@ -140,12 +140,13 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         
         do {
             try handleMediaType(response, session)
-        } catch let error as LoadingError {
-            stopRequestData()
-            pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, error.kind.rawValue, error.message)
         } catch {
             stopRequestData()
-            pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading,  ErrorKindBase.unknown.rawValue, error.localizedDescription)
+            if let loadingError = error as? LoadingError {
+                pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, loadingError.kind, loadingError.message)
+            } else  {
+                pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading,  ErrorKind.unknown, error.localizedDescription)
+            }
         }
         
     }
@@ -170,7 +171,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             let name = $0.0 as! NSString
             return String(name).starts(with: fieldsStartingWith)
         }).forEach({ result[String($0.0 as! NSString)]=String($0.1 as! NSString) })
-       return result
+        return result
     }
     
     private func handleMediaType(_ response: URLResponse, _ session: URLSession) throws {
@@ -184,7 +185,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         guard let mimeType = mimeType else {
             throw LoadingError(.missingMimeType, "missing mimeType")
         }
-
+        
         switch mimeType {
         case "audio/mpeg":
             return kAudioFileMP3Type
@@ -196,7 +197,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             throw LoadingError(.cannotProcessMimeType, "cannot process \(mimeType)")
         }
     }
-
+    
     // MARK: session runs
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
@@ -230,9 +231,9 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             case .recoverable:
                 networkStalled(behaviour.cause, behaviour.message)
             case .fatal:
-                pipeline.pipelineListener.error( stalled ? behaviour.errorLevelWhileStalling : behaviour.errorLevel, ErrorComponent.loading, behaviour.cause.rawValue, behaviour.message)
-            default:
-                pipeline.pipelineListener.error(behaviour.errorLevel, ErrorComponent.loading, behaviour.cause.rawValue, behaviour.message)
+                pipeline.pipelineListener.error( stalled ? behaviour.errorLevelWhileStalling : behaviour.errorLevel, ErrorComponent.loading, behaviour.cause, behaviour.message)
+            case .notice:
+                pipeline.pipelineListener.error(behaviour.errorLevel, ErrorComponent.loading, behaviour.cause, behaviour.message)
             }
         }
     }

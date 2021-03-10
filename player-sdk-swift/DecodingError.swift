@@ -27,19 +27,16 @@ import Foundation
 import AVFoundation
 
 class AudioDataError : LocalizedError {
-    enum ErrorKind : ErrorCode {
-        case cannotOpenStream = 401
-        case parsingFailed = 402
-        case invalidStream = 403
-        case notSupported = 404
-    }
+
     let kind: ErrorKind
     var message: String?
     var oscode: OSStatus?
+    // used with mpeg
     init(_ kind: ErrorKind, _ code: OSStatus) {
         self.kind = kind
         self.oscode = code
     }
+    // used with opus
     init(_ kind: ErrorKind, _ message: String) {
         self.kind = kind
         self.message = message
@@ -55,9 +52,39 @@ class AudioDataError : LocalizedError {
     }
 }
 
+class DecoderError : LocalizedError {
 
-fileprivate func describe(osstatus result: OSStatus ) -> String {
-    switch result {
+    let kind:ErrorKind
+    var oscode: OSStatus?
+    var message: String?
+    var cause: Error?
+    init(_ kind:ErrorKind, _ code: OSStatus? = nil) {
+        self.kind = kind; self.oscode = code
+    }
+    init(_ kind:ErrorKind, _ message: String) {
+        self.kind = kind; self.message = message
+    }
+    init(_ kind:ErrorKind, _ cause: Error) {
+        self.kind = kind; self.cause = cause
+    }
+    var errorDescription: String? {
+        var desc = String(format:"%@.%@", String(describing: Self.self), String(describing: kind))
+        if let oscode = oscode {
+            desc = desc + String(format: " Code=%d \"%@\"", oscode, MpegDecoder.describeConverting(oscode))
+        }
+        if let message = message {
+            desc = desc + ", '" + message + "'"
+        }
+        if let cause = cause {
+            desc = desc + ", cause: " + cause.localizedDescription
+        }
+        return desc
+    }
+}
+
+
+fileprivate func describe(osstatus: OSStatus) -> String {
+    switch osstatus {
     case kAudioFileStreamError_UnsupportedFileType:
         return "The file type is not supported."
     case kAudioFileStreamError_UnsupportedDataFormat:
@@ -81,6 +108,7 @@ fileprivate func describe(osstatus result: OSStatus ) -> String {
     case kAudioFileStreamError_UnspecifiedError:
         return "An unspecified error has occurred."
     default:
-        return "unknown result code \(result)"
+        return "unknown os status code \(osstatus)"
     }
 }
+

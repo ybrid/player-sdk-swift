@@ -31,8 +31,7 @@ class CustomErrorTests: XCTestCase {
 
      func testAudioDataError() throws {
         let err = AudioDataError(.parsingFailed, noErr)
-        XCTAssertEqual("AudioDataError.parsingFailed Code=0 \"unknown result code 0\"",err.localizedDescription)
-        
+        XCTAssertEqual("AudioDataError.parsingFailed Code=0 \"unknown os status code 0\"",err.localizedDescription)
     }
     
     func testParsingFailed() throws {
@@ -53,6 +52,6 @@ class CustomErrorTests: XCTestCase {
     
     func testPipelineError() throws {
         let err = LoadingError(.cannotProcessMimeType, "mp4")
-        XCTAssertEqual("LoadingError.cannotProcess mp4",err.localizedDescription)
+        XCTAssertEqual("LoadingError.cannotProcessMimeType mp4",err.localizedDescription)
     }
 }

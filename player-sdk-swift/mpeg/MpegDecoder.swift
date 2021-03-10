@@ -115,12 +115,12 @@ class MpegDecoder : AudioDecoder {
         let buffer = try prepareBuffer(frames: pcmFrames)
         let context = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
         let status = AudioConverterFillComplexBuffer(converter!, convertPacketCallback, context, &buffer.frameLength, buffer.mutableAudioBufferList, nil)
-        if Logger.verbose { Logger.decoding.debug("has read \(buffer.frameLength) frames into buffer of capacity \(pcmFrames) -> '\(AudioDecoder.describeConverting(status))'") }
+        if Logger.verbose { Logger.decoding.debug("has read \(buffer.frameLength) frames into buffer of capacity \(pcmFrames) -> '\(MpegDecoder.describeConverting(status))'") }
         
         cleanupConverterGarbage()
         
         guard status == noErr || status == ConvertingEndOfData else {
-            Logger.decoding.error("AudioConverterFillComplexBuffer returned os status \(AudioDecoder.describeConverting(status))")
+            Logger.decoding.error("AudioConverterFillComplexBuffer returned os status \(MpegDecoder.describeConverting(status))")
             switch status {
             case ConvertingMissingSourceFormat:
                 throw DecoderError(.missingSourceFormat)
@@ -179,6 +179,50 @@ class MpegDecoder : AudioDecoder {
         packetCount = 1
         return noErr
     }
+    
+    static func describeConverting(_ status: OSStatus) -> String {
+        switch status {
+        case noErr:
+            return "ok"
+        case ConvertingEndOfData:
+            return "end of data"
+        case ConvertingMissingDataSource:
+            return "missing data source"
+        case ConvertingMissingSourceFormat:
+            return "missing source format"
+        case kAudioConverterErr_RequiresPacketDescriptionsError:
+            return "kAudioConverterErr_RequiresPacketDescriptionsError"
+        /// not seen yet
+        case kAudioConverterErr_OperationNotSupported:
+            return "kAudioConverterErr_OperationNotSupported"
+        case kAudioConverterErr_FormatNotSupported:
+            return "kAudioConverterErr_FormatNotSupported"
+        case kAudioConverterErr_PropertyNotSupported:
+            return "kAudioConverterErr_PropertyNotSupported"
+        case kAudioConverterErr_InvalidInputSize:
+            return "kAudioConverterErr_InvalidInputSize"
+        case kAudioConverterErr_InvalidOutputSize:
+            return "kAudioConverterErr_InvalidOutputSize"
+        case kAudioConverterErr_UnspecifiedError:
+            return "kAudioConverterErr_UnspecifiedError"
+        case kAudioConverterErr_BadPropertySizeError:
+            return "kAudioConverterErr_BadPropertySizeError"
+        case kAudioConverterErr_RequiresPacketDescriptionsError:
+            return "kAudioConverterErr_RequiresPacketDescriptionsError"
+        case kAudioConverterErr_InputSampleRateOutOfRange:
+            return "kAudioConverterErr_InputSampleRateOutOfRange"
+        case kAudioConverterErr_OutputSampleRateOutOfRange:
+            return "kAudioConverterErr_OutputSampleRateOutOfRange"
+    #if os(iOS)
+        case kAudioConverterErr_HardwareInUse:
+            return "Hardware is in use"
+        case kAudioConverterErr_NoHardwarePermission:
+            return "No hardware permission"
+    #endif
+        default:
+            return "\(status) (unknown state)"
+        }
+    }
 }
 
 /// Synchronous Callback
@@ -190,3 +234,9 @@ fileprivate func convertPacketCallback(_ converter: AudioConverterRef,
     let converter = Unmanaged<MpegDecoder>.fromOpaque(context!).takeUnretainedValue()
     return converter.convertPacket(&packetCount.pointee, &outBufferList.pointee, outPacketDescriptions)
 }
+
+/// possible os' return codes of convertPacketsCallback
+fileprivate let ConvertingEndOfData: OSStatus = 800000001
+fileprivate let ConvertingMissingDataSource: OSStatus = 800000002
+fileprivate let ConvertingMissingSourceFormat: OSStatus = 800000003
+

@@ -28,20 +28,6 @@ import Foundation
 
 class LoadingError : LocalizedError {
     
-    enum ErrorKind : ErrorCode {
-        case missingMimeType = 300
-        case cannotProcessMimeType = 301
-        
-        case timedOutLoadingData = -1001 // "timed out loading data", .recoverable),
-        case unsuportedUrl = -1002 //, "unsupported URL", .fatal),
-        case hostNotFound = -1003 //, "host not found", .fatal, .recoverable),
-        case connectionLost = -1005 //, "connection lost", .recoverable),
-        case offline = -1009 //, "offline?", .fatal, .recoverable),
-        case noHttps = -1022 //, "not https", .fatal),
-        case cannotConnectOverSsl = -1200 //, "cannot connect over SSL",.fatal),
-        case lostConnectionToBackgroudTransferService = -997 //, nil, .notice)
-    }
-    
     let component:ErrorComponent = ErrorComponent.loading
     let kind:ErrorKind
     var message:String
@@ -67,15 +53,14 @@ class LoadingError : LocalizedError {
     }
     
     static var networkBahviourMap: [Behaviour] = [
-        Behaviour(ErrorKind.timedOutLoadingData, "timed out loading data", .recoverable),
         Behaviour(ErrorKind.unsuportedUrl, "unsupported URL", .fatal),
-        Behaviour(ErrorKind.hostNotFound, "host not found", .fatal, .recoverable),
-        Behaviour(ErrorKind.connectionLost, "connection lost", .recoverable),
-        Behaviour(ErrorKind.offline, "offline?", .fatal, .recoverable),
-        Behaviour(ErrorKind.noHttps, "not https", .fatal),
         Behaviour(ErrorKind.cannotConnectOverSsl, "cannot connect over SSL",.fatal),
+        Behaviour(ErrorKind.noHttps, "not https", .fatal),
+        Behaviour(ErrorKind.offline, "offline?", .fatal, .recoverable),
+        Behaviour(ErrorKind.hostNotFound, "host not found", .fatal, .recoverable),
+        Behaviour(ErrorKind.timedOutLoadingData, "timed out loading data", .recoverable),
+        Behaviour(ErrorKind.connectionLost, "connection lost", .recoverable),
         Behaviour(ErrorKind.lostConnectionToBackgroudTransferService, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
-
     ]
     
     
