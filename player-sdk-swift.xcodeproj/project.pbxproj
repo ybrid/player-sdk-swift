@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17109E1125F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
+		17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
+		17109E1325F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
 		1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
 		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
@@ -121,6 +124,7 @@
 		170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		170703E025D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		17109E1025F8DF4C003DA621 /* DecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodingError.swift; sourceTree = "<group>"; };
 		1732222125F614BC00AEC833 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
@@ -347,6 +351,7 @@
 				1799DCA225D565DB0055C973 /* mpeg */,
 				1799DC8025D565970055C973 /* AudioDecoder.swift */,
 				1799DC7F25D565970055C973 /* AudioData.swift */,
+				17109E1025F8DF4C003DA621 /* DecodingError.swift */,
 			);
 			name = decoding;
 			sourceTree = "<group>";
@@ -776,6 +781,7 @@
 				1799DC8425D565970055C973 /* AudioDataLoader.swift in Sources */,
 				1799DC8525D565970055C973 /* AudioData.swift in Sources */,
 				1799DC9025D565A10055C973 /* MetadataExtractor.swift in Sources */,
+				17109E1125F8DF4C003DA621 /* DecodingError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +798,7 @@
 				1799DD3D25D580D40055C973 /* PlaybackEngineTests.swift in Sources */,
 				1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */,
 				1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */,
+				17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
 				1799DD3E25D580D40055C973 /* PlaybackBufferTests.swift in Sources */,
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
@@ -864,6 +871,7 @@
 				17CBC8DC25E2517F00B2F7E7 /* AudioDataLoader.swift in Sources */,
 				17CBC8DD25E2517F00B2F7E7 /* AudioData.swift in Sources */,
 				17CBC8DE25E2517F00B2F7E7 /* MetadataExtractor.swift in Sources */,
+				17109E1325F8DF4C003DA621 /* DecodingError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -155,9 +155,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ message:String) {
+    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ code: ErrorCode, _ message:String) {
         playerListener?.currentProblem(message)
-        Logger.shared.error("\(level) error in \(component): \(message)")
+        Logger.shared.error("\(level) error code \(code): \(message)")
         switch level {
         case .notice:
             DispatchQueue.global().async {

@@ -52,7 +52,7 @@ class CustomErrorTests: XCTestCase {
    }
     
     func testPipelineError() throws {
-        let err = LoadingError(.cannotProcess, "mp4")
+        let err = LoadingError(.cannotProcessMimeType, "mp4")
         XCTAssertEqual("LoadingError.cannotProcess mp4",err.localizedDescription)
     }
 }

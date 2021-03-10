@@ -60,65 +60,8 @@ class AudioData {
     }
 }
 
-class AudioDataError : LocalizedError {
-    enum ErrorKind  {
-        case cannotOpenStream
-        case parsingFailed
-        case invalidStream
-        case notSupported
-    }
-    let kind: ErrorKind
-    var message: String?
-    var oscode: OSStatus?
-    init(_ kind: ErrorKind, _ code: OSStatus) {
-        self.kind = kind
-        self.oscode = code
-    }
-    init(_ kind: ErrorKind, _ message: String) {
-        self.kind = kind
-        self.message = message
-    }
-    var errorDescription: String? {
-        if let oscode = oscode {
-            return String(format:"%@.%@ Code=%d \"%@\"", String(describing: Self.self), String(describing: kind), oscode, describe(osstatus: oscode))
-        }
-        if let message = message {
-            return String(format:"%@.%@ '%@'", String(describing: Self.self), String(describing: kind), message)
-        }
-        return String(format:"%@.%@", String(describing: Self.self), String(describing: kind))
-    }
-}
-
 // MARK: decriptions of constants
 
-fileprivate func describe(osstatus result: OSStatus ) -> String {
-    switch result {
-    case kAudioFileStreamError_UnsupportedFileType:
-        return "The file type is not supported."
-    case kAudioFileStreamError_UnsupportedDataFormat:
-        return "The data format is not supported by this file type."
-    case kAudioFileStreamError_UnsupportedProperty:
-        return "The property is not supported."
-    case kAudioFileStreamError_BadPropertySize:
-        return "The size of the property data was not correct."
-    case kAudioFileStreamError_NotOptimized:
-        return "It is not possible to produce output packets because the file's packet table or other defining info is either not present or is after the audio data."
-    case kAudioFileStreamError_InvalidPacketOffset:
-        return "A packet offset was less than zero, or past the end of the file, or a corrupt packet size was read when building the packet table."
-    case kAudioFileStreamError_InvalidFile:
-        return "The file is malformed, or otherwise not a valid instance of an audio file of its type, or is not recognized as an audio file."
-    case kAudioFileStreamError_ValueUnknown:
-        return "The property value is not present in this file before the audio data."
-    case  kAudioFileStreamError_DataUnavailable:
-        return "The amount of data provided to the parser was insufficient to produce any result."
-    case  kAudioFileStreamError_IllegalOperation:
-        return "An illegal operation was attempted."
-    case kAudioFileStreamError_UnspecifiedError:
-        return "An unspecified error has occurred."
-    default:
-        return "unknown result code \(result)"
-    }
-}
 
 /// all possible properties
 fileprivate func describe(_ property: AudioFileStreamPropertyID) -> String {
