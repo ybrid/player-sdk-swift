@@ -141,20 +141,26 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     }
     
     private func handleMetadata(_ httpResp: HTTPURLResponse) {
-
-        let metaint:NSString?
-        if #available(iOS 13, macOS 10.15,  *) {
-            metaint = httpResp.value(forHTTPHeaderField: "icy-metaint") as NSString?
-        } else {
-            let fieldValue = httpResp.allHeaderFields.filter({ $0.0 as! NSString == "icy-metaint" }).first
-            metaint = fieldValue?.1 as! NSString?
-        }
-        if withMetadata, let metadataEveryBytes = metaint?.integerValue {
+        let icyMetadata = getHeaders(httpResp, fieldsStartingWith: "icy-")
+        Logger.loading.debug("icy-fields: \(icyMetadata)")
+        
+        if withMetadata, let metaint = icyMetadata["icy-metaint"] {
+            guard let metadataEveryBytes = Int(metaint) else {
+                Logger.loading.error("invalid icy-metaint value '\(metaint)'")
+                return
+            }
             pipeline.prepareMetadata(metadataInverallB: metadataEveryBytes)
-            Logger.loading.notice("icy-metadata every \(metadataEveryBytes) bytes")
-        } else {
-            Logger.loading.notice("without icy-metadata")
+            Logger.loading.info("icy-metadata every \(metadataEveryBytes) bytes")
         }
+    }
+    
+    private func getHeaders(_ httpResp: HTTPURLResponse, fieldsStartingWith:String) -> [String:String]  {
+        var result:[String:String] = [:]
+        httpResp.allHeaderFields.filter({
+            let name = $0.0 as! NSString
+            return String(name).starts(with: fieldsStartingWith)
+        }).forEach({ result[String($0.0 as! NSString)]=String($0.1 as! NSString) })
+       return result
     }
     
     private func handleMediaType(_ response: URLResponse, _ session: URLSession) {
