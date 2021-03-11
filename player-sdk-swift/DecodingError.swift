@@ -26,59 +26,40 @@
 import Foundation
 import AVFoundation
 
-class AudioDataError : LocalizedError {
+class AudioDataError : AudioPlayerError {
 
-    let kind: ErrorKind
-    var message: String?
-    var oscode: OSStatus?
+    init(_ kind: ErrorKind) {
+        super.init(kind, nil)
+    }
+    
     // used with mpeg
     init(_ kind: ErrorKind, _ code: OSStatus) {
-        self.kind = kind
-        self.oscode = code
+        super.init(kind, describe(osstatus: code))
+        super.osstatus = code
     }
+
     // used with opus
-    init(_ kind: ErrorKind, _ message: String) {
-        self.kind = kind
-        self.message = message
+    init(_ kind: ErrorKind, _ message: String, _ cause: Error? = nil) {
+        super.init(kind, message, cause)
     }
-    var errorDescription: String? {
-        if let oscode = oscode {
-            return String(format:"%@.%@ Code=%d \"%@\"", String(describing: Self.self), String(describing: kind), oscode, describe(osstatus: oscode))
-        }
-        if let message = message {
-            return String(format:"%@.%@ '%@'", String(describing: Self.self), String(describing: kind), message)
-        }
-        return String(format:"%@.%@", String(describing: Self.self), String(describing: kind))
-    }
+
 }
 
-class DecoderError : LocalizedError {
+class DecoderError : AudioPlayerError {
 
-    let kind:ErrorKind
-    var oscode: OSStatus?
-    var message: String?
-    var cause: Error?
     init(_ kind:ErrorKind, _ code: OSStatus? = nil) {
-        self.kind = kind; self.oscode = code
+        guard let code = code else {
+            super.init(kind, nil)
+            return
+        }
+        super.init(kind, MpegDecoder.describeConverting(code))
+        super.osstatus = code
     }
     init(_ kind:ErrorKind, _ message: String) {
-        self.kind = kind; self.message = message
+        super.init(kind, message)
     }
     init(_ kind:ErrorKind, _ cause: Error) {
-        self.kind = kind; self.cause = cause
-    }
-    var errorDescription: String? {
-        var desc = String(format:"%@.%@", String(describing: Self.self), String(describing: kind))
-        if let oscode = oscode {
-            desc = desc + String(format: " Code=%d \"%@\"", oscode, MpegDecoder.describeConverting(oscode))
-        }
-        if let message = message {
-            desc = desc + ", '" + message + "'"
-        }
-        if let cause = cause {
-            desc = desc + ", cause: " + cause.localizedDescription
-        }
-        return desc
+        super.init(kind, nil, cause)
     }
 }
 

@@ -33,8 +33,8 @@ public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)
     // metadata to the content currently playing has changed
     func displayTitleChanged(_ title: String?)
-    // message text concerning failures
-    func currentProblem(_ text: String?)
+    // all exceptions contain code, errorReason and localizedDescription, called when occuring
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     // duration of audio presented already, called every 0.2 seconds
     func playingSince(_ seconds: TimeInterval?)
     // duration between triggering play and first audio presented
@@ -115,7 +115,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    // Stop playback immediatly and clean up asychronously.
+    // Stop, notify immediatly, stop playback and clean up asychronously.
     public func stop() {
         pipeline?.stopProcessing()
         playerQueue.async {
@@ -155,22 +155,22 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ kind: ErrorKind, _ message:String) {
-        playerListener?.currentProblem(message)
-        Logger.shared.error("\(level) error code \(kind.rawValue): \(message)")
-        switch level {
+    func error(_ severity: ErrorSeverity, _ error: AudioPlayerError) {
+        let logMessage = "\(severity) \(error.localizedDescription)"
+        DispatchQueue.global().async {
+            self.playerListener?.error(severity, error)
+        }
+        switch severity {
         case .notice:
-            DispatchQueue.global().async {
-                sleep(5) ; self.playerListener?.currentProblem(nil)
-            }
+            Logger.shared.notice(logMessage)
         case .recoverable:
-            Logger.shared.notice(message)
+            Logger.shared.notice(logMessage)
         case .fatal:
-            Logger.shared.error(message)
+            Logger.shared.error(logMessage)
             stop()
         }
     }
-        
+    
     // MARK: BufferListener
     
     func stateChanged(_ bufferState: PlaybackBuffer.BufferState) {

@@ -240,10 +240,10 @@ class AbortingListener : AudioPlayerListener  {
     func displayTitleChanged(_ title: String?) {
         Logger.testing.notice("-- combined display title is \(title ?? "(nil)")")
     }
-    func currentProblem(_ text: String?) {
-        Logger.testing.notice("-- problem is \(text ?? "(nil)")")
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
+        Logger.testing.notice("-- problem is \(exception.errorDescription)")
         problemCount += 1
-    }
+    }    
     func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
