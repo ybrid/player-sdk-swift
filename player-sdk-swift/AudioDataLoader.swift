@@ -111,10 +111,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         endSession()
         startSession(configuration: configuration)
         pipeline.resume()
-        pipeline.pipelineListener.error(ErrorLevel.notice, ErrorComponent.loading, ErrorKind.noError, "resume loading data")
+        pipeline.pipelineListener.error(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
     }
     
-    fileprivate func networkStalled(_ cause:ErrorKind, _ text:String) {
+    fileprivate func networkStalled(_ cause:SessionState) {
         guard PlayerContext.networkMonitor.isConnectedToNetwork() == false else {
             resumeRequestData()
             return
@@ -123,12 +123,14 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         pipeline.decodingQueue.async {
             self.pipeline.flushAudio()
         }
-        pipeline.pipelineListener.error(ErrorLevel.recoverable, ErrorComponent.loading, cause, text)
+        let error = LoadingError(ErrorKind.networkStall, cause)
+        pipeline.pipelineListener.error(ErrorSeverity.recoverable, error)
     }
     
     // MARK: session begins
     
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {        Logger.loading.debug("didReceive response for task \(dataTask.taskIdentifier) called")
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        Logger.loading.debug("didReceive response for task \(dataTask.taskIdentifier) called")
         if let started = sessionStarted {
             pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
         }
@@ -141,14 +143,14 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         do {
             try handleMediaType(response, session)
         } catch {
-            stopRequestData()
-            if let loadingError = error as? LoadingError {
-                pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading, loadingError.kind, loadingError.message)
+            if let playerError = error as? AudioPlayerError {
+                pipeline.pipelineListener.error(ErrorSeverity.fatal, playerError)
             } else  {
-                pipeline.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.loading,  ErrorKind.unknown, error.localizedDescription)
+                pipeline.pipelineListener.error(ErrorSeverity.fatal, LoadingError( ErrorKind.unknown, "cannot handle media type", error))
             }
+            endSession()
         }
-        
+        return
     }
     
     private func handleMetadata(_ httpResp: HTTPURLResponse) {
@@ -178,12 +180,12 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         let expectedLength = response.expectedContentLength
         let type = try getAudioFileType(response.mimeType)
         Logger.loading.debug("will recieve \(expectedLength) bytes of \(type)")
-        pipeline.prepareAudio(audioContentType: type)
+        try pipeline.prepareAudio(audioContentType: type)
     }
     
     private func getAudioFileType(_ mimeType:String?) throws -> AudioFileTypeID {
         guard let mimeType = mimeType else {
-            throw LoadingError(.missingMimeType, "missing mimeType")
+            throw AudioDataError(.missingMimeType, "missing mimeType")
         }
         
         switch mimeType {
@@ -194,9 +196,11 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         case "application/ogg", "audio/ogg", "application/octet-stream":
             return kAudioFormatOpus
         default:
-            throw LoadingError(.cannotProcessMimeType, "cannot process \(mimeType)")
+            throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType)")
         }
     }
+
+
     
     // MARK: session runs
     
@@ -215,25 +219,30 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     // MARK: session ends
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        Logger.loading.debug("session didComplete task \(task.taskIdentifier), state is \(describe(sessionData?.state))")
+        var logMessage = "session didComplete task \(task.taskIdentifier)"
         if let errDesc = task.error?.localizedDescription {
-            Logger.loading.debug("task \(task.taskIdentifier) completed with \(errDesc)")
+            logMessage += " with \(errDesc)"
         }
-        
+        logMessage += ", state is \(describe(sessionData?.state))"
+        Logger.loading.debug(logMessage)
+
         if let error = error {
-            guard let behaviour = LoadingError.getNetworkErrorBehaviour(error) else {
-                Logger.loading.info("loading stopped")
+            let sessionStatus = SessionState.getSessionState(error)
+            
+            if SessionState.cancelled == sessionStatus.osstatus   {
+                Logger.loading.debug("loading stopped")
                 return
             }
             
-            Logger.loading.debug("error is \(error.self)")
-            switch behaviour.errorLevel {
+            switch sessionStatus.severity {
             case .recoverable:
-                networkStalled(behaviour.cause, behaviour.message)
+                networkStalled(sessionStatus)
             case .fatal:
-                pipeline.pipelineListener.error( stalled ? behaviour.errorLevelWhileStalling : behaviour.errorLevel, ErrorComponent.loading, behaviour.cause, behaviour.message)
+                let error = LoadingError(ErrorKind.networkFatal, sessionStatus)
+                pipeline.pipelineListener.error( stalled ? sessionStatus.severityWhileStalling : sessionStatus.severity, error)
             case .notice:
-                pipeline.pipelineListener.error(behaviour.errorLevel, ErrorComponent.loading, behaviour.cause, behaviour.message)
+                let notice = LoadingError(ErrorKind.noError, sessionStatus)
+                pipeline.pipelineListener.error(sessionStatus.severity,notice)
             }
         }
     }

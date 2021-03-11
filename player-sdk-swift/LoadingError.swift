@@ -25,57 +25,65 @@
 
 import Foundation
 
+class LoadingError : AudioPlayerError {
+    
+    init(_ kind:ErrorKind, _ message:String, _ cause:Error? = nil) {
+        super.init(kind, message, cause)
+    }
+    
+    init(_ kind:ErrorKind, _ cause:SessionState) {
+        super.init(kind, cause.message, cause)
+        super.osstatus = cause.osstatus
+    }
+}
 
-class LoadingError : LocalizedError {
+class SessionState : LocalizedError {
     
-    let component:ErrorComponent = ErrorComponent.loading
-    let kind:ErrorKind
-    var message:String
-    init(_ kind:ErrorKind, _ message:String) {
-        self.kind = kind; self.message = message
-    }
-    var errorDescription: String? {
-        return String(format:"%@.%@ %@",String(describing: Self.self), String(describing: kind), message)
-    }
-
+    static let cancelled:OSStatus = -999 /// stopped regularily
     
-    class Behaviour {
-        let cause:ErrorKind
-        let message:String
-        let errorLevel:ErrorLevel
-        var errorLevelWhileStalling:ErrorLevel
-        init(_ cause:ErrorKind, _ message:String, _ level:ErrorLevel, _ whileStalling:ErrorLevel? = nil) {
-            self.cause = cause
-            self.message = message
-            self.errorLevel = level
-            self.errorLevelWhileStalling = whileStalling ?? level
-        }
-    }
-    
-    static var networkBahviourMap: [Behaviour] = [
-        Behaviour(ErrorKind.unsuportedUrl, "unsupported URL", .fatal),
-        Behaviour(ErrorKind.cannotConnectOverSsl, "cannot connect over SSL",.fatal),
-        Behaviour(ErrorKind.noHttps, "not https", .fatal),
-        Behaviour(ErrorKind.offline, "offline?", .fatal, .recoverable),
-        Behaviour(ErrorKind.hostNotFound, "host not found", .fatal, .recoverable),
-        Behaviour(ErrorKind.timedOutLoadingData, "timed out loading data", .recoverable),
-        Behaviour(ErrorKind.connectionLost, "connection lost", .recoverable),
-        Behaviour(ErrorKind.lostConnectionToBackgroudTransferService, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
+    private static var knownSessionStates: [SessionState] = [
+        SessionState(cancelled, "stopped", .notice),  /// stopped regularily
+        SessionState(-1002, "unsupported url", .fatal),
+        SessionState(-1200, "cannot connect over ssl",.fatal),
+        SessionState(-1022, "not https", .fatal),
+        SessionState(-1100, "url not found", .fatal),
+        SessionState(-1009, "offline?", .fatal, .recoverable),
+        SessionState(-1003, "host not found", .fatal, .recoverable),
+        SessionState(-1001, "timed out loading data", .recoverable),
+        SessionState(-1005, "connection lost", .recoverable),
+        SessionState(-997, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
     ]
     
-    
-    static func getNetworkErrorBehaviour(_ error: Error) -> Behaviour? {
-        let nserr = error as NSObject
-        let code = nserr.value(forKey: "code") as! NSNumber.IntegerLiteralType
-        if code == -999 {
-            return nil /// stopped regularily
-        }
-        
-        let pattern = "task completed with code=%d %@"
-        Logger.loading.info(String(format: pattern, code , error.localizedDescription))
-        
-        return networkBahviourMap.first(where: { $0.cause.rawValue == code })
+    let osstatus:OSStatus
+    let message:String
+    let severity:ErrorSeverity
+    var severityWhileStalling:ErrorSeverity
+    init(_ code:OSStatus, _ message:String, _ severity:ErrorSeverity, _ whileStalling:ErrorSeverity? = nil) {
+        self.osstatus = code
+        self.message = message
+        self.severity = severity
+        self.severityWhileStalling = whileStalling ?? severity
     }
     
+    public var errorDescription: String? {
+        var description = String(format:"%@ OSStatus=%d", "\(type(of: self))", osstatus)
+        description += ", " + message
+        return description
+    }
+    
+    static func getSessionState(_ error: Error) -> SessionState {
+        let nserr = error as NSObject
+        let code = nserr.value(forKey: "code") as! NSNumber.IntegerLiteralType
+        let message = String(format: "task completed with OSStatus=%d %@", code , error.localizedDescription)
+        Logger.loading.debug(message)
+        guard let networkError = knownSessionStates.first(where: { $0.osstatus == code }) else {
+            return SessionState(OSStatus(code), error.localizedDescription, ErrorSeverity.notice)
+        }
+        return networkError
+    }
+    
+    
 }
+
+
 

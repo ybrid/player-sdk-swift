@@ -89,7 +89,7 @@ class PlayerContext {
 #endif
 
     static let networkMonitor = NetworkMonitor()
-    
+   
     static func register(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
         if networkMonitor.listeners[id] == nil {
@@ -100,6 +100,7 @@ class PlayerContext {
     }
     static func unregister(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
+        // sometimes EXC_BAD_ACCESS here -> TODO thread safe access to dictionary
         networkMonitor.listeners[id] = nil
         Logger.shared.debug("\(networkMonitor.listeners.count) network listeners")
     }

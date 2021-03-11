@@ -27,56 +27,8 @@ import AVFoundation
  
 protocol PipelineListener: class {
     func ready(playback: Playback)
-    func error(_ level: ErrorLevel, _ component: ErrorComponent, _ kind: ErrorKind, _ message:String)
+    func error(_ severity: ErrorSeverity, _ error: AudioPlayerError)
 }
-
-enum ErrorLevel {
-    case fatal
-    case recoverable
-    case notice
-}
-
-enum ErrorComponent {
-    case loading
-    case decoding
-    case playing
-}
-
-typealias ErrorCode = Int
-enum ErrorKind : ErrorCode {
-    case noError = 0
-    case unknown = 100
-    
-    // loading, reding from network, using core foundation codes
-    case timedOutLoadingData = -1001
-    case unsuportedUrl = -1002
-    case hostNotFound = -1003
-    case connectionLost = -1005
-    case offline = -1009
-    case noHttps = -1022
-    case cannotConnectOverSsl = -1200
-    case lostConnectionToBackgroudTransferService = -997
-    
-    // loading, reading http
-    case missingMimeType = 300
-    case cannotProcessMimeType = 301
-
-    // decoding, audio data
-    case cannotOpenStream = 411
-    case parsingFailed = 412
-    case notSupported = 413
-
-    // decoding, decoder
-    case missingSourceFormat = 521
-    case missingTargetFormat = 522
-    case cannotCreateConverter = 523
-    case missingDataSource = 524
-    case failedPackaging = 525
-    case failedToAllocatePCMBuffer = 526
-    case failedConverting = 527
-    case invalidData = 528
-}
-
 
 class AudioPipeline : DecoderListener
 {
@@ -134,31 +86,18 @@ class AudioPipeline : DecoderListener
     func prepareMetadata(metadataInverallB: Int) {
         self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB)
     }
-    
-    func prepareAudio(audioContentType: AudioFileTypeID) {
+        
+    func prepareAudio(audioContentType: AudioFileTypeID) throws {
         
         self.accumulator = DataAccumulator(type: audioContentType)
         
-        do {
-            switch audioContentType {
-
-            case kAudioFormatOpus:
-                let ogg = try OggContainer(delegate: playerListener)
-                decoder = try OpusDecoder(container: ogg, decodingListener: self)
-
-            default:
-                decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
-            }
-        } catch  {
-            Logger.decoding.error("cannot read data source, reason \(error.localizedDescription)")
-            if let audioDataError = error as? AudioDataError {
-                pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, audioDataError.kind,  audioDataError.message ?? error.localizedDescription)
-            } else {
-                pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, ErrorKind.unknown, "cannot read data source")
-            }
-            return
+        switch audioContentType {
+        case kAudioFormatOpus:
+            let ogg = try OggContainer(delegate: playerListener)
+            self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
+        default:
+            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
         }
-
     }
     
     // MARK: decoder listener
@@ -179,10 +118,10 @@ class AudioPipeline : DecoderListener
             }
         } catch {
             Logger.decoding.error(error.localizedDescription)
-            if let audioDataError = error as? AudioDataError {
-                pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, audioDataError.kind, audioDataError.message ?? "problem with audio format")
+            if let audioDataError = error as? AudioPlayerError {
+                pipelineListener.error(ErrorSeverity.fatal, audioDataError)
             } else {
-                pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, ErrorKind.unknown, "problem with audio format")
+                pipelineListener.error(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "problem with audio format", error))
             }
             return
         }
@@ -285,10 +224,10 @@ class AudioPipeline : DecoderListener
                     return
                 }
                 Logger.decoding.error(error.localizedDescription)
-                if let audioDataError = error as? AudioDataError {
-                    self.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, audioDataError.kind, audioDataError.message ?? "cannot convert audio data")
+                if let playerError = error as? AudioPlayerError {
+                    self.pipelineListener.error(ErrorSeverity.fatal, playerError)
                 } else {
-                    self.pipelineListener.error(ErrorLevel.fatal, ErrorComponent.decoding, ErrorKind.unknown, "cannot convert audio data")
+                    self.pipelineListener.error(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "cannot convert audio data", error))
                 }
             }
         }

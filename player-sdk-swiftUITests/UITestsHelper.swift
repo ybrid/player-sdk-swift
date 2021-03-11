@@ -49,8 +49,8 @@ class TestAudioPlayerListener : AudioPlayerListener {
         Logger.testing.notice("-- combined display title is \(title ?? "(nil)")")
     }
 
-    func currentProblem(_ text: String?) {
-        Logger.testing.notice("-- problem is \(text ?? "(nil)")")
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
+        Logger.testing.notice("-- \(severity): \(exception.localizedDescription)")
     }
 
     func playingSince(_ seconds: TimeInterval?) {
