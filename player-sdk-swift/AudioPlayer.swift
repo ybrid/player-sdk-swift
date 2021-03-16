@@ -68,24 +68,30 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
 
-    public var state: PlaybackState = .stopped {
-        didSet {
-            Logger.shared.notice("\(state)")
-            playerListener?.stateChanged(state)
-        }
-    }
-    
+    public var state: PlaybackState { get {
+      return playbackState
+    }}
     
     let streamUrl: URL
     let icyMetadata: Bool = true
-    
-    private let playerQueue = DispatchQueue(label: "io.ybrid.playing")
     
     var loader: AudioDataLoader?
     var pipeline: AudioPipeline?
     var playback: Playback?
     
     private weak var playerListener:AudioPlayerListener?
+    private let playerQueue = DispatchQueue(label: "io.ybrid.playing")
+    
+    private var playbackState: PlaybackState = .stopped {
+        didSet {
+            if oldValue != playbackState {
+                Logger.shared.notice("\(playbackState)")
+                DispatchQueue.global().async {
+                    self.playerListener?.stateChanged(self.state)
+                }
+            }
+        }
+    }
     
     // get ready for playing
     // mediaUrl - the provided audio. Supports mp3, aac and opus.
@@ -105,11 +111,11 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     // Asynchronously start playback of audio of the given media url as soon as possible.
     public func play() {
-        guard state == .stopped  else {
+        guard playbackState == .stopped  else {
             Logger.shared.notice("already running")
             return
         }
-        state = .buffering
+        playbackState = .buffering
         playerQueue.async {
             self.playWhenReady()
         }
@@ -117,10 +123,14 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     // Stop, notify immediatly, stop playback and clean up asychronously.
     public func stop() {
+        guard playbackState != .stopped  else {
+            Logger.shared.debug("already stopped")
+            return
+        }
         pipeline?.stopProcessing()
         playerQueue.async {
             self.stopPlaying()
-            self.state = .stopped
+            self.playbackState = .stopped
         }
     }
     
@@ -139,7 +149,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // MARK: pipeline listener
     
     func ready(playback: Playback) {
-        switch state {
+        switch playbackState {
         case .stopped:
             Logger.shared.debug("should not begin playing.")
             pipeline?.stopProcessing()
@@ -175,12 +185,12 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     func stateChanged(_ bufferState: PlaybackBuffer.BufferState) {
         
-        if state == .buffering && bufferState == .ready {
-            state = .playing
+        if playbackState == .buffering && bufferState == .ready {
+            playbackState = .playing
         }
         
-        if state == .playing && bufferState == .empty {
-            state = .buffering
+        if playbackState == .playing && bufferState == .empty {
+            playbackState = .buffering
         }
     }
 }
