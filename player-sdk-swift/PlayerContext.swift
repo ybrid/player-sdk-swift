@@ -96,13 +96,13 @@ class PlayerContext {
             weak var weakListener = listener
             networkMonitor.listeners[id] = weakListener
         }
-        Logger.shared.debug("\(networkMonitor.listeners.count) network listeners")
+        if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
     }
     static func unregister(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
         // sometimes EXC_BAD_ACCESS here -> TODO thread safe access to dictionary
         networkMonitor.listeners[id] = nil
-        Logger.shared.debug("\(networkMonitor.listeners.count) network listeners")
+        if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
     }
 
     class NetworkMonitor {
@@ -110,7 +110,7 @@ class PlayerContext {
         var connected:Bool = false {
             didSet {
                 if oldValue != connected {
-                    Logger.shared.notice("network \(connected ? "connected" : "disconnected") -> \(listeners.count) listeners")
+                    Logger.loading.notice("network \(connected ? "connected" : "disconnected") -> notifying \(listeners.count) listeners")
                     for listener in listeners {
                         listener.1.notifyNetworkChanged(connected)
                     }
@@ -138,7 +138,7 @@ class PlayerContext {
         func createAndStartNWMonitor() {
             let monitor = NWPathMonitor()
             monitor.pathUpdateHandler = { path in
-                Logger.shared.debug("network \(path.debugDescription)")
+                if Logger.verbose { Logger.loading.debug("network \(path.debugDescription)") }
                 let isConnected = (path.status == .satisfied)
                 self.updateConnected(isConnected)
             }

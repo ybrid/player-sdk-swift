@@ -36,10 +36,11 @@ class PlaybackEngine : Playback {
     let playerNode:AVAudioPlayerNode = AVAudioPlayerNode() /// visible for unit testing
     let sampleRate:Double /// visible for unit testing
     
-    var playbackBuffer:PlaybackBuffer? /// visible for unit testing
     var timer:DispatchSourceTimer? /// visible for unit testing
-
-    private let timerInterval:TimeInterval = 0.2
+    private let timerInterval = DispatchTimeInterval.milliseconds(200)
+    
+    var playbackBuffer:PlaybackBuffer? /// visible for unit testing
+    
     private var metrics = Metrics()
     
     private weak var playerListener: AudioPlayerListener?
@@ -106,18 +107,16 @@ class PlaybackEngine : Playback {
     }
 
     // MARK: taking care of buffer
-    
     private func startTimer() {
         let timer = DispatchSource.makeTimerSource()
-        timer.schedule(deadline: .now() + timerInterval, repeating: timerInterval)
+        timer.schedule(deadline: .now() + timerInterval, repeating: timerInterval) 
         timer.setEventHandler(handler: { [weak self] in
             self?.tick()
         })
-
         timer.resume()
         self.timer = timer
     }
-
+    
     private func stopTimer() {
         timer?.cancel()
         timer = nil
@@ -126,7 +125,7 @@ class PlaybackEngine : Playback {
     @objc func tick() {
         playerListener?.playingSince(playbackBuffer?.playingSince)
         
-        let bufferedS = playbackBuffer?.takeCare()
+        let bufferedS = playbackBuffer?.takeCare() 
         let avrgBuffS = metrics.averagedBufferS(bufferedS)
         playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
     }

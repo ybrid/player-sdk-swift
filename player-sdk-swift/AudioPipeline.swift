@@ -89,7 +89,8 @@ class AudioPipeline : DecoderListener
         
     func prepareAudio(audioContentType: AudioFileTypeID) throws {
         
-        self.accumulator = DataAccumulator(type: audioContentType)
+        // deactivated until we destinguish between icecast and ybrid
+//        self.accumulator = DataAccumulator(type: audioContentType)
         
         switch audioContentType {
         case kAudioFormatOpus:
@@ -172,6 +173,7 @@ class AudioPipeline : DecoderListener
     }
     
     func flushAudio() {
+        Logger.decoding.debug()
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }

@@ -89,14 +89,12 @@ class MetadataExtractor {
                     index += audio.appendUntilEnd(of: payload, idx: index)
                 }
                 nextMetadataAt -= payload.count
-                if Logger.verbose { Logger.loading.debug("audio.UntilEnd index=\(index), nMd=\(nextMetadataAt)") }
                 break iteratePayload
             }
             
             // audio until metadata
             if index < nextMetadataAt {
                 index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
-                if Logger.verbose { Logger.loading.debug("audio.Count index=\(index), nMd=\(nextMetadataAt)") }
                 continue iteratePayload
             }
             
@@ -119,7 +117,6 @@ class MetadataExtractor {
             if index+mdLength > payload.count {
                 index += metadata.appendUntilEnd(of: payload, idx: index)
                 nextMetadataAt = index + intervalBytes - payload.count
-                if Logger.verbose { Logger.loading.debug("metadata.UntilEnd index=\(index), nMd=\(nextMetadataAt)") }
                 break iteratePayload
             }
             
@@ -127,13 +124,12 @@ class MetadataExtractor {
             index += metadata.appendCount(of: payload, index: index, count: mdLength)
             metadataReset(metadataCallback)
             nextMetadataAt = index + intervalBytes
-            if Logger.verbose { Logger.loading.debug("metadata.Count index=\(index), nMd=\(nextMetadataAt)") }
-            
+
         } while (index <= payload.count)
         
         
         if metadata.data.count > 0 {
-            Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes")
+            if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes") }
         }
         totalBytesAudio += UInt32(audio.data.count)
         return audio.data

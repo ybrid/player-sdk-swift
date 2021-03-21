@@ -40,7 +40,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     private var stalled:Bool = false {
         didSet {
             if oldValue != stalled {
-                Logger.loading.debug("loading data stalled \(stalled)")
+                Logger.loading.notice("loading data stalled \(stalled)")
             }
         }
     }
@@ -110,7 +110,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         Logger.loading.debug()
         endSession()
         startSession(configuration: configuration)
-        pipeline.resume()
+        pipeline.resume() /// also buffer is cleared
         pipeline.pipelineListener.error(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
     }
     
@@ -120,9 +120,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             return
         }
         stalled = true
-        pipeline.decodingQueue.async {
-            self.pipeline.flushAudio()
-        }
         let error = LoadingError(ErrorKind.networkStall, cause)
         pipeline.pipelineListener.error(ErrorSeverity.recoverable, error)
     }
@@ -208,11 +205,12 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         
         if Logger.verbose { Logger.loading.debug("recieved \(data.count) bytes, total \(dataTask.countOfBytesReceived)") }
         
+        pipeline.decodingQueue.async {
+            self.pipeline.process(data: data)
+        }
+        
         if dataTask.state == .running {
             stalled = false
-            pipeline.decodingQueue.async {
-                self.pipeline.process(data: data)
-            }
         }
     }
     
@@ -232,6 +230,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
             if SessionState.cancelled == sessionStatus.osstatus   {
                 Logger.loading.debug("loading stopped")
                 return
+            }
+            
+            pipeline.decodingQueue.async {
+                self.pipeline.flushAudio()
             }
             
             switch sessionStatus.severity {

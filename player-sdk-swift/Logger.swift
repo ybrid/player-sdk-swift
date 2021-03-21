@@ -52,8 +52,6 @@ public class Logger {
     private var baseInfo:String?
 
     private static let subsystem = "io.ybrid.player-sdk-swift"
-    private let loggerQueue = DispatchQueue(label: "io.ybrid.logger")
-    
     
     public init(category: String = "") {
         if #available(iOS 10, macOS 10.12, *) {
@@ -100,17 +98,13 @@ public class Logger {
     
     @available(iOS 10, macOS 10.12, *)
     fileprivate func logit(_ type: OSLogType, _ message: String, _ fullSourcePath: String, _ functionWithParameters: String, _ line: Int) {
-        loggerQueue.async {
-            os_log("%{public}@.%{public}@-%d %{public}@", log: self.log!, type: type, self.getFileName(fullSourcePath), self.getFunctionName(functionWithParameters), line, "\(message)")
-        }
+        os_log("%{public}@.%{public}@-%d %{public}@", log: self.log!, type: type, self.getFileName(fullSourcePath), self.getFunctionName(functionWithParameters), line, "\(message)")
     }
     
     /// in ios 9
     fileprivate func printit(_ type: String, _ message: String, _ fullSourcePath: String, _ functionWithParameters: String, _ line: Int) {
         let fullLine = String(format: "%@ %@ %@ %@.%@-%d %@", df.string(from: Date()), baseInfo!, type, getFileName(fullSourcePath), getFunctionName(functionWithParameters), line, message)
-        loggerQueue.async {
-            print(fullLine)
-        }
+        print(fullLine)
     }
     
     fileprivate func getFileName(_ classPath: String ) -> String {
