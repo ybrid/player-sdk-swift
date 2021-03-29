@@ -190,7 +190,11 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
         
         if playbackState == .playing && bufferState == .empty {
-            playbackState = .buffering
+            if loader?.completed == true {
+                stop()
+            } else {
+                playbackState = .buffering
+            }
         }
     }
 }

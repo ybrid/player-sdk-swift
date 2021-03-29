@@ -31,27 +31,35 @@ class LoadingError : AudioPlayerError {
         super.init(kind, message, cause)
     }
     
-    init(_ kind:ErrorKind, _ cause:SessionState) {
+    init(_ kind:ErrorKind, _ cause:SessionTaskState) {
         super.init(kind, cause.message, cause)
         super.osstatus = cause.osstatus
     }
 }
 
-class SessionState : LocalizedError {
+class SessionTaskState : Equatable, LocalizedError {
     
-    static let cancelled:OSStatus = -999 /// stopped regularily
+    static func == (lhs: SessionTaskState, rhs: SessionTaskState) -> Bool {
+        return lhs.osstatus == rhs.osstatus
+    }
     
-    private static var knownSessionStates: [SessionState] = [
-        SessionState(cancelled, "stopped", .notice),  /// stopped regularily
-        SessionState(-1002, "unsupported url", .fatal),
-        SessionState(-1200, "cannot connect over ssl",.fatal),
-        SessionState(-1022, "not https", .fatal),
-        SessionState(-1100, "url not found", .fatal),
-        SessionState(-1009, "offline?", .fatal, .recoverable),
-        SessionState(-1003, "host not found", .fatal, .recoverable),
-        SessionState(-1001, "timed out loading data", .recoverable),
-        SessionState(-1005, "connection lost", .recoverable),
-        SessionState(-997, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
+    var completed:Bool { get {
+        return self == SessionTaskState.completed || self == SessionTaskState.cancelled
+    }}
+    
+    private static let completed = SessionTaskState(0, "completed", .notice) /// loading finished
+    private static let cancelled = SessionTaskState(-999, "stopped", .notice) /// stopped regularily
+    private static var knownErrorStates: [SessionTaskState] = [
+        cancelled,
+        SessionTaskState(-1002, "unsupported url", .fatal),
+        SessionTaskState(-1200, "cannot connect over ssl",.fatal),
+        SessionTaskState(-1022, "not https", .fatal),
+        SessionTaskState(-1100, "url not found", .fatal),
+        SessionTaskState(-1009, "offline?", .fatal, .recoverable),
+        SessionTaskState(-1003, "host not found", .fatal, .recoverable),
+        SessionTaskState(-1001, "timed out loading data", .recoverable),
+        SessionTaskState(-1005, "connection lost", .recoverable),
+        SessionTaskState(-997, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
     ]
     
     let osstatus:OSStatus
@@ -70,18 +78,32 @@ class SessionState : LocalizedError {
         description += ", " + message
         return description
     }
+
+    static func getSessionTaskState(_ state: URLSessionTask.State ,_ error: Error?) -> SessionTaskState? {
+
+        guard let error = error else {
+            switch state {
+            case .completed:
+                return SessionTaskState.completed
+            case .canceling, .running, .suspended:
+                return nil
+            }
+        }
+        
+        return getSessionState(error)
+    }
     
-    static func getSessionState(_ error: Error) -> SessionState {
+    
+    private static func getSessionState(_ error: Error) -> SessionTaskState {
         let nserr = error as NSObject
         let code = nserr.value(forKey: "code") as! NSNumber.IntegerLiteralType
-        let message = String(format: "task completed with OSStatus=%d %@", code , error.localizedDescription)
+        let message = String(format: "OSStatus=%d %@", code , error.localizedDescription)
         Logger.loading.debug(message)
-        guard let networkError = knownSessionStates.first(where: { $0.osstatus == code }) else {
-            return SessionState(OSStatus(code), error.localizedDescription, ErrorSeverity.notice)
+        guard let networkError = knownErrorStates.first(where: { $0.osstatus == code }) else {
+            return SessionTaskState(OSStatus(code), error.localizedDescription, ErrorSeverity.notice)
         }
         return networkError
     }
-    
     
 }
 

@@ -97,10 +97,10 @@ class CustomErrorTests: XCTestCase {
    
     
     func testLoadingError_SessionCause() throws {
-        let err = LoadingError(ErrorKind.networkFatal, SessionState(-1003, "unknown host", ErrorSeverity.fatal))
+        let err = LoadingError(ErrorKind.networkFatal, SessionTaskState(-1003, "unknown host", ErrorSeverity.fatal))
         XCTAssertEqual("201 LoadingError.networkFatal", err.failureReason)
         XCTAssertEqual(-1003, err.osstatus)
         XCTAssertEqual("unknown host", err.message)
-        XCTAssertEqual("201 LoadingError.networkFatal, OSStatus=-1003, unknown host, cause: SessionState OSStatus=-1003, unknown host", err.localizedDescription)
+        XCTAssertEqual("201 LoadingError.networkFatal, OSStatus=-1003, unknown host, cause: SessionTaskState OSStatus=-1003, unknown host", err.localizedDescription)
     }
 }

@@ -36,7 +36,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     private let configuration: URLSessionConfiguration
     
     private var session: URLSession?
-    private var sessionData: URLSessionDataTask?
+    private var taskState:SessionTaskState?
     private var stalled:Bool = false {
         didSet {
             if oldValue != stalled {
@@ -46,6 +46,12 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     }
     private var sessionStarted: Date?
     
+    var completed:Bool { get {
+        guard let state = taskState else {
+            return false
+        }
+        return state.completed
+    }}
     
     init(mediaUrl: URL, pipeline: AudioPipeline, inclMetadata: Bool = true) {
         self.url = mediaUrl
@@ -86,8 +92,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         if withMetadata {
             request.setValue("1", forHTTPHeaderField: "Icy-MetaData")
         }
-        sessionData = session?.dataTask(with: request)
-        sessionData?.resume()
+        let sessionTask = session?.dataTask(with: request)
+        sessionTask?.resume()
     }
     
     fileprivate func endSession() {
@@ -125,7 +131,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         pipeline.pipelineListener.error(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
     }
     
-    fileprivate func networkStalled(_ cause:SessionState) {
+    fileprivate func networkStalled(_ cause:SessionTaskState) {
         guard PlayerContext.networkMonitor.isConnectedToNetwork() == false else {
             resumeRequestData()
             return
@@ -138,7 +144,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     // MARK: session begins
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        Logger.loading.debug("didReceive response for task \(dataTask.taskIdentifier) called")
+        Logger.loading.notice("didReceive response for task \(dataTask.taskIdentifier)")
         if let started = sessionStarted {
             pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
         }
@@ -228,48 +234,56 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     // MARK: session ends
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        var logMessage = "session didComplete task \(task.taskIdentifier)"
+        var logMessage = "task \(task.taskIdentifier) didComplete"
         if let errDesc = task.error?.localizedDescription {
             logMessage += " with \(errDesc)"
         }
-        logMessage += ", state is \(describe(sessionData?.state))"
+        logMessage += ", state is \(describe(task.state))"
         Logger.loading.debug(logMessage)
-
-        if let error = error {
-            let sessionStatus = SessionState.getSessionState(error)
-            
-            if SessionState.cancelled == sessionStatus.osstatus   {
-                Logger.loading.debug("loading stopped")
-                return
-            }
-            
-            pipeline.decodingQueue.async {
-                self.pipeline.flushAudio()
-            }
-            
-            switch sessionStatus.severity {
-            case .recoverable:
-                networkStalled(sessionStatus)
-            case .fatal:
-                let error = LoadingError(ErrorKind.networkFatal, sessionStatus)
-                pipeline.pipelineListener.error( stalled ? sessionStatus.severityWhileStalling : sessionStatus.severity, error)
-            case .notice:
-                let notice = LoadingError(ErrorKind.noError, sessionStatus)
-                pipeline.pipelineListener.error(sessionStatus.severity,notice)
-            }
+        
+        pipeline.decodingQueue.async {
+            self.pipeline.flushAudio()
         }
+        
+        taskState = SessionTaskState.getSessionTaskState(task.state, error)
+         
+        guard let taskState = taskState else {
+            Logger.loading.error(logMessage)
+            return
+        }
+        
+        if taskState.completed {
+            Logger.loading.notice("task \(task.taskIdentifier) \(taskState.message)")
+            return
+        }
+        
+        switch taskState.severity {
+        case .recoverable:
+            networkStalled(taskState)
+        case .fatal:
+            let error = LoadingError(ErrorKind.networkFatal, taskState)
+            pipeline.pipelineListener.error( stalled ? taskState.severityWhileStalling : taskState.severity, error)
+        case .notice:
+            let notice = LoadingError(ErrorKind.noError, taskState)
+            pipeline.pipelineListener.error(taskState.severity,notice)
+        }
+
     }
     
     /// not used but I want to see it
     
     func urlSession(_ session: URLSession, taskIsWaitingForConnectivity: URLSessionTask) {
-        Logger.loading.notice("session waitingForConnectivity, task \(taskIsWaitingForConnectivity.taskIdentifier) state is \(describe(sessionData?.state))")
+        Logger.loading.notice("session waitingForConnectivity, task \(taskIsWaitingForConnectivity.taskIdentifier) state is \(describe(taskIsWaitingForConnectivity.state))")
     }
     func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        Logger.loading.debug("session didBecomeInvalidWithError state is \(describe(sessionData?.state)) \(error?.localizedDescription ?? "")")
+        var logMessage = "session didBecomeInvalid"
+        if let errDesc = error?.localizedDescription {
+            logMessage += " with \(errDesc)"
+        }
+        Logger.loading.debug(logMessage)
     }
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        Logger.loading.notice("session did finish forBackgroundURLSession, data state is \(describe(sessionData?.state))")
+        Logger.loading.notice("session did finish forBackgroundURLSession")
     }
 }
 
