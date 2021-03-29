@@ -30,7 +30,7 @@ protocol PipelineListener: class {
     func error(_ severity: ErrorSeverity, _ error: AudioPlayerError)
 }
 
-class AudioPipeline : DecoderListener
+class AudioPipeline : DecoderListener, MemoryListener
 {
     let pipelineListener: PipelineListener
     var started = Date()
@@ -58,6 +58,7 @@ class AudioPipeline : DecoderListener
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?) {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
+        PlayerContext.registerMemoryListener(listener: self)
     }
     
     deinit {
@@ -74,6 +75,7 @@ class AudioPipeline : DecoderListener
         _ = self.accumulator?.reset()
         self.decoder?.dispose()
         self.buffer?.dispose()
+        PlayerContext.unregisterMemoryListener(listener: self)
     }
     
     func resume() {
@@ -99,6 +101,15 @@ class AudioPipeline : DecoderListener
         default:
             self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
         }
+    }
+    
+    
+    // MARK: handle memory
+    
+    func notifyExceedsMemoryLimit() {
+        Logger.loading.notice("stop audio processing due to memory limit")
+        playerListener?.error(ErrorSeverity.recoverable, AudioPlayerError(.memoryLimitExceeded, "audio truncated") )
+        stopProcessing()
     }
     
     // MARK: decoder listener

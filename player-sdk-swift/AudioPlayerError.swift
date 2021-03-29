@@ -35,6 +35,7 @@ public typealias ErrorCode = Int32
 enum ErrorKind : ErrorCode {
     case noError = 0
     case unknown = 100
+    case memoryLimitExceeded = 101
     
     case networkFatal = 201
     case networkStall = 202

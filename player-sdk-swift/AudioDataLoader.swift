@@ -28,8 +28,8 @@ import Foundation
 import AVFoundation
 import Network
 
-class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
-    
+class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, MemoryListener {
+
     let url: URL
     let pipeline: AudioPipeline
     private let withMetadata: Bool
@@ -56,7 +56,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         configuration.networkServiceType = NSURLRequest.NetworkServiceType.avStreaming
         configuration.timeoutIntervalForRequest = 10.0
         super.init()
-        PlayerContext.register(listener: self)
     }
     
     deinit {
@@ -66,6 +65,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     
     func requestData(from url: URL) {
         Logger.loading.debug()
+        PlayerContext.register(listener: self)
+        PlayerContext.registerMemoryListener(listener: self)
         startSession(configuration: configuration)
     }
     
@@ -73,6 +74,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
         Logger.loading.debug()
         endSession()
         PlayerContext.unregister(listener: self)
+        PlayerContext.unregisterMemoryListener(listener: self)
         stalled = false
     }
     
@@ -91,8 +93,17 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener {
     fileprivate func endSession() {
         if let session = session {
             session.invalidateAndCancel()
+            self.session = nil
         }
     }
+    
+    // MARK: handle memory
+    
+    func notifyExceedsMemoryLimit() {
+        Logger.loading.notice("stop loading due to memory limit")
+        stopRequestData()
+    }
+    
     
     // MARK: handling network
     

@@ -36,10 +36,14 @@ import SystemConfiguration
 protocol NetworkListener : class {
     func notifyNetworkChanged(_ connected:Bool)
 }
- 
-class PlayerContext {
+protocol MemoryListener : class {
+    func notifyExceedsMemoryLimit()
+}
+public class PlayerContext {
 
     static let processingPriority:DispatchQoS = DispatchQoS.utility
+    
+    // MARK: audio session
     
 #if os(iOS)
     static func setupAudioSession() {
@@ -88,6 +92,8 @@ class PlayerContext {
     static func deactivate() {}
 #endif
 
+    // MARK: network monitoring
+    
     static let networkMonitor = NetworkMonitor()
    
     static func register(listener: NetworkListener) {
@@ -205,4 +211,217 @@ class PlayerContext {
         }
     }
     
+    // MARK: memory limit
+    public static var memoryLimitMB:Float = 128.0
+    static private var sharedMemoryMonitor:MemoryMonitor = MemoryMonitor()
+    public static func handleMemoryLimit() -> Bool {
+        return sharedMemoryMonitor.handleLimit(PlayerContext.memoryLimitMB)
+    }
+    
+    static func registerMemoryListener(listener: MemoryListener) {
+        let id = UInt(bitPattern: ObjectIdentifier(listener))
+        if sharedMemoryMonitor.listeners[id] == nil {
+            weak var weakListener = listener
+            sharedMemoryMonitor.listeners[id] = weakListener
+        }
+        Logger.loading.debug("\(sharedMemoryMonitor.listeners.count) memory listeners")
+    }
+    static func unregisterMemoryListener(listener: MemoryListener) {
+        let id = UInt(bitPattern: ObjectIdentifier(listener))
+        // sometimes EXC_BAD_ACCESS here -> TODO thread safe access to dictionary
+        sharedMemoryMonitor.listeners[id] = nil
+        Logger.loading.debug("\(sharedMemoryMonitor.listeners.count) memory listeners")
+    }
+
+    class MemoryMonitor {
+        var listeners:[UInt:MemoryListener] = [:]
+        init(){}
+        func handleLimit(_ maxMB:Float ) -> Bool {
+            guard isMemory(exceedingMB:maxMB) else {
+                return false
+            }
+            Logger.shared.error("nofiying \(listeners.count) memory listeners")
+            for listener in listeners {
+                listener.1.notifyExceedsMemoryLimit()
+            }
+            return true
+        }
+        
+        func isMemory(exceedingMB limitMB:Float) -> Bool {
+            if let usedMB = memoryFootprint()?.used {
+                Logger.shared.error(String(format: "using %.1f MB exceeds memory limit of %.1f MB", usedMB, limitMB))
+                return usedMB > limitMB
+            }
+            return false
+        }
+        
+        func memoryFootprint() -> (used:Float,resident:Float, peak:Float)? {
+            // The `TASK_VM_INFO_COUNT` and `TASK_VM_INFO_REV1_COUNT` macros are too
+            // complex for the Swift C importer, so we have to define them ourselves.
+            let TASK_VM_INFO_COUNT = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
+            let TASK_VM_INFO_REV1_COUNT = mach_msg_type_number_t(MemoryLayout.offset(of: \task_vm_info_data_t.min_address)! / MemoryLayout<integer_t>.size)
+            var info = task_vm_info_data_t()
+            var count = TASK_VM_INFO_COUNT
+            let kr = withUnsafeMutablePointer(to: &info) { infoPtr in
+                infoPtr.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { intPtr in
+                    task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), intPtr, &count)
+                }
+            }
+            guard kr == KERN_SUCCESS, count >= TASK_VM_INFO_REV1_COUNT
+            else { return nil }
+     
+            let footprint = Float(info.phys_footprint) / 1024 / 1024
+            let resident =  Float(info.resident_size) / 1024 / 1024
+            let residentPeak =  Float(info.resident_size_peak) / 1024 / 1024
+            
+            return (footprint,resident, residentPeak)
+        }
+    }
 }
+
+//func vw_page_size() -> (kern_return_t, vm_size_t) {
+//    var pageSize: vm_size_t = 0
+//    let result = withUnsafeMutablePointer(to: &pageSize) { (size) -> kern_return_t in
+//        host_page_size(mach_host_self(), size)
+//    }
+//
+//    return (result, pageSize)
+//}
+//
+//func vm_stat() -> (kern_return_t, vm_statistics) {
+//    var vmstat = vm_statistics()
+//    var count = UInt32(MemoryLayout<vm_statistics>.size / MemoryLayout<integer_t>.size)
+//    let result = withUnsafeMutablePointer(&vmstat, &count) { (stat, count) -> kern_return_t in
+//        host_statistics(mach_host_self(), HOST_VM_INFO, host_info_t(stat), count)
+//    }
+//    let result = withUnsafeMutablePointer(&vmstat, &count) { (stat, count) -> kern_return_t in
+//        host_statistics(mach_host_self(), HOST_VM_INFO, host_info_t(stat), count)
+//    }
+//
+//    return (result, vmstat)
+//}
+//
+//func vmMem() -> (totalGB:UInt, freeMB:UInt) {
+//    let (result1, pageSize) = vw_page_size()
+//    let (result2, vmstat) = vm_stat()
+//
+//    guard result1 == KERN_SUCCESS else {
+//        fatalError("Cannot get VM page size")
+//    }
+//    guard result2 == KERN_SUCCESS else {
+//        fatalError("Cannot get VM stats")
+//    }
+//
+//    let total = (UInt(vmstat.free_count + vmstat.active_count + vmstat.inactive_count + vmstat.speculative_count + vmstat.wire_count) * pageSize) >> 30
+//    let free = (UInt(vmstat.free_count) * pageSize) >> 20
+//
+//    print("total: \(total)GB")
+//    print("free : \(free)MB")
+//    return (total, free)
+//}
+//
+func showMemory() {
+    let megabytes = getMemoryUsedAndDeviceTotalInMegabytes()
+    let ratio = megabytes.used / megabytes.maxUse
+    Logger.shared.notice(String(format: "using %.0f MB of %.0f MB memory.", megabytes.used, megabytes.maxUse))
+    if ratio > 0.45 {
+        Logger.shared.notice("will cut buffer and stop loading data")
+    }
+
+
+    if let memory = memoryFootprint() {
+        Logger.shared.notice(String(format: "used MB %.0f MB, resident %.0f MB, resident_peak %.0f MB", memory.used, memory.resident, memory.peak))
+    }
+
+    if let available = availableMemory() {
+        Logger.shared.notice(String(format: "used MB %.0f MB, free %.0f MB", available.used, available.free))
+}
+}
+
+
+func availableMemory() -> (used:Float, free:Float)? {
+    var pagesize: vm_size_t = 0
+
+    let host_port: mach_port_t = mach_host_self()
+    var host_size: mach_msg_type_number_t = mach_msg_type_number_t(MemoryLayout<vm_statistics_data_t>.stride / MemoryLayout<integer_t>.stride)
+    host_page_size(host_port, &pagesize)
+
+    var vm_stat: vm_statistics = vm_statistics_data_t()
+    withUnsafeMutablePointer(to: &vm_stat) { (vmStatPointer) -> Void in
+        vmStatPointer.withMemoryRebound(to: integer_t.self, capacity: Int(host_size)) {
+            if (host_statistics(host_port, HOST_VM_INFO, $0, &host_size) != KERN_SUCCESS) {
+                NSLog("Error: Failed to fetch vm statistics")
+            }
+        }
+    }
+
+    /* Stats in bytes */
+    let mem_used: Int64 = Int64(vm_stat.active_count +
+            vm_stat.inactive_count +
+            vm_stat.wire_count) * Int64(pagesize)
+    let mem_free: Int64 = Int64(vm_stat.free_count) * Int64(pagesize)
+    return (Float(mem_used)/1024/1024, Float(mem_free)/1024/1024)
+}
+
+
+//    https://gist.github.com/pejalo/671dd2f67e3877b18c38c749742350ca
+func getMemoryUsedAndDeviceTotalInMegabytes() -> (used:Float, maxUse:Float, total:Float) {
+        
+    // https://stackoverflow.com/questions/5887248/ios-app-maximum-memory-budget/19692719#19692719
+    // https://stackoverflow.com/questions/27556807/swift-pointer-problems-with-mach-task-basic-info/27559770#27559770
+    
+    var used_megabytes: Float = 0
+    var max_megabytes: Float = 0
+    
+    let total_bytes = Float(ProcessInfo.processInfo.physicalMemory)
+    let total_megabytes = total_bytes / 1024.0 / 1024.0
+
+    var info = mach_task_basic_info()
+    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
+    
+    let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
+        $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+            task_info(
+                mach_task_self_,
+                task_flavor_t(MACH_TASK_BASIC_INFO),
+                $0,
+                &count
+            )
+        }
+    }
+    
+    if kerr == KERN_SUCCESS {
+        let used_bytes: Float = Float(info.resident_size)
+        used_megabytes = used_bytes / 1024.0 / 1024.0
+        
+        
+        let max_use_bytes: Float = Float(info.resident_size_max)
+        max_megabytes = max_use_bytes / 1024.0 / 1024.0
+    }
+    
+    return (used_megabytes, max_megabytes, total_megabytes)
+}
+
+func memoryFootprint() -> (used:Float,resident:Float, peak:Float)? {
+    // The `TASK_VM_INFO_COUNT` and `TASK_VM_INFO_REV1_COUNT` macros are too
+    // complex for the Swift C importer, so we have to define them ourselves.
+    let TASK_VM_INFO_COUNT = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
+    let TASK_VM_INFO_REV1_COUNT = mach_msg_type_number_t(MemoryLayout.offset(of: \task_vm_info_data_t.min_address)! / MemoryLayout<integer_t>.size)
+    var info = task_vm_info_data_t()
+    var count = TASK_VM_INFO_COUNT
+    let kr = withUnsafeMutablePointer(to: &info) { infoPtr in
+        infoPtr.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { intPtr in
+            task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), intPtr, &count)
+        }
+    }
+    guard kr == KERN_SUCCESS, count >= TASK_VM_INFO_REV1_COUNT
+    else { return nil }
+
+    let footprint = Float(info.phys_footprint) / 1024 / 1024
+    let resident =  Float(info.resident_size) / 1024 / 1024
+    let residentPeak =  Float(info.resident_size_peak) / 1024 / 1024
+    
+    return (footprint,resident, residentPeak)
+}
+
+
