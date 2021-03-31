@@ -126,6 +126,8 @@ class MpegDecoder : AudioDecoder {
                 throw DecoderError(.missingSourceFormat)
             case ConvertingMissingDataSource:
                 throw DecoderError(.missingDataSource)
+            case kAudioCodecBadDataError:
+                throw DecoderError(.badData )
             default:
                 throw DecoderError(.failedConverting, status)
             }
@@ -219,6 +221,8 @@ class MpegDecoder : AudioDecoder {
         case kAudioConverterErr_NoHardwarePermission:
             return "No hardware permission"
     #endif
+        case kAudioCodecBadDataError:// 1650549857
+            return "bad data"
         default:
             return "\(status) (unknown state)"
         }

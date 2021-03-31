@@ -192,22 +192,22 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     
     private func handleMediaType(_ response: URLResponse, _ session: URLSession) throws {
         let expectedLength = response.expectedContentLength
-        let type = try getAudioFileType(response.mimeType)
-        Logger.loading.debug("will recieve \(expectedLength) bytes of \(type)")
+        Logger.loading.debug("will recieve \(expectedLength) bytes")
+        guard let mimeType = response.mimeType else {
+            throw AudioDataError(.missingMimeType, "missing response.mimeType")
+        }
+        let type:AudioFileTypeID = try getAudioFileType(mimeType)
+        Logger.loading.debug("mimeType \(mimeType) resolved to \(AudioData.describeFileTypeId(type))")
         try pipeline.prepareAudio(audioContentType: type)
     }
     
-    private func getAudioFileType(_ mimeType:String?) throws -> AudioFileTypeID {
-        guard let mimeType = mimeType else {
-            throw AudioDataError(.missingMimeType, "missing mimeType")
-        }
-        
+    private func getAudioFileType(_ mimeType:String) throws -> AudioFileTypeID {
         switch mimeType {
         case "audio/mpeg":
             return kAudioFileMP3Type
         case "audio/aac", "audio/aacp":
             return kAudioFileAAC_ADTSType
-        case "application/ogg", "audio/ogg", "application/octet-stream":
+        case "application/ogg", "audio/ogg":
             return kAudioFormatOpus
         default:
             throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType)")

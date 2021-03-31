@@ -58,6 +58,7 @@ enum ErrorKind : ErrorCode {
     case failedToAllocatePCMBuffer = 526
     case failedConverting = 527
     case invalidData = 528
+    case badData = 529
 }
 
 public class AudioPlayerError : LocalizedError {
