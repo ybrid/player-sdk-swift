@@ -164,6 +164,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             }
             endSession()
         }
+        
+        let expectedLength = response.expectedContentLength
+        Logger.loading.debug("will recieve \(expectedLength) bytes")
+        pipeline.setInfinite(expectedLength == -1)
         return
     }
     
@@ -191,8 +195,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     }
     
     private func handleMediaType(_ response: URLResponse, _ session: URLSession) throws {
-        let expectedLength = response.expectedContentLength
-        Logger.loading.debug("will recieve \(expectedLength) bytes")
         guard let mimeType = response.mimeType else {
             throw AudioDataError(.missingMimeType, "missing response.mimeType")
         }

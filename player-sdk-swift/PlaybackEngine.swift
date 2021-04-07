@@ -27,6 +27,7 @@ import AVFoundation
 
 protocol Playback {
     func stop()
+    var canPause:Bool  { get }
     func setListener(listener: BufferListener)
 }
 
@@ -40,6 +41,7 @@ class PlaybackEngine : Playback {
     private let timerInterval = DispatchTimeInterval.milliseconds(200)
     
     var playbackBuffer:PlaybackBuffer? /// visible for unit testing
+    var canPause:Bool = false
     
     private var metrics = Metrics()
     

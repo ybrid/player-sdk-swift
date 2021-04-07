@@ -72,6 +72,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
       return playbackState
     }}
     
+    public var canPause:Bool = false
+    
     let streamUrl: URL
     let icyMetadata: Bool = true
     
@@ -149,6 +151,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // MARK: pipeline listener
     
     func ready(playback: Playback) {
+        
         switch playbackState {
         case .stopped:
             Logger.shared.debug("should not begin playing.")
@@ -187,6 +190,10 @@ public class AudioPlayer: BufferListener, PipelineListener {
         
         if playbackState == .buffering && bufferState == .ready {
             playbackState = .playing
+            guard let playback = playback, !playback.canPause else {
+                canPause = true
+                return
+            }
         }
         
         if playbackState == .playing && bufferState == .empty {

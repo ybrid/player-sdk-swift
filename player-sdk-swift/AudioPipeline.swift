@@ -42,6 +42,7 @@ class AudioPipeline : DecoderListener, MemoryListener
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
+    private var infinite: Bool = true // default live
     
     private var icyUrl: String?
 //        {
@@ -85,6 +86,8 @@ class AudioPipeline : DecoderListener, MemoryListener
         resumed = true
     }
     
+    // MARK: setup pipeline
+    
     func prepareMetadata(metadataInverallB: Int) {
         self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB)
     }
@@ -103,6 +106,9 @@ class AudioPipeline : DecoderListener, MemoryListener
         }
     }
     
+    func setInfinite(_ infinite: Bool) {
+        self.infinite = infinite
+    }
     
     // MARK: handle memory
     
@@ -112,6 +118,29 @@ class AudioPipeline : DecoderListener, MemoryListener
         stopProcessing()
     }
     
+    // MARK: "main" is decode
+    
+    func process(data: Data) {
+        
+        let treatedData = treatMetadata(data: data)
+        
+        let accuData = accumulate( treatedData ?? data )
+        
+        guard let audioData = accuData else {
+            return
+        }
+
+        self.decode(data: audioData)
+    }
+    
+    func flushAudio() {
+        Logger.decoding.debug()
+        if let audioData = accumulator?.reset() {
+            self.decode(data: audioData)
+        }
+    }
+
+    
     // MARK: decoder listener
     
     func onFormatChanged(_ sourceFormat:AVAudioFormat) -> () {
@@ -120,6 +149,7 @@ class AudioPipeline : DecoderListener, MemoryListener
             if let pcmTargetFormat = try decoder?.create(from: sourceFormat) {
                 if self.buffer == nil {
                     let engine = PlaybackEngine(format: pcmTargetFormat, listener: self.playerListener )
+                    if !infinite { engine.canPause = true }
                     self.buffer = engine.start()
                     self.pipelineListener.ready(playback: engine)
                 }
@@ -168,28 +198,9 @@ class AudioPipeline : DecoderListener, MemoryListener
 
     }
     
-    // MARK: "main" method
-    
-    func process(data: Data) {
-        
-        let treatedData = treatMetadata(data: data)
-        
-        let accuData = accumulate( treatedData ?? data )
-        
-        guard let audioData = accuData else {
-            return
-        }
 
-        self.decode(data: audioData)
-    }
     
-    func flushAudio() {
-        Logger.decoding.debug()
-        if let audioData = accumulator?.reset() {
-            self.decode(data: audioData)
-        }
-    }
-
+    
     
     // MARK: processing steps
     
