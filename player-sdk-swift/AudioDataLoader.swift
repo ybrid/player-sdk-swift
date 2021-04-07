@@ -103,7 +103,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         }
     }
     
-    // MARK: handle memory
+    // MARK: handling memory
     
     func notifyExceedsMemoryLimit() {
         Logger.loading.notice("stop loading due to memory limit")
@@ -142,6 +142,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     }
     
     // MARK: session begins
+
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         Logger.loading.notice("didReceive response for task \(dataTask.taskIdentifier)")
@@ -150,39 +151,64 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         }
         completionHandler(Foundation.URLSession.ResponseDisposition.allow)
         
-        if response is HTTPURLResponse {
-            handleMetadata(response as! HTTPURLResponse)
-        }
-        
         do {
-            try handleMediaType(response, session)
+            if response is HTTPURLResponse {
+                let icyMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")
+                handleMetadata(icyMetadata)
+            }
+            try handleMediaType(response.mimeType, response.suggestedFilename)
+            handleMediaLength(response.expectedContentLength)
         } catch {
             if let playerError = error as? AudioPlayerError {
                 pipeline.pipelineListener.error(ErrorSeverity.fatal, playerError)
             } else  {
-                pipeline.pipelineListener.error(ErrorSeverity.fatal, LoadingError( ErrorKind.unknown, "cannot handle media type", error))
+                pipeline.pipelineListener.error(ErrorSeverity.fatal, LoadingError( ErrorKind.unknown, "error handling url response", error))
             }
             endSession()
         }
+
+        if let textEncoding = response.textEncodingName {
+            Logger.loading.debug("textEncodingName \(textEncoding) not used")
+        }
         
-        let expectedLength = response.expectedContentLength
-        Logger.loading.debug("will recieve \(expectedLength) bytes")
-        pipeline.setInfinite(expectedLength == -1)
         return
     }
     
-    private func handleMetadata(_ httpResp: HTTPURLResponse) {
-        let icyMetadata = getHeaders(httpResp, fieldsStartingWith: "icy-")
+    fileprivate func handleMetadata(_ icyMetadata:[String:String]) {
         Logger.loading.debug("icy-fields: \(icyMetadata)")
-        
         if withMetadata, let metaint = icyMetadata["icy-metaint"] {
             guard let metadataEveryBytes = Int(metaint) else {
                 Logger.loading.error("invalid icy-metaint value '\(metaint)'")
                 return
             }
-            pipeline.prepareMetadata(metadataInverallB: metadataEveryBytes)
             Logger.loading.info("icy-metadata every \(metadataEveryBytes) bytes")
+            pipeline.prepareMetadata(metadataInverallB: metadataEveryBytes)
         }
+    }
+    
+    fileprivate func handleMediaType(_ mimeType: String?, _ filename: String?) throws {
+        guard let mimeType = mimeType else {
+            throw AudioDataError(.missingMimeType, "missing mimeType")
+        }
+        
+        guard let type = getAudioFileType( mimeType ) else {
+            guard let name = filename else {
+                throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType) without filename")
+            }
+            guard let type = getAudioFileType(filename: name) else {
+                throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType) with filename \(name)")
+            }
+            Logger.loading.debug("mimeType \(mimeType) with filename \(name) resolved to \(AudioData.describeFileTypeId(type))")
+            try pipeline.prepareAudio(audioContentType: type)
+            return
+        }
+        Logger.loading.debug("mimeType \(mimeType) resolved to \(AudioData.describeFileTypeId(type))")
+        try pipeline.prepareAudio(audioContentType: type)
+    }
+    
+    fileprivate func handleMediaLength(_ expectedLength: Int64) {
+        Logger.loading.debug("expecting to recieve \(expectedLength == -1 ? "infinite" : String(expectedLength)) bytes")
+        pipeline.setInfinite(expectedLength == -1)
     }
     
     private func getHeaders(_ httpResp: HTTPURLResponse, fieldsStartingWith:String) -> [String:String]  {
@@ -194,16 +220,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         return result
     }
     
-    private func handleMediaType(_ response: URLResponse, _ session: URLSession) throws {
-        guard let mimeType = response.mimeType else {
-            throw AudioDataError(.missingMimeType, "missing response.mimeType")
-        }
-        let type:AudioFileTypeID = try getAudioFileType(mimeType)
-        Logger.loading.debug("mimeType \(mimeType) resolved to \(AudioData.describeFileTypeId(type))")
-        try pipeline.prepareAudio(audioContentType: type)
-    }
-    
-    private func getAudioFileType(_ mimeType:String) throws -> AudioFileTypeID {
+    private func getAudioFileType(_ mimeType:String) -> AudioFileTypeID? {
         switch mimeType {
         case "audio/mpeg":
             return kAudioFileMP3Type
@@ -212,10 +229,19 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         case "application/ogg", "audio/ogg":
             return kAudioFormatOpus
         default:
-            throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType)")
+           return nil
         }
     }
-
+    
+    private func getAudioFileType(filename:String) -> AudioFileTypeID? {
+        let ext = (filename as NSString).pathExtension
+        switch ext {
+        case "mp3": return kAudioFileMP3Type
+        case "opus": return kAudioFormatOpus
+        default:
+            return nil
+        }
+    }
 
     
     // MARK: session runs
