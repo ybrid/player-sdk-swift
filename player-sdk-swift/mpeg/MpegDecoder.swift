@@ -139,7 +139,7 @@ class MpegDecoder : AudioDecoder {
     /// need to keep in mind memory of packet data and descriptions to deallocate after converting
     fileprivate var packetDescs:[UnsafeMutablePointer<AudioStreamPacketDescription>?] = []
     fileprivate var packetDatas:[UnsafeMutableRawPointer?] = []
-    fileprivate func cleanupConverterGarbage() {
+    fileprivate func cleanupConverterGarbage() { // todo async
         packetDescs.forEach { (desc) in desc?.deinitialize(count: 1); desc?.deallocate() }
         if Logger.verbose { Logger.decoding.debug("deallocated \(packetDescs.count) packet descriptions") }
         packetDescs.removeAll()
