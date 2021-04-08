@@ -28,6 +28,8 @@ import AVFoundation
 protocol Playback {
     func stop()
     var canPause:Bool  { get }
+    func pause()
+    func resume()
     func setListener(listener: BufferListener)
 }
 
@@ -103,6 +105,16 @@ class PlaybackEngine : Playback {
         engine.stop()
     }
     
+    func pause() {
+        playbackBuffer?.pause()
+        playerNode.pause()
+    }
+    
+    func resume() {
+        playerNode.play()
+        playbackBuffer?.resume()
+    }
+    
     func change(volume: Float) {
         playerNode.volume = volume
         if Logger.verbose { Logger.playing.debug("volume=\(volume)") }
@@ -125,9 +137,12 @@ class PlaybackEngine : Playback {
     }
     
     @objc func tick() {
-        playerListener?.playingSince(playbackBuffer?.playingSince)
+
+        if let playingSince = playbackBuffer?.playingSince {
+            self.playerListener?.playingSince(playingSince)
+        }
         
-        let bufferedS = playbackBuffer?.takeCare() 
+        let bufferedS = playbackBuffer?.update()
         let avrgBuffS = metrics.averagedBufferS(bufferedS)
         playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
     }

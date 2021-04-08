@@ -39,22 +39,29 @@ class PlaybackBuffer {
     enum BufferState {
         case empty
         case ready
+        case wait
     }
     private var state:BufferState = .empty {
         didSet {
             if state != oldValue {
                 Logger.playing.debug("\(state)")
                 listener?.stateChanged(state)
+                switch state {
+                case .ready: audioOn()
+                case .empty: audioOff()
+                case .wait: audioOff()
+                }
             }
         }
     }
-    
+
     var playingSince: TimeInterval? {
         return scheduling.audioSince
     }
     
     var size: TimeInterval? {
-        return cachedChunks.duration + (scheduling.remainingS ?? 0.0)
+        refreshSize()
+        return total
     }
     
     private let cachedChunks:ChunkCache
@@ -71,7 +78,7 @@ class PlaybackBuffer {
     private var bufferDescription:String { get {
         return "buffer size \(total.S) ( caching \(caching.S), remainig \(remaining.S) )"
     } }
-    
+
     
     init(scheduling:PlaybackScheduling, engine: PlaybackEngine) {
         self.cachedChunks = ChunkCache()
@@ -93,19 +100,33 @@ class PlaybackBuffer {
     func put(buffer: AVAudioPCMBuffer) {
         let bufferDuration = Double(AVAudioFramePosition(buffer.frameLength)) / scheduling.sampleRate
         let chunk = Chunk(pcm: buffer, duration: bufferDuration)
+        
         cachedChunks.put(chunk: chunk)
+        caching += chunk.duration
+        
         if Logger.verbose { Logger.playing.debug("cached \(chunk.duration.S) --> \(bufferDescription)") }
-        takeCare(audioOff: nil, audioOn: audioOn)
+        
+        takeCare()
     }
     
-    func takeCare() -> TimeInterval {
-        takeCare(audioOff: audioOff, audioOn: audioOn)
-        return total
+    func pause() {
+        state = .wait
     }
     
     func resume() {
+        state = .ready
+    }
+
+    func update() -> TimeInterval {
+        refreshSize()
+        takeCare()
+        return total
+    }
+    
+    func reset() {
         if let cleared = cachedChunks.clear() {
             Logger.playing.notice("discarded \(cleared.S) s of cached audio")
+            refreshSize()
             return
         }
     }
@@ -114,13 +135,20 @@ class PlaybackBuffer {
     private var isBufferingDone:Bool { return remaining <= 0.0 && caching >= bufferingS }
     private var isSchedulingLow: Bool { return remaining > 0.0 && remaining <= PlaybackBuffer.lowRemainingScheduledS }
     
-    private func takeCare(audioOff: (() -> ())?, audioOn: () -> () ) {
+    fileprivate func refreshSize() {
         caching = cachedChunks.duration
         remaining = scheduling.remainingS ?? 0.0
+    }
+    
+    fileprivate func takeCare() {
+        guard state != .wait else {
+            return
+        }
+        
         if Logger.verbose { Logger.playing.debug("\(bufferDescription)") }
         
         if isEmpty {
-            audioOff?()
+            state = .empty
             scheduling.reset()
             bufferingS = PlaybackBuffer.reBufferingS
             return
@@ -129,7 +157,7 @@ class PlaybackBuffer {
         if isBufferingDone  { // needs scheduling first chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
                 if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S) --> \(bufferDescription)") }
-                audioOn()
+                state = .ready
             }
             return
         }
@@ -172,19 +200,13 @@ class PlaybackBuffer {
     }
     
     fileprivate func audioOn() {
-        if state == .empty {
-            Logger.playing.notice()
-            engine.change(volume: 1)
-        }
-        state = .ready
+        Logger.playing.notice()
+        engine.change(volume: 1)
     }
     
     fileprivate func audioOff() {
-        if state == .ready {
-            Logger.playing.notice()
-            engine.change(volume: 0)
-        }
-        state = .empty
+        Logger.playing.notice()
+        engine.change(volume: 0)
     }
     
      // MARK: caching pcm audio chunks

@@ -38,6 +38,7 @@ class AudioPipeline : DecoderListener, MemoryListener
     var firstPCM = true
     var firstMetadata = true
     var stopping = false
+
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
@@ -70,6 +71,7 @@ class AudioPipeline : DecoderListener, MemoryListener
         stopping = true
         decoder?.stopping = true
     }
+
     
     func dispose() {
         Logger.decoding.debug("pre deinit")
@@ -79,7 +81,7 @@ class AudioPipeline : DecoderListener, MemoryListener
         PlayerContext.unregisterMemoryListener(listener: self)
     }
     
-    func resume() {
+    func reset() {
         started = Date()
         firstPCM = true
         firstMetadata = true
@@ -155,7 +157,7 @@ class AudioPipeline : DecoderListener, MemoryListener
                 }
             }
             if resumed {
-                buffer?.resume()
+                buffer?.reset()
                 resumed = false
             }
         } catch {

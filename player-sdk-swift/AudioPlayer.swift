@@ -49,10 +49,11 @@ public enum PlaybackState {
     case buffering // audio will play (preparing or stalling)
     case playing // audio is playing
     case stopped // no audio will play
+    case pausing // no audio will play
 }
 
 public class AudioPlayer: BufferListener, PipelineListener {
-
+    
     public static var versionString:String {
         get {
             let bundleId = "io.ybrid.player-sdk-swift"
@@ -67,9 +68,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
             return "\(name) version \(version) (build \(build))"
         }
     }
-
+    
     public var state: PlaybackState { get {
-      return playbackState
+        return playbackState
     }}
     
     public var canPause:Bool = false
@@ -113,13 +114,19 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     // Asynchronously start playback of audio of the given media url as soon as possible.
     public func play() {
-        guard playbackState == .stopped  else {
+        guard playbackState == .stopped || playbackState == .pausing else {
             Logger.shared.notice("already running")
             return
         }
-        playbackState = .buffering
-        playerQueue.async {
-            self.playWhenReady()
+        if playbackState == .stopped {
+            playbackState = .buffering
+            playerQueue.async {
+                self.playWhenReady()
+            }}
+        if playbackState == .pausing {
+            playerQueue.async {
+                self.playback?.resume()
+            }
         }
     }
     
@@ -133,6 +140,20 @@ public class AudioPlayer: BufferListener, PipelineListener {
         playerQueue.async {
             self.stopPlaying()
             self.playbackState = .stopped
+        }
+    }
+    
+    public func pause() {
+        guard canPause else {
+            Logger.shared.error("cannot pause")
+            return
+        }
+        guard playbackState != .stopped  else {
+            Logger.shared.debug("is stopped")
+            return
+        }
+        playerQueue.async {
+            self.playback?.pause()
         }
     }
     
@@ -152,19 +173,21 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     func ready(playback: Playback) {
         
+        canPause = playback.canPause
+        
         switch playbackState {
-        case .stopped:
-            Logger.shared.debug("should not begin playing.")
+        case .buffering:
+            self.playback = playback
+            playback.setListener(listener: self)
+        case .playing:
+            Logger.shared.error("should not play already.")
+        case .stopped, .pausing:
+            Logger.shared.error("is \(playbackState), should not begin playing.")
             pipeline?.stopProcessing()
             playback.stop()
             loader?.stopRequestData()
             pipeline?.dispose()
             return
-        case .playing:
-            Logger.shared.error("should not play already.")
-        case .buffering:
-            self.playback = playback
-            playback.setListener(listener: self)
         }
     }
     
@@ -188,20 +211,24 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     func stateChanged(_ bufferState: PlaybackBuffer.BufferState) {
         
-        if playbackState == .buffering && bufferState == .ready {
-            playbackState = .playing
-            guard let playback = playback, !playback.canPause else {
-                canPause = true
-                return
+        switch playbackState {
+        case .stopped, .pausing, .buffering:
+            if bufferState == .ready {
+                playbackState = .playing
+            }
+        case .playing:
+            if bufferState == .empty {
+                if loader?.completed == true {
+                    playback?.stop()
+                    playbackState = .stopped
+                } else {
+                    playbackState = .buffering
+                }
+            }
+            if bufferState == .wait {
+                playbackState = .pausing
             }
         }
         
-        if playbackState == .playing && bufferState == .empty {
-            if loader?.completed == true {
-                stop()
-            } else {
-                playbackState = .buffering
-            }
-        }
     }
 }

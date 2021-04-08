@@ -127,7 +127,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         Logger.loading.debug()
         endSession()
         startSession(configuration: configuration)
-        pipeline.resume() /// also buffer is cleared
+        pipeline.reset() /// also buffer is cleared
         pipeline.pipelineListener.error(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
     }
     
