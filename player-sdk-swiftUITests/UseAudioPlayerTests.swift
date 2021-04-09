@@ -111,5 +111,33 @@ class UseAudioPlayerTests: XCTestCase {
         player.stop()
         sleep(1)
     }
+    
+    /*
+     HttpSessions on urls that offer "expected content length != -1"
+     are identified as on demand files. They can be paused.
+     Remember, all actions are asynchronous. So assertions are 1 second later.
+     */
+    func test06_OnDemandPlayPausePlayPauseStop() {
+        let opusUrl = URL.init(string: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")!
+        let player = AudioPlayer(mediaUrl: opusUrl, listener: playerListener)
+        XCTAssertFalse(player.canPause)
+        player.play()
+        XCTAssertEqual(player.state, PlaybackState.buffering)
+        sleep(3)
+        XCTAssertTrue(player.canPause)
+        XCTAssertEqual(player.state, PlaybackState.playing)
+        player.pause()
+        sleep(1)
+        XCTAssertEqual(player.state, PlaybackState.pausing)
+        player.play()
+        sleep(1)
+        XCTAssertEqual(player.state, PlaybackState.playing)
+        player.pause()
+        sleep(1)
+        XCTAssertEqual(player.state, PlaybackState.pausing)
+        player.stop()
+        sleep(1)
+        XCTAssertEqual(player.state, PlaybackState.stopped)
+    }
 }
 

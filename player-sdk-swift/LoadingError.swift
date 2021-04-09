@@ -51,12 +51,17 @@ class SessionTaskState : Equatable, LocalizedError {
     private static let cancelled = SessionTaskState(-999, "stopped", .notice) /// stopped regularily
     private static var knownErrorStates: [SessionTaskState] = [
         cancelled,
+        SessionTaskState(-1000, "bad url", .fatal),
         SessionTaskState(-1002, "unsupported url", .fatal),
-        SessionTaskState(-1200, "cannot connect over ssl",.fatal),
+        SessionTaskState(-1004, "could not connect", .fatal),
         SessionTaskState(-1022, "not https", .fatal),
         SessionTaskState(-1100, "url not found", .fatal),
-        SessionTaskState(-1009, "offline?", .fatal, .recoverable),
+        SessionTaskState(-1101, "no file, is directory", .fatal),
+        SessionTaskState(-1200, "cannot connect over ssl",.fatal),
+        
         SessionTaskState(-1003, "host not found", .fatal, .recoverable),
+        SessionTaskState(-1009, "offline?", .fatal, .recoverable),
+
         SessionTaskState(-1001, "timed out loading data", .recoverable),
         SessionTaskState(-1005, "connection lost", .recoverable),
         SessionTaskState(-997, "lost connection in background", .recoverable) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
