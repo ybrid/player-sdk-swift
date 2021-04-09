@@ -5,7 +5,7 @@ An example app using this player SDK can be run from the XCode-Project in the re
 
 ## Why yet another player?
 This audio player offers
-- low latency live streaming
+- low latency live and on demand file streaming
 - active, user-centric handling of typical network problems
 - compatibility: currently supports audio codecs mp3, aac, and opus
 - stability
@@ -20,27 +20,34 @@ let player = AudioPlayer(mediaUrl: url, listener: nil)
 player.play()
 // of course the program must not end here
 ```
+
+Possible playback states are
+```swift
+public enum PlaybackState {
+    case buffering 
+    case playing 
+    case stopped 
+    case pausing 
+}
+```
+With urls addressing on demand files, you can safely use ```player.pause()``` if ```player.canPause``` is true.
+
 As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it to the AudioPlayer via the listener parameter above. You will also receive changes of metadata, hints on problems like network stalls as well as relevant durations and playback buffer size.
 ```swift
 public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)
     func displayTitleChanged(_ title: String?)
-    func currentProblem(_ text: String?)
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     func playingSince(_ seconds: TimeInterval?)
     func durationReadyToPlay(_ seconds: TimeInterval?)
     func durationConnected(_ seconds: TimeInterval?)
     func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?)
 }
 ```
-The PlaybackStates are 
-```swift
-public enum PlaybackState {
-    case buffering
-    case playing
-    case stopped
-}
-```
+
 In case of network stalls, the state will change from playing to buffering at the time of exhausting audio buffer. Try it out! After reconnecting to a network, the player will resume.
+
+Errors are raised when occuring. Your handling may use the message, the code or just ```ErrorSeverity```. 
 
 ## Development environment
 We use XCode version 12 with swift 4 and CocoaPods 1.10. According to the nature of evolved XCFrameworks, 'player-sdk-swift.xcworkspace' should be compatible with elder versions of XCode. 
