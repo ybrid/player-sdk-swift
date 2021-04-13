@@ -18,6 +18,16 @@
 		1732222325F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
 		1732222425F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
 		17404C8625E78DCC00051988 /* YbridPlayerSDK.framework in Resources */ = {isa = PBXBuildFile; fileRef = 170703D025D2F44400549B8A /* YbridPlayerSDK.framework */; };
+		17539E3F26257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
+		17539E4026257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
+		17539E4126257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
+		17539E48262591C3000FE902 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E47262591C3000FE902 /* Session.swift */; };
+		17539E49262591C3000FE902 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E47262591C3000FE902 /* Session.swift */; };
+		17539E4A262591C3000FE902 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E47262591C3000FE902 /* Session.swift */; };
+		17539E522626D2C6000FE902 /* ApiDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E512626D2C6000FE902 /* ApiDriver.swift */; };
+		17539E532626D2C6000FE902 /* ApiDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E512626D2C6000FE902 /* ApiDriver.swift */; };
+		17539E542626D2C6000FE902 /* ApiDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E512626D2C6000FE902 /* ApiDriver.swift */; };
+		17539E712626E18F000FE902 /* ApiDriverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E702626E18F000FE902 /* ApiDriverTests.swift */; };
 		175AFB2925FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
 		175AFB2A25FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
 		175AFB2B25FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
@@ -129,6 +139,10 @@
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		17109E1025F8DF4C003DA621 /* DecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodingError.swift; sourceTree = "<group>"; };
 		1732222125F614BC00AEC833 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
+		17539E3E26257A9A000FE902 /* MediaEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaEndpoint.swift; sourceTree = "<group>"; };
+		17539E47262591C3000FE902 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		17539E512626D2C6000FE902 /* ApiDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiDriver.swift; sourceTree = "<group>"; };
+		17539E702626E18F000FE902 /* ApiDriverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiDriverTests.swift; sourceTree = "<group>"; };
 		175AFB2825FA428100005046 /* AudioPlayerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerError.swift; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
@@ -260,12 +274,15 @@
 				17CBC9B425E3C36000B2F7E7 /* decoding */,
 				17CBC9B325E3C33B00B2F7E7 /* playing */,
 				17CBC9B225E3C30F00B2F7E7 /* loading */,
+				17539E502626D108000FE902 /* api */,
 				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
 				1799DC8D25D565A10055C973 /* Logger.swift */,
 				175AFB2825FA428100005046 /* AudioPlayerError.swift */,
 				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
 				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
 				1732222125F614BC00AEC833 /* Metadata.swift */,
+				17539E3E26257A9A000FE902 /* MediaEndpoint.swift */,
+				17539E47262591C3000FE902 /* Session.swift */,
 			);
 			path = "player-sdk-swift";
 			sourceTree = "<group>";
@@ -277,6 +294,14 @@
 				170703E025D2F44400549B8A /* Info.plist */,
 			);
 			path = "player-sdk-swiftTests";
+			sourceTree = "<group>";
+		};
+		17539E502626D108000FE902 /* api */ = {
+			isa = PBXGroup;
+			children = (
+				17539E512626D2C6000FE902 /* ApiDriver.swift */,
+			);
+			path = api;
 			sourceTree = "<group>";
 		};
 		1799DCA225D565DB0055C973 /* mpeg */ = {
@@ -311,6 +336,7 @@
 				1799DD3725D580D40055C973 /* DequeTests.swift */,
 				1799DD3825D580D40055C973 /* MetadataExtractorTests.swift */,
 				1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */,
+				17539E702626E18F000FE902 /* ApiDriverTests.swift */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -772,13 +798,16 @@
 				1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */,
 				1799DC9925D565B30055C973 /* PlaybackEngine.swift in Sources */,
 				1799DC9E25D565BB0055C973 /* PlayerContext.swift in Sources */,
+				17539E3F26257A9A000FE902 /* MediaEndpoint.swift in Sources */,
 				1799DC9725D565B30055C973 /* PlaybackBuffer.swift in Sources */,
 				1799DC9825D565B30055C973 /* PlaybackScheduling.swift in Sources */,
+				17539E48262591C3000FE902 /* Session.swift in Sources */,
 				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
 				1799DCAB25D565DB0055C973 /* MpegData.swift in Sources */,
 				17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */,
 				1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */,
 				1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */,
+				17539E522626D2C6000FE902 /* ApiDriver.swift in Sources */,
 				1799DCB025D565DB0055C973 /* FrameSkipper.swift in Sources */,
 				1799DCAF25D565DB0055C973 /* OggContainer.swift in Sources */,
 				1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */,
@@ -801,6 +830,7 @@
 				1799DCDB25D566C00055C973 /* OpusMapping.swift in Sources */,
 				1799DCDA25D566C00055C973 /* OggContainer.swift in Sources */,
 				1799DCCA25D566AF0055C973 /* AudioDecoder.swift in Sources */,
+				17539E532626D2C6000FE902 /* ApiDriver.swift in Sources */,
 				1799DD3D25D580D40055C973 /* PlaybackEngineTests.swift in Sources */,
 				1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */,
 				1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */,
@@ -810,9 +840,11 @@
 				175AFB2A25FA428100005046 /* AudioPlayerError.swift in Sources */,
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
 				1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */,
+				17539E4026257A9A000FE902 /* MediaEndpoint.swift in Sources */,
 				1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */,
 				1732222325F614BC00AEC833 /* Metadata.swift in Sources */,
 				1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */,
+				17539E712626E18F000FE902 /* ApiDriverTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,
 				1799DD3C25D580D40055C973 /* CustomErrorTests.swift in Sources */,
@@ -823,6 +855,7 @@
 				1799DCD525D566BB0055C973 /* MpegData.swift in Sources */,
 				1799DCCF25D566AF0055C973 /* PlaybackEngine.swift in Sources */,
 				1799DCC525D566AF0055C973 /* AudioPlayer.swift in Sources */,
+				17539E49262591C3000FE902 /* Session.swift in Sources */,
 				1799DCD925D566C00055C973 /* OpusDecoder.swift in Sources */,
 				1799DD3B25D580D40055C973 /* PlayerMetricsTests.swift in Sources */,
 				17B54DD925F7B45800CDEBAD /* LoadingError.swift in Sources */,
@@ -864,13 +897,16 @@
 				17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */,
 				17CBC8CF25E2517F00B2F7E7 /* PlaybackEngine.swift in Sources */,
 				17CBC8D025E2517F00B2F7E7 /* PlayerContext.swift in Sources */,
+				17539E4126257A9A000FE902 /* MediaEndpoint.swift in Sources */,
 				17CBC8D125E2517F00B2F7E7 /* PlaybackBuffer.swift in Sources */,
 				17CBC8D225E2517F00B2F7E7 /* PlaybackScheduling.swift in Sources */,
+				17539E4A262591C3000FE902 /* Session.swift in Sources */,
 				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
 				17CBC8D425E2517F00B2F7E7 /* MpegData.swift in Sources */,
 				17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */,
 				17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */,
 				17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */,
+				17539E542626D2C6000FE902 /* ApiDriver.swift in Sources */,
 				17CBC8D725E2517F00B2F7E7 /* FrameSkipper.swift in Sources */,
 				17CBC8D825E2517F00B2F7E7 /* OggContainer.swift in Sources */,
 				17CBC8D925E2517F00B2F7E7 /* AudioPlayer.swift in Sources */,
