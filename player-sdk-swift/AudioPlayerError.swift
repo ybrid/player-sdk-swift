@@ -37,6 +37,7 @@ enum ErrorKind : ErrorCode {
     case unknown = 100
     case memoryLimitExceeded = 101
     
+    // audio data loading
     case networkFatal = 201
     case networkStall = 202
     
@@ -59,6 +60,14 @@ enum ErrorKind : ErrorCode {
     case failedConverting = 527
     case invalidData = 528
     case badData = 529
+    
+    // api and session
+    case invalidUri = 601
+    case serverError = 603
+    case invalidResponse = 604
+    case noSession = 605
+    case invalidSession = 606
+    
 }
 
 public class AudioPlayerError : LocalizedError {

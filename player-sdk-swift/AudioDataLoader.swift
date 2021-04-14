@@ -53,8 +53,22 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         return state.completed
     }}
     
+    
+    static let replaceSchemes:[String:String] = [
+        "icyx"  : "http",
+        "icyxs" : "https"
+    ]
+    static func mapProtocol(_ inUrl:URL) -> URL {
+        if let scheme = inUrl.absoluteURL.scheme, replaceSchemes.keys.contains(scheme) {
+            var comps = URLComponents(url: inUrl, resolvingAgainstBaseURL: false)!
+            comps.scheme = replaceSchemes[scheme]
+            return comps.url!
+        }
+        return inUrl
+    }
+    
     init(mediaUrl: URL, pipeline: AudioPipeline, inclMetadata: Bool = true) {
-        self.url = mediaUrl
+        self.url = AudioDataLoader.mapProtocol(mediaUrl)
         self.pipeline = pipeline
         self.withMetadata = inclMetadata
         configuration = URLSessionConfiguration.default

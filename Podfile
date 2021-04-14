@@ -3,7 +3,7 @@ target 'player-sdk-swift' do
   use_frameworks!
   source 'https://github.com/CocoaPods/Specs.git'
   
-  pod 'YbridOgg'
+  pod 'YbridOgg', '0.7.4'
   pod 'YbridOpus'
 
   target 'player-sdk-swiftTests' do
@@ -14,12 +14,14 @@ target 'player-sdk-swift' do
 
   target 'player-sdk-swift_mac' do
     platform :osx, '10.10'
-    pod 'YbridOgg'
+    pod 'YbridOgg', '0.7.4'
     pod 'YbridOpus'
   end
 
   target 'player-sdk-swiftMacTests' do
     platform :osx, '10.10'
+    pod 'YbridOgg', '0.7.4'
+    pod 'YbridOpus'
   end
 
 end

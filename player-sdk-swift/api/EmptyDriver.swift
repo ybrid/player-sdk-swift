@@ -1,5 +1,5 @@
 //
-// MediaEndpoint.swift
+// EmptyDriver.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -26,24 +26,47 @@
 import Foundation
 
 
-public class MediaEndpoint {
-    let uri:String
-
-    public init(mediaUri:String!) {
-        self.uri = mediaUri
+class EmptyDriver : ApiDriver {
+    
+    let apiVersion = ApiVersion.icy
+    let session:Session
+    var baseUrl:URL
+    var valid:Bool = true
+    var connected:Bool = false { didSet {
+        Logger.api.debug("empty driver \(connected ? "connected" : "disconnected")")
+    }}
+    var playbackUri:String
+    
+    init(session:Session){
+        self.session = session
+        self.playbackUri = session.endpoint.uri
+        self.baseUrl = URL(string: session.endpoint.uri)!
     }
     
-    public func createSession() -> Session {
-        
-        let session = Session(endpoint: self)
-        do {
-            try session.connect()
-        } catch {
-            Logger.api.debug("cannot connect, reason \(error.localizedDescription)")
+    func connect() throws {
+        if connected {
+            return
         }
-        return session
+        
+        if !valid {
+            throw ApiError(ErrorKind.invalidSession, "session is not valid.")
+        }
+        connected = true
     }
-
+       
+    func disconnect() {
+        if !connected {
+            return
+        }
+        connected = false
+    }
+    
+    func info() throws {
+        if !connected {
+            Logger.api.error("no empty driver")
+            return
+        }
+        Logger.api.notice("no info to get from empty driver")
+    }
     
 }
-

@@ -26,28 +26,34 @@
 import Foundation
 
 
-class Session {
+public class Session {
+    
     let endpoint:MediaEndpoint
+    let factory = ApiDriverFactory()
+    
     var driver:ApiDriver?
     var player:AudioPlayer?
+    
+    public var playbackUri:String { get {
+        if let uri = driver?.playbackUri {
+            return uri
+        }
+        return endpoint.uri
+    }}
+
     init(endpoint:MediaEndpoint) {
         self.endpoint = endpoint
     }
     
-    func createDriver() {
-        self.driver = ApiDriver(endpoint)
-    }
-    
     func connect() throws {
-        guard let url = URL(string: endpoint.uri) else {
-            return
+        if self.driver == nil {
+            self.driver = try factory.createDriver(self)
         }
-        try self.driver?.connect(url:url)
+        try self.driver?.connect()
     }
     
-    
-    
-    
- 
+    public func close() {
+        self.driver?.disconnect()
+    }
     
 }

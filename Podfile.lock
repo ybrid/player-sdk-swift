@@ -1,9 +1,9 @@
 PODS:
-  - YbridOgg (0.7.3)
+  - YbridOgg (0.7.4)
   - YbridOpus (0.7.1)
 
 DEPENDENCIES:
-  - YbridOgg
+  - YbridOgg (= 0.7.4)
   - YbridOpus
 
 SPEC REPOS:
@@ -12,9 +12,9 @@ SPEC REPOS:
     - YbridOpus
 
 SPEC CHECKSUMS:
-  YbridOgg: e8e652ef1a291175a486ef90d192cfd964261630
+  YbridOgg: 10ad81cccae140351d2852aeacb39f45baa6d155
   YbridOpus: 76ef1ad9631b8128810bd894ff73ffd641d67cfb
 
-PODFILE CHECKSUM: 8b305c666827aba801c2f73bf6d406d33cd45b84
+PODFILE CHECKSUM: 4543246fc8465af9f208f023b5acd5a97417abb1
 
 COCOAPODS: 1.10.0

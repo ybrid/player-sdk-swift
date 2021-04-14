@@ -1,5 +1,5 @@
 //
-// MediaEndpoint.swift
+// ApiError.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,25 +25,12 @@
 
 import Foundation
 
-
-public class MediaEndpoint {
-    let uri:String
-
-    public init(mediaUri:String!) {
-        self.uri = mediaUri
+class ApiError : AudioPlayerError {
+    
+    
+    init(_ kind:ErrorKind, _ message:String, _ cause:Error? = nil) {
+        super.init(kind, message, cause)
     }
     
-    public func createSession() -> Session {
-        
-        let session = Session(endpoint: self)
-        do {
-            try session.connect()
-        } catch {
-            Logger.api.debug("cannot connect, reason \(error.localizedDescription)")
-        }
-        return session
-    }
-
     
 }
-

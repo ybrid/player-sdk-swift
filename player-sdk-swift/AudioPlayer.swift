@@ -105,6 +105,17 @@ public class AudioPlayer: BufferListener, PipelineListener {
         PlayerContext.setupAudioSession()
     }
     
+    
+    // get ready for playing
+    // mediaUrl - the provided audio. Supports mp3, aac and opus.
+    // listener - object to be called back from the player process
+    public init(session: Session, listener: AudioPlayerListener?) {
+        self.playerListener = listener
+        self.streamUrl = URL(string: session.playbackUri)!
+        PlayerContext.setupAudioSession()
+    }
+
+    
     deinit {
         Logger.shared.debug()
         PlayerContext.deactivate()

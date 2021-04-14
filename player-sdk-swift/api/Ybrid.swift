@@ -1,5 +1,5 @@
 //
-// MediaEndpoint.swift
+// Ybrid.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -26,24 +26,33 @@
 import Foundation
 
 
-public class MediaEndpoint {
-    let uri:String
-
-    public init(mediaUri:String!) {
-        self.uri = mediaUri
-    }
-    
-    public func createSession() -> Session {
-        
-        let session = Session(endpoint: self)
-        do {
-            try session.connect()
-        } catch {
-            Logger.api.debug("cannot connect, reason \(error.localizedDescription)")
-        }
-        return session
-    }
-
-    
+struct YbridResponse: Decodable {
+    let __responseHeader: YbridInfo
+}
+struct YbridInfo: Codable {
+    let responseVersion: String
+    let statusCode: Int
+    let success: Bool
+    let supportedVersions: [String]
+//        let timestamp: Date // TODO
 }
 
+struct YbridSessionResponse: Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridSessionObject
+}
+struct YbridSessionObject: Codable {
+    let duration: Int
+    let id: String
+    let sessionId: String
+    let valid: Bool
+    let playout: YbridPlayout
+}
+struct YbridPlayout: Codable {
+    let baseURL: URL
+    let playbackURI: String //edge01-stagecast.ybrid.io:443/adaptive-demo?session-id\u003d90bb355e-30de-44ae-b521-4ba1544a9753",
+    let currentBitRate: Int // -1,
+    let host: String // "edge01-stagecast.ybrid.io",
+    let maxBitRate: Int // -1,
+    let offsetToLive : Int // -504
+}
