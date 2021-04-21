@@ -47,6 +47,8 @@ struct YbridSessionObject: Codable {
     let sessionId: String
     let valid: Bool
     let playout: YbridPlayout
+    let metadata: YbridMetadata
+    let startDate: Date
 }
 struct YbridPlayout: Codable {
     let baseURL: URL
@@ -55,4 +57,39 @@ struct YbridPlayout: Codable {
     let host: String // "edge01-stagecast.ybrid.io",
     let maxBitRate: Int // -1,
     let offsetToLive : Int // -504
+}
+
+// TODO use enum but should allow unknown/optional
+enum YbridItemType : String, Codable {
+    case MUSIC = "MUSIC"
+    case VOICE = "VOICE"
+    case JINGLE = "JINGLE"
+    case NEWS = "NEWS"
+}
+
+struct YbridMetadata : Codable, Equatable {
+    static func == (lhs: YbridMetadata, rhs: YbridMetadata) -> Bool {
+        return lhs.currentItem == rhs.currentItem &&
+            lhs.nextItem == rhs.nextItem &&
+            lhs.station == rhs.station
+    }
+    
+    let currentItem: YbridItem
+    let nextItem: YbridItem
+    let station: YbridStation
+}
+
+struct YbridItem : Codable, Equatable {
+    let id: String
+    let artist: String
+    let title: String
+    let description: String
+    let durationMillis: Int64
+    let companions: [String]
+    let type : String
+}
+
+struct YbridStation : Codable, Equatable {
+    let genre: String
+    let name: String
 }

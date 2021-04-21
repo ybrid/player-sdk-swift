@@ -1,5 +1,5 @@
 //
-// EmptyDriver.swift
+// Session.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,48 +25,48 @@
 
 import Foundation
 
-
-class EmptyDriver : ApiDriver {
+public class YbridSession {
     
-    let apiVersion = ApiVersion.icy
-    let session:Session
-    var baseUrl:URL
-    var valid:Bool = true
-    var connected:Bool = false { didSet {
-        Logger.api.debug("empty driver \(connected ? "connected" : "disconnected")")
+    let endpoint:MediaEndpoint
+    let factory = ControllerFactory()
+    var controller:ApiController?
+    var metadata:YbridMetadata? {
+        didSet {
+            if metadata != oldValue, let metadata = metadata {
+                if controller is YbridV2Controller { // just logging
+                    (controller as! YbridV2Controller).logMetadata()
+                }
+                metadataListener?.metadataReady(Metadata(ybridMetadata: metadata))
+            }
     }}
-    var playbackUri:String
     
-    init(session:Session){
-        self.session = session
-        self.playbackUri = session.endpoint.uri
-        self.baseUrl = URL(string: session.endpoint.uri)!
+    weak var metadataListener:MetadataListener? { didSet {
+        if let metadata = metadata {
+            metadataListener?.metadataReady(Metadata(ybridMetadata: metadata))
+        }
+    }}
+    
+    public var playbackUri:String { get {
+        return controller?.playbackUri ?? endpoint.uri
+    }}
+
+    init(on endpoint:MediaEndpoint) {
+        self.endpoint = endpoint
     }
     
     func connect() throws {
-        if connected {
-            return
-        }
-        
-        if !valid {
-            throw ApiError(ErrorKind.invalidSession, "session is not valid.")
-        }
-        connected = true
-    }
-       
-    func disconnect() {
-        if !connected {
-            return
-        }
-        connected = false
+        self.controller = try factory.create(self)
+        try self.controller?.connect()
     }
     
-    func info() throws {
-        if !connected {
-            Logger.api.error("no empty driver")
-            return
+    public func close() {
+        self.controller?.disconnect()
+    }
+    
+    func fetchMetadata() {
+        if controller is YbridV2Controller {
+            (controller as! YbridV2Controller).info()
         }
-        Logger.api.notice("no info to get from empty driver")
     }
     
 }

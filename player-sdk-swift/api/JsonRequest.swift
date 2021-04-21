@@ -25,6 +25,17 @@
 
 import Foundation
 
+extension Formatter {
+    static let iso8601withMilliSeconds: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .iso8601)
+        formatter.locale = Locale.current//(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
+        return formatter
+    }()
+}
+
 class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*/
     
     static let applicationJson:String = "application/json"
@@ -33,10 +44,13 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
     let url:URL
     let configuration = URLSessionConfiguration.default
     
+    let decoder = JSONDecoder()
+    
     init(url:URL) {
         self.url = url
         //        configuration.timeoutIntervalForResource = 5
         //        super.init()
+            self.decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
     }
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {
@@ -87,7 +101,7 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
             }
             
             do {
-                result = try JSONDecoder().decode(responseType, from: data)
+                result = try self.decoder.decode(responseType, from: data)
                 semaphore.signal()
             } catch {
                 apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
@@ -149,7 +163,7 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
             }
             
             do {
-                result = try JSONDecoder().decode(responseType, from: data)
+                result = try self.decoder.decode(responseType, from: data)
                 semaphore.signal()
             } catch {
                 apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)

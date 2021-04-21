@@ -1,0 +1,92 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-04-22T06:33:27.950Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "swr3-live",
+            "availableServices": [
+                {
+                    "iconURL": "https://www.swr.de/unternehmen/kommunikation/service/SWR3-Logos%2C1560344662150%2Clogos-swr3-100~_v-16x9@2dS_-6be50a9c75559ca1aaf1d0b25bae287afdcd877a.png",
+                    "displayName": "SWR3 Live",
+                    "id": "swr3-live"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 09",
+                    "id": "swr-raka09"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 08",
+                    "id": "swr-raka08"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 05",
+                    "id": "swr-raka05"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 06",
+                    "id": "swr-raka06"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 03",
+                    "id": "swr-raka03"
+                }
+            ],
+            "bouquetId": "swr3",
+            "primaryServiceId": "swr3-live"
+        },
+        "duration": 16632,
+        "id": "052f9d2d-e395-4b37-bc72-ca2e42b6904a",
+        "metadata": {
+            "currentItem": {
+                "artist": "",
+                "companions": [],
+                "description": "radiomax:SWR3-BAD-MAX:event-1619073072000",
+                "durationMillis": 72100,
+                "id": "playlist--swr3-radiomax-swr3-bad-max-event-1619073072000",
+                "title": "Nachrichten",
+                "type": "NEWS"
+            },
+            "nextItem": {
+                "artist": "Celeste",
+                "companions": [],
+                "description": "",
+                "durationMillis": 214200,
+                "id": "playlist--swr3-radiomax-swr3-bad-max-12676392",
+                "title": "Tonight tonight",
+                "type": "MUSIC"
+            },
+            "station": {
+                "genre": "Pop Music",
+                "name": "SWR3"
+            }
+        },
+        "playout": {
+            "baseURL": "https://edge01-stagecast.ybrid.io/swr3/mp3/mid",
+            "playbackURI": "icyxs://edge01-stagecast.ybrid.io:443/swr3/mp3/mid?session-id\u003d052f9d2d-e395-4b37-bc72-ca2e42b6904a",
+            "currentBitRate": 128000,
+            "host": "edge01-stagecast.ybrid.io",
+            "maxBitRate": 128000,
+            "offsetToLive": -2519
+        },
+        "sessionId": "052f9d2d-e395-4b37-bc72-ca2e42b6904a",
+        "startDate": "2021-04-22T06:33:08.244Z",
+        "swapInfo": {
+            "nextSwapReturnsToMain": false,
+            "swapsLeft": 0
+        },
+        "valid": true
+    }
+}

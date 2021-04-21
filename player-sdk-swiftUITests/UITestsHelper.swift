@@ -85,3 +85,39 @@ class TestAudioPlayerListener : AudioPlayerListener {
 }
 
 
+class AbstractAudioPlayerListener : AudioPlayerListener {
+
+    func stateChanged(_ state: PlaybackState) {
+        Logger.testing.notice("-- player is \(state)")
+    }
+    func displayTitleChanged(_ title: String?) {
+    }
+
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
+        Logger.testing.notice("-- \(severity): \(exception.localizedDescription)")
+    }
+
+    func playingSince(_ seconds: TimeInterval?) {
+    }
+
+    func durationReadyToPlay(_ seconds: TimeInterval?) {
+        if let duration = seconds {
+            Logger.testing.notice("-- begin playing audio after \(duration.S) seconds ")
+        } else {
+            Logger.testing.notice("-- reset buffered until playing duration ")
+        }
+    }
+
+    func durationConnected(_ seconds: TimeInterval?) {
+        if let duration = seconds {
+            Logger.testing.notice("-- recieved first data from url after \(duration.S) seconds ")
+        } else {
+            Logger.testing.notice("-- reset recieved first data duration ")
+        }
+    }
+
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+    }
+}
+
+

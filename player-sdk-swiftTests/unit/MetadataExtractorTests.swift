@@ -10,37 +10,44 @@ import XCTest
 @testable import YbridPlayerSDK
 
 class MetadataExtractorTests: XCTestCase {
-    
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+ 
+    class TestMetadataListener : MetadataListener {
+        var titles:[String] = []
+        func metadataReady(_ metadata: Metadata) {
+            if let title = metadata.displayTitle() {
+                titles.append(title)
+            }
+        }
     }
+    var consumer = TestMetadataListener()
+    override func setUpWithError() throws {  }
     
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        consumer.titles.removeAll()
     }
      
     func testInit() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 100)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 100, listener: consumer)
         XCTAssert( extractor.intervalBytes == 100 )
     }
     
     func testEmptyData() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
         XCTAssert( extractor.intervalBytes == 0 )
         
         let input:Data = Data()
-        let result = extractor.handle(payload: input, metadataCallback: nil)
+        let result = extractor.handle(payload: input)
         XCTAssert( result.count == 0 )
     }
     
     func testEmptyMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
         XCTAssert( extractor.intervalBytes == 0 )
         
         var input:Data = Data()
         let content: [UInt8] = [0,0,0]
         input.append(contentsOf: content)
-        let result = extractor.handle(payload: input, metadataCallback: nil)
+        let result = extractor.handle(payload: input)
         XCTAssert( result.count == 0 )
     }
     
@@ -54,35 +61,25 @@ class MetadataExtractorTests: XCTestCase {
         output.append([0], count: size * 16 - mdArray.count)
         return output
     }
-    
-    
+
     func testSingleMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
         XCTAssert( extractor.intervalBytes == 0 )
         let input = createMetadataBlock(with: "StreamTitle=hallo")
-        var extractedTitle:String = ""
-        let result = extractor.handle(payload: input, metadataCallback: { (md:[String:String]) in
-            if let mdExtracted = md.first {
-                extractedTitle = mdExtracted.1
-            }
-        })
+        let result = extractor.handle(payload: input)
         XCTAssertEqual(0, result.count)
-        XCTAssertEqual( "hallo", extractedTitle )
+        XCTAssertEqual( "hallo", consumer.titles[0] )
     }
     
     func testSingle16BytesMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
         XCTAssert( extractor.intervalBytes == 0 )
         let input = createMetadataBlock(with: "StreamTitle=hell")
         XCTAssertEqual( 17, input.count )
-        var extractedTitle:String = ""
-        let result = extractor.handle(payload: input, metadataCallback: { (md:[String:String]) in
-            if let mdExtracted = md.first {
-                extractedTitle = mdExtracted.1
-            }
-        })
+        
+        let result = extractor.handle(payload: input)
         XCTAssert( result.count == 0 )
-        XCTAssertEqual( "hell", extractedTitle )
+        XCTAssertEqual( "hell",  consumer.titles[0] )
     }
     
     func testSomeMetadataOnly() throws {
@@ -91,16 +88,11 @@ class MetadataExtractorTests: XCTestCase {
         input.append(createMetadataBlock(with: "StreamTitle=re"))
         input.append(createMetadataBlock(with: "StreamTitle=mi,fa,so,la"))
 
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
-        var extractedTitles:[String] = []
-        let result = extractor.handle(payload: input, metadataCallback: { (md:[String:String]) in
-            if let mdExtracted = md.first {
-                extractedTitles.append(mdExtracted.1)
-            }
-        })
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
+        let result = extractor.handle(payload: input)
         XCTAssert( result.count == 0 )
-        XCTAssertEqual( 3, extractedTitles.count )
-        XCTAssertEqual( "re", extractedTitles[1] )
-        XCTAssertEqual( "mi,fa,so,la", extractedTitles[2] )
+        XCTAssertEqual( 3, consumer.titles.count )
+        XCTAssertEqual( "re", consumer.titles[1] )
+        XCTAssertEqual( "mi,fa,so,la", consumer.titles[2] )
     }
 }

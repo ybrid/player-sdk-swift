@@ -34,11 +34,12 @@ class MetadataExtractor {
     var totalBytesTreated:UInt32 = 0
     var totalBytesExtracted:UInt32 = 0
     var totalBytesAudio:UInt32 = 0
+    weak var listener: MetadataListener?
     
-    
-    init(bytesBetweenMetadata:Int) {
+    init(bytesBetweenMetadata:Int, listener: MetadataListener) {
         self.intervalBytes = bytesBetweenMetadata
         self.nextMetadataAt = bytesBetweenMetadata
+        self.listener = listener
     }
     
     deinit {
@@ -76,7 +77,7 @@ class MetadataExtractor {
     }
     
     
-    func handle(payload: Data, metadataCallback: ((_ metadata:[String:String]) -> Void)? ) -> Data {
+    func handle(payload: Data) -> Data {
         totalBytesTreated += UInt32(payload.count)
         let audio:PayloadCollector = PayloadCollector("audio")
         
@@ -122,11 +123,10 @@ class MetadataExtractor {
             
             // metadata until audio
             index += metadata.appendCount(of: payload, index: index, count: mdLength)
-            metadataReset(metadataCallback)
+            metadataDone()
             nextMetadataAt = index + intervalBytes
 
         } while (index <= payload.count)
-        
         
         if metadata.data.count > 0 {
             if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes") }
@@ -135,14 +135,13 @@ class MetadataExtractor {
         return audio.data
     }
     
-    fileprivate func metadataReset(_ metadataCallback: ( ([String:String]) -> Void)? ) {
-        if let callback = metadataCallback {
-            totalBytesExtracted += UInt32(metadata.data.count)
-            let flatMd = String(decoding: metadata.data, as: UTF8.self)
-            Logger.loading.info("metadata is \(flatMd)")
-            let result = parseMetadata(mdString: flatMd)
-            callback(result)
-        }
+    fileprivate func metadataDone() {
+        totalBytesExtracted += UInt32(metadata.data.count)
+        let flatMd = String(decoding: metadata.data, as: UTF8.self)
+        Logger.loading.debug("metadata is \(flatMd)")
+        let metaDict = parseMetadata(mdString: flatMd)
+        if Logger.verbose { Logger.decoding.debug("extracted metadata is \(metaDict)") }
+        listener?.metadataReady(Metadata(icyData: metaDict))
         metadata = PayloadCollector("metadata")
     }
     

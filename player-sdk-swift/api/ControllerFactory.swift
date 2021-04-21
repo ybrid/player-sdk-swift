@@ -26,14 +26,14 @@
 import Foundation
 
 
-enum ApiVersion : String {
+enum ControllerVersion : String {
     case plain
     case icy
     case ybridV2 = "v2"
 }
 
-protocol ApiDriver {
-    var apiVersion:ApiVersion { get }
+protocol ApiControllerOld {
+    var apiVersion:ControllerVersion { get }
     var playbackUri:String { get }
     
     //    func executeRequest(@NotNull Request<Command> request) throws
@@ -53,27 +53,28 @@ protocol ApiDriver {
 }
 
 
-class ApiDriverFactory {
+class ControllerFactory {
     
-    func createDriver(_ session:Session) throws -> ApiDriver {
+    func create(_ session:YbridSession) throws -> ApiController {
         let uri = session.endpoint.uri
-        let driver:ApiDriver
-        switch try getVersion(uri) {
-        case .plain, .icy: driver = EmptyDriver(session: session)
-        case .ybridV2: driver = YbridV2Driver(session:session)
+        let driver:ApiController
+        let apiVersion = try getVersion(uri)
+        switch apiVersion {
+        case .plain, .icy: driver = DummyController(session:session)
+        case .ybridV2: driver = YbridV2Controller(session:session)
         }
-        Logger.api.notice("selected API version is \(driver.apiVersion)")
+        Logger.api.notice("selected API version is \(apiVersion)")
         return driver
     }
     
-    func getVersion(_ uri:String) throws -> ApiVersion {
+    func getVersion(_ uri:String) throws -> ControllerVersion {
         
         guard let url = URL(string: uri) else {
             throw ApiError(ErrorKind.invalidUri, uri)
         }
         
         let ybridVersions = try getSupportedVersionsFromYbridV2Server(url: url)
-        if ybridVersions.contains(ApiVersion.ybridV2.rawValue) {
+        if ybridVersions.contains(ControllerVersion.ybridV2.rawValue) {
             return .ybridV2
         } else {
             return .icy

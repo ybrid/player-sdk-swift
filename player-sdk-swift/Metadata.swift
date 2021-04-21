@@ -29,23 +29,10 @@ import Foundation
 
 class Metadata {
     
-//    public enum type {
-//        case music
-//        case unknown
-//    }
-//
-//    var id: String?
-//    var artist: String?
-//    var title: String?
-   
-//    var companions: [String] = []
-//    var description: String?
-//    var durationMillies: Int?
-//    var type: type = .unknown
-  
     var combinedTitle: String?
+    var icyData: [String:String]?
     var opusComments: [String:String]?
-    
+    var ybridMetadata: YbridMetadata?
     
     init(combinedTitle:String) {
         self.combinedTitle = combinedTitle
@@ -55,16 +42,31 @@ class Metadata {
         self.opusComments = opusComments
     }
     
+    init(icyData:[String:String]) {
+        self.icyData = icyData
+    }
+    
+    init(ybridMetadata:YbridMetadata) {
+        self.ybridMetadata = ybridMetadata
+    }
+    
     func displayTitle() -> String? {
-        if combinedTitle != nil {
-            return combinedTitle!
+        
+        if let ybrid = ybridMetadata {
+            var displayTitle = ""
+            let item = ybrid.currentItem
+            displayTitle = item.title
+            if !item.artist.isEmpty {
+                displayTitle += "\nby \(item.artist)"
+            }
+            return displayTitle
         }
         
-        if opusComments != nil {
+        if let opus = opusComments {
             let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
             let playout = relevant
-                .filter { opusComments![$0] != nil }
-                .map { opusComments![$0]! }
+                .filter { opus[$0] != nil }
+                .map { opus[$0]! }
             let displayTitle = playout.joined(separator: " - ")
             if displayTitle.count > 0 {
                 // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
@@ -72,7 +74,17 @@ class Metadata {
                 return displayTitle
             }
         }
-
+        
+        if let icyDictionary = icyData {
+            if let streamTitle = icyDictionary["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
+                return streamTitle
+            }
+        }
+        
+        if combinedTitle != nil {
+            return combinedTitle!
+        }
+        
         return nil
     }
 }

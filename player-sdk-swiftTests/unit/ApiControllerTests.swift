@@ -25,36 +25,33 @@
 
 import XCTest
 
-class ApiDriverTests: XCTestCase {
-
-     //   {"__responseHeader":{"responseVersion":"v2","statusCode":200,"success":true,"supportedVersions":["v1","v2"],"timestamp":"2021-04-13T08:29:35.815Z"}}
+class ApiControllerTests: XCTestCase {
     
-    let factory = ApiDriverFactory()
-    
+    let factory = ControllerFactory()
     
     func testFactoryGetVersion_YbridDemo() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(ApiVersion.ybridV2, version)
+        XCTAssertEqual(ControllerVersion.ybridV2, version)
     }
     
     func testFactoryGetVersion_Swr3() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3/mid")
-        XCTAssertEqual(ApiVersion.ybridV2, version)
+        XCTAssertEqual(ControllerVersion.ybridV2, version)
     }
     
     func testFactoryGetVersion_Swr3WrongUrl() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
-        XCTAssertEqual(ApiVersion.icy, version)
+        XCTAssertEqual(ControllerVersion.icy, version)
     }
     
     func testFactoryGetVersion_UrlNotFound() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/gibtsNicht")
-        XCTAssertEqual(ApiVersion.icy, version)
+        XCTAssertEqual(ControllerVersion.icy, version)
     }
     
     func testFactoryGetVersion_Hr2() throws {
         let version = try factory.getVersion("https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        XCTAssertEqual(ApiVersion.icy, version)
+        XCTAssertEqual(ControllerVersion.icy, version)
     }
     
     func testFactoryGetVersion_BadUrl() throws {
@@ -70,34 +67,35 @@ class ApiDriverTests: XCTestCase {
     
     func testFactoryGetVersion_OnDemand() throws {
         let version = try factory.getVersion("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        XCTAssertEqual(ApiVersion.icy, version)
+        XCTAssertEqual(ControllerVersion.icy, version)
     }
     
     func testDriver_YbridDemo_Connect_Disconnect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
-        guard let driver = session.driver else {
-            XCTFail(); return
+
+        guard let controller = session.controller else {
+            XCTFail("expected a controller"); return
         }
-        XCTAssertEqual(ApiVersion.ybridV2, driver.apiVersion)
-        XCTAssertTrue(driver.connected)
-        XCTAssertNotNil(driver.playbackUri)
-        XCTAssertTrue(driver.playbackUri.starts(with: "icyx"))
-        XCTAssertTrue(driver.playbackUri.contains("edge"))
+        XCTAssertEqual(ControllerVersion.ybridV2, controller.apiVersion)
+        XCTAssertTrue(controller.connected)
+        XCTAssertNotNil(controller.playbackUri)
+        XCTAssertTrue(controller.playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(controller.playbackUri.contains("edge"))
       
-        driver.disconnect()
-        XCTAssertFalse(driver.connected)
+        controller.disconnect()
+        XCTAssertFalse(controller.connected)
     }
 
     func testDriver_Swr3_Connect_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
-        guard let driver = session.driver else {
+        guard let driver = session.controller else {
             XCTFail(); return
         }
-        XCTAssertEqual(ApiVersion.ybridV2, driver.apiVersion)
+        XCTAssertEqual(ControllerVersion.ybridV2, driver.apiVersion)
         XCTAssertTrue(driver.connected)
 
         var playbackUri = driver.playbackUri
@@ -109,16 +107,13 @@ class ApiDriverTests: XCTestCase {
         playbackUri = driver.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        
-        
     }
-    
     
     func testDriver_Swr3WrongUrl_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3")
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
-        XCTAssertNotNil(session.driver)
+        XCTAssertNotNil(session.controller)
         
         XCTAssertEqual(session.playbackUri, endpoint.uri)
     }
@@ -126,40 +121,40 @@ class ApiDriverTests: XCTestCase {
     
     func testDriver_Hr2() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        guard let driver = endpoint.createSession().driver else {
+        guard let driver = endpoint.createSession().controller else {
             XCTFail(); return
         }
-        XCTAssertEqual(ApiVersion.icy, driver.apiVersion)
+        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_EgoFM() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
-        guard let driver = endpoint.createSession().driver else {
+        guard let driver = endpoint.createSession().controller else {
             XCTFail(); return
         }
-        XCTAssertEqual(ApiVersion.icy, driver.apiVersion)
+        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_DlfOpus() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let driver = endpoint.createSession().driver else {
+        guard let driver = endpoint.createSession().controller else {
             XCTFail(); return
         }
-        XCTAssertEqual(ApiVersion.icy, driver.apiVersion)
+        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_OnDemandSound() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let driver = endpoint.createSession().driver else {
+        guard let driver = endpoint.createSession().controller else {
             XCTFail(); return
         }
-        XCTAssertEqual(ApiVersion.icy, driver.apiVersion)
+        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }

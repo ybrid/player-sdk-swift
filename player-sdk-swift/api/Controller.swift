@@ -1,5 +1,5 @@
 //
-// Session.swift
+// Controller.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,35 +25,31 @@
 
 import Foundation
 
+protocol Controller {
+    var playbackUri:String { get }
+    var connected:Bool { get }
+}
 
-public class Session {
+class ApiController : Controller {
     
-    let endpoint:MediaEndpoint
-    let factory = ApiDriverFactory()
-    
-    var driver:ApiDriver?
-    var player:AudioPlayer?
-    
-    public var playbackUri:String { get {
-        if let uri = driver?.playbackUri {
-            return uri
-        }
-        return endpoint.uri
+    let apiVersion:ControllerVersion
+    let session:YbridSession
+    var baseUrl:URL
+    var playbackUri:String
+    var valid:Bool = true
+    var connected:Bool = false { didSet {
+        Logger.api.info("\(apiVersion) controller \(connected ? "connected" : "disconnected")")
     }}
 
-    init(endpoint:MediaEndpoint) {
-        self.endpoint = endpoint
+    init(session:YbridSession, version:ControllerVersion) {
+        self.apiVersion = version
+        self.session = session
+        self.playbackUri = session.endpoint.uri
+        self.baseUrl = URL(string: session.endpoint.uri)!
+
     }
     
-    func connect() throws {
-        if self.driver == nil {
-            self.driver = try factory.createDriver(self)
-        }
-        try self.driver?.connect()
-    }
-    
-    public func close() {
-        self.driver?.disconnect()
-    }
-    
+    func connect() throws {}
+    func disconnect() {}
+
 }

@@ -25,7 +25,7 @@
 
 import XCTest
 
-class ApiSessionTests: XCTestCase {
+class YbridSessionTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -42,6 +42,24 @@ class ApiSessionTests: XCTestCase {
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
+        guard let metadata = session.metadata else {
+            XCTFail("ybrid metadata expected"); return
+        }
+        print("running \(metadata.currentItem.title ), \(metadata.currentItem.type) on \(metadata.station.name)")
+        XCTAssertNotNil(metadata)
+        session.close()
+    }
+    
+    func testSession_YbridSwr3() throws {
+        let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
+        let session = endpoint.createSession()
+        let playbackUri = session.playbackUri
+        XCTAssertTrue(playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(playbackUri.contains("edge"))
+        guard let metadata = session.metadata else {
+            XCTFail("ybrid metadata expected"); return
+        }
+        print("running \(metadata.currentItem.title ), \(metadata.currentItem.type) on \(metadata.station.name)")
         session.close()
     }
     
@@ -62,7 +80,5 @@ class ApiSessionTests: XCTestCase {
         XCTAssertEqual(uri, playbackUri)
         session.close()
     }
-
-    
     
 }

@@ -1,0 +1,70 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-04-21T16:22:02.312Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "adaptive-demo",
+            "availableServices": [
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "adaptive-demo"
+                },
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "ad-injection-demo"
+                }
+            ],
+            "bouquetId": "ybrid-demo-services",
+            "primaryServiceId": "adaptive-demo"
+        },
+        "duration": 7056,
+        "id": "a3c7353b-7c27-463d-9cc8-c8d29a84c2d7",
+        "metadata": {
+            "currentItem": {
+                "artist": "ABBA",
+                "companions": [],
+                "description": "A stream continuously modulating between 32 and 192 kbps.",
+                "durationMillis": 291192,
+                "id": "3464",
+                "title": "The Winner Takes It All",
+                "type": "MUSIC"
+            },
+            "nextItem": {
+                "artist": "Ybrid® Hybrid Dynamic Live Audio Technology",
+                "companions": [],
+                "description": "",
+                "durationMillis": 9912,
+                "id": "3465",
+                "title": "Your Personal Audio Experience",
+                "type": "JINGLE"
+            },
+            "station": {
+                "genre": "",
+                "name": ""
+            }
+        },
+        "playout": {
+            "baseURL": "https://edge01-stagecast.ybrid.io/adaptive-demo",
+            "playbackURI": "icyxs://edge01-stagecast.ybrid.io:443/adaptive-demo?session-id\u003da3c7353b-7c27-463d-9cc8-c8d29a84c2d7",
+            "currentBitRate": 112000,
+            "host": "edge01-stagecast.ybrid.io",
+            "maxBitRate": -1,
+            "offsetToLive": -1008
+        },
+        "sessionId": "a3c7353b-7c27-463d-9cc8-c8d29a84c2d7",
+        "startDate": "2021-04-21T16:21:56.461Z",
+        "swapInfo": {
+            "nextSwapReturnsToMain": false,
+            "swapsLeft": 0
+        },
+        "valid": true
+    }
+}

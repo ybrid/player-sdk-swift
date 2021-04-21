@@ -73,10 +73,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackState
     }}
     
+    public let session:YbridSession
     public var canPause:Bool = false
-    
-    let streamUrl: URL
-    let icyMetadata: Bool = true
     
     var loader: AudioDataLoader?
     var pipeline: AudioPipeline?
@@ -99,23 +97,28 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // get ready for playing
     // mediaUrl - the provided audio. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(mediaUrl: URL, listener: AudioPlayerListener?) {
-        self.playerListener = listener
-        self.streamUrl = mediaUrl
-        PlayerContext.setupAudioSession()
+    public convenience init(mediaUrl: URL, listener: AudioPlayerListener?) {
+        let mediaEndpoint = MediaEndpoint(mediaUri: mediaUrl.absoluteString)
+        self.init(mediaEndpoint: mediaEndpoint, listener: listener)
     }
     
+    // get ready for playing
+    // mediaEndpoint - the wrapped provided audio uri.
+    // listener - object to be called back from the player process
+    public convenience init(mediaEndpoint: MediaEndpoint, listener: AudioPlayerListener?) {
+        let session = mediaEndpoint.createSession()
+        self.init(session: session, listener: listener)
+    }
     
     // get ready for playing
-    // mediaUrl - the provided audio. Supports mp3, aac and opus.
+    // session - the connected session to the endpoint on audio. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(session: Session, listener: AudioPlayerListener?) {
+    public init(session: YbridSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
-        self.streamUrl = URL(string: session.playbackUri)!
+        self.session = session
         PlayerContext.setupAudioSession()
     }
 
-    
     deinit {
         Logger.shared.debug()
         PlayerContext.deactivate()
@@ -169,8 +172,11 @@ public class AudioPlayer: BufferListener, PipelineListener {
     }
     
     private func playWhenReady() {
-        pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener)
-        loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline!, inclMetadata: icyMetadata)
+        let pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, ybridSession: session)
+        self.pipeline = pipeline
+        let streamUrl = URL(string: session.playbackUri)!
+        let icyMetadata = (session.controller?.apiVersion == ControllerVersion.icy)
+        loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline, inclMetadata: icyMetadata)
         loader?.requestData(from: streamUrl)
     }
     
@@ -190,6 +196,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         case .buffering:
             self.playback = playback
             playback.setListener(listener: self)
+            session.fetchMetadata()
         case .playing:
             Logger.shared.error("should not play already.")
         case .stopped, .pausing:
@@ -209,7 +216,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
         switch severity {
         case .notice:
-            Logger.shared.notice(logMessage)
+            Logger.shared.info(logMessage)
         case .recoverable:
             Logger.shared.notice(logMessage)
         case .fatal:

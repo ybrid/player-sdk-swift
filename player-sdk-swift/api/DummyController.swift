@@ -1,5 +1,5 @@
 //
-// MediaEndpoint.swift
+// EmptyDriver.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -26,23 +26,28 @@
 import Foundation
 
 
-public class MediaEndpoint {
-    let uri:String
-
-    public init(mediaUri:String!) {
-        self.uri = mediaUri
+class DummyController : ApiController {
+    
+    init(session:YbridSession) {
+        super.init(session: session, version: .icy)
     }
     
-    public func createSession() -> YbridSession {
-        
-        let session = YbridSession(on: self)
-        do {
-            try session.connect()
-        } catch {
-            Logger.api.debug("cannot connect to endpoint, reason \(error.localizedDescription)")
-
+    override func connect() throws {
+        if connected {
+            return
         }
-        return session
+        
+        if !valid {
+            throw ApiError(ErrorKind.invalidSession, "session is not valid.")
+        }
+        connected = true
     }
+       
+    override func disconnect() {
+        if !connected {
+            return
+        }
+        connected = false
+    }
+    
 }
-

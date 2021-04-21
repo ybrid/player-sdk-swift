@@ -30,7 +30,11 @@ protocol PipelineListener: class {
     func error(_ severity: ErrorSeverity, _ error: AudioPlayerError)
 }
 
-class AudioPipeline : DecoderListener, MemoryListener
+protocol MetadataListener: class {
+    func metadataReady(_ metadata: Metadata)
+}
+
+class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
 {
     let pipelineListener: PipelineListener
     var started = Date()
@@ -53,16 +57,19 @@ class AudioPipeline : DecoderListener, MemoryListener
 //        }
     
     weak var playerListener:AudioPlayerListener?
+    weak var ybridSession:YbridSession?
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
     
-    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?) {
+    
+    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, ybridSession: YbridSession? = nil) {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
+        self.ybridSession = ybridSession
+        self.ybridSession?.metadataListener = self
         PlayerContext.registerMemoryListener(listener: self)
     }
-    
     deinit {
         Logger.decoding.debug()
     }
@@ -91,7 +98,7 @@ class AudioPipeline : DecoderListener, MemoryListener
     // MARK: setup pipeline
     
     func prepareMetadata(metadataInverallB: Int) {
-        self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB)
+        self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB, listener: self)
     }
         
     func prepareAudio(audioContentType: AudioFileTypeID) throws {
@@ -124,6 +131,12 @@ class AudioPipeline : DecoderListener, MemoryListener
     
     func process(data: Data) {
         
+        metadataQueue.async {
+            if let _ = self.ybridSession {
+                self.ybridSession?.fetchMetadata()
+            }
+        }
+        
         let treatedData = treatMetadata(data: data)
         
         let accuData = accumulate( treatedData ?? data )
@@ -133,6 +146,7 @@ class AudioPipeline : DecoderListener, MemoryListener
         }
 
         self.decode(data: audioData)
+
     }
     
     func flushAudio() {
@@ -185,6 +199,8 @@ class AudioPipeline : DecoderListener, MemoryListener
         }
     }
     
+    // MARK: metadata listener
+    
     func metadataReady(_ metadata: Metadata) {
         if firstMetadata {
             firstMetadata = false
@@ -197,12 +213,7 @@ class AudioPipeline : DecoderListener, MemoryListener
                 self.notifyMetadataChanged(metadata)
             }
         }
-
     }
-    
-
-    
-    
     
     // MARK: processing steps
     
@@ -210,14 +221,7 @@ class AudioPipeline : DecoderListener, MemoryListener
         guard let mdExtractor = metadataExtractor else {
             return nil
         }
-        let treatedData = mdExtractor.handle(payload: data, metadataCallback: { (metadata:[String:String]) in
-            Logger.decoding.debug("extracted metadata is \(metadata)")
-            if let streamTitle = metadata["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
-                self.metadataReady(Metadata(combinedTitle: streamTitle))
-            }
-            let streamUrl = metadata["StreamUrl"]
-            self.icyUrl = streamUrl
-        })
+        let treatedData = mdExtractor.handle(payload: data)
         if Logger.verbose { Logger.decoding.debug("\(data.count - treatedData.count) of \(data.count) bytes were extracted") }
         
         return treatedData
