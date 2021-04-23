@@ -36,6 +36,7 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
     fileprivate var decoder:OpaquePointer?
     fileprivate var skipper:FrameSkipper?
     
+    
     init(container: OggContainer, decodingListener: DecoderListener) throws {
         self.container = container
         try super.init(audioContentType: kAudioFormatOpus, decodingListener: decodingListener)
@@ -142,6 +143,8 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
         }
     }
 
+    // MARK: MetadataListener
+    
     func metadataReady(_ metadata: Metadata) {
         super.listener.metadataReady(metadata)
     }

@@ -25,7 +25,7 @@
 
 import XCTest
 
-class YbridSessionTests: XCTestCase {
+class MediaSessionTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -42,24 +42,35 @@ class YbridSessionTests: XCTestCase {
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = session.metadata else {
+        guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.currentItem.title ), \(metadata.currentItem.type) on \(metadata.station.name)")
+        print("running \(metadata.displayTitle())")
         XCTAssertNotNil(metadata)
         session.close()
     }
-    
+
     func testSession_YbridSwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
         let session = endpoint.createSession()
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = session.metadata else {
+        guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.currentItem.title ), \(metadata.currentItem.type) on \(metadata.station.name)")
+        print("running \(metadata.displayTitle())")
+        session.close()
+    }
+    
+    func testSession_IcySwr3() throws {
+        let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
+        let session = endpoint.createSession()
+        let playbackUri = session.playbackUri
+        XCTAssertEqual(endpoint.uri, playbackUri)
+        let metadata = session.fetchMetadataSync()
+        XCTAssertNil(metadata, "no icy metadata expected")
+      
         session.close()
     }
     
@@ -69,6 +80,10 @@ class YbridSessionTests: XCTestCase {
         let session = endpoint.createSession()
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
+        
+        let metadata = session.fetchMetadataSync()
+        XCTAssertNil(metadata, "no opus metadata expected")
+        
         session.close()
     }
     
@@ -78,6 +93,8 @@ class YbridSessionTests: XCTestCase {
         let session = endpoint.createSession()
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
+        let metadata = session.fetchMetadataSync()
+        XCTAssertNil(metadata, "no metadata expected")
         session.close()
     }
     

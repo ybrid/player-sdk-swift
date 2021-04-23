@@ -26,55 +26,34 @@
 import Foundation
 
 
-enum ControllerVersion : String {
-    case plain
-    case icy
-    case ybridV2 = "v2"
+enum MediaProtocol : String {
+    case plain // http only
+    case icy // http with icy-fields
+    case ybridV2 = "v2" // ybrid verson 2 (with icy-fields)
 }
 
-protocol ApiControllerOld {
-    var apiVersion:ControllerVersion { get }
-    var playbackUri:String { get }
+class MediaControlFactory {
     
-    //    func executeRequest(@NotNull Request<Command> request) throws
-    func connect() throws
-    func disconnect()
-    var connected:Bool { get }
-    var valid:Bool { get }
-    
-    //    var playoutInfo: PlayoutInfo { get }
-    
-    //    var capabilities: CapabilitySet { get }
-    //    void clearChanged(@NotNull SubInfo what);
-    //    func hasChanged(@NotNull SubInfo what) -> Bool
-    
-    //    func getBouquet() -> Bouquet
-    //    @NotNull Service getCurrentService();
-}
-
-
-class ControllerFactory {
-    
-    func create(_ session:YbridSession) throws -> ApiController {
+    func create(_ session:MediaSession) throws -> MediaDriver {
         let uri = session.endpoint.uri
-        let driver:ApiController
+        let driver:MediaDriver
         let apiVersion = try getVersion(uri)
         switch apiVersion {
-        case .plain, .icy: driver = DummyController(session:session)
-        case .ybridV2: driver = YbridV2Controller(session:session)
+        case .plain, .icy: driver = IcyDriver(session:session)
+        case .ybridV2: driver = YbridV2Driver(session:session)
         }
-        Logger.api.notice("selected API version is \(apiVersion)")
+        Logger.api.notice("selected media protocol is \(apiVersion)")
         return driver
     }
     
-    func getVersion(_ uri:String) throws -> ControllerVersion {
+    func getVersion(_ uri:String) throws -> MediaProtocol {
         
         guard let url = URL(string: uri) else {
             throw ApiError(ErrorKind.invalidUri, uri)
         }
         
         let ybridVersions = try getSupportedVersionsFromYbridV2Server(url: url)
-        if ybridVersions.contains(ControllerVersion.ybridV2.rawValue) {
+        if ybridVersions.contains(MediaProtocol.ybridV2.rawValue) {
             return .ybridV2
         } else {
             return .icy

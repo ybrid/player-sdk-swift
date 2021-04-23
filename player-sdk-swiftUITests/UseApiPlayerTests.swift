@@ -28,7 +28,7 @@ import YbridPlayerSDK
 
 class UseApiPlayerTests: XCTestCase {
     
-    var session:YbridSession? { willSet {
+    var session:MediaSession? { willSet {
         if let lastSession = session {
             lastSession.close()
         }
@@ -36,15 +36,18 @@ class UseApiPlayerTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Log additional debug information in this tests
-//        Logger.verbose = true
+        Logger.verbose = true
     }
     
     override func tearDownWithError() throws {
+        session?.close()
         session = nil
     }
     
     func test01_Session_Ybrid_PlaySomeSeconds() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+//        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
+        let uri = "https://stagecast.ybrid.io/adaptive-demo"
+        let endpoint = MediaEndpoint(mediaUri: uri )
         self.session = endpoint.createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()

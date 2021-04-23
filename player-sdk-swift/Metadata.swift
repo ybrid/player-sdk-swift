@@ -29,14 +29,14 @@ import Foundation
 
 class Metadata {
     
-    var combinedTitle: String?
+//    var combinedTitle: String?
     var icyData: [String:String]?
     var opusComments: [String:String]?
     var ybridMetadata: YbridMetadata?
     
-    init(combinedTitle:String) {
-        self.combinedTitle = combinedTitle
-    }
+//    init(combinedTitle:String) {
+//        self.combinedTitle = combinedTitle
+//    }
     
     init(opusComments:[String:String]) {
         self.opusComments = opusComments
@@ -49,13 +49,12 @@ class Metadata {
     init(ybridMetadata:YbridMetadata) {
         self.ybridMetadata = ybridMetadata
     }
-    
+
     func displayTitle() -> String? {
         
         if let ybrid = ybridMetadata {
-            var displayTitle = ""
             let item = ybrid.currentItem
-            displayTitle = item.title
+            var displayTitle = item.title
             if !item.artist.isEmpty {
                 displayTitle += "\nby \(item.artist)"
             }
@@ -80,10 +79,10 @@ class Metadata {
                 return streamTitle
             }
         }
-        
-        if combinedTitle != nil {
-            return combinedTitle!
-        }
+//        
+//        if combinedTitle != nil {
+//            return combinedTitle!
+//        }
         
         return nil
     }

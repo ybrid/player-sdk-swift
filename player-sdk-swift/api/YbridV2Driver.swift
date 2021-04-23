@@ -26,12 +26,19 @@
 import Foundation
 
 
-class YbridV2Controller : ApiController {
+class YbridV2Driver : MediaDriver {
     
     let encoder = JSONEncoder()
     var token:String?
+    var startDate:Date? { didSet {
+        if let start = startDate, startDate != oldValue {
+            Logger.api.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: start))")
+        }
+    }
+    }
+    var ybridMetadata:YbridMetadata?
     
-    init(session:YbridSession) {
+    init(session:MediaSession) {
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
         super.init(session:session, version: .ybridV2)
     }
@@ -40,7 +47,7 @@ class YbridV2Controller : ApiController {
         if connected {
             return
         }
-        
+ 
         if !valid {
             throw ApiError(ErrorKind.invalidSession, "session is not valid.")
         }
@@ -48,10 +55,8 @@ class YbridV2Controller : ApiController {
         Logger.api.debug("creating ybrid session")
         
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
-        try accecpt(response: sessionObj)
+        accecpt(response: sessionObj)
         connected = true
-        
-        Logger.api.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: sessionObj.startDate))")
     }
     
     override func disconnect() {
@@ -62,11 +67,8 @@ class YbridV2Controller : ApiController {
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
-            try accecpt(response: sessionObj)
+            accecpt(response: sessionObj)
             connected = false
-            
-            Logger.api.debug("start date was \(Formatter.iso8601withMilliSeconds.string(from: sessionObj.startDate))")
-            
         } catch {
             Logger.api.error(error.localizedDescription)
         }
@@ -77,33 +79,44 @@ class YbridV2Controller : ApiController {
             Logger.api.error("no connected ybrid session")
             return
         }
-        Logger.api.notice("getting info about ybrid session")
+        Logger.api.debug("getting info about ybrid session")
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
-            try accecpt(response: sessionObj)
-            
+            accecpt(response: sessionObj)
+            if !valid {
+                try reconnect()
+            }
         } catch {
             Logger.api.error(error.localizedDescription)
         }
     }
-
     
-    private func accecpt(response:YbridSessionObject) throws {
+    private func reconnect() throws {
+        Logger.api.info("reconnecting ybrid session")
+        let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
+        accecpt(response: sessionObj)
+        connected = true
+    }
+    
+    private func accecpt(response:YbridSessionObject) {
+        valid = response.valid
         token = response.sessionId
-        //            updateBouquet(response.getRawBouquet());
-        session.metadata = response.metadata // This must be after updateBouquet() has been called.
-        playbackUri = response.playout.playbackURI
-        baseUrl = response.playout.baseURL
-        //            updatePlayout(response.getRawPlayout());
-        //            updateSwapInfo(response.getRawSwapInfo());
-        if !response.valid {
-            valid = false
+        // updateBouquet(response.getRawBouquet());
+        ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
+
+        
+        if let playout = response.playout {
+            playbackUri = playout.playbackURI
+            baseUrl = playout.baseURL
+            //            updatePlayout(response.getRawPlayout());
+            //            updateSwapInfo(response.getRawSwapInfo());
         }
+        startDate = response.startDate
+    
         //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
         //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
     }
-    
     
     private func ctrlRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
@@ -130,16 +143,13 @@ class YbridV2Controller : ApiController {
         }
     }
     
-    func logMetadata() {
-        
-        if let metadata = session.metadata {
-            do {
-                let metadataData = try encoder.encode(metadata.currentItem)
-                let metadataString = String(data: metadataData, encoding: .utf8)!
-                Logger.api.debug("current item is \(metadataString)")
-            } catch {
-                Logger.api.error("cannot log metadata")
-            }
+    func logMetadata(_ data: YbridMetadata) {
+        do {
+            let currentItemData = try encoder.encode(data.currentItem)
+            let metadataString = String(data: currentItemData, encoding: .utf8)!
+            Logger.api.debug("current item is \(metadataString)")
+        } catch {
+            Logger.api.error("cannot log metadata")
         }
     }
     

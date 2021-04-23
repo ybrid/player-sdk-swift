@@ -1,5 +1,5 @@
 //
-// Session.swift
+// MediaSession.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,29 +25,16 @@
 
 import Foundation
 
-public class YbridSession {
+public class MediaSession {
     
     let endpoint:MediaEndpoint
-    let factory = ControllerFactory()
-    var controller:ApiController?
-    var metadata:YbridMetadata? {
-        didSet {
-            if metadata != oldValue, let metadata = metadata {
-                if controller is YbridV2Controller { // just logging
-                    (controller as! YbridV2Controller).logMetadata()
-                }
-                metadataListener?.metadataReady(Metadata(ybridMetadata: metadata))
-            }
-    }}
-    
-    weak var metadataListener:MetadataListener? { didSet {
-        if let metadata = metadata {
-            metadataListener?.metadataReady(Metadata(ybridMetadata: metadata))
-        }
-    }}
-    
+    let factory = MediaControlFactory()
+    var mediaControl:MediaDriver?
+
+    var metadataDict:[UUID:Metadata] = [:]
+
     public var playbackUri:String { get {
-        return controller?.playbackUri ?? endpoint.uri
+        return mediaControl?.playbackUri ?? endpoint.uri
     }}
 
     init(on endpoint:MediaEndpoint) {
@@ -55,18 +42,42 @@ public class YbridSession {
     }
     
     func connect() throws {
-        self.controller = try factory.create(self)
-        try self.controller?.connect()
+        self.mediaControl = try factory.create(self)
+        try self.mediaControl?.connect()
     }
     
     public func close() {
-        self.controller?.disconnect()
+        self.mediaControl?.disconnect()
     }
     
-    func fetchMetadata() {
-        if controller is YbridV2Controller {
-            (controller as! YbridV2Controller).info()
+    func fetchMetadataSync() -> Metadata? {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.info()
+            if let ybridData = v2Control.ybridMetadata {
+                return Metadata(ybridMetadata: ybridData)
+            }
         }
+        return nil
+    }
+    
+    func holdMetadata(metadata: Metadata) -> UUID {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.info()
+            if let ybridData = v2Control.ybridMetadata {
+                metadata.ybridMetadata = ybridData
+            }
+        }
+        let uuid = UUID()
+        metadataDict[uuid] = metadata
+        return uuid
+    }
+    
+    func popMetadata(uuid:UUID) -> Metadata? {
+        if let metadata = metadataDict[uuid] {
+            metadataDict[uuid] = nil
+            return metadata
+        }
+        return nil
     }
     
 }

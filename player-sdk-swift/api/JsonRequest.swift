@@ -29,17 +29,18 @@ extension Formatter {
     static let iso8601withMilliSeconds: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .iso8601)
-        formatter.locale = Locale.current//(identifier: "en_US_POSIX")
+        formatter.locale = Locale.current
         formatter.timeZone = TimeZone.current
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
         return formatter
     }()
 }
 
-class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*/
+class JsonRequest {
     
     static let applicationJson:String = "application/json"
     static let encodingUtf8:String = "utf-8"
+    static let onlyPostfix = ", */*; q=0"
     
     let url:URL
     let configuration = URLSessionConfiguration.default
@@ -48,9 +49,9 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
     
     init(url:URL) {
         self.url = url
-        //        configuration.timeoutIntervalForResource = 5
-        //        super.init()
-            self.decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
+        configuration.timeoutIntervalForResource = 3
+        configuration.timeoutIntervalForRequest = 3
+        self.decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
     }
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {
@@ -64,35 +65,27 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
         
         var result:T?
         
-        let session = URLSession(configuration: configuration)//, delegate: self, delegateQueue: nil)
+        let session = URLSession(configuration: configuration)
         var request = URLRequest(url: url)
         request.httpMethod = "OPTIONS"
-        request.setValue(JsonRequest.applicationJson, forHTTPHeaderField: "Accept")
-        request.setValue(JsonRequest.encodingUtf8, forHTTPHeaderField: "Accept-Charset")
+        request.setValue(JsonRequest.applicationJson + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept")
+        request.setValue(JsonRequest.encodingUtf8 + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept-Charset")
         
         let task = session.dataTask(with: request) { data, response, error in
-            
-            do {
-                if try !self.isJsonResponse(response) {
-                    semaphore.signal()
-                    return
-                }
-            } catch {
-                if error is ApiError {
-                    apiError = error as? ApiError
-                } else {
-                    apiError = ApiError(ErrorKind.invalidResponse, "error reading json", error)
-                }
+           
+            if let apiError = self.validateJsonResponse(response) {
+                if Logger.verbose { Logger.api.debug(apiError.localizedDescription) }
+                semaphore.signal()
                 return
             }
             
             if let error = error {
-                apiError = ApiError(ErrorKind.unknown, "error in OPTIONS \(self.url.absoluteString)", error)
+                apiError = ApiError(ErrorKind.serverError, "error in OPTIONS \(self.url.absoluteString)", error)
                 return
             }
             
             guard let data = data else {
-                apiError = ApiError(ErrorKind.invalidResponse,"missing data")
+                apiError = ApiError(ErrorKind.invalidResponse, "missing data")
                 return
             }
             
@@ -104,7 +97,11 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
                 result = try self.decoder.decode(responseType, from: data)
                 semaphore.signal()
             } catch {
-                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                guard let dataString = String(data: data, encoding: .utf8) else {
+                    apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                    return
+                }
+                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
                 return
             }
         }
@@ -135,12 +132,12 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
         
         var result:T?
         
-        let session = URLSession(configuration: URLSessionConfiguration.default)//, delegate: self, delegateQueue: nil)
+        let session = URLSession(configuration: configuration)
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue(JsonRequest.applicationJson, forHTTPHeaderField: "Accept")
-        request.setValue(JsonRequest.encodingUtf8, forHTTPHeaderField: "Accept-Charset")
+        request.setValue(JsonRequest.applicationJson + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept")
+        request.setValue(JsonRequest.encodingUtf8 + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept-Charset")
         
         let task = session.dataTask(with: request) { data, response, error in
             
@@ -166,7 +163,11 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
                 result = try self.decoder.decode(responseType, from: data)
                 semaphore.signal()
             } catch {
-                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                guard let dataString = String(data: data, encoding: .utf8) else {
+                    apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                    return
+                }
+                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
                 return
             }
         }
@@ -189,9 +190,8 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
     private func validateJsonResponse(_ response: URLResponse?) -> ApiError? {
         
         if let response = response {
-            Logger.api.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)")
+            if Logger.verbose { Logger.api.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
         }
-        
         guard let mime = response?.mimeType, mime == JsonRequest.applicationJson else {
             return ApiError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
         }
@@ -212,126 +212,11 @@ class JsonRequest {/*: NSObject, URLSessionTaskDelegate, URLSessionDataDelegate*
         guard let type = headers["Content-Type"] as? String else {
             return ApiError(ErrorKind.invalidResponse,"missing Content-Type")
         }
-        guard type.lowercased() == JsonRequest.applicationJson else {
+        guard type.lowercased().contains(JsonRequest.applicationJson) else {
             return ApiError(ErrorKind.missingMimeType,"unsupported Content-Type \(type)")
-        }
-        guard let encoding = headers["Content-Encoding"] as? String else {
-            return ApiError(ErrorKind.invalidResponse,"missing Content-Encoding")
-        }
-        guard encoding.lowercased() == JsonRequest.encodingUtf8 else {
-            return ApiError(ErrorKind.invalidResponse, "unsupported Content-Encoding \(encoding)")
         }
         return nil
     }
-    
-    private func isJsonResponse(_ response: URLResponse?) throws -> Bool {
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            Logger.api.error(response.debugDescription)
-            throw ApiError(ErrorKind.serverError, "no http response")
-        }
-        
-        guard httpResponse.mimeType == JsonRequest.applicationJson else {
-            return false
-        }
-        guard httpResponse.expectedContentLength > 0 else {
-            return false
-        }
-        
-        let headers = httpResponse.allHeaderFields
-        guard let type = headers["Content-Type"] as? String,
-              type.lowercased().contains(JsonRequest.applicationJson) else {
-            return false
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            Logger.api.debug("http status \(httpResponse.statusCode)")
-            return false
-        }
-        
-        //        guard let encoding = headers["Content-Encoding"] as? String else {
-        //            return ApiError(ErrorKind.invalidResponse,"missing Content-Encoding")
-        //        }
-        //        guard encoding.lowercased() == JsonRequest.encodingUtf8 else {
-        //            return ApiError(ErrorKind.invalidResponse, "unsupported Content-Encoding \(encoding)")
-        //        }
-        return true
-    }
-    
-    
-    // MARK: URLSessionTaskDelegate
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        Logger.api.notice("follow redirect: \(response.description)")
-        task.cancel()
-    }
-    
-    
-    //    @available(iOS 11.0, *)
-    //    func urlSession(_ session: URLSession, task: URLSessionTask, willBeginDelayedRequest request: URLRequest, completionHandler: @escaping (URLSession.DelayedRequestDisposition, URLRequest?) -> Void) {
-    //        Logger.api.notice()
-    //    }
-    
-    
-    func urlSession(_ session: URLSession, taskIsWaitingForConnectivity task: URLSessionTask) {
-        Logger.api.notice()
-    }
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        Logger.api.notice()
-    }
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
-        Logger.api.notice()
-    }
-    
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
-        Logger.api.notice()
-    }
-    
-    
-    //    @available(iOS 10.0, *)
-    //    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-    //        Logger.api.notice()
-    //    }
-    
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        Logger.api.notice()
-    }
-    
-    // MARK: URLSessionDataDelegate
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        Logger.api.notice("didReceive response for task \(dataTask.taskIdentifier)")
-        
-        completionHandler(Foundation.URLSession.ResponseDisposition.allow)
-    }
-    
-    
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didBecome downloadTask: URLSessionDownloadTask) {
-        Logger.api.notice()
-    }
-    
-    
-    //    @available(iOS 9.0, *)
-    //    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didBecome streamTask: URLSessionStreamTask){
-    //        Logger.api.notice()
-    //    }
-    
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        Logger.api.notice()
-    }
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, willCacheResponse proposedResponse: CachedURLResponse, completionHandler: @escaping (CachedURLResponse?) -> Void) {
-        Logger.api.notice()
-    }
-    
-    
-    
 }
 
 fileprivate func describe(_ state: URLSessionTask.State? ) -> String {

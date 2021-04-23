@@ -73,7 +73,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackState
     }}
     
-    public let session:YbridSession
+    public let session:MediaSession
     public var canPause:Bool = false
     
     var loader: AudioDataLoader?
@@ -113,7 +113,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // get ready for playing
     // session - the connected session to the endpoint on audio. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(session: YbridSession, listener: AudioPlayerListener?) {
+    public init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
         PlayerContext.setupAudioSession()
@@ -134,6 +134,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
         if playbackState == .stopped {
             playbackState = .buffering
+            self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
             playerQueue.async {
                 self.playWhenReady()
             }}
@@ -172,11 +173,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
     }
     
     private func playWhenReady() {
-        let pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, ybridSession: session)
-        self.pipeline = pipeline
         let streamUrl = URL(string: session.playbackUri)!
-        let icyMetadata = (session.controller?.apiVersion == ControllerVersion.icy)
-        loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline, inclMetadata: icyMetadata)
+        loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline!, inclMetadata: true)
         loader?.requestData(from: streamUrl)
     }
     
@@ -196,7 +194,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
         case .buffering:
             self.playback = playback
             playback.setListener(listener: self)
-            session.fetchMetadata()
+//            if let id = session.fetchMetadata(), let metadata = session.popMetadata(uuid: id) {
+//                playerListener?.displayTitleChanged(metadata.displayTitle())
+//            }
         case .playing:
             Logger.shared.error("should not play already.")
         case .stopped, .pausing:

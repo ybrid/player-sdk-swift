@@ -25,33 +25,33 @@
 
 import XCTest
 
-class ApiControllerTests: XCTestCase {
+class MediaProtocolTests: XCTestCase {
     
-    let factory = ControllerFactory()
+    let factory = MediaControlFactory()
     
     func testFactoryGetVersion_YbridDemo() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(ControllerVersion.ybridV2, version)
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
     func testFactoryGetVersion_Swr3() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3/mid")
-        XCTAssertEqual(ControllerVersion.ybridV2, version)
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
     func testFactoryGetVersion_Swr3WrongUrl() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
-        XCTAssertEqual(ControllerVersion.icy, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     func testFactoryGetVersion_UrlNotFound() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/gibtsNicht")
-        XCTAssertEqual(ControllerVersion.icy, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     func testFactoryGetVersion_Hr2() throws {
         let version = try factory.getVersion("https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        XCTAssertEqual(ControllerVersion.icy, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     func testFactoryGetVersion_BadUrl() throws {
@@ -67,7 +67,7 @@ class ApiControllerTests: XCTestCase {
     
     func testFactoryGetVersion_OnDemand() throws {
         let version = try factory.getVersion("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        XCTAssertEqual(ControllerVersion.icy, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     func testDriver_YbridDemo_Connect_Disconnect() throws {
@@ -75,10 +75,10 @@ class ApiControllerTests: XCTestCase {
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
 
-        guard let controller = session.controller else {
+        guard let controller = session.mediaControl else {
             XCTFail("expected a controller"); return
         }
-        XCTAssertEqual(ControllerVersion.ybridV2, controller.apiVersion)
+        XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
         XCTAssertTrue(controller.connected)
         XCTAssertNotNil(controller.playbackUri)
         XCTAssertTrue(controller.playbackUri.starts(with: "icyx"))
@@ -92,10 +92,10 @@ class ApiControllerTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
-        guard let driver = session.controller else {
+        guard let driver = session.mediaControl else {
             XCTFail(); return
         }
-        XCTAssertEqual(ControllerVersion.ybridV2, driver.apiVersion)
+        XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
         XCTAssertTrue(driver.connected)
 
         var playbackUri = driver.playbackUri
@@ -113,7 +113,7 @@ class ApiControllerTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3")
         let session = endpoint.createSession()
         XCTAssertNotNil(session, "expected a session")
-        XCTAssertNotNil(session.controller)
+        XCTAssertNotNil(session.mediaControl)
         
         XCTAssertEqual(session.playbackUri, endpoint.uri)
     }
@@ -121,40 +121,40 @@ class ApiControllerTests: XCTestCase {
     
     func testDriver_Hr2() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        guard let driver = endpoint.createSession().controller else {
+        guard let driver = endpoint.createSession().mediaControl else {
             XCTFail(); return
         }
-        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
+        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_EgoFM() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
-        guard let driver = endpoint.createSession().controller else {
+        guard let driver = endpoint.createSession().mediaControl else {
             XCTFail(); return
         }
-        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
+        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_DlfOpus() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let driver = endpoint.createSession().controller else {
+        guard let driver = endpoint.createSession().mediaControl else {
             XCTFail(); return
         }
-        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
+        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }
     
     func testDriver_OnDemandSound() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let driver = endpoint.createSession().controller else {
+        guard let driver = endpoint.createSession().mediaControl else {
             XCTFail(); return
         }
-        XCTAssertEqual(ControllerVersion.icy, driver.apiVersion)
+        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
         XCTAssertTrue(driver.connected)
     }

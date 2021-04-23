@@ -25,31 +25,39 @@
 
 import Foundation
 
-protocol Controller {
+protocol MediaControl {
     var playbackUri:String { get }
     var connected:Bool { get }
 }
 
-class ApiController : Controller {
+class MediaDriver : MediaControl {
     
-    let apiVersion:ControllerVersion
-    let session:YbridSession
+    let mediaProtocol:MediaProtocol
+    let session:MediaSession
     var baseUrl:URL
     var playbackUri:String
-    var valid:Bool = true
+    var valid:Bool = true //  { get }
     var connected:Bool = false { didSet {
-        Logger.api.info("\(apiVersion) controller \(connected ? "connected" : "disconnected")")
+        Logger.api.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
 
-    init(session:YbridSession, version:ControllerVersion) {
-        self.apiVersion = version
+    init(session:MediaSession, version:MediaProtocol) {
+        self.mediaProtocol = version
         self.session = session
         self.playbackUri = session.endpoint.uri
         self.baseUrl = URL(string: session.endpoint.uri)!
-
     }
     
+    //    func executeRequest(@NotNull Request<Command> request) throws
     func connect() throws {}
     func disconnect() {}
 
+    //    var playoutInfo: PlayoutInfo { get }
+    
+    //    var capabilities: CapabilitySet { get }
+    //    void clearChanged(@NotNull SubInfo what);
+    //    func hasChanged(@NotNull SubInfo what) -> Bool
+    
+    //    func getBouquet() -> Bouquet
+    //    @NotNull Service getCurrentService();
 }

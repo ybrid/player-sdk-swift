@@ -25,6 +25,7 @@
 
 
 import Foundation
+import CommonCrypto
 
 class MetadataExtractor {
     
@@ -35,6 +36,7 @@ class MetadataExtractor {
     var totalBytesExtracted:UInt32 = 0
     var totalBytesAudio:UInt32 = 0
     weak var listener: MetadataListener?
+    private var lastMetadataHash: Data?
     
     init(bytesBetweenMetadata:Int, listener: MetadataListener) {
         self.intervalBytes = bytesBetweenMetadata
@@ -137,14 +139,29 @@ class MetadataExtractor {
     
     fileprivate func metadataDone() {
         totalBytesExtracted += UInt32(metadata.data.count)
+        let hashed = hash(data: metadata.data)
+        Logger.loading.debug("\(hashed == lastMetadataHash ? "unchanged":"changed") icy metadata hash \(hashed.base64EncodedString())")
+        guard hashed != lastMetadataHash else {
+            return
+        }
+        lastMetadataHash = hashed
         let flatMd = String(decoding: metadata.data, as: UTF8.self)
-        Logger.loading.debug("metadata is \(flatMd)")
+        Logger.loading.debug("changed icy metadata string is \(flatMd)")
         let metaDict = parseMetadata(mdString: flatMd)
-        if Logger.verbose { Logger.decoding.debug("extracted metadata is \(metaDict)") }
-        listener?.metadataReady(Metadata(icyData: metaDict))
+        if Logger.verbose { Logger.decoding.debug("extracted icy metadata is \(metaDict)") }
+        let icyMetadata = Metadata(icyData: metaDict)
+        listener?.metadataReady(icyMetadata)
+        
         metadata = PayloadCollector("metadata")
     }
     
+    func hash(data : Data) -> Data {
+        var hash = [UInt8](repeating: 0,  count: Int(CC_SHA256_DIGEST_LENGTH))
+        data.withUnsafeBytes {
+            _ = CC_SHA256($0.baseAddress, CC_LONG(data.count), &hash)
+        }
+        return Data(hash)
+    }
     
     fileprivate func parseMetadata(mdString:String) -> [String:String] {
         let entries = mdString.components(separatedBy: ";")

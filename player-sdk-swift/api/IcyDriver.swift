@@ -26,9 +26,9 @@
 import Foundation
 
 
-class DummyController : ApiController {
+class IcyDriver : MediaDriver {
     
-    init(session:YbridSession) {
+    init(session:MediaSession) {
         super.init(session: session, version: .icy)
     }
     

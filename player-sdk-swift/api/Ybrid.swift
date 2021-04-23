@@ -34,7 +34,7 @@ struct YbridInfo: Codable {
     let statusCode: Int
     let success: Bool
     let supportedVersions: [String]
-//        let timestamp: Date // TODO
+    let timestamp: Date
 }
 
 struct YbridSessionResponse: Decodable {
@@ -43,12 +43,12 @@ struct YbridSessionResponse: Decodable {
 }
 struct YbridSessionObject: Codable {
     let duration: Int
-    let id: String
-    let sessionId: String
+    let id: String?
+    let sessionId: String?
     let valid: Bool
-    let playout: YbridPlayout
-    let metadata: YbridMetadata
-    let startDate: Date
+    let playout: YbridPlayout?
+    let metadata: YbridMetadata?
+    let startDate: Date?
 }
 struct YbridPlayout: Codable {
     let baseURL: URL

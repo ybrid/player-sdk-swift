@@ -33,9 +33,9 @@ public class MediaEndpoint {
         self.uri = mediaUri
     }
     
-    public func createSession() -> YbridSession {
+    public func createSession() -> MediaSession {
         
-        let session = YbridSession(on: self)
+        let session = MediaSession(on: self)
         do {
             try session.connect()
         } catch {

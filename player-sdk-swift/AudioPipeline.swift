@@ -36,6 +36,7 @@ protocol MetadataListener: class {
 
 class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
 {
+    
     let pipelineListener: PipelineListener
     var started = Date()
     var resumed = false
@@ -49,25 +50,21 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     private var buffer: PlaybackBuffer?
     private var infinite: Bool = true // default live
     
-    private var icyUrl: String?
-//        {
-//            didSet {
-//                Logger.loading.notice("\(icyUrl)")
-//            }
-//        }
-    
     weak var playerListener:AudioPlayerListener?
-    weak var ybridSession:YbridSession?
+    weak var mediaSession:MediaSession?
+    private var lastMetadata:Metadata? = nil
+
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
-    
-    
-    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, ybridSession: YbridSession? = nil) {
+    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession? = nil) {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
-        self.ybridSession = ybridSession
-        self.ybridSession?.metadataListener = self
+        self.mediaSession = session
+        /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackuri.
+        if let metadata = self.mediaSession?.fetchMetadataSync() {
+            self.notifyMetadataChanged(metadata)
+        }
         PlayerContext.registerMemoryListener(listener: self)
     }
     deinit {
@@ -78,7 +75,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         stopping = true
         decoder?.stopping = true
     }
-
     
     func dispose() {
         Logger.decoding.debug("pre deinit")
@@ -130,12 +126,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     // MARK: "main" is decode
     
     func process(data: Data) {
-        
-        metadataQueue.async {
-            if let _ = self.ybridSession {
-                self.ybridSession?.fetchMetadata()
-            }
-        }
         
         let treatedData = treatMetadata(data: data)
         
@@ -204,13 +194,31 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     func metadataReady(_ metadata: Metadata) {
         if firstMetadata {
             firstMetadata = false
-            notifyMetadataChanged(metadata)
+            guard let session = mediaSession else {
+                self.notifyMetadataChanged(metadata)
+                return
+            }
+            metadataQueue.async {
+                if let metadata = session.fetchMetadataSync() {
+                    self.notifyMetadataChanged(metadata)
+                    return
+                }
+                self.notifyMetadataChanged(metadata)
+            }
             return
         }
-        
         if let timeToMetadataPlaying = buffer?.size {
+            guard let session = mediaSession else {
+                metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
+                    self.notifyMetadataChanged(metadata)
+                }
+                return
+            }
+            let metadataId = session.holdMetadata(metadata: metadata)
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                self.notifyMetadataChanged(metadata)
+                if let delayedMd = session.popMetadata(uuid: metadataId) {
+                    self.notifyMetadataChanged(delayedMd)
+                }
             }
         }
     }
