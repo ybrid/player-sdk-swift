@@ -23,29 +23,24 @@
 // SOFTWARE.
 //
 
+// Metadata contains data corresponding to a time period or a single instance of a stream.
+// The data can origin from different sources. in general it is up to the purpose
+// which of the data is relevant.
+
 import Foundation
-
-
 
 class Metadata {
     
-//    var combinedTitle: String?
-    var icyData: [String:String]?
-    var opusComments: [String:String]?
+    private var icyData: [String:String]?
+    private var opusComments: [String:String]?
     var ybridMetadata: YbridMetadata?
-    
-//    init(combinedTitle:String) {
-//        self.combinedTitle = combinedTitle
-//    }
     
     init(opusComments:[String:String]) {
         self.opusComments = opusComments
     }
-    
     init(icyData:[String:String]) {
         self.icyData = icyData
     }
-    
     init(ybridMetadata:YbridMetadata) {
         self.ybridMetadata = ybridMetadata
     }
@@ -79,10 +74,6 @@ class Metadata {
                 return streamTitle
             }
         }
-//        
-//        if combinedTitle != nil {
-//            return combinedTitle!
-//        }
         
         return nil
     }

@@ -23,6 +23,9 @@
 // SOFTWARE.
 //
 
+// The session establishes the media control protocol with the server.
+// It caches meta data and in future will offer media controllers to interact with.
+
 import Foundation
 
 public class MediaSession {

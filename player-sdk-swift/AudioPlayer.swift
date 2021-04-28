@@ -95,7 +95,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     }
     
     // get ready for playing
-    // mediaUrl - the provided audio. Supports mp3, aac and opus.
+    // mediaUrl - the url of the audio stream. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
     public convenience init(mediaUrl: URL, listener: AudioPlayerListener?) {
         let mediaEndpoint = MediaEndpoint(mediaUri: mediaUrl.absoluteString)
@@ -151,6 +151,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
+    // Pause playback immediatly. Next play resumes.
+    // For on demand contents only. Loading continues in backgroud.
     public func pause() {
         guard canPause else {
             Logger.shared.error("cannot pause")
@@ -239,6 +241,5 @@ public class AudioPlayer: BufferListener, PipelineListener {
                 playbackState = .pausing
             }
         }
-        
     }
 }

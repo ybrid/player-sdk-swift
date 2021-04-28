@@ -61,7 +61,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
         self.mediaSession = session
-        /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackuri.
+        /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackUri coming from the session.
         if let metadata = self.mediaSession?.fetchMetadataSync() {
             self.notifyMetadataChanged(metadata)
         }

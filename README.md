@@ -15,13 +15,20 @@ After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the F
 ```swift
 import YbridPlayerSDK
 
-let url = URL.init(string: "https://stagecast.ybrid.io/adaptive-demo")!
-let player = AudioPlayer(mediaUrl: url, listener: nil)
+let mediaSession = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo").createSession()
+let player = AudioPlayer(session: mediaSession, listener: nil)
 player.play()
 // of course the program must not end here
+ ...
+
+
+// when context of media communication ends, such as ending the app 
+mediaSession.close()
 ```
 
-Possible playback states are
+The media session object auto detects the protocol to control content and metadata. It interacts with server and player. In future releases it will hold the player state and will offer some media controllers to the developer.
+
+Possible playback states of the player are
 ```swift
 public enum PlaybackState {
     case buffering 

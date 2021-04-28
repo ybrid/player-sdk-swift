@@ -23,8 +23,10 @@
 // SOFTWARE.
 //
 
-import Foundation
+// MediaEndpoint represents the entry point on a media server.
+// It's used to open a session for a stream.
 
+import Foundation
 
 public class MediaEndpoint {
     let uri:String
@@ -33,13 +35,14 @@ public class MediaEndpoint {
         self.uri = mediaUri
     }
     
+    // Create a MediaSession using this MediaEndpoint
     public func createSession() -> MediaSession {
         
         let session = MediaSession(on: self)
         do {
             try session.connect()
         } catch {
-            Logger.api.debug("cannot connect to endpoint, reason \(error.localizedDescription)")
+            Logger.api.debug("cannot connect to endpoint, reason: \(error.localizedDescription)")
 
         }
         return session
