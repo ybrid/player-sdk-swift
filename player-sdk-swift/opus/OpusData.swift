@@ -229,7 +229,7 @@ class OpusData : AudioData {
             return false
         }
         Logger.decoding.notice("OpusTags \(opusTags.debugDescription)")
-        let metadata = Metadata(opusComments: opusTags.comments)
+        let metadata = Metadata(vorbisComments: opusTags.comments)
         opusListener?.metadataReady(metadata)
         return true
     }

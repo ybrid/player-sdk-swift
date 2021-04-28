@@ -24,7 +24,7 @@
 //
 
 // Metadata contains data corresponding to a time period or a single instance of a stream.
-// The data can origin from different sources. in general it is up to the purpose
+// The data can origin from different sources. In general it is up to the purpose
 // which of the data is relevant.
 
 import Foundation
@@ -32,11 +32,11 @@ import Foundation
 class Metadata {
     
     private var icyData: [String:String]?
-    private var opusComments: [String:String]?
+    private var vorbisComments: [String:String]?
     var ybridMetadata: YbridMetadata?
     
-    init(opusComments:[String:String]) {
-        self.opusComments = opusComments
+    init(vorbisComments:[String:String]) {
+        self.vorbisComments = vorbisComments
     }
     init(icyData:[String:String]) {
         self.icyData = icyData
@@ -47,6 +47,7 @@ class Metadata {
 
     func displayTitle() -> String? {
         
+        // $TITLE by $ARTIST
         if let ybrid = ybridMetadata {
             let item = ybrid.currentItem
             var displayTitle = item.title
@@ -56,19 +57,24 @@ class Metadata {
             return displayTitle
         }
         
-        if let opus = opusComments {
+        // $ALBUM - $ARTIST - $TITLE ($VERSION)
+        if let comment = vorbisComments {
             let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
             let playout = relevant
-                .filter { opus[$0] != nil }
-                .map { opus[$0]! }
-            let displayTitle = playout.joined(separator: " - ")
+                .filter { comment[$0] != nil }
+                .map { comment[$0]! }
+            var displayTitle = playout.joined(separator: " - ")
+            if let version = comment["VERSION"] {
+                displayTitle += " (\(version))"
+            }
             if displayTitle.count > 0 {
-                // $ALBUM " - " $ARTIST " - " $TITLE " (" $VERSION ")"
-                // TODO version
+              
+
                 return displayTitle
             }
         }
         
+        // $ARTIST - $TITLE
         if let icyDictionary = icyData {
             if let streamTitle = icyDictionary["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
                 return streamTitle

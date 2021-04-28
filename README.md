@@ -26,7 +26,7 @@ player.play()
 mediaSession.close()
 ```
 
-The media session object auto detects the protocol to control content and metadata. It interacts with server and player. In future releases it will hold the player state and will offer some media controllers to the developer.
+The media session object auto detects the protocol to control content and metadata. It interacts with server and player. In future releases it will hold the player state and will offer some media controllers to developers.
 
 Possible playback states of the player are
 ```swift

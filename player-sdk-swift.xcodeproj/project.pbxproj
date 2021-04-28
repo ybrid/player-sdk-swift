@@ -16,6 +16,7 @@
 		171345C4263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
 		171345C5263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
 		171345C6263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
+		1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1714DA84263A0B7700DD17B8 /* MetadataTests.swift */; };
 		1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
 		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
@@ -164,6 +165,7 @@
 		17134568263015440054DB9D /* MediaSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSessionTests.swift; sourceTree = "<group>"; };
 		171345B426306D780054DB9D /* ComsumeMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComsumeMetadataTests.swift; sourceTree = "<group>"; };
 		171345C3263153500054DB9D /* MediaControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControl.swift; sourceTree = "<group>"; };
+		1714DA84263A0B7700DD17B8 /* MetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataTests.swift; sourceTree = "<group>"; };
 		1732222125F614BC00AEC833 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		17539E3E26257A9A000FE902 /* MediaEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaEndpoint.swift; sourceTree = "<group>"; };
 		17539E47262591C3000FE902 /* MediaSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSession.swift; sourceTree = "<group>"; };
@@ -376,6 +378,7 @@
 				1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */,
 				17539E702626E18F000FE902 /* MediaProtocolTests.swift */,
 				17134568263015440054DB9D /* MediaSessionTests.swift */,
+				1714DA84263A0B7700DD17B8 /* MetadataTests.swift */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -885,6 +888,7 @@
 				1799DD3F25D580D40055C973 /* DequeTests.swift in Sources */,
 				17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */,
 				17539E8C26272AC8000FE902 /* ApiError.swift in Sources */,
+				1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
 				17539E95262869E7000FE902 /* MediaControlFactory.swift in Sources */,
 				1799DD3E25D580D40055C973 /* PlaybackBufferTests.swift in Sources */,
