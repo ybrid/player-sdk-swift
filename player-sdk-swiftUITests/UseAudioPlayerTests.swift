@@ -34,7 +34,7 @@ class UseAudioPlayerTests: XCTestCase {
     }
  
     // of course you may choose your own radio station here
-    let url = URL.init(string: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")!
+    let url = URL.init(string: "https://stagecast.ybrid.io/swr3/mp3/mid")!
    
     /*
     Let the player play your radio.

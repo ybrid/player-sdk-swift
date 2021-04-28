@@ -99,19 +99,12 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // listener - object to be called back from the player process
     public convenience init(mediaUrl: URL, listener: AudioPlayerListener?) {
         let mediaEndpoint = MediaEndpoint(mediaUri: mediaUrl.absoluteString)
-        self.init(mediaEndpoint: mediaEndpoint, listener: listener)
-    }
-    
-    // get ready for playing
-    // mediaEndpoint - the wrapped provided audio uri.
-    // listener - object to be called back from the player process
-    public convenience init(mediaEndpoint: MediaEndpoint, listener: AudioPlayerListener?) {
         let session = mediaEndpoint.createSession()
         self.init(session: session, listener: listener)
     }
     
     // get ready for playing
-    // session - the connected session to the endpoint on audio. Supports mp3, aac and opus.
+    // session - the MediaSession created on the MediaEndpoint. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
     public init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
@@ -188,15 +181,14 @@ public class AudioPlayer: BufferListener, PipelineListener {
     
     func ready(playback: Playback) {
         
-        canPause = playback.canPause
+        if playback.canPause {
+            canPause = true
+        }
         
         switch playbackState {
         case .buffering:
             self.playback = playback
             playback.setListener(listener: self)
-//            if let id = session.fetchMetadata(), let metadata = session.popMetadata(uuid: id) {
-//                playerListener?.displayTitleChanged(metadata.displayTitle())
-//            }
         case .playing:
             Logger.shared.error("should not play already.")
         case .stopped, .pausing:

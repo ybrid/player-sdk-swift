@@ -28,6 +28,13 @@ import XCTest
 
 class AbortBufferingTests: XCTestCase {
     
+    var session:MediaSession?
+    
+    
+    override func tearDownWithError() throws {
+        session?.close()
+    }
+    
     func test00_LoggerVerboseDefault() {
         XCTAssertFalse(Logger.verbose)
     }
@@ -38,9 +45,11 @@ class AbortBufferingTests: XCTestCase {
         
     func testAbortMp3_until100msAfterConnect_CleanedUp() throws {
         Logger.verbose = true
+        session = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").createSession()
+        
         var interval:TimeInterval = 0.000
         repeat {
-            let aborting = playMp3AndAbort(afterConnect:interval)
+            let aborting = playAndAbort(session!, afterConnect:interval)
             
             var cycle = 0
             var state:PlaybackState?
@@ -66,9 +75,11 @@ class AbortBufferingTests: XCTestCase {
 
     func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
         Logger.verbose = true
-        var interval:TimeInterval = 1
+        session = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").createSession()
+
+        var interval:TimeInterval = 0.010
         repeat {
-            let aborting = playMp3AndAbort(afterConnect:interval)
+            let aborting = playAndAbort(session!, afterConnect:interval)
             
             var cycle = 0
             var state:PlaybackState?
@@ -98,8 +109,10 @@ class AbortBufferingTests: XCTestCase {
     
     func testAbortOpus_until100msAfterConnect_CleanedUp() throws {
         var interval:TimeInterval = 0.000
+        session = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus").createSession()
+       
         repeat {
-            let aborting = playOpusAndAbort(afterConnect:interval)
+            let aborting = playAndAbort(session!, afterConnect:interval)
             
             var cycle = 0
             var state:PlaybackState?
@@ -124,9 +137,10 @@ class AbortBufferingTests: XCTestCase {
 
     func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
         Logger.verbose = true
+        session = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus").createSession()
         var interval:TimeInterval = 0.010
         repeat {
-            let aborting = playOpusAndAbort(afterConnect:interval)
+            let aborting = playAndAbort(session!, afterConnect:interval)
             
             var cycle = 0
             var state:PlaybackState?
@@ -151,21 +165,10 @@ class AbortBufferingTests: XCTestCase {
     }
 
     // MARK: helpers
-    
-    private func playOpusAndAbort(afterConnect:TimeInterval) -> AbortingListener {
-        let url = URL.init(string: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")!
-        return playAndAbort(url, afterConnect: afterConnect)
-    }
-    
-    private func playMp3AndAbort(afterConnect:TimeInterval) -> AbortingListener {
-        let url = URL.init(string: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")!
-        return playAndAbort(url, afterConnect: afterConnect)
-    }
-
-    
-    private func playAndAbort(_ url:URL, afterConnect:TimeInterval) -> AbortingListener {
+        
+    private func playAndAbort(_ session:MediaSession, afterConnect:TimeInterval) -> AbortingListener {
         let abortingListener = AbortingListener(afterConnect:afterConnect)
-        let player = AudioPlayer(mediaUrl: url, listener: abortingListener)
+        let player = AudioPlayer(session: session, listener: abortingListener)
         abortingListener.player = player
         player.play()
         return abortingListener

@@ -26,13 +26,13 @@
 import XCTest
 import YbridPlayerSDK
 
-class MetadataTests: XCTestCase {
+class ComsumeMetadataTests: XCTestCase {
 
-    let metadataListener = TestMetadataListener()
+    let metadataListener = CountMetadataCallsListener()
     override func setUpWithError() throws {
         metadataListener.displayTitleCalled = 0
     }
-
+      
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
@@ -44,8 +44,8 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playSleepCheckStopPlaySleepCheck(on: player,
-                            fistCheck: { self.checkMinimumMetadataCalls(2) },
-                            secondCheck: { self.checkMinimumMetadataCalls(3) }
+                                              fistCheck: { self.checkMetadataCalls(min:2, max:3) },
+                                              secondCheck: { self.checkMetadataCalls(min:3, max:4) }
         )
     }
     
@@ -56,8 +56,8 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playCheckSleepCheck(on: player,
-                            fistCheck: { self.checkMetadataCalls(1) },
-                            secondCheck: { self.checkMinimumMetadataCalls(2) }
+                                 fistCheck: { self.checkMetadataCalls(equal:1) },
+                                 secondCheck: { self.checkMetadataCalls(min:2, max:3) }
         )
     }
     
@@ -68,8 +68,8 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playSleepCheckStopPlaySleepCheck(on: player,
-                            fistCheck: { self.checkMinimumMetadataCalls(1) },
-                            secondCheck: { self.checkMinimumMetadataCalls(2) }
+                                              fistCheck: { self.checkMetadataCalls(min:1, max:2) },
+                                              secondCheck: { self.checkMetadataCalls(min:2, max:3) }
         )
     }
     
@@ -78,8 +78,8 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playCheckSleepCheck(on: player,
-                            fistCheck: { self.checkMetadataCalls(0) },
-                            secondCheck: { self.checkMinimumMetadataCalls(1) }
+                                 fistCheck: { self.checkMetadataCalls(equal:0) },
+                                 secondCheck: { self.checkMetadataCalls(min:1, max:2) }
         )
     }
 
@@ -88,8 +88,8 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playSleepCheckStopPlaySleepCheck(on: player,
-                            fistCheck: { self.checkMinimumMetadataCalls(1) },
-                            secondCheck: { self.checkMinimumMetadataCalls(2) }
+                                              fistCheck: { self.checkMetadataCalls(min:1, max:2) },
+                                              secondCheck: { self.checkMetadataCalls(min:2, max:3) }
         )
     }
     
@@ -98,10 +98,22 @@ class MetadataTests: XCTestCase {
         let session = endpoint.createSession()
         let player = AudioPlayer(session: session, listener: metadataListener)
         self.playSleepCheckStopPlaySleepCheck(on: player,
-                            fistCheck: { self.checkMetadataCalls(0) },
-                            secondCheck: { self.checkMetadataCalls(0) }
+                                              fistCheck: { self.checkMetadataCalls(equal:0) },
+                                              secondCheck: { self.checkMetadataCalls(equal:0) }
         )
     }
+    
+    func test07_OpusOnDemandWithMetadata_NoneOnResume() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
+        let session = endpoint.createSession()
+        let player = AudioPlayer(session: session, listener: metadataListener)
+        self.play5SecCheckPausePlay3SecCheck(on: player,
+                                              fistCheck: { self.checkMetadataCalls(equal:1) },
+                                              secondCheck: { self.checkMetadataCalls(equal:1) }
+        )
+    }
+    
+    
     
     private func playSleepCheckStopPlaySleepCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
         player.play()
@@ -130,18 +142,39 @@ class MetadataTests: XCTestCase {
         sleep(1)
     }
     
-    private func checkMinimumMetadataCalls(_ expectedMinCalls: Int) {
-        let called = metadataListener.displayTitleCalled
-        XCTAssertTrue( called >= expectedMinCalls, "expected >=\(expectedMinCalls)  calls, but was \(called)")
+    private func play5SecCheckPausePlay3SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
+        player.play()
+        sleep(5)
+        XCTAssertEqual(PlaybackState.playing, player.state)
+        fistCheck()
+        player.pause()
+        sleep(1)
+        XCTAssertEqual(PlaybackState.pausing, player.state)
+        
+        player.play()
+        sleep(3)
+        XCTAssertEqual(PlaybackState.playing, player.state)
+        secondCheck()
+        player.stop()
+        sleep(1)
     }
     
-    private func checkMetadataCalls(_ expectedCalls: Int) {
+    
+    private func checkMetadataCalls(equal expectedCalls: Int) {
         let called = metadataListener.displayTitleCalled
         XCTAssertTrue( called == expectedCalls,  "expected == \(expectedCalls)  calls, but was \(called)")
     }
     
-     
-    class TestMetadataListener : AbstractAudioPlayerListener {
+    /// necessary because there could be a change of metadata while playing
+    private func checkMetadataCalls(min expectedMinCalls: Int, max expectedMaxCalls: Int) {
+        let called = metadataListener.displayTitleCalled
+        XCTAssertTrue( called >= expectedMinCalls, "expected >=\(expectedMinCalls)  calls, but was \(called)")
+        
+        XCTAssertTrue( called <= expectedMaxCalls, "expected <=\(expectedMaxCalls)  calls, but was \(called)")
+    }
+    
+    
+    class CountMetadataCallsListener : AbstractAudioPlayerListener {
         
         var displayTitleCalled = 0
         
@@ -150,6 +183,7 @@ class MetadataTests: XCTestCase {
             Logger.testing.info("-- combined display title is \(title ?? "(nil)")")
             XCTAssertNotNil(title)
         }
+        
     }
 }
 
