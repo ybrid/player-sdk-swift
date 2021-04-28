@@ -28,16 +28,21 @@
 # Usage: no parameters
 # 
 
-scheme=player-sdk-swiftIOSTests
-target=player-sdk-swiftIOSTests
-testing="-only-testing:$target/DevelopingPlayerTests"
-testing="$testing -only-testing:$target/UseAudioPlayerTests"
+
+
 
 dd=./DerivedData
 
 logbase="test-"
 rm -f "$logbase*.log"
 grepToStdoutPattern="^\s*Executed\s\d+\stests|^\*\* TEST"
+
+# ---------------------
+# ios base settings
+scheme=player-sdk-swiftIOSTests
+target=player-sdk-swiftIOSTests
+testing="-only-testing:$target/DevelopingPlayerTests"
+testing="$testing -only-testing:$target/UseAudioPlayerTests"
 
 platform=iphonesimulator
 device="iPhone 11 Pro"
@@ -75,18 +80,21 @@ echo "---------------------------------"
 # echo "$result, see $logfile"
 # echo "---------------------------------"
 
+# -----------------------
+# macos base settings
+scheme=player-sdk-swiftMacTests
+target=player-sdk-swiftMacTests
+testing="-only-testing:$target/DevelopingPlayerTests"
+testing="$testing -only-testing:$target/UseAudioPlayerTests"
 
-# platform=macosx
-# scheme=player-sdk-swiftMacTests
-# target=player-sdk-swiftMacTests
-# testing="-only-testing $target/DevelopingPlayerTests"
-# device="My Mac"
-# echo "testing with $platform on $device"
-# logfile=$logbase$device.log
-# xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
-#   -destination='$device' -sdk $platform \
-#   test $testing 2>&1 > "$logfile"
-# result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
-# echo "$result, see $logfile"
-# echo "---------------------------------"
+platform=macosx
+device="My Mac"
+echo "testing with $platform on $device"
+logfile=$logbase$device.log
+xcodebuild -workspace player-sdk-swift.xcworkspace -scheme $scheme \
+  -destination='$device' -sdk $platform \
+  test $testing 2>&1 > "$logfile"
+result=`cat "$logfile" | grep -E "$grepToStdoutPattern"`
+echo "$result, see $logfile"
+echo "---------------------------------"
 
