@@ -263,9 +263,15 @@ class AbortingListener : AudioPlayerListener  {
 
 extension PlaybackEngine {
     func cleanedUp() -> Bool {
+        let noTimer = timer == nil
+        XCTAssertTrue(noTimer, "timer should be gone")
         let noScheduling = playbackBuffer?.playingSince == nil
-        let notPlaying = !playerNode.isPlaying && !engine.isRunning
-        return timer == nil && noScheduling && notPlaying
+        XCTAssertTrue(noScheduling, "playing since should be nil")
+        let notPlaying = !playerNode.isPlaying
+        XCTAssertTrue(notPlaying, "player node should not be playing")
+        let notRunning = !engine.isRunning
+        XCTAssertTrue(notRunning, "engine should not be running")
+        return noTimer && noScheduling && notPlaying && notRunning
     }
 }
 

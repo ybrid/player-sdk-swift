@@ -40,21 +40,18 @@ class UseApiPlayerTests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
-        session?.close()
-        session = nil
     }
     
     func test01_Session_Ybrid_PlaySomeSeconds() throws {
 //        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
         let uri = "https://stagecast.ybrid.io/adaptive-demo"
-        let endpoint = MediaEndpoint(mediaUri: uri )
-        self.session = endpoint.createSession()
+        self.session = MediaEndpoint(mediaUri: uri).createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()
-        sleep(6)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        _ = wait(player, until: .playing, maxSeconds: 10)
+        sleep(3)
         player.stop()
-        sleep(1)
+        _ = wait(player, until: .stopped, maxSeconds: 2)
     }
     
     func test02_Session_WrongUrl_PlayStops() throws {
@@ -62,8 +59,7 @@ class UseApiPlayerTests: XCTestCase {
         session = endpoint.createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()
-        sleep(2)
-        XCTAssertEqual(PlaybackState.stopped, player.state)
+        _ = wait(player, until: .stopped, maxSeconds: 2)
     }
 
     func test03_Session_Icy_PlaySomeSeconds() throws {
@@ -71,37 +67,21 @@ class UseApiPlayerTests: XCTestCase {
         session = endpoint.createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()
-        sleep(6)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        _ = wait(player, until: .playing, maxSeconds: 10)
+        sleep(3)
         player.stop()
-        sleep(1)
+        _ = wait(player, until: .stopped, maxSeconds: 2)
     }
 
-////    waitUntilPlaying(player, maxSeconds: 10)
-////    print("\ntook \(tookSeconds) second\(tookSeconds > 1 ? "s" : "") until playing")
-////    private func waitUntilPlaying(_ player:AudioPlayer, maxSeconds:Int) {
-////        let semaphore = DispatchSemaphore(value: 0)
-////        DispatchQueue.main.async {
-////            var seconds = 0
-////            repeat {
-////                print(". \(player.state)"); sleep(1)
-////                seconds += 1
-////            } while player.state == PlaybackState.buffering && seconds < maxSeconds
-////            semaphore.signal()
-////        }
-////        _ = semaphore.wait(timeout: .distantFuture)
-////        return
-////    }
-
-    func test04_Session_Icy_Opus_PlaySomeSeconds() throws {
+    func test04_Session_Opus_PlaySomeSeconds() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         session = endpoint.createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()
-        sleep(6)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        _ = wait(player, until: .playing, maxSeconds: 10)
+        sleep(3)
         player.stop()
-        sleep(1)
+        _ = wait(player, until: .stopped, maxSeconds: 2)
     }
 
     func test05_Session_Icy_OnDemand_PlayPausePlay() throws {
@@ -109,14 +89,26 @@ class UseApiPlayerTests: XCTestCase {
         session = endpoint.createSession()
         let player = AudioPlayer(session: session!, listener: nil)
         player.play()
-        sleep(4)
-        XCTAssertEqual(PlaybackState.playing, player.state)
-        player.pause()
-        sleep(1)
-        XCTAssertEqual(PlaybackState.pausing, player.state)
-        player.play()
+        _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(3)
-        player.stop()
+        player.pause()
+        _ = wait(player, until: .pausing, maxSeconds: 2)
+        player.play()
+        _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(1)
+        player.stop()
+        _ = wait(player, until: .stopped, maxSeconds: 2)
     }
+    
+    private func wait(_ player:AudioPlayer, until:PlaybackState, maxSeconds:Int) -> Int {
+        var seconds = 0
+        while player.state != until && seconds <= maxSeconds {
+            sleep(1)
+            seconds += 1
+        }
+        print("took \(seconds) second\(seconds > 1 ? "s" : "") until \(player.state)")
+        XCTAssertEqual(until, player.state)
+        return seconds
+    }
+
 }

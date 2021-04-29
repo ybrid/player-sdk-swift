@@ -26,7 +26,7 @@
 import XCTest
 import YbridPlayerSDK
 
-class ComsumeMetadataTests: XCTestCase {
+class ConsumeMetadataTests: XCTestCase {
 
     let metadataListener = CountMetadataCallsListener()
     override func setUpWithError() throws {

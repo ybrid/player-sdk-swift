@@ -37,16 +37,19 @@ class DevelopingPlayerTests: XCTestCase {
     }
     
     func test02_PlayerBundle() {
-        let version = checkBundle(id: "io.ybrid.player-sdk-swift", expectedName: "YbridPlayerSDK")
-        XCTAssertNotNil(version)
-//        XCTAssertEqual("0.6.1", version)
+        guard let version = checkBundle(id: "io.ybrid.player-sdk-swift", expectedName: "YbridPlayerSDK") else {
+            XCTFail("version of bundle 'io.ybrid.player-sdk-swift' expected")
+            return
+        }
+        XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
+        XCTAssertTrue(version.starts(with: "1."))
     }
 
     func test03_VersionString() {
         Logger.verbose = false
-        let version = AudioPlayer.versionString
-        Logger.testing.notice("-- \(version)")
-        XCTAssert(version.contains("YbridPlayerSDK"), "should contain player-sdk-swiftTests")
+        let versionString = AudioPlayer.versionString
+        Logger.testing.notice("-- \(versionString)")
+        XCTAssert(versionString.contains("YbridPlayerSDK"), "should contain YbridPlayerSDK")
     }
     
      private func checkBundle(id:String, expectedName:String) -> String? {
@@ -74,10 +77,19 @@ class DevelopingPlayerTests: XCTestCase {
         return version
     }
     
+    private func isVersionNumber(_ version:String) -> Bool {
+        let pattern = "(\\d+)\\.(\\d+)\\.(\\d+)"
+        return version.range(of: pattern, options: .regularExpression) != nil
+    }
+    
+      
     func test04_OpusBundleInfo() throws {
-        let version = checkBundle(id: "io.ybrid.opus-swift", expectedName: "YbridOpus")
-        XCTAssertNotNil(version)
-//        XCTAssertEqual("0.7.0", version)
+        guard let version = checkBundle(id: "io.ybrid.opus-swift", expectedName: "YbridOpus") else {
+            XCTFail("version of bundle 'io.ybrid.opus-swift' expected")
+            return
+        }
+        XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
+        XCTAssertTrue(version.starts(with: "0."))
     }
     
     func test05_YbridOpusAvailable() {
@@ -87,9 +99,10 @@ class DevelopingPlayerTests: XCTestCase {
     }
     
     func test06_OggBundleInfo() throws {
-        let version = checkBundle(id: "io.ybrid.ogg-swift", expectedName: "YbridOgg")
-        XCTAssertNotNil(version)
-//        XCTAssertEqual("0.7.2", version)
+        guard let version = checkBundle(id: "io.ybrid.ogg-swift", expectedName: "YbridOgg") else {
+            XCTFail("version of bundle 'io.ybrid.ogg-swift' expected"); return
+        }
+        XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
     }
     
     func test07_YbridOggAvailable() {
