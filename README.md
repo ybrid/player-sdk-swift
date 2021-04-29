@@ -43,7 +43,7 @@ As a developer, you probably want to receive changes of the playback state. Impl
 ```swift
 public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)
-    func displayTitleChanged(_ title: String?)
+    func metadataChanged(_ metadata: Metadata)
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     func playingSince(_ seconds: TimeInterval?)
     func durationReadyToPlay(_ seconds: TimeInterval?)

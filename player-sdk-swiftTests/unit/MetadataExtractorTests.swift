@@ -13,8 +13,8 @@ class MetadataExtractorTests: XCTestCase {
  
     class TestMetadataListener : MetadataListener {
         var titles:[String] = []
-        func metadataReady(_ metadata: Metadata) {
-            if let title = metadata.displayTitle() {
+        func metadataReady(_ metadata: AbstractMetadata) {
+            if let title = metadata.displayTitle {
                 titles.append(title)
             }
         }

@@ -156,7 +156,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     // MARK: radio player delegate
     
     func stateChanged(_ to: PlaybackState) {}
-    func displayTitleChanged(_ title: String?) {}
+    func metadataChanged(_ metadata: Metadata) {}
 
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
         Logger.testing.notice("-- \(severity) is \(exception.localizedDescription)")

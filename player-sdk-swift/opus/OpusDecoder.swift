@@ -28,6 +28,7 @@ import YbridOpus
 
 class OpusDecoder : AudioDecoder, OpusDataListener {
     
+
     private static let opusBundleIdentifier = "io.ybrid.opus-swift"
     typealias PcmSample = Float32
     fileprivate static let bytesPerSample:Int = MemoryLayout<PcmSample>.size
@@ -145,7 +146,7 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
 
     // MARK: MetadataListener
     
-    func metadataReady(_ metadata: Metadata) {
+    func metadataReady(_ metadata: AbstractMetadata) {
         super.listener.metadataReady(metadata)
     }
     

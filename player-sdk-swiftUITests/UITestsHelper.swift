@@ -45,10 +45,9 @@ class TestAudioPlayerListener : AudioPlayerListener {
     func stateChanged(_ state: PlaybackState) {
         Logger.testing.notice("-- player is \(state)")
     }
-    func displayTitleChanged(_ title: String?) {
-        Logger.testing.notice("-- combined display title is \(title ?? "(nil)")")
+    func metadataChanged(_ metadata: Metadata) {
+        Logger.testing.notice("-- combined display title is \(metadata.displayTitle ?? "(nil)")")
     }
-
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
         Logger.testing.notice("-- \(severity): \(exception.localizedDescription)")
     }
@@ -90,15 +89,12 @@ class AbstractAudioPlayerListener : AudioPlayerListener {
     func stateChanged(_ state: PlaybackState) {
         Logger.testing.notice("-- player is \(state)")
     }
-    func displayTitleChanged(_ title: String?) {
-    }
-
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
         Logger.testing.notice("-- \(severity): \(exception.localizedDescription)")
     }
 
-    func playingSince(_ seconds: TimeInterval?) {
-    }
+    func metadataChanged(_ metadata: Metadata) {}
+    func playingSince(_ seconds: TimeInterval?) {}
 
     func durationReadyToPlay(_ seconds: TimeInterval?) {
         if let duration = seconds {
@@ -116,8 +112,7 @@ class AbstractAudioPlayerListener : AudioPlayerListener {
         }
     }
 
-    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
-    }
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {}
 }
 
 

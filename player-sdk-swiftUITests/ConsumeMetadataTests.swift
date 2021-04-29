@@ -1,6 +1,6 @@
+// ConsumeMetadataTests.swift
 //
-// MetadataTests.swift
-// player-sdk-swift
+// player-sdk-swiftUITests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
 //
@@ -27,95 +27,123 @@ import XCTest
 import YbridPlayerSDK
 
 class ConsumeMetadataTests: XCTestCase {
-
-    let metadataListener = CountMetadataCallsListener()
-    override func setUpWithError() throws {
-        metadataListener.displayTitleCalled = 0
-    }
-      
+    
+    let ybridEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+    let icecastEndpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
+    let opusEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
+    let onDemandEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
+    
+    
+    var consumer = TestMetadataCallsConsumer()
+    var mediaSession:MediaSession?
+    override func setUpWithError() throws { }
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        mediaSession?.close()
+        consumer = TestMetadataCallsConsumer()
     }
-
-    func test01_YbridMetadata_OnEachPlayAndIcy() throws {
-        let uri = "https://stagecast.ybrid.io/adaptive-demo"
-        //        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
-        let endpoint = MediaEndpoint(mediaUri: uri)
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playSleepCheckStopPlaySleepCheck(on: player,
-                                              fistCheck: { self.checkMetadataCalls(min:2, max:3) },
-                                              secondCheck: { self.checkMetadataCalls(min:3, max:4) }
+    
+    
+    func test01_MetadataYbrid_ImmediatelyOnPlay() {
+        mediaSession = ybridEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheck5SecCheck(on: player,
+                                fistCheck: { consumer.checkMetadataCalls(equal:1) },
+                                secondCheck: { consumer.checkMetadataCalls(min:2) }
         )
     }
     
-    func test02_YbridMetadata_OnPlayAndIcyTriggered() throws {
-        let uri = "https://stagecast.ybrid.io/adaptive-demo"
-//        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
-        let endpoint = MediaEndpoint(mediaUri: uri)
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playCheckSleepCheck(on: player,
-                                 fistCheck: { self.checkMetadataCalls(equal:1) },
-                                 secondCheck: { self.checkMetadataCalls(min:2, max:3) }
+    func test02_MetadataYbrid_OnPlayAndInStream() {
+        mediaSession = ybridEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.play5SecCheckStopPlay3SecCheck(on: player,
+                                            fistCheck: { consumer.checkMetadataCalls(min:2) },
+                                            secondCheck: { consumer.checkMetadataCalls(min:3) }
         )
     }
     
-    
-    
-    func test03_IcyMetadata_OnIcyTriggerred() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playSleepCheckStopPlaySleepCheck(on: player,
-                                              fistCheck: { self.checkMetadataCalls(min:1, max:2) },
-                                              secondCheck: { self.checkMetadataCalls(min:2, max:3) }
+    func test03_MetadataYbrid_DemoStreamMetadata() {
+        mediaSession = ybridEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player.play()
+        player.stop()
+        sleep(1)
+        consumer.checkMetadataCalls(equal: 1)
+        
+        let expectedTypes = [ItemType.MUSIC, ItemType.JINGLE]
+        let types = consumer.metadatas.map{ $0.current?.type }
+        XCTAssertTrue(types.count > 0)
+        let type = types[0]!
+        XCTAssertTrue(expectedTypes.contains(type), "\(type) not expected" )
+        
+        let expectedTitles = ["The Winner Takes It All", "Your Personal Audio Experience", "All I Need"]
+        let titles = consumer.metadatas.map{ $0.current?.title }
+        XCTAssertTrue(titles.count > 0)
+        let title = titles[0]!
+        XCTAssertTrue(expectedTitles.contains(title), "\(title) not expected" )
+    }
+ 
+    func test04_MetadataIcy_InStreamOnly() throws {
+        mediaSession = icecastEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheck5SecCheck(on: player,
+                                fistCheck: { consumer.checkMetadataCalls(equal:0) },
+                                secondCheck: { consumer.checkMetadataCalls(min:1) }
         )
     }
     
-    func test04_IcyMetadata_NotEarly() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playCheckSleepCheck(on: player,
-                                 fistCheck: { self.checkMetadataCalls(equal:0) },
-                                 secondCheck: { self.checkMetadataCalls(min:1, max:2) }
-        )
-    }
-
-    func test05_OpusMetadata_OnVoribisCommentTriggered() throws {
-        let endpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playSleepCheckStopPlaySleepCheck(on: player,
-                                              fistCheck: { self.checkMetadataCalls(min:1, max:2) },
-                                              secondCheck: { self.checkMetadataCalls(min:2, max:3) }
+    func test05_MetadataIcy_OnEachBeginningStream() throws {
+        mediaSession = icecastEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.play5SecCheckStopPlay3SecCheck(on: player,
+                                            fistCheck: { consumer.checkMetadataCalls(min:1) },
+                                            secondCheck: { consumer.checkMetadataCalls(min:2) }
         )
     }
     
-    func test06_OpusNoMetadata_NoneOnPlay() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
-        self.playSleepCheckStopPlaySleepCheck(on: player,
-                                              fistCheck: { self.checkMetadataCalls(equal:0) },
-                                              secondCheck: { self.checkMetadataCalls(equal:0) }
+    func test06_MetadataIcy_Hr2StreamMetadata() {
+        mediaSession = icecastEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheck5SecCheck(on: player, fistCheck: {},
+                                secondCheck: { consumer.checkMetadataCalls(min:1) })
+        
+        let types = consumer.metadatas.map{ $0.current?.type }
+        guard types.count > 0 else {
+            XCTFail(); return
+        }
+        XCTAssertTrue(types.count > 0)
+        let type = types[0]!
+        XCTAssertTrue(type == ItemType.UNKNOWN, "type '\(type)' not expected " )
+    }
+    
+    func test07_MetadataOpus_OnEachBeginningStream() throws {
+        mediaSession = opusEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.play5SecCheckStopPlay3SecCheck(on: player,
+                                            fistCheck: { consumer.checkMetadataCalls(min:1) },
+                                            secondCheck: { consumer.checkMetadataCalls(min:2) }
         )
     }
     
-    func test07_OpusOnDemandWithMetadata_NoneOnResume() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
-        let session = endpoint.createSession()
-        let player = AudioPlayer(session: session, listener: metadataListener)
+    func test08_MetadataOnDemand_OnBeginningNoneOnResume() throws {
+        mediaSession = onDemandEndpoint.createSession()
+        let player = AudioPlayer(session: mediaSession!, listener: consumer)
         self.play5SecCheckPausePlay3SecCheck(on: player,
-                                              fistCheck: { self.checkMetadataCalls(equal:1) },
-                                              secondCheck: { self.checkMetadataCalls(equal:1) }
+                                             fistCheck: { consumer.checkMetadataCalls(equal:1) },
+                                             secondCheck: { consumer.checkMetadataCalls(equal:1) }
         )
     }
     
+    private func playCheck5SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
+        player.play()
+        fistCheck()
+        sleep(5)
+        XCTAssertEqual(PlaybackState.playing, player.state)
+        secondCheck()
+        player.stop()
+        sleep(1)
+    }
     
-    
-    private func playSleepCheckStopPlaySleepCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
+    private func play5SecCheckStopPlay3SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
         player.play()
         sleep(5)
         XCTAssertEqual(PlaybackState.playing, player.state)
@@ -126,16 +154,6 @@ class ConsumeMetadataTests: XCTestCase {
         
         player.play()
         sleep(3)
-        XCTAssertEqual(PlaybackState.playing, player.state)
-        secondCheck()
-        player.stop()
-        sleep(1)
-    }
-
-    private func playCheckSleepCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
-        player.play()
-        fistCheck()
-        sleep(4)
         XCTAssertEqual(PlaybackState.playing, player.state)
         secondCheck()
         player.stop()
@@ -159,32 +177,27 @@ class ConsumeMetadataTests: XCTestCase {
         sleep(1)
     }
     
-    
-    private func checkMetadataCalls(equal expectedCalls: Int) {
-        let called = metadataListener.displayTitleCalled
-        XCTAssertTrue( called == expectedCalls,  "expected == \(expectedCalls)  calls, but was \(called)")
-    }
-    
-    /// necessary because there could be a change of metadata while playing
-    private func checkMetadataCalls(min expectedMinCalls: Int, max expectedMaxCalls: Int) {
-        let called = metadataListener.displayTitleCalled
-        XCTAssertTrue( called >= expectedMinCalls, "expected >=\(expectedMinCalls)  calls, but was \(called)")
+    class TestMetadataCallsConsumer : AbstractAudioPlayerListener {
         
-        XCTAssertTrue( called <= expectedMaxCalls, "expected <=\(expectedMaxCalls)  calls, but was \(called)")
-    }
-    
-    
-    class CountMetadataCallsListener : AbstractAudioPlayerListener {
+        var metadatas:[Metadata] = []
         
-        var displayTitleCalled = 0
-        
-        override func displayTitleChanged(_ title: String?) {
-            displayTitleCalled += 1
-            Logger.testing.info("-- combined display title is \(title ?? "(nil)")")
-            XCTAssertNotNil(title)
+        override func metadataChanged(_ metadata: Metadata) {
+            metadatas.append(metadata)
+            Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+            XCTAssertNotNil(metadata.displayTitle)
         }
         
+        func checkMetadataCalls(equal expectedCalls: Int) {
+            let calls = metadatas.count
+            XCTAssertTrue( calls == expectedCalls,  "expected == \(expectedCalls) calls, but was \(calls)")
+        }
+        
+        /// tolerating one more is necessary because metadata can change while testing
+        func checkMetadataCalls(min expectedMinCalls: Int, tolerateMore:Int = 1) {
+            let calls = metadatas.count
+            let expectedMaxCalls = expectedMinCalls + tolerateMore
+            let range = (expectedMinCalls...expectedMaxCalls)
+            XCTAssertTrue( range.contains(calls), "expected \(range) calls, but was \(calls)")
+        }
     }
 }
-
-

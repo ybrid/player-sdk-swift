@@ -1,6 +1,6 @@
 //
-// PlayingEdgeCasesTests.swift
-// player-sdk-swiftTests
+// AbortBufferingTests.swift
+// player-sdk-swiftUITests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
 //
@@ -175,7 +175,7 @@ class AbortBufferingTests: XCTestCase {
     }
 }
 
-class AbortingListener : AudioPlayerListener  {
+class AbortingListener : AbstractAudioPlayerListener  {
     let afterConnect:TimeInterval
     
     var player:AudioPlayer?
@@ -200,7 +200,7 @@ class AbortingListener : AudioPlayerListener  {
         player?.stop()
     }
     
-    func durationConnected(_ seconds: TimeInterval?) {
+    override func durationConnected(_ seconds: TimeInterval?) {
         Logger.testing.notice("-- recieved first data from url after \(seconds!.S) seconds ")
         guard let state = player?.state else {
             XCTFail("durationConnected -- player without state.")
@@ -213,7 +213,7 @@ class AbortingListener : AudioPlayerListener  {
         }
     }
     
-    func durationReadyToPlay(_ seconds: TimeInterval?) {
+    override func durationReadyToPlay(_ seconds: TimeInterval?) {
         hasPlayed = true
         
         guard let duration = seconds else {
@@ -233,30 +233,6 @@ class AbortingListener : AudioPlayerListener  {
             XCTFail("-- should not play already.")
         default:
             Logger.testing.notice("-- durationReady took \(duration.S) seconds ")
-        }
-        
-    }
-    
-    func stateChanged(_ state: PlaybackState) {
-        Logger.testing.notice("-- player is \(state)")
-    }
-    func displayTitleChanged(_ title: String?) {
-        Logger.testing.notice("-- combined display title is \(title ?? "(nil)")")
-    }
-    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
-        Logger.testing.notice("-- problem is \(exception.errorDescription)")
-        problemCount += 1
-    }    
-    func playingSince(_ seconds: TimeInterval?) {
-        if let duration = seconds {
-            Logger.testing.notice("-- playing for \(duration.S) seconds ")
-        } else {
-            Logger.testing.notice("-- no playing duration ")
-        }
-    }
-    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
-        if let bufferLength = currentSeconds {
-            Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
         }
     }
 }

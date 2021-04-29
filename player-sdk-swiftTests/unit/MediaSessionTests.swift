@@ -45,7 +45,7 @@ class MediaSessionTests: XCTestCase {
         guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.displayTitle())")
+        print("running \(metadata.displayTitle)")
         XCTAssertNotNil(metadata)
         session.close()
     }
@@ -59,7 +59,7 @@ class MediaSessionTests: XCTestCase {
         guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.displayTitle())")
+        print("running \(metadata.displayTitle)")
         session.close()
     }
     

@@ -1,6 +1,6 @@
 //
 // DevelopingPlayerTests.swift
-// player-sdk-swiftTests
+// player-sdk-swiftUITests
 //
 // Copyright (c) 2020 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
 //

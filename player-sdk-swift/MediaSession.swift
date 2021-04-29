@@ -34,7 +34,7 @@ public class MediaSession {
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
 
-    var metadataDict:[UUID:Metadata] = [:]
+    var metadataDict:[UUID:AbstractMetadata] = [:]
 
     public var playbackUri:String { get {
         return mediaControl?.playbackUri ?? endpoint.uri
@@ -53,21 +53,22 @@ public class MediaSession {
         self.mediaControl?.disconnect()
     }
     
-    func fetchMetadataSync() -> Metadata? {
+    func fetchMetadataSync() -> AbstractMetadata? {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                return Metadata(ybridMetadata: ybridData)
+                return YbridMetadata(ybridV2: ybridData)
             }
         }
         return nil
     }
     
-    func holdMetadata(metadata: Metadata) -> UUID {
+    func holdMetadata(metadata: AbstractMetadata) -> UUID {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                metadata.ybridMetadata = ybridData
+                let ybridMetadata = YbridMetadata(ybridV2: ybridData)
+                metadata.delegate(with: ybridMetadata)
             }
         }
         let uuid = UUID()
@@ -75,7 +76,7 @@ public class MediaSession {
         return uuid
     }
     
-    func popMetadata(uuid:UUID) -> Metadata? {
+    func popMetadata(uuid:UUID) -> AbstractMetadata? {
         if let metadata = metadataDict[uuid] {
             metadataDict[uuid] = nil
             return metadata

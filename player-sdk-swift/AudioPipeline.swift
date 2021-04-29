@@ -31,7 +31,7 @@ protocol PipelineListener: class {
 }
 
 protocol MetadataListener: class {
-    func metadataReady(_ metadata: Metadata)
+    func metadataReady(_ metadata: AbstractMetadata)
 }
 
 class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
@@ -191,7 +191,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     
     // MARK: metadata listener
     
-    func metadataReady(_ metadata: Metadata) {
+    func metadataReady(_ metadata: AbstractMetadata) {
         if firstMetadata {
             firstMetadata = false
             guard let session = mediaSession else {
@@ -276,11 +276,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
             Logger.decoding.debug("stopping pipeline, ignoring metadata")
             return
         }
-        guard let displayTitle = metadata.displayTitle() else {
+        guard let _ = metadata.displayTitle else {
             Logger.decoding.notice("no metadata to notifiy")
             return
         }
-        self.playerListener?.displayTitleChanged("\(displayTitle)")
+        self.playerListener?.metadataChanged(metadata)
     }
     
     ///  delegate for visibility

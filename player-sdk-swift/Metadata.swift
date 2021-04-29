@@ -29,58 +29,74 @@
 
 import Foundation
 
-class Metadata {
-    
-    private var icyData: [String:String]?
-    private var vorbisComments: [String:String]?
-    var ybridMetadata: YbridMetadata?
-    
-    init(vorbisComments:[String:String]) {
-        self.vorbisComments = vorbisComments
-    }
-    init(icyData:[String:String]) {
-        self.icyData = icyData
-    }
-    init(ybridMetadata:YbridMetadata) {
-        self.ybridMetadata = ybridMetadata
-    }
 
-    func displayTitle() -> String? {
-        
-        // $TITLE by $ARTIST
-        if let ybrid = ybridMetadata {
-            let item = ybrid.currentItem
-            var displayTitle = item.title
-            if !item.artist.isEmpty {
-                displayTitle += "\nby \(item.artist)"
-            }
-            return displayTitle
-        }
-        
-        // $ALBUM - $ARTIST - $TITLE ($VERSION)
-        if let comment = vorbisComments {
-            let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
-            let playout = relevant
-                .filter { comment[$0] != nil }
-                .map { comment[$0]! }
-            var displayTitle = playout.joined(separator: " - ")
-            if let version = comment["VERSION"] {
-                displayTitle += " (\(version))"
-            }
-            if displayTitle.count > 0 {
-              
+public protocol Metadata {
+    // fixed syntax containing TITLE and if available ARTIST
+    // ALBUM (and version) if available in vorbis comments
+    var displayTitle:String? { get }
+    
+    var current:Item? { get }
+    var next:Item? { get }
+}
 
-                return displayTitle
-            }
+public struct Item {
+    public let type:ItemType
+    public let displayTitle:String
+    
+    public let identifier:String?
+    public let title:String?
+    public let version:String?
+    public let artist:String?
+    public let album:String?
+    public let description:String?
+}
+
+public enum ItemType : String  {
+    case ADVERTISEMENT = "ADVERTISEMENT"
+    case COMEDY = "COMEDY"
+    case JINGLE = "JINGLE"
+    case MUSIC = "MUSIC"
+    case NEWS = "NEWS"
+    case TRAFFIC = "TRAFFIC"
+    case VOICE = "VOICE"
+    case WEATHER = "WEATHER"
+    case UNKNOWN
+}
+
+class AbstractMetadata : Metadata {
+    
+    var currentItem:Item?
+    var nextItem:Item?
+    var delegate:AbstractMetadata?
+    
+    init(current:Item? = nil, next:Item? = nil) {
+        self.currentItem = current
+        self.nextItem = next
+    }
+    
+    func delegate(with other: AbstractMetadata) {
+        self.delegate = other
+    }
+    
+    public final var displayTitle: String? {
+        if let delegate = delegate {
+            return delegate.current?.displayTitle
         }
-        
-        // $ARTIST - $TITLE
-        if let icyDictionary = icyData {
-            if let streamTitle = icyDictionary["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) {
-                return streamTitle
-            }
+        return current?.displayTitle
+    }
+    
+    public final var current: Item? {
+        if let delegate = delegate {
+            return delegate.currentItem
         }
-        
-        return nil
+        return currentItem
+    }
+    
+    public final var next: Item?  {
+        if let delegate = delegate {
+            return delegate.nextItem
+        }
+        return nextItem
     }
 }
+

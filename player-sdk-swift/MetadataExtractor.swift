@@ -149,7 +149,7 @@ class MetadataExtractor {
         Logger.loading.debug("changed icy metadata string is \(flatMd)")
         let metaDict = parseMetadata(mdString: flatMd)
         if Logger.verbose { Logger.decoding.debug("extracted icy metadata is \(metaDict)") }
-        let icyMetadata = Metadata(icyData: metaDict)
+        let icyMetadata = IcyMetadata(icyData: metaDict)
         listener?.metadataReady(icyMetadata)
         
         metadata = PayloadCollector("metadata")

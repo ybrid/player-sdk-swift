@@ -31,8 +31,8 @@ import AVFoundation
 public protocol AudioPlayerListener : class {
     // the playback state has changed
     func stateChanged(_ state: PlaybackState)
-    // metadata to the content currently playing has changed
-    func displayTitleChanged(_ title: String?)
+    // metadata of the content currently playing has changed
+    func metadataChanged(_ metadata: Metadata)
     // all exceptions contain code, errorReason and localizedDescription, called when occuring
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     // duration of audio presented already, called every 0.2 seconds

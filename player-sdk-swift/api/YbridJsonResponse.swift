@@ -23,8 +23,9 @@
 // SOFTWARE.
 //
 
-import Foundation
+// Defines the expected structure of ybrid responses
 
+import Foundation
 
 struct YbridResponse: Decodable {
     let __responseHeader: YbridInfo
@@ -47,7 +48,7 @@ struct YbridSessionObject: Codable {
     let sessionId: String?
     let valid: Bool
     let playout: YbridPlayout?
-    let metadata: YbridMetadata?
+    let metadata: YbridV2Metadata?
     let startDate: Date?
 }
 struct YbridPlayout: Codable {
@@ -59,16 +60,8 @@ struct YbridPlayout: Codable {
     let offsetToLive : Int // -504
 }
 
-// TODO use enum but should allow unknown/optional
-enum YbridItemType : String, Codable {
-    case MUSIC = "MUSIC"
-    case VOICE = "VOICE"
-    case JINGLE = "JINGLE"
-    case NEWS = "NEWS"
-}
-
-struct YbridMetadata : Codable, Equatable {
-    static func == (lhs: YbridMetadata, rhs: YbridMetadata) -> Bool {
+struct YbridV2Metadata : Codable, Equatable {
+    static func == (lhs: YbridV2Metadata, rhs: YbridV2Metadata) -> Bool {
         return lhs.currentItem == rhs.currentItem &&
             lhs.nextItem == rhs.nextItem &&
             lhs.station == rhs.station

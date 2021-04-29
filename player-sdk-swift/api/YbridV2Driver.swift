@@ -36,7 +36,7 @@ class YbridV2Driver : MediaDriver {
         }
     }
     }
-    var ybridMetadata:YbridMetadata?
+    var ybridMetadata:YbridV2Metadata?
     
     init(session:MediaSession) {
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
@@ -143,7 +143,7 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    func logMetadata(_ data: YbridMetadata) {
+    func logMetadata(_ data: YbridV2Metadata) {
         do {
             let currentItemData = try encoder.encode(data.currentItem)
             let metadataString = String(data: currentItemData, encoding: .utf8)!
