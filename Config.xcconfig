@@ -31,7 +31,7 @@
 // Product Version, PLEASE CHANGE HERE to affect all targets
 MARKETING_VERSION = 1.0.0
 // Build number, PLEASE CHANGE HERE to affect all targets
-CURRENT_PROJECT_VERSION = 16
+CURRENT_PROJECT_VERSION = 17
 
 // Architectures
 ARCHS = arm64 armv7 x86_64 x86_64h i386
