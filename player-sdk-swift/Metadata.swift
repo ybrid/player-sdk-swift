@@ -33,22 +33,24 @@ import Foundation
 public protocol Metadata {
     // fixed syntax containing TITLE and if available ARTIST
     // ALBUM (and version) if available in vorbis comments
-    var displayTitle:String? { get }
+    var displayTitle: String? { get }
     
-    var current:Item? { get }
-    var next:Item? { get }
+    var station: Station? { get }
+    var current: Item? { get }
+    var next: Item? { get }
 }
 
 public struct Item {
-    public let type:ItemType
-    public let displayTitle:String
+    public let type: ItemType
+    public let displayTitle: String
     
-    public let identifier:String?
-    public let title:String?
-    public let version:String?
-    public let artist:String?
-    public let album:String?
-    public let description:String?
+    public let identifier: String?
+    public let title: String?
+    public let version: String?
+    public let artist: String?
+    public let album: String?
+    public let description: String?
+    public let durationMillis: Int64?
 }
 
 public enum ItemType : String  {
@@ -63,13 +65,19 @@ public enum ItemType : String  {
     case UNKNOWN
 }
 
+public struct Station {
+    public let name: String?
+    public let genre: String?
+}
+
 class AbstractMetadata : Metadata {
     
     var currentItem:Item?
     var nextItem:Item?
+    var stationInfo: Station?
     var delegate:AbstractMetadata?
     
-    init(current:Item? = nil, next:Item? = nil) {
+    init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
         self.currentItem = current
         self.nextItem = next
     }
@@ -83,6 +91,13 @@ class AbstractMetadata : Metadata {
             return delegate.current?.displayTitle
         }
         return current?.displayTitle
+    }
+    
+    public final var station: Station?  {
+        if let delegate = delegate {
+            return delegate.stationInfo
+        }
+        return stationInfo
     }
     
     public final var current: Item? {

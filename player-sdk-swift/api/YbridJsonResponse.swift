@@ -44,7 +44,7 @@ struct YbridSessionResponse: Decodable {
 }
 struct YbridSessionObject: Codable {
     let duration: Int
-    let id: String?
+//    let id: String?
     let sessionId: String?
     let valid: Bool
     let playout: YbridPlayout?
@@ -53,10 +53,10 @@ struct YbridSessionObject: Codable {
 }
 struct YbridPlayout: Codable {
     let baseURL: URL
-    let playbackURI: String //edge01-stagecast.ybrid.io:443/adaptive-demo?session-id\u003d90bb355e-30de-44ae-b521-4ba1544a9753",
-    let currentBitRate: Int // -1,
-    let host: String // "edge01-stagecast.ybrid.io",
-    let maxBitRate: Int // -1,
+    let playbackURI: String
+    let currentBitRate: Int // -1
+    let host: String // "edge01-stagecast.ybrid.io"
+    let maxBitRate: Int // -1
     let offsetToLive : Int // -504
 }
 
@@ -78,7 +78,6 @@ struct YbridItem : Codable, Equatable {
     let title: String
     let description: String
     let durationMillis: Int64
-    let companions: [String]
     let type : String
 }
 

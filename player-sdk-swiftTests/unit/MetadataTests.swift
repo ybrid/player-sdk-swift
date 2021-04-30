@@ -28,10 +28,10 @@ import XCTest
 class MetadataTests: XCTestCase {
 
     // ybrid examples
-    let heyJudeYbridItem = YbridItem(id: "anyId", artist: "Beatles", title: "Hey Jude", description: "test song", durationMillis: 238000, companions: [], type: "MUSIC")
-    let noTitleYbridItem = YbridItem(id: "otherId", artist: "", title: "", description: "", durationMillis: 0, companions: [], type: "")
+    let heyJudeYbridItem = YbridItem(id: "anyId", artist: "Beatles", title: "Hey Jude", description: "test song", durationMillis: 238000, type: "MUSIC")
+    let noTitleYbridItem = YbridItem(id: "otherId", artist: "", title: "", description: "", durationMillis: 0, type: "")
     let ybridDemoYbridStation = YbridStation(genre: "", name: "")
-    let newsYbridItem = YbridItem(id: "newsId", artist: "", title: "Nachrichten", description: "what happened tody", durationMillis: 238000, companions: [], type: "NEWS")
+    let newsYbridItem = YbridItem(id: "newsId", artist: "", title: "Nachrichten", description: "what happened tody", durationMillis: 238000, type: "NEWS")
     let metadataRawJson = "{\"station\":{\"genre\":\"\",\"name\":\"\"},\"nextItem\":{\"artist\":\"Ybrid® Hybrid Dynamic Live Audio Technology\",\"id\":\"384\",\"durationMillis\":9912,\"title\":\"Your Personal Audio Experience\",\"companions\":[],\"type\":\"JINGLE\",\"description\":\"\"},\"currentItem\":{\"artist\":\"Air\",\"id\":\"383\",\"durationMillis\":268416,\"title\":\"All I Need\",\"companions\":[],\"type\":\"MUSIC\",\"description\":\"\"}}"
     
     func toYbridV2Metadata(_ inString:String) -> YbridV2Metadata {

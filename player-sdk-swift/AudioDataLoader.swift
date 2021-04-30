@@ -167,7 +167,17 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         
         do {
             if response is HTTPURLResponse {
-                let icyMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")
+                var icyMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")
+                if icyMetadata.count == 0 {
+                    let iceMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "ice-")
+                    iceMetadata.forEach { (key:String,value) in
+                        let endIndex = key.index(key.startIndex, offsetBy: 3)
+                        var icyKey:String = key
+                        icyKey.replaceSubrange(...endIndex, with: "icy-")
+                        Logger.loading.notice("changed http field '\(key)' to '\(icyKey)'")
+                        icyMetadata[icyKey] = value
+                    }
+                }
                 handleMetadata(icyMetadata)
             }
             try handleMediaType(response.mimeType, response.suggestedFilename)
@@ -190,6 +200,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     
     fileprivate func handleMetadata(_ icyMetadata:[String:String]) {
         Logger.loading.debug("icy-fields: \(icyMetadata)")
+        pipeline.icyFields = icyMetadata
+        
         if withMetadata, let metaint = icyMetadata["icy-metaint"] {
             guard let metadataEveryBytes = Int(metaint) else {
                 Logger.loading.error("invalid icy-metaint value '\(metaint)'")

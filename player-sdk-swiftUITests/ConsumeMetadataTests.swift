@@ -29,6 +29,7 @@ import YbridPlayerSDK
 class ConsumeMetadataTests: XCTestCase {
     
     let ybridEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+    let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
     let icecastEndpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
     let opusEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
     let onDemandEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
@@ -36,145 +37,219 @@ class ConsumeMetadataTests: XCTestCase {
     
     var consumer = TestMetadataCallsConsumer()
     var mediaSession:MediaSession?
+    var player:AudioPlayer?
     override func setUpWithError() throws { }
     override func tearDownWithError() throws {
         mediaSession?.close()
         consumer = TestMetadataCallsConsumer()
     }
+
     
-    
-    func test01_MetadataYbrid_ImmediatelyOnPlay() {
+    func test01_MetadataYbrid_OnEachPlayAndInStream() {
         mediaSession = ybridEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.playCheck5SecCheck(on: player,
-                                fistCheck: { consumer.checkMetadataCalls(equal:1) },
-                                secondCheck: { consumer.checkMetadataCalls(min:2) }
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheckPlayingCheckStopPlayPlayingCheck(
+            fistCheck: { consumer.checkMetadataCalls(equal:1) },
+            secondCheck: { consumer.checkMetadataCalls(min:2) },
+            thirdCheck: { consumer.checkMetadataCalls(min:3) }
+        )
+    }
+
+    func test02_MetadataIcy_InStreamOnly() {
+        mediaSession = icecastEndpoint.createSession()
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheckPlayingCheckStopPlayPlayingCheck(
+            fistCheck: { consumer.checkMetadataCalls(equal:0) },
+            secondCheck: { consumer.checkMetadataCalls(min:1) },
+            thirdCheck: { consumer.checkMetadataCalls(min:2) }
         )
     }
     
-    func test02_MetadataYbrid_OnPlayAndInStream() {
-        mediaSession = ybridEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.play5SecCheckStopPlay3SecCheck(on: player,
-                                            fistCheck: { consumer.checkMetadataCalls(min:2) },
-                                            secondCheck: { consumer.checkMetadataCalls(min:3) }
+    func test03_MetadataOpus_InStreamOnly() throws {
+        mediaSession = opusEndpoint.createSession()
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playCheckPlayingCheckStopPlayPlayingCheck(
+            fistCheck: { consumer.checkMetadataCalls(equal:0) },
+            secondCheck: { consumer.checkMetadataCalls(min:1) },
+            thirdCheck: { consumer.checkMetadataCalls(min:2) }
         )
     }
     
-    func test03_MetadataYbrid_DemoStreamMetadata() {
+    func test04_MetadataOnDemand_OnBeginningNoneOnResume() throws {
+        mediaSession = onDemandEndpoint.createSession()
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        self.playPlayingCheckPausePlayPlayingCheck(
+            fistCheck: { consumer.checkMetadataCalls(equal:1) },
+            secondCheck: { consumer.checkMetadataCalls(equal:1) }
+        )
+    }
+    
+    
+    func test05_MetadataYbrid_DemoStream_FullCurrentItem() {
         mediaSession = ybridEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        player.play()
-        player.stop()
-        sleep(1)
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player?.play()
         consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
         
+        let metadata = consumer.metadatas[0]
+        guard let current = metadata.current else { XCTFail("current expected"); return }
         let expectedTypes = [ItemType.MUSIC, ItemType.JINGLE]
-        let types = consumer.metadatas.map{ $0.current?.type }
-        XCTAssertTrue(types.count > 0)
-        let type = types[0]!
-        XCTAssertTrue(expectedTypes.contains(type), "\(type) not expected" )
+        XCTAssertTrue( expectedTypes.contains(current.type), "\(current.type) not expected" )
         
+        guard let title = current.title else { XCTFail("title expected"); return }
         let expectedTitles = ["The Winner Takes It All", "Your Personal Audio Experience", "All I Need"]
-        let titles = consumer.metadatas.map{ $0.current?.title }
-        XCTAssertTrue(titles.count > 0)
-        let title = titles[0]!
         XCTAssertTrue(expectedTitles.contains(title), "\(title) not expected" )
-    }
- 
-    func test04_MetadataIcy_InStreamOnly() throws {
-        mediaSession = icecastEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.playCheck5SecCheck(on: player,
-                                fistCheck: { consumer.checkMetadataCalls(equal:0) },
-                                secondCheck: { consumer.checkMetadataCalls(min:1) }
-        )
-    }
-    
-    func test05_MetadataIcy_OnEachBeginningStream() throws {
-        mediaSession = icecastEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.play5SecCheckStopPlay3SecCheck(on: player,
-                                            fistCheck: { consumer.checkMetadataCalls(min:1) },
-                                            secondCheck: { consumer.checkMetadataCalls(min:2) }
-        )
-    }
-    
-    func test06_MetadataIcy_Hr2StreamMetadata() {
-        mediaSession = icecastEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.playCheck5SecCheck(on: player, fistCheck: {},
-                                secondCheck: { consumer.checkMetadataCalls(min:1) })
+
+        XCTAssertNotNil(current.displayTitle,"display title expected")
+        XCTAssertNil(current.version,"no version expected")
+        guard let artist = current.artist else { XCTFail("artist expected"); return }
+        let expectedArtists = ["ABBA", "Ybrid® Hybrid Dynamic Live Audio Technology", "Air"]
+        XCTAssertNotNil(expectedArtists.contains(artist),"one of \(expectedArtists) expected")
         
-        let types = consumer.metadatas.map{ $0.current?.type }
-        guard types.count > 0 else {
+        XCTAssertNotNil(current.identifier,"id expected")
+        XCTAssertNotNil(current.description,"descriptiion expected")
+        XCTAssertNotNil(current.durationMillis,"durationMillis expected")
+        
+        _ = wait(until: .stopped, maxSeconds: 2)
+    }
+    
+    
+    func test06_MetadataYbrid_Swr3_CurrentNextStation() {
+        mediaSession = ybridSwr3Endpoint.createSession()
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player?.play()
+        consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
+        
+        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
+        currentItems.map{ $0.type }.forEach{ (type) in
+            XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+        }
+        
+        let nextItems = consumer.metadatas.filter{ return $0.next != nil }.map{ $0.next! }
+        XCTAssertGreaterThan(nextItems.count, 0, "must be at least one next item")
+        nextItems.map{ $0.type }.forEach{ (type) in
+            XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+        }
+        
+        guard let station = consumer.metadatas[0].station else {
             XCTFail(); return
         }
-        XCTAssertTrue(types.count > 0)
-        let type = types[0]!
-        XCTAssertTrue(type == ItemType.UNKNOWN, "type '\(type)' not expected " )
+        XCTAssertEqual("SWR3", station.name)
+        XCTAssertEqual("Pop Music", station.genre)
+
+        _ = wait(until: .stopped, maxSeconds: 2)
     }
     
-    func test07_MetadataOpus_OnEachBeginningStream() throws {
-        mediaSession = opusEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.play5SecCheckStopPlay3SecCheck(on: player,
-                                            fistCheck: { consumer.checkMetadataCalls(min:1) },
-                                            secondCheck: { consumer.checkMetadataCalls(min:2) }
-        )
+    func test07_MetadataIcy_Hr2_CurrentStation() {
+        mediaSession = icecastEndpoint.createSession()
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player?.play()
+        _ = wait(until: .playing, maxSeconds: 10)
+        consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
+        
+        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
+        currentItems.map{ $0.type }.forEach{ (type) in
+            XCTAssertEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+        }
+        currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
+            XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
+        }
+        
+        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
+        
+        guard let station = consumer.metadatas[0].station else {
+            XCTFail("icy usually uses http-header 'icy-name'"); return
+        }
+        XCTAssertEqual("hr2", station.name)
+        XCTAssertNil(station.genre)
+        
+        _ = wait(until: .stopped, maxSeconds: 1)
     }
     
-    func test08_MetadataOnDemand_OnBeginningNoneOnResume() throws {
+    func test08_MetadataOpusOnDemand_TitleArtistAlbum() {
         mediaSession = onDemandEndpoint.createSession()
-        let player = AudioPlayer(session: mediaSession!, listener: consumer)
-        self.play5SecCheckPausePlay3SecCheck(on: player,
-                                             fistCheck: { consumer.checkMetadataCalls(equal:1) },
-                                             secondCheck: { consumer.checkMetadataCalls(equal:1) }
-        )
+        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player?.play()
+        _ = wait(until: .playing, maxSeconds: 10)
+        consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
+        
+        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current }
+        XCTAssertEqual(currentItems.count, 1, "must be one current item")
+        guard let item = currentItems[0] else { XCTFail(); return }
+        XCTAssertNotNil(item.album)
+        XCTAssertNotNil(item.title)
+        XCTAssertNotNil(item.artist)
+        XCTAssertNotNil(item.displayTitle)
+        XCTAssertNil(item.description)
+        XCTAssertNil(item.identifier)
+        XCTAssertNil(item.version)
+        XCTAssertEqual(ItemType.UNKNOWN, item.type)
+        
+        
+        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
+        
+        guard let station = consumer.metadatas[0].station else {
+            XCTFail("icy usually uses http-header 'icy-name'"); return
+        }
+        XCTAssertNil(station.name)
+        XCTAssertNil(station.genre)
+        
+        _ = wait(until: .stopped, maxSeconds: 1)
     }
     
-    private func playCheck5SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
+
+
+    
+    private func playCheckPlayingCheckStopPlayPlayingCheck(fistCheck: () -> (), secondCheck: () -> (), thirdCheck: () -> () ) {
+        guard let player = player else { XCTFail("no player"); return }
         player.play()
         fistCheck()
-        sleep(5)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        var seconds = wait(until: .playing, maxSeconds: 10)
+        Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")
         secondCheck()
         player.stop()
-        sleep(1)
-    }
-    
-    private func play5SecCheckStopPlay3SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
-        player.play()
-        sleep(5)
-        XCTAssertEqual(PlaybackState.playing, player.state)
-        fistCheck()
-        player.stop()
-        sleep(1)
-        XCTAssertEqual(PlaybackState.stopped, player.state)
+        _ = wait(until: .stopped, maxSeconds: 3)
         
         player.play()
-        sleep(3)
-        XCTAssertEqual(PlaybackState.playing, player.state)
-        secondCheck()
+        seconds = wait(until: .playing, maxSeconds: 10)
+        Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")
+        thirdCheck()
         player.stop()
-        sleep(1)
+        _ = wait(until: .stopped, maxSeconds: 2)
     }
     
-    private func play5SecCheckPausePlay3SecCheck(on player: AudioPlayer, fistCheck: () -> (), secondCheck: () -> () ) {
+    private func playPlayingCheckPausePlayPlayingCheck(fistCheck: () -> (), secondCheck: () -> () ) {
+        guard let player = player else { XCTFail("no player"); return }
         player.play()
-        sleep(5)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        var seconds = wait(until: .playing, maxSeconds: 10)
+        Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")
         fistCheck()
         player.pause()
-        sleep(1)
-        XCTAssertEqual(PlaybackState.pausing, player.state)
-        
+        _ = wait(until: .pausing, maxSeconds: 2)
+
         player.play()
-        sleep(3)
-        XCTAssertEqual(PlaybackState.playing, player.state)
+        seconds = wait(until: .playing, maxSeconds: 10)
+        Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")
         secondCheck()
         player.stop()
-        sleep(1)
+        _ = wait(until: .stopped, maxSeconds: 2)
+    }
+    
+    private func wait(until:PlaybackState, maxSeconds:Int) -> Int {
+        guard let player = player else { XCTFail("no player"); return -1 }
+        var seconds = 0
+        while player.state != until && seconds < maxSeconds {
+            sleep(1)
+            seconds += 1
+        }
+        XCTAssertEqual(until, player.state, "not \(until) within \(maxSeconds) s")
+        return seconds
     }
     
     class TestMetadataCallsConsumer : AbstractAudioPlayerListener {
@@ -201,3 +276,4 @@ class ConsumeMetadataTests: XCTestCase {
         }
     }
 }
+

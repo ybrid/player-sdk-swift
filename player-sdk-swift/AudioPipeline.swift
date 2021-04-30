@@ -44,6 +44,12 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     var firstMetadata = true
     var stopping = false
 
+    var icyFields:[String:String]? { didSet {
+        Logger.loading.notice("icy fields \(icyFields ?? [:])")
+    }}
+
+    private var lastMetadata:Metadata? = nil
+
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
@@ -52,7 +58,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     
     weak var playerListener:AudioPlayerListener?
     weak var mediaSession:MediaSession?
-    private var lastMetadata:Metadata? = nil
 
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
@@ -192,6 +197,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     // MARK: metadata listener
     
     func metadataReady(_ metadata: AbstractMetadata) {
+        metadata.stationInfo = Station(name: icyFields?["icy-name"], genre: icyFields?["icy-genre"])
         if firstMetadata {
             firstMetadata = false
             guard let session = mediaSession else {

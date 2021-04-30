@@ -28,17 +28,25 @@ import Foundation
 
 class IcyMetadata : AbstractMetadata {
     init(icyData:[String:String]) {
-        super.init(current: IcyMetadata.createItem(icy: icyData) )
+        super.init(current: IcyMetadata.createItem(icyData) )
+        stationInfo = IcyMetadata.createStation(icyData)
     }
     
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
-    private static func createItem(icy: [String:String]) -> Item? {
+    private static func createItem(_ icy: [String:String]) -> Item? {
         guard let displayTitle = icy["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {
             return nil
         }
         
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, version:nil, artist:nil, album:nil, description:nil)
+        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, version:nil, artist:nil, album:nil, description:nil, durationMillis:nil)
     }
+    
+    
+    // content of http-headers "icy-name" and "icy-genre" or "ice-*"
+    private static func createStation(_ icy: [String:String]) -> Station? {
+        return Station(name: icy["icy-name"], genre: icy["icy-genre"])
+    }
+    
 }
 
 class OpusMetadata : AbstractMetadata {
@@ -48,7 +56,7 @@ class OpusMetadata : AbstractMetadata {
     
     private static func createItem(vorbis: [String:String]) -> Item? {
         let displayTitle = OpusMetadata.combinedTitle(comments: vorbis)
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:vorbis["TITLE"], version:vorbis["VERSION"], artist:vorbis["ARTIST"], album:vorbis["ALBUM"], description:nil)
+        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:vorbis["TITLE"], version:vorbis["VERSION"], artist:vorbis["ARTIST"], album:vorbis["ALBUM"], description:nil, durationMillis:nil)
     }
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"
@@ -72,12 +80,18 @@ class YbridMetadata : AbstractMetadata {
     init(ybridV2:YbridV2Metadata) {
         super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
                    next: YbridMetadata.createItem(ybrid: ybridV2.nextItem) )
+        super.stationInfo = YbridMetadata.createStation(ybridV2.station)
+    }
+    
+    // content of __responseObject.metatdata.station
+    private static func createStation(_ ybridStation: YbridStation) -> Station? {
+        return Station(name: ybridStation.name, genre:  ybridStation.genre)
     }
     
     private static func createItem(ybrid: YbridItem) -> Item? {
         let type = YbridMetadata.typeFrom(type: ybrid.type)
         let displayTitle = YbridMetadata.combinedTitle(item: ybrid)
-        return Item(type:type, displayTitle:displayTitle, identifier:ybrid.id, title:ybrid.title, version:nil, artist:ybrid.artist, album:nil, description:ybrid.description )
+        return Item(type:type, displayTitle:displayTitle, identifier:ybrid.id, title:ybrid.title, version:nil, artist:ybrid.artist, album:nil, description:ybrid.description, durationMillis: ybrid.durationMillis )
     }
     
     private static func typeFrom(type: String) -> ItemType {
