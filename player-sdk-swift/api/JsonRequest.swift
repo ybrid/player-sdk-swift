@@ -72,15 +72,22 @@ class JsonRequest {
         request.setValue(JsonRequest.encodingUtf8 + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept-Charset")
         
         let task = session.dataTask(with: request) { data, response, error in
+
+            if let error = error {
+                let optionsState = ApiError.OptionsTaskState.getOptionsState(error)
+                if optionsState.severity == ErrorSeverity.notice {
+                    if Logger.verbose { Logger.api.debug(error.localizedDescription) }
+                    semaphore.signal()
+                    return
+                }
+  
+                apiError = ApiError(ErrorKind.serverError, "error in OPTIONS \(self.url.absoluteString)", optionsState)
+                return
+            }
            
             if let apiError = self.validateJsonResponse(response) {
                 if Logger.verbose { Logger.api.debug(apiError.localizedDescription) }
                 semaphore.signal()
-                return
-            }
-            
-            if let error = error {
-                apiError = ApiError(ErrorKind.serverError, "error in OPTIONS \(self.url.absoluteString)", error)
                 return
             }
             

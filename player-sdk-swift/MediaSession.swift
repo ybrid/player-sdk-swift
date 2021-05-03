@@ -28,9 +28,12 @@
 
 import Foundation
 
-public class MediaSession {
+public class MediaSession : Equatable {
+    public static func == (lhs: MediaSession, rhs: MediaSession) -> Bool {
+        return lhs.endpoint == rhs.endpoint
+    }
     
-    let endpoint:MediaEndpoint
+    public let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
 

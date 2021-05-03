@@ -73,7 +73,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackState
     }}
     
-    public let session:MediaSession
+    public var session:MediaSession?
     public var canPause:Bool = false
     
     var loader: AudioDataLoader?
@@ -106,7 +106,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // get ready for playing
     // session - the MediaSession created on the MediaEndpoint. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(session: MediaSession, listener: AudioPlayerListener?) {
+    public init(session: MediaSession?, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
         PlayerContext.setupAudioSession()
@@ -128,8 +128,13 @@ public class AudioPlayer: BufferListener, PipelineListener {
         if playbackState == .stopped {
             playbackState = .buffering
             self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
+            guard let playbackUri = session?.playbackUri else {
+                stop()
+                return
+            }
+            let streamUrl = URL(string: playbackUri)!
             playerQueue.async {
-                self.playWhenReady()
+                self.playWhenReady(streamUrl: streamUrl)
             }}
         if playbackState == .pausing {
             playerQueue.async {
@@ -167,8 +172,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    private func playWhenReady() {
-        let streamUrl = URL(string: session.playbackUri)!
+    private func playWhenReady(streamUrl: URL) {
         loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline!, inclMetadata: true)
         loader?.requestData(from: streamUrl)
     }

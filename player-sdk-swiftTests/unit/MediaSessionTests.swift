@@ -38,34 +38,40 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_YbridDemo() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        let session = endpoint.createSession()
+        guard let session = endpoint.createSession() else {
+            XCTFail("session expected"); return
+        }
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
         guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.displayTitle)")
+        print("running \(metadata.displayTitle ?? "(nil")")
         XCTAssertNotNil(metadata)
         session.close()
     }
 
     func testSession_YbridSwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
-        let session = endpoint.createSession()
+        guard let session = endpoint.createSession() else {
+            XCTFail("session expected"); return
+        }
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
         guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.displayTitle)")
+        print("running \(metadata.displayTitle ?? "(nil")")
         session.close()
     }
     
     func testSession_IcySwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        let session = endpoint.createSession()
+        guard let session = endpoint.createSession() else {
+            XCTFail("session expected"); return
+        }
         let playbackUri = session.playbackUri
         XCTAssertEqual(endpoint.uri, playbackUri)
         let metadata = session.fetchMetadataSync()
@@ -77,7 +83,9 @@ class MediaSessionTests: XCTestCase {
     func testSession_DlfOpus() throws {
         let uri = "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus"
         let endpoint = MediaEndpoint(mediaUri: uri)
-        let session = endpoint.createSession()
+        guard let session = endpoint.createSession() else {
+            XCTFail("session expected"); return
+        }
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         
@@ -90,12 +98,22 @@ class MediaSessionTests: XCTestCase {
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        let session = endpoint.createSession()
+        guard let session = endpoint.createSession() else {
+            XCTFail("session expected"); return
+        }
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         let metadata = session.fetchMetadataSync()
         XCTAssertNil(metadata, "no metadata expected")
         session.close()
+    }
+    
+    
+    func testSession_BadUrl() throws {
+        let uri = "https://blub"
+        let endpoint = MediaEndpoint(mediaUri:uri)
+        let session = endpoint.createSession()
+        XCTAssertNil(session, "no session expected")
     }
     
 }

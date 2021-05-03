@@ -28,21 +28,31 @@
 
 import Foundation
 
-public class MediaEndpoint {
-    let uri:String
+public class MediaEndpoint : Hashable {
+    public static func == (lhs: MediaEndpoint, rhs: MediaEndpoint) -> Bool {
+        return lhs.uri == rhs.uri
+    }
+    public var hashValue: Int { return uri.hashValue}
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uri)
+    }
+    
+    
+    public let uri:String
 
     public init(mediaUri:String!) {
         self.uri = mediaUri
     }
     
     // Create a MediaSession using this MediaEndpoint
-    public func createSession() -> MediaSession {
+    public func createSession() -> MediaSession? {
         
         let session = MediaSession(on: self)
         do {
             try session.connect()
         } catch {
             Logger.api.debug("cannot connect to endpoint, reason: \(error.localizedDescription)")
+            return nil
 
         }
         return session

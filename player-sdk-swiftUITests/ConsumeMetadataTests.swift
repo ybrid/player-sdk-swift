@@ -28,10 +28,10 @@ import YbridPlayerSDK
 
 class ConsumeMetadataTests: XCTestCase {
     
-    let ybridEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+    let ybridDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
     let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
-    let icecastEndpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-    let opusEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
+    let icecastHr2Endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
+    let opusDlfEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
     let onDemandEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
     
     
@@ -46,7 +46,7 @@ class ConsumeMetadataTests: XCTestCase {
 
     
     func test01_MetadataYbrid_OnEachPlayAndInStream() {
-        mediaSession = ybridEndpoint.createSession()
+        mediaSession = ybridDemoEndpoint.createSession()
         player = AudioPlayer(session: mediaSession!, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
@@ -56,7 +56,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
     func test02_MetadataIcy_InStreamOnly() {
-        mediaSession = icecastEndpoint.createSession()
+        mediaSession = icecastHr2Endpoint.createSession()
         player = AudioPlayer(session: mediaSession!, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
@@ -66,7 +66,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test03_MetadataOpus_InStreamOnly() throws {
-        mediaSession = opusEndpoint.createSession()
+        mediaSession = opusDlfEndpoint.createSession()
         player = AudioPlayer(session: mediaSession!, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
@@ -85,12 +85,13 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     
-    func test05_MetadataYbrid_DemoStream_FullCurrentItem() {
-        mediaSession = ybridEndpoint.createSession()
+    func test05_MetadataYbrid_Demo_FullCurrentItem() {
+        mediaSession = ybridDemoEndpoint.createSession()
         player = AudioPlayer(session: mediaSession!, listener: consumer)
         player?.play()
         consumer.checkMetadataCalls(equal: 1)
         player?.stop()
+        _ = wait(until: .stopped, maxSeconds: 2)
         
         let metadata = consumer.metadatas[0]
         guard let current = metadata.current else { XCTFail("current expected"); return }
@@ -110,8 +111,7 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertNotNil(current.identifier,"id expected")
         XCTAssertNotNil(current.description,"descriptiion expected")
         XCTAssertNotNil(current.durationMillis,"durationMillis expected")
-        
-        _ = wait(until: .stopped, maxSeconds: 2)
+ 
     }
     
     
@@ -144,7 +144,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test07_MetadataIcy_Hr2_CurrentStation() {
-        mediaSession = icecastEndpoint.createSession()
+        mediaSession = icecastHr2Endpoint.createSession()
         player = AudioPlayer(session: mediaSession!, listener: consumer)
         player?.play()
         _ = wait(until: .playing, maxSeconds: 10)

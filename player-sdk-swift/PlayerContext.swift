@@ -126,7 +126,7 @@ public class PlayerContext {
             didSet {
                 if oldValue != connected {
                     Logger.loading.notice("network \(connected ? "connected" : "disconnected") -> notifying \(listeners.count) listeners")
-                    for listener in listeners {
+                    for listener in listeners {  // TODO make it thread safe
                         listener.1.notifyNetworkChanged(connected)
                     }
                 }
