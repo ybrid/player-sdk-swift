@@ -40,14 +40,13 @@ class ConsumeMetadataTests: XCTestCase {
     var player:AudioPlayer?
     override func setUpWithError() throws { }
     override func tearDownWithError() throws {
-        mediaSession?.close()
+        player?.close()
         consumer = TestMetadataCallsConsumer()
     }
 
     
     func test01_MetadataYbrid_OnEachPlayAndInStream() {
-        mediaSession = ybridDemoEndpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = ybridDemoEndpoint.audioPlayer(listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
             secondCheck: { consumer.checkMetadataCalls(min:2) },
@@ -56,8 +55,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
     func test02_MetadataIcy_InStreamOnly() {
-        mediaSession = icecastHr2Endpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = icecastHr2Endpoint.audioPlayer(listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
             secondCheck: { consumer.checkMetadataCalls(min:1) },
@@ -66,8 +64,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test03_MetadataOpus_InStreamOnly() throws {
-        mediaSession = opusDlfEndpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = opusDlfEndpoint.audioPlayer(listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
             secondCheck: { consumer.checkMetadataCalls(min:1) },
@@ -76,8 +73,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test04_MetadataOnDemand_OnBeginningNoneOnResume() throws {
-        mediaSession = onDemandEndpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = onDemandEndpoint.audioPlayer(listener: consumer)
         self.playPlayingCheckPausePlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
             secondCheck: { consumer.checkMetadataCalls(equal:1) }
@@ -86,8 +82,7 @@ class ConsumeMetadataTests: XCTestCase {
     
     
     func test05_MetadataYbrid_Demo_FullCurrentItem() {
-        mediaSession = ybridDemoEndpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = ybridDemoEndpoint.audioPlayer(listener: consumer)
         player?.play()
         consumer.checkMetadataCalls(equal: 1)
         player?.stop()
@@ -116,8 +111,7 @@ class ConsumeMetadataTests: XCTestCase {
     
     
     func test06_MetadataYbrid_Swr3_CurrentNextStation() {
-        mediaSession = ybridSwr3Endpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = ybridSwr3Endpoint.audioPlayer(listener: consumer)
         player?.play()
         consumer.checkMetadataCalls(equal: 1)
         player?.stop()
@@ -144,8 +138,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test07_MetadataIcy_Hr2_CurrentStation() {
-        mediaSession = icecastHr2Endpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = icecastHr2Endpoint.audioPlayer(listener: consumer)
         player?.play()
         _ = wait(until: .playing, maxSeconds: 10)
         consumer.checkMetadataCalls(equal: 1)
@@ -172,8 +165,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test08_MetadataOpusOnDemand_TitleArtistAlbum() {
-        mediaSession = onDemandEndpoint.createSession()
-        player = AudioPlayer(session: mediaSession!, listener: consumer)
+        player = onDemandEndpoint.audioPlayer(listener: consumer)
         player?.play()
         _ = wait(until: .playing, maxSeconds: 10)
         consumer.checkMetadataCalls(equal: 1)

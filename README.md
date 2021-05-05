@@ -1,13 +1,14 @@
 # player-sdk-swift
 This audio player is written in Swift 4 and runs on iPhones and iPads from iOS 9 to iOS 14. 
 
-An example app using this player SDK can be run from the XCode-Project in the repository [app-example-ios](https://github.com/ybrid/app-example-ios).
+An example app using this player SDK can be run from the XCode-Project in the repository [app-example-ios](https://github.com/ybrid/app-example-ios). 
 
 ## Why yet another player?
 This audio player offers
 - low latency live and on demand file streaming
-- active, user-centric handling of typical network problems
 - compatibility: currently supports audio codecs mp3, aac, and opus
+- metadata processing for icecast, vorbis commands and ybrid 
+- active, user-centric handling of typical network problems
 - stability
 
 ## How to use
@@ -15,18 +16,18 @@ After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the F
 ```swift
 import YbridPlayerSDK
 
-let mediaSession = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo").createSession()
-let player = AudioPlayer(session: mediaSession, listener: nil)
+let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+let player = endpoint.audioPlayer(listener: nil)
 player.play()
 // of course the program must not end here
  ...
+player.stop()
 
-
-// when context of media communication ends, such as ending the app 
-mediaSession.close()
+ ...
+player.close()
 ```
 
-The media session object auto detects the protocol to control content and metadata. It interacts with server and player. In future releases it will hold the player state and will offer some media controllers to developers.
+MediaEndpoint.audioPlayer first detects the protocol to handle audio content and metadata and then returns the audio player. In future releases a matching type of player (or of media controls) will be passed to you asynchrounously.
 
 Possible playback states of the player are
 ```swift
@@ -39,7 +40,7 @@ public enum PlaybackState {
 ```
 With urls addressing on demand files, you can safely use ```player.pause()``` if ```player.canPause``` is true.
 
-As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it to the AudioPlayer via the listener parameter above. You will also receive changes of metadata, hints on problems like network stalls as well as relevant durations and playback buffer size.
+As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it via the listener parameter above. You will also receive changes of metadata, hints on problems like network stalls as well as relevant durations and playback buffer size.
 ```swift
 public protocol AudioPlayerListener : class {
     func stateChanged(_ state: PlaybackState)

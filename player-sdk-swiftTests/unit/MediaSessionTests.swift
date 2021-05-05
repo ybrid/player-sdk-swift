@@ -27,8 +27,9 @@ import XCTest
 
 class MediaSessionTests: XCTestCase {
 
+    let listener = MediaListener()
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        listener.errors.removeAll()
     }
 
     override func tearDownWithError() throws {
@@ -38,7 +39,7 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_YbridDemo() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        guard let session = endpoint.createSession() else {
+        guard let session = endpoint.open(listener: listener) else {
             XCTFail("session expected"); return
         }
         let playbackUri = session.playbackUri
@@ -47,14 +48,15 @@ class MediaSessionTests: XCTestCase {
         guard let metadata = session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
-        print("running \(metadata.displayTitle ?? "(nil")")
+        print("running \(metadata.displayTitle ?? "(nil)")")
         XCTAssertNotNil(metadata)
+        XCTAssertEqual(0, listener.errors.count)
         session.close()
     }
 
     func testSession_YbridSwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
-        guard let session = endpoint.createSession() else {
+        guard let session = endpoint.open(listener: listener) else {
             XCTFail("session expected"); return
         }
         let playbackUri = session.playbackUri
@@ -64,26 +66,27 @@ class MediaSessionTests: XCTestCase {
             XCTFail("ybrid metadata expected"); return
         }
         print("running \(metadata.displayTitle ?? "(nil")")
+        XCTAssertEqual(0, listener.errors.count)
         session.close()
     }
     
     func testSession_IcySwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        guard let session = endpoint.createSession() else {
+        guard let session = endpoint.open(listener: listener) else {
             XCTFail("session expected"); return
         }
         let playbackUri = session.playbackUri
         XCTAssertEqual(endpoint.uri, playbackUri)
         let metadata = session.fetchMetadataSync()
         XCTAssertNil(metadata, "no icy metadata expected")
-      
+        XCTAssertEqual(0, listener.errors.count)
         session.close()
     }
     
     func testSession_DlfOpus() throws {
         let uri = "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus"
         let endpoint = MediaEndpoint(mediaUri: uri)
-        guard let session = endpoint.createSession() else {
+        guard let session = endpoint.open(listener: listener) else {
             XCTFail("session expected"); return
         }
         let playbackUri = session.playbackUri
@@ -91,29 +94,41 @@ class MediaSessionTests: XCTestCase {
         
         let metadata = session.fetchMetadataSync()
         XCTAssertNil(metadata, "no opus metadata expected")
-        
+        XCTAssertEqual(0, listener.errors.count)
         session.close()
     }
     
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        guard let session = endpoint.createSession() else {
+        guard let session = endpoint.open(listener: listener) else {
             XCTFail("session expected"); return
         }
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         let metadata = session.fetchMetadataSync()
         XCTAssertNil(metadata, "no metadata expected")
+        XCTAssertEqual(0, listener.errors.count)
         session.close()
     }
     
     
+
     func testSession_BadUrl() throws {
         let uri = "https://blub"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        let session = endpoint.createSession()
+        let session = endpoint.open(listener: listener)
         XCTAssertNil(session, "no session expected")
+        XCTAssertEqual(1,listener.errors.count)
+        let error = listener.errors[0]
+        XCTAssertNotEqual(0,error.code)
     }
     
+    
+    class MediaListener : MediaEndpointListener {
+        var errors:[AudioPlayerError] = []
+        func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+            errors.append(exception)
+        }
+    }
 }

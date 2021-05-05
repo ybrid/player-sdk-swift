@@ -28,13 +28,13 @@
 import AVFoundation
 
 // called back while processing
-public protocol AudioPlayerListener : class {
+public protocol AudioPlayerListener : MediaEndpointListener {
     // the playback state has changed
     func stateChanged(_ state: PlaybackState)
     // metadata of the content currently playing has changed
     func metadataChanged(_ metadata: Metadata)
     // all exceptions contain code, errorReason and localizedDescription, called when occuring
-    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
+//    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     // duration of audio presented already, called every 0.2 seconds
     func playingSince(_ seconds: TimeInterval?)
     // duration between triggering play and first audio presented
@@ -170,6 +170,17 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
    
+    public func close() {
+        if playbackState != .stopped {
+            pipeline?.stopProcessing()
+            playerQueue.async {
+                self.stopPlaying()
+                self.playbackState = .stopped
+            }
+        }
+        session?.close()
+    }
+    
     private func getPlaybackUrl() -> URL {
         let playbackUrl:URL
         if let playbackUri = session?.playbackUri {

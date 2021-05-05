@@ -32,8 +32,8 @@ class ApiError : AudioPlayerError {
         super.init(kind, message, cause)
     }
     
-    init(_ kind:ErrorKind, _ message:String,_ cause:OptionsTaskState) {
-        super.init(kind, message, cause)
+    init(_ kind:ErrorKind, _ cause:OptionsTaskState) {
+        super.init(kind, cause.message, cause)
         super.osstatus = cause.osstatus
     }
     

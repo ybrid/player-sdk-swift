@@ -81,7 +81,7 @@ class JsonRequest {
                     return
                 }
   
-                apiError = ApiError(ErrorKind.serverError, "error in OPTIONS \(self.url.absoluteString)", optionsState)
+                apiError = ApiError(ErrorKind.serverError, optionsState)
                 return
             }
            
