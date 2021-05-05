@@ -54,11 +54,14 @@ class UseApiPlayerTests: XCTestCase {
         _ = wait(player, until: .stopped, maxSeconds: 2)
     }
     
+    
     func test02_Session_WrongUrl_PlayStops() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wrongurl")
         session = endpoint.createSession()
-        let player = AudioPlayer(session: session!, listener: nil)
+        let playerListener = TestAudioPlayerListener()
+        let player = AudioPlayer(session: session!, listener: playerListener)
         player.play()
+        XCTAssertNotEqual(0, playerListener.statusCode)
         _ = wait(player, until: .stopped, maxSeconds: 2)
     }
 
@@ -98,6 +101,16 @@ class UseApiPlayerTests: XCTestCase {
         sleep(1)
         player.stop()
         _ = wait(player, until: .stopped, maxSeconds: 2)
+    }
+    
+    
+    
+    /*
+     You want to see a problem?
+     */
+    func test06_ErrorWithPlayer() {
+        let session = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url").createSession()
+       XCTAssertNil(session)
     }
     
     private func wait(_ player:AudioPlayer, until:PlaybackState, maxSeconds:Int) -> Int {

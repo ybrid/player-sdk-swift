@@ -96,6 +96,7 @@ class UseAudioPlayerTests: XCTestCase {
         player.play()
         XCTAssertEqual(player.state, PlaybackState.buffering)
         sleep(1)
+        XCTAssertNotEqual(0, playerListener.statusCode)
         XCTAssertEqual(player.state, PlaybackState.stopped)
     }
 

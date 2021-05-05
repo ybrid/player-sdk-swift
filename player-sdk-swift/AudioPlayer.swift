@@ -73,6 +73,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackState
     }}
     
+    public var mediaUrl:URL?
     public var session:MediaSession?
     public var canPause:Bool = false
     
@@ -97,16 +98,16 @@ public class AudioPlayer: BufferListener, PipelineListener {
     // get ready for playing
     // mediaUrl - the url of the audio stream. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public convenience init(mediaUrl: URL, listener: AudioPlayerListener?) {
-        let mediaEndpoint = MediaEndpoint(mediaUri: mediaUrl.absoluteString)
-        let session = mediaEndpoint.createSession()
-        self.init(session: session, listener: listener)
+    public init(mediaUrl: URL, listener: AudioPlayerListener?) {
+        self.playerListener = listener
+        self.mediaUrl = mediaUrl
+        PlayerContext.setupAudioSession()
     }
     
     // get ready for playing
     // session - the MediaSession created on the MediaEndpoint. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(session: MediaSession?, listener: AudioPlayerListener?) {
+    public init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
         PlayerContext.setupAudioSession()
@@ -128,14 +129,11 @@ public class AudioPlayer: BufferListener, PipelineListener {
         if playbackState == .stopped {
             playbackState = .buffering
             self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
-            guard let playbackUri = session?.playbackUri else {
-                stop()
-                return
-            }
-            let streamUrl = URL(string: playbackUri)!
+            let playbackUrl = getPlaybackUrl()
             playerQueue.async {
-                self.playWhenReady(streamUrl: streamUrl)
-            }}
+                self.playWhenReady(playbackUrl)
+            }
+        }
         if playbackState == .pausing {
             playerQueue.async {
                 self.playback?.resume()
@@ -143,7 +141,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    // Stop, notify immediatly, stop playback and clean up asychronously.
+      // Stop, notify immediatly, stop playback and clean up asychronously.
     public func stop() {
         guard playbackState != .stopped  else {
             Logger.shared.debug("already stopped")
@@ -171,8 +169,18 @@ public class AudioPlayer: BufferListener, PipelineListener {
             self.playback?.pause()
         }
     }
+   
+    private func getPlaybackUrl() -> URL {
+        let playbackUrl:URL
+        if let playbackUri = session?.playbackUri {
+            playbackUrl = URL(string: playbackUri)!
+        } else {
+            playbackUrl = mediaUrl!
+        }
+        return playbackUrl
+    }
     
-    private func playWhenReady(streamUrl: URL) {
+    private func playWhenReady(_ streamUrl: URL) {
         loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline!, inclMetadata: true)
         loader?.requestData(from: streamUrl)
     }
