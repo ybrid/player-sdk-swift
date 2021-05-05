@@ -37,7 +37,10 @@ class ApiError : AudioPlayerError {
         super.osstatus = cause.osstatus
     }
     
-    class OptionsTaskState : Equatable, LocalizedError {
+}
+    
+    
+class OptionsTaskState : Equatable, LocalizedError {
         
         static func == (lhs: OptionsTaskState, rhs: OptionsTaskState) -> Bool {
             return lhs.osstatus == rhs.osstatus
@@ -66,8 +69,6 @@ class ApiError : AudioPlayerError {
             OptionsTaskState(-997, "lost connection in background", .fatal) //  App in den Hingerund  -->  -997 Lost connection to background transfer service
         ]
 
-        
-        
         let osstatus:OSStatus
         let message:String
         let severity:ErrorSeverity
@@ -98,4 +99,4 @@ class ApiError : AudioPlayerError {
     
         }
     }
-}
+

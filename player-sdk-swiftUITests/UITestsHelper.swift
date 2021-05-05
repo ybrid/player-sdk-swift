@@ -49,15 +49,11 @@ class TestAudioPlayerListener : AudioPlayerListener {
         Logger.testing.notice("-- combined display title is \(metadata.displayTitle ?? "(nil)")")
     }
     
-    var statusCode:Int32 = 0
+    var errors:[AudioPlayerError] = []
     
     func error(_ severity:ErrorSeverity, _ error: AudioPlayerError) {
         Logger.testing.notice("-- \(severity): \(error.localizedDescription)")
-        if let code = error.osstatus, code != 0 {
-            statusCode = code
-        } else {
-            statusCode = 0
-        }
+        errors.append(error)
     }
 
     func playingSince(_ seconds: TimeInterval?) {

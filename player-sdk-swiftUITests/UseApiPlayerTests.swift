@@ -61,8 +61,11 @@ class UseApiPlayerTests: XCTestCase {
         let playerListener = TestAudioPlayerListener()
         let player = AudioPlayer(session: session!, listener: playerListener)
         player.play()
-        XCTAssertNotEqual(0, playerListener.statusCode)
         _ = wait(player, until: .stopped, maxSeconds: 2)
+        XCTAssertEqual(1, playerListener.errors.count)
+        let lastError = playerListener.errors.last!
+        XCTAssertNotEqual(0, lastError.code)
+        XCTAssertNotEqual(0, lastError.osstatus)
     }
 
     func test03_Session_Icy_PlaySomeSeconds() throws {

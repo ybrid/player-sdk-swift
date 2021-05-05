@@ -96,7 +96,12 @@ class UseAudioPlayerTests: XCTestCase {
         player.play()
         XCTAssertEqual(player.state, PlaybackState.buffering)
         sleep(1)
-        XCTAssertNotEqual(0, playerListener.statusCode)
+        
+        XCTAssertEqual(playerListener.errors.count, 1)
+        let lastError = playerListener.errors.last!
+        XCTAssertNotEqual(0, lastError.code)
+        XCTAssertNotEqual(0, lastError.osstatus)
+
         XCTAssertEqual(player.state, PlaybackState.stopped)
     }
 

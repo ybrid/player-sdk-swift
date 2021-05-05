@@ -74,7 +74,7 @@ class JsonRequest {
         let task = session.dataTask(with: request) { data, response, error in
 
             if let error = error {
-                let optionsState = ApiError.OptionsTaskState.getOptionsState(error)
+                let optionsState = OptionsTaskState.getOptionsState(error)
                 if optionsState.severity == ErrorSeverity.notice {
                     if Logger.verbose { Logger.api.debug(error.localizedDescription) }
                     semaphore.signal()
