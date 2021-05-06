@@ -44,14 +44,16 @@ class UseApiPlayerTests: XCTestCase {
     override func tearDownWithError() throws {
     }
     
-    func test01_Session_Ybrid_PlaySomeSeconds() throws {
+    func test01_Ybrid_PlaySomeSeconds() throws {
 //        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
         let uri = "https://stagecast.ybrid.io/adaptive-demo"
         let endpoint = MediaEndpoint(mediaUri: uri)
-        player = endpoint.audioPlayer(listener: playerListener)
+        player = endpoint.audioPlayer(listener: nil)
         guard let player = player else {
             XCTFail(); return
         }
+        XCTAssertEqual(MediaProtocol.ybridV2, player.session?.mediaProtocol)
+        
         player.play()
         _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(3)
@@ -60,12 +62,13 @@ class UseApiPlayerTests: XCTestCase {
     }
     
     
-    func test02_Session_WrongUrl_PlayStops() throws {
+    func test02_WrongUrl_PlayStops() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wrongurl")
         player = endpoint.audioPlayer(listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
+        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
         player.play()
         _ = wait(player, until: .stopped, maxSeconds: 2)
         XCTAssertEqual(1, playerListener.errors.count)
@@ -74,12 +77,13 @@ class UseApiPlayerTests: XCTestCase {
         XCTAssertNotEqual(0, lastError.osstatus)
     }
 
-    func test03_Session_Icy_PlaySomeSeconds() throws {
+    func test03_Icy_PlaySomeSeconds() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        player = endpoint.audioPlayer(listener: playerListener)
+        player = endpoint.audioPlayer(listener: nil)
         guard let player = player else {
             XCTFail(); return
         }
+        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
         player.play()
         _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(3)
@@ -87,12 +91,14 @@ class UseApiPlayerTests: XCTestCase {
         _ = wait(player, until: .stopped, maxSeconds: 2)
     }
 
-    func test04_Session_Opus_PlaySomeSeconds() throws {
+    func test04_Icy_Opus_PlaySomeSeconds() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         player = endpoint.audioPlayer(listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
+        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
+        
         player.play()
         _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(3)
@@ -106,6 +112,7 @@ class UseApiPlayerTests: XCTestCase {
         guard let player = player else {
             XCTFail(); return
         }
+        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
         player.play()
         _ = wait(player, until: .playing, maxSeconds: 10)
         sleep(3)
@@ -125,13 +132,14 @@ class UseApiPlayerTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
         player = endpoint.audioPlayer(listener: playerListener)
         XCTAssertNil(player)
+
         XCTAssertEqual(1, playerListener.errors.count)
         let error = playerListener.errors[0]
         XCTAssertNotEqual(0, error.code)
         XCTAssertEqual(-1003, error.osstatus) // host not found
     }
     
-    func test07_Error_CannotProcessMimetype() {
+    func test07_Icy_CannotProcessMimetype() {
         let endpoint = MediaEndpoint(mediaUri: "https://www.google.de")
         player = endpoint.audioPlayer(listener: playerListener)
         guard let player = player else {

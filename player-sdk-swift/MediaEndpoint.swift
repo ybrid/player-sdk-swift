@@ -28,12 +28,6 @@
 
 import Foundation
 
-
-public protocol MediaEndpointListener : class {
-    // all exceptions contain code, errorReason and localizedDescription, called when occuring
-    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
-}
-
 public class MediaEndpoint : Hashable {
     public static func == (lhs: MediaEndpoint, rhs: MediaEndpoint) -> Bool {
         return lhs.uri == rhs.uri
@@ -49,37 +43,6 @@ public class MediaEndpoint : Hashable {
         self.uri = mediaUri
     }
     
-    // Create a MediaSession using this MediaEndpoint
-    public func createSession() -> MediaSession? {
-        
-        let session = MediaSession(on: self)
-        do {
-            try session.connect()
-        } catch {
-            Logger.api.debug("cannot connect to endpoint, reason: \(error.localizedDescription)")
- 
-            return nil
-        }
-        return session
-    }
-    
-    // Create a MediaSession using this MediaEndpoint
-    public func open(listener:MediaEndpointListener?) -> MediaSession? {
-        
-        let session = MediaSession(on: self)
-        do {
-            try session.connect()
-        } catch {
-            if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
-            } else {
-                listener?.error(ErrorSeverity.fatal, ApiError(ErrorKind.unknown, "cannot connect to endpoint", error))
-            }
-            return nil
-        }
-        return session
-    }
-
     // Create a AudioPlayer using this MediaEndpoint
     public func audioPlayer(listener:AudioPlayerListener?) -> AudioPlayer? {
         

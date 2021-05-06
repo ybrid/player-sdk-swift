@@ -39,97 +39,116 @@ class AbortBufferingTests: XCTestCase {
         XCTAssertFalse(Logger.verbose)
     }
     
-    let maxSecondsWait = 3
+    let maxSecondsWait = 4
     
     // MARK: abort playing mp3
         
     func testAbortMp3_until100msAfterConnect_CleanedUp() throws {
         Logger.verbose = true
-        session = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").createSession()
+        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
+        let abortingListener = AbortingListener()
+        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+            XCTFail(); return
+        }
+        abortingListener.player = player
         
         var interval:TimeInterval = 0.000
         repeat {
-            let aborting = playAndAbort(session!, afterConnect:interval)
+            abortingListener.prepare(interval)
+            player.play()
             
-            var cycle = 0
-            var state:PlaybackState?
-            repeat {
-                sleep(1)
-                state = aborting.player?.state
-                cycle += 1
-                Logger.testing.notice("-- \(state!) after \(cycle) seconds")
-            } while PlaybackState.stopped != state && cycle <= maxSecondsWait
+            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
+            let failed = reportAndCheck(interval, cycle, abortingListener)
             
-            let played = aborting.hasPlayed ? "played" : "not played"
-            Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state!) after \(cycle) seconds, \(aborting.problemCount) errors occured, \(aborting.cleanedUp)")
-            
-            XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state!) after \(cycle) seconds")
-            XCTAssertTrue(cycle <= maxSecondsWait, "-- \(interval.S) after connect: took \(cycle) seconds")
-            
-            XCTAssertEqual(0, aborting.problemCount)
-            XCTAssertTrue(aborting.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(cycle) seconds")
+            if failed {
+                player.close()
+                player = endpoint.audioPlayer(listener: abortingListener)!
+                abortingListener.player = player
+            }
             
             interval += 0.005
         } while interval <= 0.101
     }
 
+    
+    private func reportAndCheck(_ interval:TimeInterval, _ seconds:Int, _ listener:AbortingListener) -> Bool {
+        
+        let state = (listener.player?.state)!
+        Logger.testing.notice("-- \(state) after \(seconds) seconds")
+        
+        let played = listener.hasPlayed ? "played" : "not played"
+        Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state) after \(seconds) seconds, \(listener.problemCount) errors occured, \(listener.cleanedUp)")
+        
+        XCTAssertEqual(0, listener.problemCount)
+        XCTAssertTrue(listener.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(seconds) seconds")
+        
+        XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state) after \(seconds) seconds")
+        XCTAssertTrue(seconds <= maxSecondsWait, "-- \(interval.S) after connect: took \(seconds) seconds")
+        
+        return seconds > maxSecondsWait
+    }
+    
     func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
         Logger.verbose = true
-        session = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").createSession()
-
+        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
+        let abortingListener = AbortingListener()
+        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+            XCTFail(); return
+        }
+        abortingListener.player = player
+        
         var interval:TimeInterval = 0.010
         repeat {
-            let aborting = playAndAbort(session!, afterConnect:interval)
+            abortingListener.prepare(interval)
+            player.play()
+
+            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
+            let failed = reportAndCheck(interval, cycle, abortingListener)
             
-            var cycle = 0
-            var state:PlaybackState?
-            repeat {
-                sleep(1)
-                state = aborting.player?.state
-                cycle += 1
-                Logger.testing.notice("-- \(state!) after \(cycle) seconds")
-            } while PlaybackState.stopped != state && cycle <= maxSecondsWait
-            
-            let played = aborting.hasPlayed ? "played" : "not played"
-            Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state!) after \(cycle) seconds, \(aborting.problemCount) errors occured, \(aborting.cleanedUp)")
-            
-            XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state!) after \(cycle) seconds")
-            XCTAssertTrue(cycle <= maxSecondsWait, "-- \(interval.S) after connect: took \(cycle) seconds")
-            
-            XCTAssertEqual(0, aborting.problemCount)
-            XCTAssertTrue(aborting.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(cycle) seconds")
+            if failed {
+                player.close()
+                player = endpoint.audioPlayer(listener: abortingListener)!
+                abortingListener.player = player
+            }
             
             interval += 0.050
         } while interval <= 1
     }
-
+    
+    private func wait(_ player:AudioPlayer, until:PlaybackState, maxSeconds:Int) -> Int {
+        var seconds = 0
+        while player.state != until && seconds <= maxSeconds {
+            sleep(1)
+            seconds += 1
+        }
+        print("took \(seconds) second\(seconds > 1 ? "s" : "") until \(player.state)")
+        XCTAssertEqual(until, player.state)
+        return seconds
+    }
     
     // MARK: abort playing opus
     
-    
     func testAbortOpus_until100msAfterConnect_CleanedUp() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        let abortingListener = AbortingListener()
+        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+            XCTFail(); return
+        }
+        abortingListener.player = player
+        
         var interval:TimeInterval = 0.000
-        session = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus").createSession()
-       
         repeat {
-            let aborting = playAndAbort(session!, afterConnect:interval)
+            abortingListener.prepare(interval)
+            player.play()
+
+            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
+            let failed = reportAndCheck(interval, cycle, abortingListener)
             
-            var cycle = 0
-            var state:PlaybackState?
-            repeat {
-                sleep(1)
-                state = aborting.player?.state
-                cycle += 1
-            } while PlaybackState.stopped != state && cycle <= maxSecondsWait
-            
-            let played = aborting.hasPlayed ? "played" : "not played"
-            Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state!) after \(cycle) seconds, \(aborting.problemCount) errors occured, \(aborting.cleanedUp)")
-            
-            XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state!) after \(cycle) seconds")
-            XCTAssertTrue(cycle <= maxSecondsWait, "-- \(interval.S) after connect: took \(cycle) seconds")
-            
-            XCTAssertEqual(0, aborting.problemCount)
-            XCTAssertTrue(aborting.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(cycle) seconds")
+            if failed {
+                player.close()
+                player = endpoint.audioPlayer(listener: abortingListener)!
+                abortingListener.player = player
+            }
             
             interval += 0.005
         } while interval <= 0.101
@@ -137,46 +156,34 @@ class AbortBufferingTests: XCTestCase {
 
     func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
         Logger.verbose = true
-        session = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus").createSession()
+        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        let aborting = AbortingListener()
+        guard var player = endpoint.audioPlayer(listener: aborting) else {
+            XCTFail(); return
+        }
+        aborting.player = player
+        
         var interval:TimeInterval = 0.010
         repeat {
-            let aborting = playAndAbort(session!, afterConnect:interval)
+            aborting.prepare(interval)
+            player.play()
+
+            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
+            let failed = reportAndCheck(interval, cycle, aborting)
             
-            var cycle = 0
-            var state:PlaybackState?
-            repeat {
-                sleep(1)
-                state = aborting.player?.state
-                cycle += 1
-                Logger.testing.notice("-- \(state!) after \(cycle) seconds")
-            } while PlaybackState.stopped != state && cycle <= maxSecondsWait
-            
-            let played = aborting.hasPlayed ? "played" : "not played"
-            Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state!) after \(cycle) seconds, \(aborting.problemCount) errors occured, \(aborting.cleanedUp)")
-            
-            XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state!) after \(cycle) seconds")
-            XCTAssertTrue(cycle <= maxSecondsWait, "-- \(interval.S) after connect: took \(cycle) seconds")
-            
-            XCTAssertEqual(0, aborting.problemCount)
-            XCTAssertTrue(aborting.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(cycle) seconds")
+            if failed {
+                player.close()
+                player = endpoint.audioPlayer(listener: aborting)!
+                aborting.player = player
+            }
             
             interval += 0.050
         } while interval <= 1
     }
-
-    // MARK: helpers
-        
-    private func playAndAbort(_ session:MediaSession, afterConnect:TimeInterval) -> AbortingListener {
-        let abortingListener = AbortingListener(afterConnect:afterConnect)
-        let player = AudioPlayer(session: session, listener: abortingListener)
-        abortingListener.player = player
-        player.play()
-        return abortingListener
-    }
 }
 
 class AbortingListener : AbstractAudioPlayerListener  {
-    let afterConnect:TimeInterval
+    var afterConnect:TimeInterval = -1.0
     
     var player:AudioPlayer?
     private let testQueue = DispatchQueue(label: "io.ybrid.player-sdk-tests")
@@ -191,8 +198,11 @@ class AbortingListener : AbstractAudioPlayerListener  {
         return pbEngine.cleanedUp()
     }
     
-    init(afterConnect: TimeInterval) {
-        self.afterConnect = afterConnect
+    func prepare(_ abortAfterConnect:TimeInterval) {
+        
+        hasPlayed = false
+        problemCount = 0
+        afterConnect = abortAfterConnect
     }
     
     private func abort() {

@@ -39,93 +39,120 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_YbridDemo() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        guard let session = endpoint.open(listener: listener) else {
-            XCTFail("session expected"); return
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
         }
-        let playbackUri = session.playbackUri
+        guard let playbackUri = player.session?.playbackUri else {
+            XCTFail("playbackUri expected"); return
+        }
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = session.fetchMetadataSync() else {
+        guard let metadata = player.session?.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
         print("running \(metadata.displayTitle ?? "(nil)")")
         XCTAssertNotNil(metadata)
         XCTAssertEqual(0, listener.errors.count)
-        session.close()
+        player.close()
     }
 
     func testSession_YbridSwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
-        guard let session = endpoint.open(listener: listener) else {
-            XCTFail("session expected"); return
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
         }
-        let playbackUri = session.playbackUri
+        guard let playbackUri = player.session?.playbackUri else {
+            XCTFail("playbackUri expected"); return
+        }
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = session.fetchMetadataSync() else {
+        guard let metadata = player.session?.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
         print("running \(metadata.displayTitle ?? "(nil")")
         XCTAssertEqual(0, listener.errors.count)
-        session.close()
+        player.close()
     }
     
     func testSession_IcySwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        guard let session = endpoint.open(listener: listener) else {
-            XCTFail("session expected"); return
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
         }
-        let playbackUri = session.playbackUri
+        guard let playbackUri = player.session?.playbackUri else {
+            XCTFail("playbackUri expected"); return
+        }
         XCTAssertEqual(endpoint.uri, playbackUri)
-        let metadata = session.fetchMetadataSync()
+        let metadata = player.session?.fetchMetadataSync()
         XCTAssertNil(metadata, "no icy metadata expected")
         XCTAssertEqual(0, listener.errors.count)
-        session.close()
+        player.close()
     }
     
     func testSession_DlfOpus() throws {
         let uri = "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus"
         let endpoint = MediaEndpoint(mediaUri: uri)
-        guard let session = endpoint.open(listener: listener) else {
-            XCTFail("session expected"); return
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
         }
-        let playbackUri = session.playbackUri
+        guard let playbackUri = player.session?.playbackUri else {
+            XCTFail("playbackUri expected"); return
+        }
         XCTAssertEqual(uri, playbackUri)
         
-        let metadata = session.fetchMetadataSync()
+        let metadata = player.session?.fetchMetadataSync()
         XCTAssertNil(metadata, "no opus metadata expected")
         XCTAssertEqual(0, listener.errors.count)
-        session.close()
+        player.close()
     }
     
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        guard let session = endpoint.open(listener: listener) else {
-            XCTFail("session expected"); return
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
         }
-        let playbackUri = session.playbackUri
+        guard let playbackUri = player.session?.playbackUri else {
+            XCTFail("playbackUri expected"); return
+        }
         XCTAssertEqual(uri, playbackUri)
-        let metadata = session.fetchMetadataSync()
+        let metadata = player.session?.fetchMetadataSync()
         XCTAssertNil(metadata, "no metadata expected")
         XCTAssertEqual(0, listener.errors.count)
-        session.close()
+        player.close()
     }
     
     
+    func testSession_NoMediaUrl() throws {
+        let uri = "https://stagecast.ybrid.io/xyzbnlabla"
+        let endpoint = MediaEndpoint(mediaUri:uri)
+        guard let player = endpoint.audioPlayer(listener: listener) else {
+            XCTFail("player expected"); return
+        }
+        XCTAssertNotNil(player.session, "session expected")
+        XCTAssertEqual(0,listener.errors.count)
 
+    }
+    
     func testSession_BadUrl() throws {
         let uri = "https://blub"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        let session = endpoint.open(listener: listener)
-        XCTAssertNil(session, "no session expected")
+        XCTAssertNil(endpoint.audioPlayer(listener: listener), "no player expected")
+
         XCTAssertEqual(1,listener.errors.count)
         let error = listener.errors[0]
         XCTAssertNotEqual(0,error.code)
     }
     
     
-    class MediaListener : MediaEndpointListener {
+    class MediaListener : AudioPlayerListener {
+        func stateChanged(_ state: PlaybackState) {}
+        func metadataChanged(_ metadata: Metadata) {}
+        func playingSince(_ seconds: TimeInterval?) {}
+        func durationReadyToPlay(_ seconds: TimeInterval?) {}
+        func durationConnected(_ seconds: TimeInterval?) {}
+        func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {}
+        
         var errors:[AudioPlayerError] = []
         func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
             errors.append(exception)

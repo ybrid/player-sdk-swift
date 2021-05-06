@@ -30,6 +30,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     
     var triggeredPlay:Int = 0
     var triggeredStop:Int = 0
+    var triggeredPause:Int = 0
     
     var stepDuration:TimeInterval = 10
     var rangeFrom:TimeInterval = 1
@@ -73,7 +74,19 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         Logger.testing.notice("------------------")
     }
     
-    func testOpusPlayStop() throws {
+    func test01_MP3PlayStop() throws {
+        prepare("https://swr-edge-20b9-fra-lg-cdn.cast.addradio.de/swr/swr3/live/mp3/128/stream.mp3")
+        
+        stepDuration = 10
+        rangeFrom = 1 /// on first step
+        rangeTo = 3 /// on first step
+        restBetweenSteps = 5
+        stepsDecrease = 10
+        
+        self.execute()
+    }
+    
+    func test02_OpusPlayStop() throws {
         prepare("https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         
         stepDuration = 10
@@ -88,8 +101,10 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         self.execute()
     }
     
-    func testMP3PlayStop() throws {
-        prepare("https://swr-edge-20b9-fra-lg-cdn.cast.addradio.de/swr/swr3/live/mp3/128/stream.mp3")
+
+    
+    func test03_OnDemandPlayPause() throws {
+        prepare("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/music.mp3?raw=true")
         
         stepDuration = 10
         rangeFrom = 1 /// on first step
@@ -98,7 +113,6 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         stepsDecrease = 10
         
         self.execute()
-        
     }
     
     fileprivate func prepare(_ mediaUrl:String) {
@@ -120,13 +134,14 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
             
             for _ in 1...nToggles {
                 let waiting = TimeInterval.random(in: self.rangeFrom...self.rangeTo)
-                var action:String = ""
-                if self.toggle() {
+                let action = self.toggle()
+                switch action {
+                case .play:
                     self.triggeredPlay += 1
-                    action = "play"
-                } else {
+                case .stop:
                     self.triggeredStop += 1
-                    action = "stop"
+                case .pause:
+                    self.triggeredPause += 1
                 }
                 Logger.testing.notice("-- \(action) \(waiting.S)")
                 usleep(useconds_t(waiting.us))
@@ -140,15 +155,30 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
                 rangeTo = rangeTo * 2 / 3
             }
         }
+        
+        if self.player?.state != .stopped {
+            self.player?.stop()
+        }
     }
     
-    private func toggle() -> Bool {
-        if self.player?.state == .stopped {
-            self.player?.play()
-            return true
+    enum Action {
+        case play
+        case stop
+        case pause
+    }
+    
+    private func toggle() -> Action {
+        guard let player = self.player else {fatalError()}
+        if player.state == .stopped || player.state == .pausing {
+            player.play()
+            return Action.play
         } else {
-            self.player?.stop()
-            return false
+            if player.canPause {
+                player.pause()
+                return Action.pause
+            }
+            player.stop()
+            return Action.stop
         }
     }
     

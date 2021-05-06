@@ -27,7 +27,7 @@ player.stop()
 player.close()
 ```
 
-MediaEndpoint.audioPlayer first detects the protocol to handle audio content and metadata and then returns the audio player. In future releases a matching type of player (or of media controls) will be passed to you asynchrounously.
+MediaEndpoint.audioPlayer first detects the protocol to handle audio content and metadata and then returns the audio player. In future releases a matching type of player (or of media controls) will be passed to you asynchronously.
 
 Possible playback states of the player are
 ```swift
