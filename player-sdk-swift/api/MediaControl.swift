@@ -26,8 +26,9 @@
 import Foundation
 
 protocol MediaControl {
-    var playbackUri:String { get }
-    var connected:Bool { get }
+    var playbackUri: String { get }
+    var connected: Bool { get }
+    var mediaProtocol: MediaProtocol { get }
 }
 
 class MediaDriver : MediaControl {

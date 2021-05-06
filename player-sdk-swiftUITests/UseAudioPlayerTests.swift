@@ -31,11 +31,16 @@ class UseAudioPlayerTests: XCTestCase {
     override func setUpWithError() throws {
         // Log additional debug information in this tests
         Logger.verbose = true
+        
+        playerListener.reset()
     }
  
     // of course you may choose your own radio station here
     let url = URL.init(string: "https://stagecast.ybrid.io/swr3/mp3/mid")!
    
+    // see tests using the listener
+    let playerListener = TestAudioPlayerListener()
+    
     /*
     Let the player play your radio.
     
@@ -77,7 +82,7 @@ class UseAudioPlayerTests: XCTestCase {
 
      Make sure the listener stays alive until it recieves stateChanged to '.stopped'.
      */
-    let playerListener = TestAudioPlayerListener()
+
     func test03_ListenToPlayer() {
         let player = AudioPlayer(mediaUrl: url, listener: playerListener)
         player.play()
@@ -89,20 +94,22 @@ class UseAudioPlayerTests: XCTestCase {
     /*
      You want to see a problem?
      Filter the console output by '-- '
+     
+     listener.error lets you see all errors, warnings and notifications
      */
     func test04_ErrorWithPlayer() {
+
         let badUrl = URL.init(string: "https://swr-swr3.cast.io/bad/url")!
         let player = AudioPlayer(mediaUrl: badUrl, listener: playerListener)
         player.play()
         XCTAssertEqual(player.state, PlaybackState.buffering)
         sleep(1)
+        XCTAssertEqual(player.state, PlaybackState.stopped)
         
         XCTAssertEqual(playerListener.errors.count, 1)
         let lastError = playerListener.errors.last!
         XCTAssertNotEqual(0, lastError.code)
         XCTAssertNotEqual(0, lastError.osstatus)
-
-        XCTAssertEqual(player.state, PlaybackState.stopped)
     }
 
     
@@ -121,7 +128,7 @@ class UseAudioPlayerTests: XCTestCase {
     /*
      HttpSessions on urls that offer "expected content length != -1"
      are identified as on demand files. They can be paused.
-     Remember, all actions are asynchronous. So assertions are 1 second later.
+     Remember, all actions are asynchronous. So assertions in this test are delayed.
      */
     func test06_OnDemandPlayPausePlayPauseStop() {
         let opusUrl = URL.init(string: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")!
@@ -144,6 +151,28 @@ class UseAudioPlayerTests: XCTestCase {
         player.stop()
         sleep(1)
         XCTAssertEqual(player.state, PlaybackState.stopped)
+    }
+    
+    
+    /*
+     listener.metadataChanged is called when metadata changes. In the beginning of streaming
+     there ist always a change comared to nothing.
+     */
+    func test07_ListenToMetadata() {
+
+        let player = AudioPlayer(mediaUrl: url, listener: playerListener)
+        player.play()
+        sleep(3)
+        player.stop()
+        sleep(1)
+        
+        XCTAssertGreaterThan(playerListener.metadatas.count, 0)
+        guard playerListener.metadatas.count > 0 else {
+            XCTFail("expected at least one metadata called"); return
+        }
+        let metadata = playerListener.metadatas[0]
+        XCTAssertNotNil(metadata.current?.displayTitle)
+        
     }
 }
 

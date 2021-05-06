@@ -72,10 +72,10 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_YbridDemo_Connect_Disconnect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        let session = endpoint.createSession()
-        XCTAssertNotNil(session, "expected a session")
-
-        guard let controller = session?.mediaControl else {
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let controller = player.session?.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
@@ -90,10 +90,11 @@ class MediaProtocolTests: XCTestCase {
 
     func testDriver_Swr3_Connect_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
-        let session = endpoint.createSession()
-        XCTAssertNotNil(session, "expected a session")
-        guard let driver = session?.mediaControl else {
-            XCTFail(); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
         XCTAssertTrue(driver.connected)
@@ -111,19 +112,22 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_Swr3WrongUrl_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3")
-        guard let session = endpoint.createSession() else {
-            XCTFail("expected a session"); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
         }
-        XCTAssertNotNil(session.mediaControl)
+        XCTAssertNotNil(player.session?.mediaControl)
         
-        XCTAssertEqual(session.playbackUri, endpoint.uri)
+        XCTAssertEqual(endpoint.uri, player.session?.playbackUri)
     }
     
     
     func testDriver_Hr2() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        guard let driver = endpoint.createSession()?.mediaControl else {
-            XCTFail(); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
@@ -132,8 +136,11 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_EgoFM() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
-        guard let driver = endpoint.createSession()?.mediaControl else {
-            XCTFail(); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
@@ -142,8 +149,11 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_DlfOpus() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let driver = endpoint.createSession()?.mediaControl else {
-            XCTFail(); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)
@@ -152,8 +162,11 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_OnDemandSound() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let driver = endpoint.createSession()?.mediaControl else {
-            XCTFail(); return
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, driver.playbackUri)

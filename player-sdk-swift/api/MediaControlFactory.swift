@@ -26,7 +26,7 @@
 import Foundation
 
 
-enum MediaProtocol : String {
+public enum MediaProtocol : String {
     case plain // http only
     case icy // http with icy-fields
     case ybridV2 = "v2" // ybrid verson 2 (with icy-fields)

@@ -115,6 +115,28 @@ class MetadataTests: XCTestCase {
         
         XCTAssertEqual(ItemType.JINGLE, metadata.next?.type )
         XCTAssertEqual("Your Personal Audio Experience", metadata.next?.title )
+        
+        XCTAssertEqual("", metadata.station?.name )
+        XCTAssertEqual("", metadata.station?.genre )
     }
 
+
+    func testDisplayTitle_icyAndYbrid_Station() {
+        var heyJudeIcyTitleExtended = heyJudeIcyTitle
+        heyJudeIcyTitleExtended["icy-name"] = "SWR3"
+        heyJudeIcyTitleExtended["icy-genre"] = "Pop Music"
+        let metadata = IcyMetadata(icyData: heyJudeIcyTitleExtended )
+        XCTAssertEqual("SWR3", metadata.station?.name)
+        XCTAssertEqual("Pop Music", metadata.station?.genre)
+        
+        let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
+        
+        metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
+        XCTAssertEqual("Hey Jude\nby Beatles", metadata.displayTitle )
+        
+        XCTAssertEqual("", metadata.station?.name)
+        XCTAssertEqual("", metadata.station?.genre)
+    }
+
+    
 }

@@ -28,13 +28,13 @@
 import AVFoundation
 
 // called back while processing
-public protocol AudioPlayerListener : MediaEndpointListener {
+public protocol AudioPlayerListener : class {
     // the playback state has changed
     func stateChanged(_ state: PlaybackState)
     // metadata of the content currently playing has changed
     func metadataChanged(_ metadata: Metadata)
     // all exceptions contain code, errorReason and localizedDescription, called when occuring
-//    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
+    func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError)
     // duration of audio presented already, called every 0.2 seconds
     func playingSince(_ seconds: TimeInterval?)
     // duration between triggering play and first audio presented
@@ -95,7 +95,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    // get ready for playing
+    // get ready for playing (do not use with ybrid)
     // mediaUrl - the url of the audio stream. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
     public init(mediaUrl: URL, listener: AudioPlayerListener?) {
@@ -104,10 +104,10 @@ public class AudioPlayer: BufferListener, PipelineListener {
         PlayerContext.setupAudioSession()
     }
     
-    // get ready for playing
-    // session - the MediaSession created on the MediaEndpoint. Supports mp3, aac and opus.
+    // get ready for playing.
+    // session - the MediaSession connected to the MediaEndpoint. Supports mp3, aac and opus.
     // listener - object to be called back from the player process
-    public init(session: MediaSession, listener: AudioPlayerListener?) {
+    init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
         PlayerContext.setupAudioSession()
@@ -170,6 +170,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
    
+    // Stopping and releasing all ressources
     public func close() {
         if playbackState != .stopped {
             pipeline?.stopProcessing()
@@ -191,9 +192,9 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackUrl
     }
     
-    private func playWhenReady(_ streamUrl: URL) {
-        loader = AudioDataLoader(mediaUrl: streamUrl, pipeline: pipeline!, inclMetadata: true)
-        loader?.requestData(from: streamUrl)
+    private func playWhenReady(_ playbackUrl: URL) {
+        loader = AudioDataLoader(mediaUrl: playbackUrl, pipeline: pipeline!, inclMetadata: true)
+        loader?.requestData(from: playbackUrl)
     }
     
     private func stopPlaying() {

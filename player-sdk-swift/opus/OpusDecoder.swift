@@ -120,6 +120,11 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
     }
     
     func convert(package:AudioData.Package, granularPos:Int64?) throws {
+        guard !super.stopping else {
+            Logger.decoding.debug("stopping, ignore converting package")
+            return
+        }
+        
         guard let targetFormat = pcmFormat else {
             Logger.decoding.error("target format missing")
             throw DecoderError(.missingTargetFormat)

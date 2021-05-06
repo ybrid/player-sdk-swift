@@ -28,14 +28,14 @@
 
 import Foundation
 
-public class MediaSession : Equatable {
-    public static func == (lhs: MediaSession, rhs: MediaSession) -> Bool {
-        return lhs.endpoint == rhs.endpoint
-    }
-    
+public class MediaSession  {
+       
     public let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
+    public var mediaProtocol:MediaProtocol? { get {
+        return mediaControl?.mediaProtocol
+    }}
 
     var metadataDict:[UUID:AbstractMetadata] = [:]
 
@@ -52,7 +52,7 @@ public class MediaSession : Equatable {
         try self.mediaControl?.connect()
     }
     
-    public func close() {
+    func close() {
         self.mediaControl?.disconnect()
     }
     
