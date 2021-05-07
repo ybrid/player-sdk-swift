@@ -80,6 +80,7 @@ class AbstractMetadata : Metadata {
     init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
         self.currentItem = current
         self.nextItem = next
+        self.stationInfo = station
     }
     
     func delegate(with other: AbstractMetadata) {
@@ -88,28 +89,28 @@ class AbstractMetadata : Metadata {
     
     public final var displayTitle: String? {
         if let delegate = delegate {
-            return delegate.current?.displayTitle
+            return delegate.displayTitle
         }
         return current?.displayTitle
     }
     
     public final var station: Station?  {
         if let delegate = delegate {
-            return delegate.stationInfo
+            return delegate.station
         }
         return stationInfo
     }
     
     public final var current: Item? {
         if let delegate = delegate {
-            return delegate.currentItem
+            return delegate.current
         }
         return currentItem
     }
     
     public final var next: Item?  {
         if let delegate = delegate {
-            return delegate.nextItem
+            return delegate.next
         }
         return nextItem
     }

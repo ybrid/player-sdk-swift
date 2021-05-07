@@ -28,7 +28,7 @@
 
 import Foundation
 
-public class MediaEndpoint : Hashable {
+public class MediaEndpoint : Equatable, Hashable {
     public static func == (lhs: MediaEndpoint, rhs: MediaEndpoint) -> Bool {
         return lhs.uri == rhs.uri
     }
@@ -43,7 +43,9 @@ public class MediaEndpoint : Hashable {
         self.uri = mediaUri
     }
     
-    // Create a AudioPlayer using this MediaEndpoint
+    // Create an AudioPlayer using this MediaEndpoint.
+    // It detects the best matching MediaProtocol and establishes
+    // a session object to control content and metadata of the stream.
     public func audioPlayer(listener:AudioPlayerListener?) -> AudioPlayer? {
         
         let session = MediaSession(on: self)

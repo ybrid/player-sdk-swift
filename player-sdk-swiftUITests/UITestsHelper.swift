@@ -40,23 +40,26 @@ extension TimeInterval {
     }
 }
 
-class TestAudioPlayerListener : AudioPlayerListener {
+class TestAudioPlayerListener : AbstractAudioPlayerListener {
 
-    func stateChanged(_ state: PlaybackState) {
-        Logger.testing.notice("-- player is \(state)")
+    func reset() {
+        metadatas.removeAll()
+        errors.removeAll()
     }
-    func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- combined display title is \(metadata.displayTitle ?? "(nil)")")
+    
+    var metadatas:[Metadata] = []
+    override func metadataChanged(_ metadata: Metadata) {
+        super.metadataChanged(metadata)
+        metadatas.append(metadata)
     }
     
     var errors:[AudioPlayerError] = []
-    
-    func error(_ severity:ErrorSeverity, _ error: AudioPlayerError) {
-        Logger.testing.notice("-- \(severity): \(error.localizedDescription)")
+    override func error(_ severity:ErrorSeverity, _ error: AudioPlayerError) {
+        super.error(severity, error)
         errors.append(error)
     }
 
-    func playingSince(_ seconds: TimeInterval?) {
+    override func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
         } else {
@@ -64,23 +67,7 @@ class TestAudioPlayerListener : AudioPlayerListener {
         }
     }
 
-    func durationReadyToPlay(_ seconds: TimeInterval?) {
-        if let duration = seconds {
-            Logger.testing.notice("-- begin playing audio after \(duration.S) seconds ")
-        } else {
-            Logger.testing.notice("-- reset buffered until playing duration ")
-        }
-    }
-
-    func durationConnected(_ seconds: TimeInterval?) {
-        if let duration = seconds {
-            Logger.testing.notice("-- recieved first data from url after \(duration.S) seconds ")
-        } else {
-            Logger.testing.notice("-- reset recieved first data duration ")
-        }
-    }
-
-    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+    override func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let bufferLength = currentSeconds {
             Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
         }
