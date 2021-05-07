@@ -1,10 +1,10 @@
 # player-sdk-swift
-This audio player is written in Swift 4 and runs on iPhones and iPads from iOS 9 to iOS 14. 
+This audio player SDK is written in Swift 4 and runs on iPhones and iPads from iOS 9 to iOS 14. 
 
 An example app using this player SDK can be run from the XCode-Project in the repository [app-example-ios](https://github.com/ybrid/app-example-ios). 
 
 ## Why yet another player?
-This audio player offers
+This audio player SDK offers
 - low latency live and on demand file streaming
 - compatibility: currently supports audio codecs mp3, aac, and opus
 - metadata processing for icecast, vorbis commands and ybrid 
@@ -12,7 +12,7 @@ This audio player offers
 - stability
 
 ## How to use
-After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the Framework into your project, use the following lines of Swift code to listen to your radio:
+After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the framework into your project, use the following lines of Swift code to listen to your radio:
 ```swift
 import YbridPlayerSDK
 
@@ -27,7 +27,7 @@ player.stop()
 player.close()
 ```
 
-MediaEndpoint.audioPlayer first detects the protocol to handle audio content and metadata and then returns the audio player. In future releases a matching type of player (or of media controls) will be passed to you asynchronously.
+MediaEndpoint.audioPlayer first detects the transmission protocol and encoding of the audio content and metadata and then returns the corresponding player. In future releases a matching type of player (incl. specific media controls) will be passed to you asynchronously.
 
 Possible playback states of the player are
 ```swift
