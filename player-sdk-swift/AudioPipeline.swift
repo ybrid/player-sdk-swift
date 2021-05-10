@@ -264,7 +264,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
                 return
             } catch {
                 guard !self.stopping else {
-                    Logger.decoding.debug("stopping pipeline, ignoring decoding error")
+                    Logger.decoding.notice("stopping pipeline, ignoring decoding error")
                     return
                 }
                 Logger.decoding.error(error.localizedDescription)

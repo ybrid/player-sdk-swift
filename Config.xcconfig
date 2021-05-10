@@ -29,9 +29,9 @@
 #include "Pods/Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.release.xcconfig"
 
 // Product Version, PLEASE CHANGE HERE to affect all targets
-MARKETING_VERSION = 0.10.0
+MARKETING_VERSION = 0.10.1
 // Build number, PLEASE CHANGE HERE to affect all targets
-CURRENT_PROJECT_VERSION = 19
+CURRENT_PROJECT_VERSION = 20
 
 // Architectures
 ARCHS = arm64 armv7 x86_64 x86_64h i386

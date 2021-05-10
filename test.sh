@@ -28,7 +28,15 @@
 # Usage: no parameters
 # 
 
-
+# 2021-05-10 : IMPORTANT NOTE 
+# When YbridPlayerSDK.xcframework.zip is built with xcodebuild version 12.5, 
+# playing opus streams on real iOS devices crashes.
+#
+# Until the bug is fixed this test uses installed version 12.4 of xcodebuild.
+#
+# Comment the following line to use the default installation on the system.
+export DEVELOPER_DIR=/Applications/Xcode_12.4.app/Contents/Developer
+echo "using $(xcodebuild -version)"
 
 
 dd=./DerivedData
