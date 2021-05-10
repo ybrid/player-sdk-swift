@@ -23,9 +23,19 @@
 # SOFTWARE.
 
 #
-# Generates the player-sdk-swift.xcframework from player-sdk-swift.xcodeworkspace.
+# Generates the YbridPlayerSDK.xcframework from player-sdk-swift.xcodeworkspace.
 # Usage: no parameters, settings mostly defined in xcode xcodeworkspace
 # 
+
+# 2021-05-10 : IMPORTANT NOTE FOR BUILDING
+# When YbridPlayerSDK.xcframework.zip is built with xcodebuild version 12.5, 
+# playing opus streams on real iOS devices crashes.
+#
+# Until the bug is fixed this build uses installed version 12.4 of xcodebuild.
+#
+# Comment the following line to use the default installation on the system.
+export DEVELOPER_DIR=/Applications/Xcode_12.4.app/Contents/Developer
+echo "using $(xcodebuild -version)"
 
 scheme=player-sdk-swift
 opts="SKIP_INSTALL=NO BUILD_LIBRARIES_FOR_DISTRIBUTION=YES" 
@@ -36,6 +46,7 @@ archivesPath="$dd/Archives"
 # clean up
 rm -rfd $dd
 mkdir -p "$archivesPath"
+rm build-*.log
 
 # path and name of platform specifically generated frameworks 
 generatedPath="Products/Library/Frameworks"
