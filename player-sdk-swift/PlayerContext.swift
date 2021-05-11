@@ -104,31 +104,25 @@ public class PlayerContext {
     // MARK: network monitoring
     
     static let networkMonitor = NetworkMonitor()
-    
     static func register(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
-        if networkMonitor.listeners[id] == nil {
-            weak var weakListener = listener
-            networkMonitor.listeners[id] = weakListener
-        }
+        networkMonitor.listeners.put(id: id, value: listener)
         if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
     }
     static func unregister(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
-        // sometimes EXC_BAD_ACCESS here -> TODO thread safe access to dictionary
-        networkMonitor.listeners[id] = nil
+        networkMonitor.listeners.remove(id: id)
         if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
     }
-    
+
     class NetworkMonitor {
-        var listeners:[UInt:NetworkListener] = [:]
+        var listeners = ThreadsafeDictionary<UInt,NetworkListener>(queueLabel: "io.ybrid.context.networkListening")
         var connected:Bool = false {
             didSet {
                 if oldValue != connected {
                     Logger.loading.notice("network \(connected ? "connected" : "disconnected") -> notifying \(listeners.count) listeners")
-                    for listener in listeners {  // TODO make it thread safe
-                        listener.1.notifyNetworkChanged(connected)
-                    }
+                    listeners.forEachValue { (listener) in
+                        listener.notifyNetworkChanged(connected) }
                 }
             }
         }
@@ -223,36 +217,33 @@ public class PlayerContext {
     // MARK: memory limit
     
     public static var memoryLimitMB:Float = 128.0
-    static private var sharedMemoryMonitor:MemoryMonitor = MemoryMonitor()
+    static var sharedMemoryMonitor:MemoryMonitor = MemoryMonitor()
     public static func handleMemoryLimit() -> Bool {
         return sharedMemoryMonitor.handleLimit(PlayerContext.memoryLimitMB)
     }
     
     static func registerMemoryListener(listener: MemoryListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
-        if sharedMemoryMonitor.listeners[id] == nil {
-            weak var weakListener = listener
-            sharedMemoryMonitor.listeners[id] = weakListener
-        }
+        sharedMemoryMonitor.listeners.put(id: id, value: listener)
         Logger.loading.debug("\(sharedMemoryMonitor.listeners.count) memory listeners")
     }
     static func unregisterMemoryListener(listener: MemoryListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
-        // sometimes EXC_BAD_ACCESS here -> TODO thread safe access to dictionary
-        sharedMemoryMonitor.listeners[id] = nil
+        sharedMemoryMonitor.listeners.remove(id: id)
         Logger.loading.debug("\(sharedMemoryMonitor.listeners.count) memory listeners")
     }
     
     class MemoryMonitor {
-        var listeners:[UInt:MemoryListener] = [:]
+        var listeners = ThreadsafeDictionary<UInt,MemoryListener>(queueLabel: "io.ybrid.context.memoryListening")
+        
         init(){}
         func handleLimit(_ maxMB:Float ) -> Bool {
             guard isMemory(exceedingMB:maxMB) else {
                 return false
             }
             Logger.shared.error("nofiying \(listeners.count) memory listeners")
-            for listener in listeners {
-                listener.1.notifyExceedsMemoryLimit()
+            listeners.forEachValue{ (listener) in
+                listener.notifyExceedsMemoryLimit()
             }
             return true
         }
@@ -285,6 +276,42 @@ public class PlayerContext {
             let residentPeak =  Float(info.resident_size_peak) / 1024 / 1024
             
             return (footprint,resident, residentPeak)
+        }
+    }
+}
+
+class ThreadsafeDictionary<K:Hashable,V> {
+    private let queue:DispatchQueue
+    private var entries:[K:V] = [:]
+    init(queueLabel:String) {
+        self.queue = DispatchQueue(label: queueLabel, qos: PlayerContext.processingPriority)
+    }
+    var count: Int { get { return queue.sync {() -> Int in return entries.count }}}
+    func forEachValue( act: (V) -> () ) {
+        queue.sync {
+            for entry in entries {
+                act(entry.1)
+            }}
+    }
+    func put(id:K, value: V) {
+            queue.async {
+                self.entries[id] = value
+            }
+        }
+    func get(id:K) -> V? {
+        return queue.sync { ()-> V? in
+            return entries[id]
+        }
+    }
+    func remove(id:K) {
+        queue.async {
+            self.entries[id] = nil
+        }
+    }
+    
+    func removeAll()  {
+        queue.async {
+            self.entries.removeAll()
         }
     }
 }
