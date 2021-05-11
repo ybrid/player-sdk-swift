@@ -28,8 +28,8 @@ import Foundation
 
 class IcyMetadata : AbstractMetadata {
     init(icyData:[String:String]) {
-        super.init(current: IcyMetadata.createItem(icyData) )
-        stationInfo = IcyMetadata.createStation(icyData)
+        super.init(current: IcyMetadata.createItem(icyData),
+                   station: IcyMetadata.createStation(icyData) )
     }
     
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
@@ -79,8 +79,8 @@ class OpusMetadata : AbstractMetadata {
 class YbridMetadata : AbstractMetadata {
     init(ybridV2:YbridV2Metadata) {
         super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
-                   next: YbridMetadata.createItem(ybrid: ybridV2.nextItem) )
-        super.stationInfo = YbridMetadata.createStation(ybridV2.station)
+                   next: YbridMetadata.createItem(ybrid: ybridV2.nextItem),
+                   station: YbridMetadata.createStation(ybridV2.station) )
     }
     
     // content of __responseObject.metatdata.station

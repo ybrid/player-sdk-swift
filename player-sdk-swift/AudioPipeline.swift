@@ -197,7 +197,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     // MARK: metadata listener
     
     func metadataReady(_ metadata: AbstractMetadata) {
-        metadata.stationInfo = Station(name: icyFields?["icy-name"], genre: icyFields?["icy-genre"])
+        
+        if let broadcaster = icyFields?["icy-name"] {
+            metadata.setBroadcaster(broadcaster)
+        }
+        if let genre = icyFields?["icy-genre"] {
+            metadata.setGenre(genre)
+        }
+        
         if firstMetadata {
             firstMetadata = false
             guard let session = mediaSession else {
@@ -220,7 +227,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
                 }
                 return
             }
-            let metadataId = session.holdMetadata(metadata: metadata)
+            let metadataId = session.maintainMetadata(metadata: metadata)
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
                 if let delayedMd = session.popMetadata(uuid: metadataId) {
                     self.notifyMetadataChanged(delayedMd)

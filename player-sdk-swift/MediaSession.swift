@@ -37,7 +37,7 @@ public class MediaSession  {
         return mediaControl?.mediaProtocol
     }}
 
-    var metadataDict:[UUID:AbstractMetadata] = [:]
+    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(queueLabel: "io.ybrid.metadata.maintaining")
 
     public var playbackUri:String { get {
         return mediaControl?.playbackUri ?? endpoint.uri
@@ -66,7 +66,7 @@ public class MediaSession  {
         return nil
     }
     
-    func holdMetadata(metadata: AbstractMetadata) -> UUID {
+    func maintainMetadata(metadata: AbstractMetadata) -> UUID {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
@@ -75,16 +75,14 @@ public class MediaSession  {
             }
         }
         let uuid = UUID()
-        metadataDict[uuid] = metadata
+        metadataDict.put(id: uuid, value: metadata)
         return uuid
     }
     
     func popMetadata(uuid:UUID) -> AbstractMetadata? {
-        if let metadata = metadataDict[uuid] {
-            metadataDict[uuid] = nil
-            return metadata
-        }
-        return nil
+        return metadataDict.pop(id:uuid)
     }
     
 }
+
+

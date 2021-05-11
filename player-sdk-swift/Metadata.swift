@@ -66,16 +66,16 @@ public enum ItemType : String  {
 }
 
 public struct Station {
-    public let name: String?
-    public let genre: String?
+    public var name: String?
+    public var genre: String?
 }
 
 class AbstractMetadata : Metadata {
     
-    var currentItem:Item?
-    var nextItem:Item?
-    var stationInfo: Station?
-    var delegate:AbstractMetadata?
+    private var currentItem:Item?
+    private var nextItem:Item?
+    private var stationInfo: Station?
+    private var delegate:AbstractMetadata?
     
     init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
         self.currentItem = current
@@ -85,6 +85,22 @@ class AbstractMetadata : Metadata {
     
     func delegate(with other: AbstractMetadata) {
         self.delegate = other
+    }
+    
+    func setBroadcaster(_ broadcaster:String) {
+        guard var station = stationInfo else {
+            stationInfo = Station(name:broadcaster)
+            return
+        }
+        station.name = broadcaster
+    }
+    
+    func setGenre(_ genre:String) {
+        guard var station = stationInfo else {
+            stationInfo = Station(genre:genre)
+            return
+        }
+        station.genre = genre
     }
     
     public final var displayTitle: String? {
