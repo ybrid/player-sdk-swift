@@ -54,6 +54,7 @@
 		17539EBF26287B6D000FE902 /* UseEndpointPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* UseEndpointPlayerTests.swift */; };
 		175849DF264A5D6E0071FEE6 /* ContextMonitoringNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849DE264A5D6E0071FEE6 /* ContextMonitoringNetworkTests.swift */; };
 		175849E1264A76790071FEE6 /* ContextMonitoringMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E0264A76790071FEE6 /* ContextMonitoringMemoryTests.swift */; };
+		175849E3264B27620071FEE6 /* SetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E2264B27620071FEE6 /* SetTests.swift */; };
 		175AFB2925FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
 		175AFB2A25FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
 		175AFB2B25FA428100005046 /* AudioPlayerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AFB2825FA428100005046 /* AudioPlayerError.swift */; };
@@ -184,6 +185,7 @@
 		17539EBD26287B6D000FE902 /* UseEndpointPlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseEndpointPlayerTests.swift; sourceTree = "<group>"; };
 		175849DE264A5D6E0071FEE6 /* ContextMonitoringNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMonitoringNetworkTests.swift; sourceTree = "<group>"; };
 		175849E0264A76790071FEE6 /* ContextMonitoringMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMonitoringMemoryTests.swift; sourceTree = "<group>"; };
+		175849E2264B27620071FEE6 /* SetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetTests.swift; sourceTree = "<group>"; };
 		175AFB2825FA428100005046 /* AudioPlayerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerError.swift; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				1714DA84263A0B7700DD17B8 /* MetadataTests.swift */,
 				175849E0264A76790071FEE6 /* ContextMonitoringMemoryTests.swift */,
 				175849DE264A5D6E0071FEE6 /* ContextMonitoringNetworkTests.swift */,
+				175849E2264B27620071FEE6 /* SetTests.swift */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -915,6 +918,7 @@
 				1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */,
 				17539E712626E18F000FE902 /* MediaProtocolTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
+				175849E3264B27620071FEE6 /* SetTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,
 				1711D184263AB45400882D2B /* MetadataMappings.swift in Sources */,
 				171345C5263153500054DB9D /* MediaControl.swift in Sources */,

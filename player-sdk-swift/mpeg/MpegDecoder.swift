@@ -136,18 +136,46 @@ class MpegDecoder : AudioDecoder {
         return buffer
     }
 
-    /// need to keep in mind memory of packet data and descriptions to deallocate after converting
-    fileprivate var packetDescs:[UnsafeMutablePointer<AudioStreamPacketDescription>?] = []
-    fileprivate var packetDatas:[UnsafeMutableRawPointer?] = []
-    fileprivate func cleanupConverterGarbage() { // todo async
-        packetDescs.forEach { (desc) in desc?.deinitialize(count: 1); desc?.deallocate() }
-        if Logger.verbose { Logger.decoding.debug("deallocated \(packetDescs.count) packet descriptions") }
-        packetDescs.removeAll()
-        packetDatas.forEach { (data) in data?.deallocate() }
-        if Logger.verbose { Logger.decoding.debug("deallocated \(packetDatas.count) packets of data") }
-        packetDatas.removeAll()
+    class ThreadsafeSet<T:Hashable> {
+        private var entries = Set<T>()
+        private let queue:DispatchQueue
+        init(_ queueLabel:String) {
+            queue = DispatchQueue(label: queueLabel, qos: .background)
+        }
+        var count:Int {
+            return queue.sync {
+                return self.entries.count
+            }
+        }
+        func insert(_ entry:T) {
+            queue.async {
+                self.entries.insert(entry)
+            }
+        }
+        func popAll(act: @escaping (T) -> () ) {
+            queue.async {
+                while let entry = self.entries.popFirst() {
+                    act(entry)
+                }
+            }
+        }
     }
 
+    /// need to keep in mind memory of packet data and descriptions to deallocate after converting
+    fileprivate var packetDescs = ThreadsafeSet<UnsafeMutablePointer<AudioStreamPacketDescription>?>("io.ybrid.decoding.garbage.description")
+    fileprivate var packetDatas = ThreadsafeSet<UnsafeMutableRawPointer?>("io.ybrid.decoding.garbage.data")
+    fileprivate func cleanupConverterGarbage() {
+        if Logger.verbose { Logger.decoding.debug("deallocating \(packetDescs.count) packet descriptions") }
+        packetDescs.popAll { (desc) in
+            desc?.deinitialize(count: 1)
+            desc?.deallocate()
+        }
+        if Logger.verbose { Logger.decoding.debug("deallocating \(packetDatas.count) packets of data") }
+        packetDatas.popAll { (data) in
+            data?.deallocate()
+        }
+    }
+    
     /// called for each packet by convertPacketCallback
     fileprivate func convertPacket(_ packetCount: inout UInt32,
                                    _ outData: inout AudioBufferList,
@@ -165,7 +193,7 @@ class MpegDecoder : AudioDecoder {
             memcpy((outData.mBuffers.mData?.assumingMemoryBound(to: UInt8.self))!, bytes.baseAddress, bytesCount)
         }
         outData.mBuffers.mDataByteSize = UInt32(bytesCount)
-        packetDatas.append(outData.mBuffers.mData) /// needs to be cleaned up
+        packetDatas.insert(outData.mBuffers.mData) /// needs to be cleaned up
         
         /// converter needs description if not pcm (mFormatID != kAudioFormatLinearPCM)
         if var desc = packet.description {
@@ -175,7 +203,7 @@ class MpegDecoder : AudioDecoder {
                 outDescription?.pointee?.initialize(to: desc)
             }
             outDescription?.pointee?[0] = desc
-            packetDescs.append(outDescription?.pointee) /// needs to be cleaned up
+            packetDescs.insert(outDescription?.pointee) /// needs to be cleaned up
         }
         
         packetCount = 1
@@ -243,4 +271,3 @@ fileprivate func convertPacketCallback(_ converter: AudioConverterRef,
 fileprivate let ConvertingEndOfData: OSStatus = 800000001
 fileprivate let ConvertingMissingDataSource: OSStatus = 800000002
 fileprivate let ConvertingMissingSourceFormat: OSStatus = 800000003
-
