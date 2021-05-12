@@ -46,28 +46,7 @@ class MpegData : AudioData {
         packages.clear()
     }
 
-    let packages:Dequeue = Dequeue<Package>()
-    class Dequeue<T> {
-        private let queue = DispatchQueue(label: "io.ybrid.decoding.source", qos: PlayerContext.processingPriority)
-        
-        private var packages = [T]()
-        
-        var count:Int { queue.sync { return packages.count } }
-        
-        func put(_ package: T) {
-            queue.async { self.packages.append(package) }
-        }
-        
-        func take() -> T? {
-            queue.sync {
-                guard packages.count > 0 else { return nil }
-                return packages.removeFirst()
-            }
-        }
-        
-        func clear() { queue.async { self.packages.removeAll() } }
-    }
-
+    let packages:ThreadsafeDequeue = ThreadsafeDequeue<Package>()
     
     func parse(data: Data) throws {
         if Logger.verbose { Logger.decoding.debug("parsing \(data.count) bytes") }

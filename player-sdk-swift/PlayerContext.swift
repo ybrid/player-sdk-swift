@@ -280,45 +280,4 @@ public class PlayerContext {
     }
 }
 
-class ThreadsafeDictionary<K:Hashable,V> {
-    private let queue:DispatchQueue
-    private var entries:[K:V] = [:]
-    init(queueLabel:String) {
-        self.queue = DispatchQueue(label: queueLabel, qos: PlayerContext.processingPriority)
-    }
-    var count: Int { get { return queue.sync {() -> Int in return entries.count }}}
-    func forEachValue( act: (V) -> () ) {
-        queue.sync {
-            for entry in entries {
-                act(entry.1)
-            }}
-    }
-    func put(id:K, value: V) {
-            queue.async {
-                self.entries[id] = value
-            }
-        }
-//    func get(id:K) -> V? {
-//        return queue.sync { ()-> V? in
-//            return entries[id]
-//        }
-//    }
-    func remove(id:K) {
-        queue.async {
-            self.entries[id] = nil
-        }
-    }
-    func pop(id:K) -> V? {
-        return queue.sync { ()-> V? in
-            let value = entries[id]
-            entries[id] = nil
-            return value
-        }
-    }
-    
-    func removeAll()  {
-        queue.async {
-            self.entries.removeAll()
-        }
-    }
-}
+

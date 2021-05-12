@@ -1,5 +1,5 @@
 //
-// SetTests.swift
+// ThreadsafeSetTests.swift
 // player-sdk-swiftTests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,9 +25,9 @@
 
 import XCTest
 
-class SetTests: XCTestCase {
+class ThreadsafeSetTests: XCTestCase {
 
-    var mySet = MpegDecoder.ThreadsafeSet<UUID>("io.ybrid.decoder.cleanup.test")
+    var mySet = ThreadsafeSet<UUID>("io.ybrid.decoder.cleanup.test")
     
     override func tearDownWithError() throws {
         print("\ncleaning \(mySet.count) entries")
@@ -95,7 +95,4 @@ class SetTests: XCTestCase {
             }
         }
     }
-    
- 
- 
 }

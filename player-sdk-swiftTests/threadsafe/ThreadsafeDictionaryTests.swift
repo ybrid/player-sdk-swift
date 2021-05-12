@@ -1,5 +1,5 @@
 //
-// ContextMonitoringNetworkTests.swift
+// ThreadsafeDictionaryTests.swift
 // player-sdk-swiftTests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -24,88 +24,80 @@
 //
 
 import XCTest
-@testable import YbridPlayerSDK
 
-// tests only thread safe regisgtration
-class ContextMonitoringNetworkTests: XCTestCase {
+class ThreadsafeDictionaryTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        PlayerContext.networkMonitor.listeners.removeAll()
-    }
-    var regsisteredCount:Int {get{ return PlayerContext.networkMonitor.listeners.count}}
-
+    var dictionary = ThreadsafeDictionary<Int,TestInstance>(queueLabel: "io.ybrid.threadsafe.dictionary.testing")
     
-    class TestNetworkListener : NetworkListener {
+    override func setUpWithError() throws {
+        dictionary.removeAll()
+    }
+    
+    class TestInstance {
         let id:Int
-        var connectedCount = 0
-        var unconnectedCount = 0
         init(_ listenerId: Int) {
             self.id = listenerId
         }
-        func notifyNetworkChanged(_ connected: Bool) {
-            if connected { connectedCount += 1 }
-            else { unconnectedCount += 1}
-        }
     }
-
+  
     
     func testRegister()  {
-        let listener = TestNetworkListener(0)
-        PlayerContext.register(listener: listener)
-        XCTAssertEqual(1, regsisteredCount)
+        let listener = TestInstance(0)
+        dictionary.put(id: listener.id, value: listener)
+        XCTAssertEqual(1, dictionary.count)
     }
 
     func testUnregister()  {
-        let listener = TestNetworkListener(0)
-        PlayerContext.unregister(listener: listener)
-        XCTAssertEqual(0, regsisteredCount)
+        let listener = TestInstance(0)
+        dictionary.remove(id: listener.id)
+        XCTAssertEqual(0, dictionary.count)
     }
 
     func testRegisterUnregister()  {
-        let listener = TestNetworkListener(0)
-        PlayerContext.register(listener: listener)
-        XCTAssertEqual(1, regsisteredCount)
-        PlayerContext.unregister(listener: listener)
-        XCTAssertEqual(0, regsisteredCount)
+        let listener = TestInstance(0)
+        dictionary.put(id: listener.id, value: listener)
+        XCTAssertEqual(1, dictionary.count)
+        dictionary.remove(id: listener.id)
+        XCTAssertEqual(0, dictionary.count)
     }
 
     func testRegisterRegister()  {
-        let listener = TestNetworkListener(0)
-        PlayerContext.register(listener: listener)
-        XCTAssertEqual(1, regsisteredCount)
-        PlayerContext.register(listener: listener)
-        XCTAssertEqual(1, regsisteredCount)
-        PlayerContext.unregister(listener: listener)
-        XCTAssertEqual(0, regsisteredCount)
+        let listener = TestInstance(0)
+        dictionary.put(id: listener.id, value: listener)
+        XCTAssertEqual(1, dictionary.count)
+        dictionary.put(id: listener.id, value: listener)
+        XCTAssertEqual(1, dictionary.count)
+        dictionary.remove(id: listener.id)
+        XCTAssertEqual(0, dictionary.count)
     }
     
     func testRegister1Register2()  {
-        let listener1 = TestNetworkListener(1)
-        let listener2 = TestNetworkListener(2)
-        PlayerContext.register(listener: listener1)
-        XCTAssertEqual(1, regsisteredCount)
-        PlayerContext.register(listener: listener2)
-        XCTAssertEqual(2, regsisteredCount)
-        PlayerContext.unregister(listener: listener1)
-        XCTAssertEqual(1, regsisteredCount)
+        let listener1 = TestInstance(1)
+        let listener2 = TestInstance(2)
+        dictionary.put(id: listener1.id, value: listener1)
+        XCTAssertEqual(1, dictionary.count)
+        dictionary.put(id: listener2.id, value: listener2)
+        XCTAssertEqual(2, dictionary.count)
+        dictionary.remove(id: listener1.id)
+        XCTAssertEqual(1, dictionary.count)
     }
     
     func testWildRegistrations() {
-        var listeners:[TestNetworkListener] = []
+        var listeners:[TestInstance] = []
         let nListeners = 20
         for i in 1...nListeners {
-            listeners.append(TestNetworkListener(i))
+            listeners.append(TestInstance(i))
         }
         wild((5...100)) { // one is registering each 5 to 100 ms
             let randomListener = listeners[Int.random(in: 0...nListeners-1)]
-            PlayerContext.register(listener: randomListener)
+            self.dictionary.put(id: randomListener.id, value: randomListener)
         }
         wild(5...200) { // one is unregistering each 5 to 200 ms
             let randomListener = listeners[Int.random(in: 0...nListeners-1)]
-            PlayerContext.unregister(listener: randomListener)
+            self.dictionary.remove(id: randomListener.id)
         }
         wild(500...500) { // report each 0.5 seconds
-            print ("registered \(self.regsisteredCount) network listeners")
+            print ("registered \(self.dictionary.count) instance")
         }
         sleep(10)
     }
@@ -120,5 +112,6 @@ class ContextMonitoringNetworkTests: XCTestCase {
         }
     }
     
+
 
 }

@@ -136,31 +136,6 @@ class MpegDecoder : AudioDecoder {
         return buffer
     }
 
-    class ThreadsafeSet<T:Hashable> {
-        private var entries = Set<T>()
-        private let queue:DispatchQueue
-        init(_ queueLabel:String) {
-            queue = DispatchQueue(label: queueLabel, qos: .background)
-        }
-        var count:Int {
-            return queue.sync {
-                return self.entries.count
-            }
-        }
-        func insert(_ entry:T) {
-            queue.async {
-                self.entries.insert(entry)
-            }
-        }
-        func popAll(act: @escaping (T) -> () ) {
-            queue.async {
-                while let entry = self.entries.popFirst() {
-                    act(entry)
-                }
-            }
-        }
-    }
-
     /// need to keep in mind memory of packet data and descriptions to deallocate after converting
     fileprivate var packetDescs = ThreadsafeSet<UnsafeMutablePointer<AudioStreamPacketDescription>?>("io.ybrid.decoding.garbage.description")
     fileprivate var packetDatas = ThreadsafeSet<UnsafeMutableRawPointer?>("io.ybrid.decoding.garbage.data")
