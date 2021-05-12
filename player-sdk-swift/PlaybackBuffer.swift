@@ -189,7 +189,7 @@ class PlaybackBuffer {
     }
     
     private func scheduleNext() -> TimeInterval? {
-        guard let takenChunk = cachedChunks.take() else {
+        guard let takenChunk = cachedChunks.pop() else {
             return nil
         }
         self.scheduling.schedule(chunk: takenChunk)
@@ -217,6 +217,11 @@ class PlaybackBuffer {
     }
     private class ChunkCache : ThreadsafeDequeue<Chunk> {
         
+        init() {
+            let queue = DispatchQueue(label: "io.ybrid.playing.chunks", qos: PlayerContext.processingPriority)
+            super.init(queue)
+        }
+        
         var duration:TimeInterval {
             guard super.count > 0 else {
                 return 0.0
@@ -236,21 +241,21 @@ class PlaybackBuffer {
         }
     }
 
-    class ThreadsafeDequeue<T> {
-        let queue = DispatchQueue(label: "io.ybrid.playing.chunks", qos: PlayerContext.processingPriority)
-
-        private var element = [T]()
-        var count:Int {queue.sync { element.count } }
-        var all:[T] { queue.sync { return element } }
-        func put(_ package: T) { queue.async { self.element.append(package) } }
-        func take() -> T? {
-            queue.sync {
-                guard self.element.count > 0 else { return nil }
-                return self.element.removeFirst()
-            }
-        }
-        func clear() { queue.async { self.element.removeAll() } }
-    }
+//    class ThreadsafeDequeue<T> {
+//
+//
+//        private var element = [T]()
+//        var count:Int {queue.sync { element.count } }
+//        var all:[T] { queue.sync { return element } }
+//        func put(_ package: T) { queue.async { self.element.append(package) } }
+//        func take() -> T? {
+//            queue.sync {
+//                guard self.element.count > 0 else { return nil }
+//                return self.element.removeFirst()
+//            }
+//        }
+//        func clear() { queue.async { self.element.removeAll() } }
+//    }
 }
 
 extension TimeInterval {

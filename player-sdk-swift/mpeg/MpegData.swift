@@ -30,6 +30,10 @@ class MpegData : AudioData {
     
     var id:AudioFileStreamID? 
     
+    let packages = ThreadsafeDequeue<Package>(
+        DispatchQueue(label: "io.ybrid.decoding.packages", qos: PlayerContext.processingPriority)
+    )
+    
     override init(audioContentType: AudioFileTypeID, listener: AudioDataListener) throws {
         try super.init(audioContentType: audioContentType, listener: listener)
         let context = unsafeBitCast(self, to: UnsafeMutablePointer<AudioData>.self)
@@ -46,7 +50,6 @@ class MpegData : AudioData {
         packages.clear()
     }
 
-    let packages:ThreadsafeDequeue = ThreadsafeDequeue<Package>()
     
     func parse(data: Data) throws {
         if Logger.verbose { Logger.decoding.debug("parsing \(data.count) bytes") }

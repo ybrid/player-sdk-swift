@@ -27,7 +27,9 @@ import XCTest
 
 class ThreadsafeDictionaryTests: XCTestCase {
 
-    var dictionary = ThreadsafeDictionary<Int,TestInstance>(queueLabel: "io.ybrid.threadsafe.dictionary.testing")
+    var dictionary = ThreadsafeDictionary<Int,TestInstance>(
+        DispatchQueue(label: "io.ybrid.threadsafe.dictionary.testing")
+    )
     
     override func setUpWithError() throws {
         dictionary.removeAll()

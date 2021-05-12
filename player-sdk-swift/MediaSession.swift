@@ -37,7 +37,9 @@ public class MediaSession  {
         return mediaControl?.mediaProtocol
     }}
 
-    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(queueLabel: "io.ybrid.metadata.maintaining")
+    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
+        DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
+    )
 
     public var playbackUri:String { get {
         return mediaControl?.playbackUri ?? endpoint.uri

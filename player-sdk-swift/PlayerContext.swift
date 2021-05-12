@@ -116,7 +116,8 @@ public class PlayerContext {
     }
 
     class NetworkMonitor {
-        var listeners = ThreadsafeDictionary<UInt,NetworkListener>(queueLabel: "io.ybrid.context.networkListening")
+        var listeners = ThreadsafeDictionary<UInt,NetworkListener>(DispatchQueue( label: "io.ybrid.context.network.listening", qos: PlayerContext.processingPriority)
+        )
         var connected:Bool = false {
             didSet {
                 if oldValue != connected {
@@ -234,7 +235,8 @@ public class PlayerContext {
     }
     
     class MemoryMonitor {
-        var listeners = ThreadsafeDictionary<UInt,MemoryListener>(queueLabel: "io.ybrid.context.memoryListening")
+        var listeners = ThreadsafeDictionary<UInt,MemoryListener>(DispatchQueue(label: "io.ybrid.context.memoryListening", qos: PlayerContext.processingPriority)
+        )
         
         init(){}
         func handleLimit(_ maxMB:Float ) -> Bool {

@@ -137,8 +137,12 @@ class MpegDecoder : AudioDecoder {
     }
 
     /// need to keep in mind memory of packet data and descriptions to deallocate after converting
-    fileprivate var packetDescs = ThreadsafeSet<UnsafeMutablePointer<AudioStreamPacketDescription>?>("io.ybrid.decoding.garbage.description")
-    fileprivate var packetDatas = ThreadsafeSet<UnsafeMutableRawPointer?>("io.ybrid.decoding.garbage.data")
+    fileprivate var packetDescs = ThreadsafeSet<UnsafeMutablePointer<AudioStreamPacketDescription>?>(
+        DispatchQueue(label: "io.ybrid.decoding.garbage.description", qos: .background)
+    )
+    fileprivate var packetDatas = ThreadsafeSet<UnsafeMutableRawPointer?>(
+        DispatchQueue(label: "io.ybrid.decoding.garbage.data", qos: .background)
+    )
     fileprivate func cleanupConverterGarbage() {
         if Logger.verbose { Logger.decoding.debug("deallocating \(packetDescs.count) packet descriptions") }
         packetDescs.popAll { (desc) in
@@ -156,7 +160,7 @@ class MpegDecoder : AudioDecoder {
                                    _ outData: inout AudioBufferList,
                                    _ outDescription: UnsafeMutablePointer<UnsafeMutablePointer<AudioStreamPacketDescription>?>?) -> OSStatus {
 
-        guard var packet = source?.packages.take() else {
+        guard var packet = source?.packages.pop() else {
             return ConvertingEndOfData
         }
 

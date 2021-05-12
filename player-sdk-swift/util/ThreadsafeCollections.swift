@@ -26,32 +26,33 @@
 import Foundation
 
 class ThreadsafeDequeue<T> {
-    private let queue = DispatchQueue(label: "io.ybrid.decoding.source", qos: PlayerContext.processingPriority)
-    
-    private var packages = [T]()
-    
-    var count:Int { queue.sync { return packages.count } }
-    
-    func put(_ package: T) {
-        queue.async { self.packages.append(package) }
+    private let queue:DispatchQueue
+    private var entries = [T]()
+    init(_ usedQueue: DispatchQueue) {
+        self.queue = usedQueue
     }
     
-    func take() -> T? {
+    var count:Int { queue.sync { return entries.count } }
+    var all:[T] { queue.sync { return entries } }
+    func put(_ package: T) {
+        queue.async { self.entries.append(package) }
+    }
+    
+    func pop() -> T? {
         queue.sync {
-            guard packages.count > 0 else { return nil }
-            return packages.removeFirst()
+            guard entries.count > 0 else { return nil }
+            return entries.removeFirst()
         }
     }
     
-    func clear() { queue.async { self.packages.removeAll() } }
+    func clear() { queue.async { self.entries.removeAll() } }
 }
-
 
 class ThreadsafeSet<T:Hashable> {
     private var entries = Set<T>()
     private let queue:DispatchQueue
-    init(_ queueLabel:String) {
-        queue = DispatchQueue(label: queueLabel, qos: .background)
+    init(_ usedQueue: DispatchQueue) {
+        queue = usedQueue
     }
     var count:Int {
         return queue.sync {
@@ -72,12 +73,11 @@ class ThreadsafeSet<T:Hashable> {
     }
 }
 
-
 class ThreadsafeDictionary<K:Hashable,V> {
     private let queue:DispatchQueue
     private var entries:[K:V] = [:]
-    init(queueLabel:String) {
-        self.queue = DispatchQueue(label: queueLabel, qos: PlayerContext.processingPriority)
+    init(_ usedQueue: DispatchQueue) {
+        queue = usedQueue
     }
     var count: Int { get { return queue.sync {() -> Int in return entries.count }}}
     func forEachValue( act: (V) -> () ) {
@@ -87,15 +87,10 @@ class ThreadsafeDictionary<K:Hashable,V> {
             }}
     }
     func put(id:K, value: V) {
-            queue.async {
-                self.entries[id] = value
-            }
+        queue.async {
+            self.entries[id] = value
         }
-//    func get(id:K) -> V? {
-//        return queue.sync { ()-> V? in
-//            return entries[id]
-//        }
-//    }
+    }
     func remove(id:K) {
         queue.async {
             self.entries[id] = nil

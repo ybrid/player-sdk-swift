@@ -29,103 +29,97 @@ import AVFoundation
 
 class ThreadsafeDequeueTests: XCTestCase {
     
-    var pkg1:String = "A"
-    var pkg2:String = "B"
-    
-    override func setUpWithError() throws {
-        
-    }
-    
+    var items = ThreadsafeDequeue<String>(
+        DispatchQueue(label: "io.ybrid.threadsafe.dequeue.tests", qos: PlayerContext.processingPriority)
+    )
+
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        items.clear()
     }
     
-    func testEmptyTake() throws {
-        let packets = ThreadsafeDequeue<String>()
-        XCTAssertEqual(0, packets.count)
+    func testEmptyPop() throws {
+        XCTAssertEqual(0, items.count)
         
-        XCTAssertNil(packets.take())
-        XCTAssertEqual(0, packets.count)
+        XCTAssertNil(items.pop())
+        XCTAssertEqual(0, items.count)
     }
     
-    func testPutTakeTake() throws {
-        let packets = ThreadsafeDequeue<String>()
-        XCTAssertEqual(0, packets.count)
-        packets.put(pkg1)
-        XCTAssertEqual(1, packets.count)
+    func testPutPopPop() throws {
+        XCTAssertEqual(0, items.count)
+        items.put("A")
+        XCTAssertEqual(1, items.count)
         
-        let next = packets.take()
+        let next = items.pop()
         XCTAssertNotNil(next)
         XCTAssertEqual("A", next)
-        XCTAssertEqual(0, packets.count)
+        XCTAssertEqual(0, items.count)
         
-        XCTAssertNil(packets.take())
+        XCTAssertNil(items.pop())
     }
     
-    func testPutPutTakeTake() throws {
-        let packets = ThreadsafeDequeue<String>()
-        packets.put(pkg1)
-        packets.put(pkg2)
-        XCTAssertEqual(2, packets.count)
+    func testPutPutPopPop() throws {
+        items.put("A")
+        items.put("B")
+        XCTAssertEqual(2, items.count)
         
-        let next = packets.take()
+        let next = items.pop()
         XCTAssertNotNil(next)
         XCTAssertEqual("A", next)
-        XCTAssertEqual(1, packets.count)
-        XCTAssertEqual("B", packets.take())
+        XCTAssertEqual(1, items.count)
+        XCTAssertEqual("B", items.pop())
     }
     
-    func testPutTakePutTake() throws {
-        let packets = ThreadsafeDequeue<String>()
-        packets.put(pkg1)
-        XCTAssertEqual(1, packets.count)
+    
+    func testPutPutSamePopPop() throws {
+        items.put("A")
+        items.put("A")
+        XCTAssertEqual(2, items.count)
         
-        let next = packets.take()
+        let next = items.pop()
+        XCTAssertNotNil(next)
+        XCTAssertEqual("A", next)
+        XCTAssertEqual(1, items.count)
+        XCTAssertEqual("A", items.pop())
+    }
+    
+    func testPutPopPutPop() throws {
+        items.put("A")
+        XCTAssertEqual(1, items.count)
+        
+        let next = items.pop()
         XCTAssertNotNil(next)
         XCTAssertEqual("A", next)
         
-        packets.put(pkg2)
-        XCTAssertEqual(1, packets.count)
-        XCTAssertEqual("B", packets.take())
+        items.put("B")
+        XCTAssertEqual(1, items.count)
+        XCTAssertEqual("B", items.pop())
     }
     
-    class A {
-        let packets = ThreadsafeDequeue<String>()
-        
-        func put() {
-            DispatchQueue.global(qos: .background).async {
-                usleep(useconds_t(Int.random(in: 100...1000)))
-                let char = String(UnicodeScalar(UInt8.random(in: 65...90))) // A bis Z
-                print ("putting \(char)")
-                self.packets.put(char)
-            }
+    func testPutPopWild() throws {
+        wild(100...1000) {
+            let char = String(UnicodeScalar(UInt8.random(in: 65...90))) // from A to Z
+            print ("putting \(char)")
+            self.items.put(char)
+        }
+        wild(100...1000) {
+            print ("taking \((self.items.pop() ?? "nil"))")
         }
         
-        func take() {
-            DispatchQueue.global(qos: .background).async {
-                usleep(useconds_t(Int.random(in: 100...1000)))
-                print ("took \((self.packets.take() ?? "nil"))")
-            }
+        wild( 10...1500) {
+            print ("size is \((self.items.count))")
         }
-    }
-    func testPutTakeWow() throws {
-        let a = A()
-        print("--------")
-        for _ in 0...1000 {
-            // Single actions
-            DispatchQueue.global(qos: .background).async {
-                usleep(useconds_t(Int.random(in: 100...1000)))
-                a.put()
-            }
-            DispatchQueue.global(qos: .default).async {
-                usleep(useconds_t(Int.random(in: 100...1000)))
-                a.take()
-            }
-        }
+        
         Thread.sleep(forTimeInterval: 5.0)
-        print("--------")
     }
     
+    private func wild(_ rangeUS:ClosedRange<Int>, act: @escaping () -> ()) {
+        DispatchQueue.global(qos: .background).async {
+            while true {
+                usleep(useconds_t(Int.random(in: rangeUS)))
+                act()
+            }
+        }
+    }
     
 }
 

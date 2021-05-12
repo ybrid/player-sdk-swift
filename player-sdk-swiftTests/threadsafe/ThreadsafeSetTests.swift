@@ -27,7 +27,9 @@ import XCTest
 
 class ThreadsafeSetTests: XCTestCase {
 
-    var mySet = ThreadsafeSet<UUID>("io.ybrid.decoder.cleanup.test")
+    var mySet = ThreadsafeSet<UUID>(
+        DispatchQueue(label: "io.ybrid.decoder.cleanup.test", qos: .background)
+    )
     
     override func tearDownWithError() throws {
         print("\ncleaning \(mySet.count) entries")
