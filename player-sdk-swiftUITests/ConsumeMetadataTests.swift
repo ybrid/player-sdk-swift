@@ -31,7 +31,8 @@ class ConsumeMetadataTests: XCTestCase {
     let ybridDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
     let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
     let icecastHr2Endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-    let opusDlfEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
+    let opusDlfEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+    let opusCCEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
     let onDemandEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
     
     
@@ -164,7 +165,63 @@ class ConsumeMetadataTests: XCTestCase {
         _ = wait(until: .stopped, maxSeconds: 1)
     }
     
-    func test08_MetadataOpusOnDemand_TitleArtistAlbum() {
+    func test08_MetadataOpus_Dlf_CurrentStation() {
+        player = opusDlfEndpoint.audioPlayer(listener: consumer)
+        player?.play()
+        _ = wait(until: .playing, maxSeconds: 10)
+        consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
+        
+        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
+        currentItems.map{ $0.type }.forEach{ (type) in
+            XCTAssertEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+        }
+        currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
+            XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
+        }
+        
+        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
+        
+        guard let station = consumer.metadatas[0].station else {
+            XCTFail("icy usually uses http-header 'icy-name'"); return
+        }
+        XCTAssertEqual("Deutschlandfunk", station.name)
+        XCTAssertEqual("Information", station.genre)
+        
+        _ = wait(until: .stopped, maxSeconds: 1)
+    }
+
+    func test08_MetadataOpus_CC_CurrentStation() {
+        player = opusCCEndpoint.audioPlayer(listener: consumer)
+        player?.play()
+        _ = wait(until: .playing, maxSeconds: 10)
+        consumer.checkMetadataCalls(equal: 1)
+        player?.stop()
+        
+        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
+        currentItems.map{ $0.type }.forEach{ (type) in
+            XCTAssertEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+        }
+        currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
+            XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
+        }
+        
+        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
+        
+        guard let station = consumer.metadatas[0].station else {
+            XCTFail("icy usually uses http-header 'icy-name'"); return
+        }
+        XCTAssertEqual("TheRadio.CC", station.name)
+        XCTAssertEqual("Creative Commons", station.genre)
+        
+        _ = wait(until: .stopped, maxSeconds: 1)
+    }
+
+    
+    
+    func test09_MetadataOpusOnDemand_TitleArtistAlbum() {
         player = onDemandEndpoint.audioPlayer(listener: consumer)
         player?.play()
         _ = wait(until: .playing, maxSeconds: 10)
@@ -186,11 +243,8 @@ class ConsumeMetadataTests: XCTestCase {
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
         
-        guard let station = consumer.metadatas[0].station else {
-            XCTFail("icy usually uses http-header 'icy-name'"); return
-        }
-        XCTAssertNil(station.name)
-        XCTAssertNil(station.genre)
+        let station = consumer.metadatas[0].station
+        XCTAssertNil(station, "This server does not support icy-fields")
         
         _ = wait(until: .stopped, maxSeconds: 1)
     }

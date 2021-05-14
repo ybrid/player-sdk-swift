@@ -88,18 +88,27 @@ class AbstractMetadata : Metadata {
     }
     
     func setBroadcaster(_ broadcaster:String) {
-        guard var station = stationInfo else {
+        guard let _ = stationInfo else {
             stationInfo = Station(name:broadcaster)
             return
         }
-        station.name = broadcaster
+        stationInfo!.name = broadcaster
     }
     
     func setGenre(_ genre:String) {
-        guard var station = stationInfo else {
+        guard let _ = stationInfo else {
             stationInfo = Station(genre:genre)
             return
         }
+        stationInfo!.genre = genre
+    }
+    
+    func setStationInfo(broadcaster:String, genre:String) {
+        guard var station = stationInfo else {
+            stationInfo = Station(name:broadcaster, genre:genre)
+            return
+        }
+        station.name = broadcaster
         station.genre = genre
     }
     
