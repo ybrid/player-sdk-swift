@@ -38,10 +38,18 @@ public class MediaEndpoint : Equatable, Hashable {
     }
     
     public let uri:String
+    var forcedProtocol:MediaProtocol?
 
     public init(mediaUri:String!) {
         self.uri = mediaUri
     }
+    
+    
+    public func forceProtocol(_ mediaProtocol:MediaProtocol) -> MediaEndpoint{
+        self.forcedProtocol = mediaProtocol
+        return self
+    }
+    
     
     // Create an AudioPlayer using this MediaEndpoint.
     // It detects the best matching MediaProtocol and establishes

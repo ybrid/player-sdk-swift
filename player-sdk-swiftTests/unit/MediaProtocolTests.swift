@@ -54,6 +54,7 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
+    
     func testFactoryGetVersion_BadUrl() throws {
         do {
             _ = try factory.getVersion("no url")
@@ -70,8 +71,8 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testDriver_YbridDemo_Connect_Disconnect() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
+    func testDriver_YbridStageDemo_Connect_Disconnect() throws {
+        let endpoint = ybridStageDemoEndpoint
         guard let player = endpoint.audioPlayer(listener: nil) else {
             XCTFail("expected a player"); return
         }
@@ -88,8 +89,43 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertFalse(controller.connected)
     }
 
+    
+    func testDriver_YbridSwr3_MustBeForced() throws {
+        guard let player = ybridSwr3Endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let controller = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
+        }
+        XCTAssertEqual(MediaProtocol.icy, controller.mediaProtocol)
+        XCTAssertTrue(controller.connected)
+        
+        player.close()
+        
+        let endpoint = ybridSwr3Endpoint.forceProtocol(.ybridV2)
+        guard let player = endpoint.audioPlayer(listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let controller = player.session?.mediaControl else {
+            XCTFail("expected a controller"); return
+        }
+        XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
+        XCTAssertTrue(controller.connected)
+        
+        
+        XCTAssertNotNil(controller.playbackUri)
+        XCTAssertTrue(controller.playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(controller.playbackUri.contains("edge"))
+      
+        controller.disconnect()
+        XCTAssertFalse(controller.connected)
+    }
+
+    
+    
+    
     func testDriver_Swr3_Connect_Connect() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
+        let endpoint = ybridStageDemoEndpoint
         guard let player = endpoint.audioPlayer(listener: nil) else {
             XCTFail("expected a player"); return
         }

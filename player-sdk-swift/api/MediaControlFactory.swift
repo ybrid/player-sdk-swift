@@ -35,9 +35,14 @@ public enum MediaProtocol : String {
 class MediaControlFactory {
     
     func create(_ session:MediaSession) throws -> MediaDriver {
-        let uri = session.endpoint.uri
+        let apiVersion:MediaProtocol
+        if let forced = session.endpoint.forcedProtocol {
+            apiVersion = forced
+        } else {
+            let uri = session.endpoint.uri
+            apiVersion = try getVersion(uri)
+        }
         let driver:MediaDriver
-        let apiVersion = try getVersion(uri)
         switch apiVersion {
         case .plain, .icy: driver = IcyDriver(session:session)
         case .ybridV2: driver = YbridV2Driver(session:session)

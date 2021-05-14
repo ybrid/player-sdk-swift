@@ -45,10 +45,7 @@ class UseEndpointPlayerTests: XCTestCase {
     }
     
     func test01_Ybrid_PlaySomeSeconds() throws {
-//        let uri = "https://stagecast.ybrid.io/swr3/mp3/mid"
-        let uri = "https://stagecast.ybrid.io/adaptive-demo"
-        let endpoint = MediaEndpoint(mediaUri: uri)
-        player = endpoint.audioPlayer(listener: nil)
+        player = ybridDemoEndpoint.audioPlayer(listener: nil)
         guard let player = player else {
             XCTFail(); return
         }
@@ -79,8 +76,8 @@ class UseEndpointPlayerTests: XCTestCase {
     }
 
     func test03_Icy_PlaySomeSeconds() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        player = endpoint.audioPlayer(listener: nil)
+
+        player = icecastHr2Endpoint.audioPlayer(listener: nil)
         guard let player = player else {
             XCTFail(); return
         }

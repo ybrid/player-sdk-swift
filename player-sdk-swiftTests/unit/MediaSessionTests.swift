@@ -57,8 +57,8 @@ class MediaSessionTests: XCTestCase {
     }
 
     func testSession_YbridSwr3() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3/mid")
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        _ = ybridSwr3Endpoint.forceProtocol(MediaProtocol.ybridV2)
+        guard let player = ybridSwr3Endpoint.audioPlayer(listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
