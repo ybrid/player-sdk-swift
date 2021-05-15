@@ -39,7 +39,7 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_YbridDemo() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
@@ -58,7 +58,7 @@ class MediaSessionTests: XCTestCase {
 
     func testSession_YbridSwr3() throws {
         _ = ybridSwr3Endpoint.forceProtocol(MediaProtocol.ybridV2)
-        guard let player = ybridSwr3Endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
@@ -76,7 +76,7 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_IcySwr3() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
@@ -92,7 +92,7 @@ class MediaSessionTests: XCTestCase {
     func testSession_DlfOpus() throws {
         let uri = "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus"
         let endpoint = MediaEndpoint(mediaUri: uri)
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
@@ -109,7 +109,7 @@ class MediaSessionTests: XCTestCase {
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         guard let playbackUri = player.session?.playbackUri else {
@@ -126,7 +126,7 @@ class MediaSessionTests: XCTestCase {
     func testSession_NoMediaUrl() throws {
         let uri = "https://stagecast.ybrid.io/xyzbnlabla"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        guard let player = endpoint.audioPlayer(listener: listener) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         XCTAssertNotNil(player.session, "session expected")
@@ -135,9 +135,9 @@ class MediaSessionTests: XCTestCase {
     }
     
     func testSession_BadUrl() throws {
-        let uri = "https://blub"
-        let endpoint = MediaEndpoint(mediaUri:uri)
-        XCTAssertNil(endpoint.audioPlayer(listener: listener), "no player expected")
+        let endpoint = MediaEndpoint(mediaUri:"https://blub")
+        let player = AudioPlayer.open(for: endpoint, listener: listener)
+        XCTAssertNil(player, "no player expected")
 
         XCTAssertEqual(1,listener.errors.count)
         let error = listener.errors[0]

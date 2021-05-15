@@ -36,7 +36,7 @@ class UseAudioPlayerTests: XCTestCase {
     }
  
     // of course you may choose your own radio station here
-    let url = URL.init(string: "https://stagecast.ybrid.io/swr3/mp3/mid")!
+    let url = URL.init(string: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")!
    
     // see tests using the listener
     let playerListener = TestAudioPlayerListener()
@@ -108,8 +108,10 @@ class UseAudioPlayerTests: XCTestCase {
         
         XCTAssertEqual(playerListener.errors.count, 1)
         let lastError = playerListener.errors.last!
-        XCTAssertNotEqual(0, lastError.code)
+        XCTAssertNotEqual(0, lastError.code) // error occured
         XCTAssertNotEqual(0, lastError.osstatus)
+        XCTAssertEqual(201, lastError.code) // ErrorKind.networkFatal
+        XCTAssertEqual(-1003, lastError.osstatus) // host not found
     }
 
     

@@ -45,7 +45,7 @@ class UseEndpointPlayerTests: XCTestCase {
     }
     
     func test01_Ybrid_PlaySomeSeconds() throws {
-        player = ybridDemoEndpoint.audioPlayer(listener: nil)
+        player = AudioPlayer.open(for: ybridDemoEndpoint, listener: nil)
         guard let player = player else {
             XCTFail(); return
         }
@@ -61,7 +61,7 @@ class UseEndpointPlayerTests: XCTestCase {
     
     func test02_WrongUri_PlayStops() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wrongurl")
-        player = endpoint.audioPlayer(listener: playerListener)
+        player = AudioPlayer.open(for: endpoint, listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
@@ -77,7 +77,7 @@ class UseEndpointPlayerTests: XCTestCase {
 
     func test03_Icy_PlaySomeSeconds() throws {
 
-        player = icecastHr2Endpoint.audioPlayer(listener: nil)
+        player = AudioPlayer.open(for: icecastHr2Endpoint, listener: nil)
         guard let player = player else {
             XCTFail(); return
         }
@@ -91,7 +91,7 @@ class UseEndpointPlayerTests: XCTestCase {
 
     func test04_Icy_Opus_PlaySomeSeconds() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        player = endpoint.audioPlayer(listener: playerListener)
+        player = AudioPlayer.open(for: endpoint, listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
@@ -105,8 +105,8 @@ class UseEndpointPlayerTests: XCTestCase {
     }
 
     func test05_Icy_OnDemand_PlayPausePlay() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        player = endpoint.audioPlayer(listener: playerListener)
+
+        player = AudioPlayer.open(for: onDemandMp3Endpoint, listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
@@ -126,7 +126,7 @@ class UseEndpointPlayerTests: XCTestCase {
 
     func test06_Error_NoPlayer_HostNotFound() {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
-        player = endpoint.audioPlayer(listener: playerListener)
+        player = AudioPlayer.open(for: endpoint, listener: playerListener)
         XCTAssertNil(player)
 
         XCTAssertEqual(1, playerListener.errors.count)

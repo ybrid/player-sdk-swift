@@ -28,11 +28,7 @@ import XCTest
 
 class AbortBufferingTests: XCTestCase {
     
-    var session:MediaSession?
-    
-    
     override func tearDownWithError() throws {
-        session?.close()
     }
     
     func test00_LoggerVerboseDefault() {
@@ -47,7 +43,7 @@ class AbortBufferingTests: XCTestCase {
         Logger.verbose = true
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
         let abortingListener = AbortingListener()
-        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
             XCTFail(); return
         }
         abortingListener.player = player
@@ -62,7 +58,7 @@ class AbortBufferingTests: XCTestCase {
             
             if failed {
                 player.close()
-                player = endpoint.audioPlayer(listener: abortingListener)!
+                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
                 abortingListener.player = player
             }
             
@@ -92,7 +88,7 @@ class AbortBufferingTests: XCTestCase {
         Logger.verbose = true
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
         let abortingListener = AbortingListener()
-        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
             XCTFail(); return
         }
         abortingListener.player = player
@@ -107,7 +103,7 @@ class AbortBufferingTests: XCTestCase {
             
             if failed {
                 player.close()
-                player = endpoint.audioPlayer(listener: abortingListener)!
+                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
                 abortingListener.player = player
             }
             
@@ -131,7 +127,7 @@ class AbortBufferingTests: XCTestCase {
     func testAbortOpus_until100msAfterConnect_CleanedUp() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         let abortingListener = AbortingListener()
-        guard var player = endpoint.audioPlayer(listener: abortingListener) else {
+        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
             XCTFail(); return
         }
         abortingListener.player = player
@@ -146,7 +142,7 @@ class AbortBufferingTests: XCTestCase {
             
             if failed {
                 player.close()
-                player = endpoint.audioPlayer(listener: abortingListener)!
+                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
                 abortingListener.player = player
             }
             
@@ -158,7 +154,7 @@ class AbortBufferingTests: XCTestCase {
         Logger.verbose = true
         let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         let aborting = AbortingListener()
-        guard var player = endpoint.audioPlayer(listener: aborting) else {
+        guard var player = AudioPlayer.open(for: endpoint, listener: aborting) else {
             XCTFail(); return
         }
         aborting.player = player
@@ -173,7 +169,7 @@ class AbortBufferingTests: XCTestCase {
             
             if failed {
                 player.close()
-                player = endpoint.audioPlayer(listener: aborting)!
+                player = AudioPlayer.open(for: endpoint, listener: aborting)!
                 aborting.player = player
             }
             

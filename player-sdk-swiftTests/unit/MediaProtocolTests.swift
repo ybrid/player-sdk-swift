@@ -73,7 +73,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_YbridStageDemo_Connect_Disconnect() throws {
         let endpoint = ybridStageDemoEndpoint
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session?.mediaControl else {
@@ -91,7 +91,7 @@ class MediaProtocolTests: XCTestCase {
 
     
     func testDriver_YbridSwr3_MustBeForced() throws {
-        guard let player = ybridSwr3Endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:ybridSwr3Endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session?.mediaControl else {
@@ -103,7 +103,7 @@ class MediaProtocolTests: XCTestCase {
         player.close()
         
         let endpoint = ybridSwr3Endpoint.forceProtocol(.ybridV2)
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session?.mediaControl else {
@@ -126,7 +126,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_Swr3_Connect_Connect() throws {
         let endpoint = ybridStageDemoEndpoint
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session?.mediaControl else {
@@ -148,7 +148,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_Swr3WrongUrl_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3")
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         XCTAssertNotNil(player.session?.mediaControl)
@@ -159,7 +159,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_Hr2() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session?.mediaControl else {
@@ -172,7 +172,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_EgoFM() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session?.mediaControl else {
@@ -185,7 +185,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_DlfOpus() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session?.mediaControl else {
@@ -198,7 +198,7 @@ class MediaProtocolTests: XCTestCase {
     
     func testDriver_OnDemandSound() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let player = endpoint.audioPlayer(listener: nil) else {
+        guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session?.mediaControl else {

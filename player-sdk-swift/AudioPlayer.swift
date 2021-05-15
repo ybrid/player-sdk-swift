@@ -69,6 +69,26 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
+    // Create an AudioPlayer for this MediaEndpoint.
+    //
+    // The matching MediaProtocol is detected and a session
+    // to control content and metadata of the stream is established.
+    public static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
+        
+        let session = MediaSession(on: endpoint)
+        do {
+            try session.connect()
+        } catch {
+            if let audioDataError = error as? AudioPlayerError {
+                listener?.error(ErrorSeverity.fatal, audioDataError)
+            } else {
+                listener?.error(ErrorSeverity.fatal, ApiError(ErrorKind.unknown, "cannot connect to endpoint", error))
+            }
+            return nil
+        }
+        return AudioPlayer(session: session, listener: listener)
+    }
+    
     public var state: PlaybackState { get {
         return playbackState
     }}
