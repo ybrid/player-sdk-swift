@@ -32,7 +32,7 @@ class YbridV2Driver : MediaDriver {
     var token:String?
     var startDate:Date? { didSet {
         if let start = startDate, startDate != oldValue {
-            Logger.api.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: start))")
+            Logger.controlling.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: start))")
         }
     }
     }
@@ -52,7 +52,7 @@ class YbridV2Driver : MediaDriver {
             throw ApiError(ErrorKind.invalidSession, "session is not valid.")
         }
         
-        Logger.api.debug("creating ybrid session")
+        Logger.controlling.debug("creating ybrid session")
         
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
         accecpt(response: sessionObj)
@@ -63,23 +63,23 @@ class YbridV2Driver : MediaDriver {
         if !connected {
             return
         }
-        Logger.api.debug("closing ybrid session")
+        Logger.controlling.debug("closing ybrid session")
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
             accecpt(response: sessionObj)
             connected = false
         } catch {
-            Logger.api.error(error.localizedDescription)
+            Logger.controlling.error(error.localizedDescription)
         }
     }
     
     func info() {
         if !connected {
-            Logger.api.error("no connected ybrid session")
+            Logger.controlling.error("no connected ybrid session")
             return
         }
-        Logger.api.debug("getting info about ybrid session")
+        Logger.controlling.debug("getting info about ybrid session")
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
@@ -88,12 +88,12 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            Logger.api.error(error.localizedDescription)
+            Logger.controlling.error(error.localizedDescription)
         }
     }
     
     private func reconnect() throws {
-        Logger.api.info("reconnecting ybrid session")
+        Logger.controlling.info("reconnecting ybrid session")
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
         accecpt(response: sessionObj)
         connected = true
@@ -135,10 +135,10 @@ class YbridV2Driver : MediaDriver {
             }
             let sessionObj = result.__responseObject
             let responseString = String(data: try encoder.encode(sessionObj), encoding: .utf8) ?? "(no response struct)"
-            Logger.api.debug("__responseObject is \(responseString)")
+            Logger.controlling.debug("__responseObject is \(responseString)")
             return sessionObj
         } catch {
-            Logger.api.error(error.localizedDescription)
+            Logger.controlling.error(error.localizedDescription)
             throw ApiError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
         }
     }
@@ -147,9 +147,9 @@ class YbridV2Driver : MediaDriver {
         do {
             let currentItemData = try encoder.encode(data.currentItem)
             let metadataString = String(data: currentItemData, encoding: .utf8)!
-            Logger.api.debug("current item is \(metadataString)")
+            Logger.controlling.debug("current item is \(metadataString)")
         } catch {
-            Logger.api.error("cannot log metadata")
+            Logger.controlling.error("cannot log metadata")
         }
     }
     

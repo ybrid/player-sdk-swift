@@ -30,28 +30,30 @@ import Foundation
 
 public class MediaSession  {
        
-    public let endpoint:MediaEndpoint
+    let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
+    
     public var mediaProtocol:MediaProtocol? { get {
         return mediaControl?.mediaProtocol
     }}
 
-    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
-        DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
-    )
-
     public var playbackUri:String { get {
         return mediaControl?.playbackUri ?? endpoint.uri
     }}
-
+    
+    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
+        DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
+    )
+    
     init(on endpoint:MediaEndpoint) {
         self.endpoint = endpoint
     }
     
     func connect() throws {
-        self.mediaControl = try factory.create(self)
-        try self.mediaControl?.connect()
+        let mediaControl = try factory.create(self)
+        self.mediaControl = mediaControl
+        try mediaControl.connect()
     }
     
     func close() {

@@ -75,7 +75,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     }
     
     func test01_MP3PlayStop() throws {
-        prepare("https://swr-edge-20b9-fra-lg-cdn.cast.addradio.de/swr/swr3/live/mp3/128/stream.mp3")
+        player = AudioPlayer.open(for: icecastSwr3Endpoint, listener: self)
         
         stepDuration = 10
         rangeFrom = 1 /// on first step
@@ -87,7 +87,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     }
     
     func test02_OpusPlayStop() throws {
-        prepare("https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        player = AudioPlayer.open(for: opusDlfEndpoint, listener: self)
         
         stepDuration = 10
         rangeFrom = 1 /// on first step
@@ -104,8 +104,8 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
 
     
     func test03_OnDemandPlayPause() throws {
-        prepare("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/music.mp3?raw=true")
-        
+        player = AudioPlayer.open(for: onDemandMp3Endpoint, listener: self)
+
         stepDuration = 10
         rangeFrom = 1 /// on first step
         rangeTo = 3 /// on first step
@@ -114,11 +114,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         
         self.execute()
     }
-    
-    fileprivate func prepare(_ mediaUrl:String) {
-        let url = URL.init(string: mediaUrl)!
-        player = AudioPlayer(mediaUrl: url, listener: self)
-    }
+
     
     func execute() {
         if Thread.isMainThread{

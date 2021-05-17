@@ -85,35 +85,36 @@ class ThreadsafeDictionaryTests: XCTestCase {
     }
     
     func testWildRegistrations() {
+        var stopIt = false
         var listeners:[TestInstance] = []
         let nListeners = 20
         for i in 1...nListeners {
             listeners.append(TestInstance(i))
         }
-        wild((5...100)) { // one is registering each 5 to 100 ms
+        wild(5...100, &stopIt) { // one is registering each 5 to 100 ms
             let randomListener = listeners[Int.random(in: 0...nListeners-1)]
             self.dictionary.put(id: randomListener.id, value: randomListener)
         }
-        wild(5...200) { // one is unregistering each 5 to 200 ms
+        wild(5...200, &stopIt) { // one is unregistering each 5 to 200 ms
             let randomListener = listeners[Int.random(in: 0...nListeners-1)]
             self.dictionary.remove(id: randomListener.id)
         }
-        wild(500...500) { // report each 0.5 seconds
+        wild(500...500, &stopIt) { // report each 0.5 seconds
             print ("registered \(self.dictionary.count) instance")
         }
         sleep(10)
+        stopIt = true
+        print("\nstopped")
     }
     
-    fileprivate func wild(_ rangeMS:ClosedRange<Int>, act: @escaping () -> ()) {
+    fileprivate func wild(_ rangeMS:ClosedRange<Int>,_ endFlag: UnsafePointer<Bool>, act: @escaping () -> ()) {
         let rangeUS = rangeMS.lowerBound*1000...rangeMS.upperBound*1000
         DispatchQueue.global(qos: .background).async {
-            while true {
+            while !endFlag.pointee {
                 usleep(useconds_t(Int.random(in: rangeUS)))
                 act()
             }
         }
     }
-    
-
 
 }

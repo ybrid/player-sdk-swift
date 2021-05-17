@@ -49,7 +49,7 @@ class UseEndpointPlayerTests: XCTestCase {
         guard let player = player else {
             XCTFail(); return
         }
-        XCTAssertEqual(MediaProtocol.ybridV2, player.session?.mediaProtocol)
+        XCTAssertEqual(MediaProtocol.ybridV2, player.session.mediaProtocol)
         
         player.play()
         _ = wait(until: .playing, maxSeconds: 10)
@@ -60,12 +60,12 @@ class UseEndpointPlayerTests: XCTestCase {
     
     
     func test02_WrongUri_PlayStops() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wrongurl")
+        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wronguri")
         player = AudioPlayer.open(for: endpoint, listener: playerListener)
         guard let player = player else {
             XCTFail(); return
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
+        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
         player.play()
         _ = wait(until: .stopped, maxSeconds: 2)
         
@@ -81,7 +81,7 @@ class UseEndpointPlayerTests: XCTestCase {
         guard let player = player else {
             XCTFail(); return
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
+        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
         player.play()
         _ = wait(until: .playing, maxSeconds: 10)
         sleep(3)
@@ -95,7 +95,7 @@ class UseEndpointPlayerTests: XCTestCase {
         guard let player = player else {
             XCTFail(); return
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
+        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
         
         player.play()
         _ = wait(until: .playing, maxSeconds: 10)
@@ -110,7 +110,7 @@ class UseEndpointPlayerTests: XCTestCase {
         guard let player = player else {
             XCTFail(); return
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session?.mediaProtocol)
+        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
         player.play()
         _ = wait(until: .playing, maxSeconds: 10)
         sleep(3)

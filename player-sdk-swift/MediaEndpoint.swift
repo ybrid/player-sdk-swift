@@ -44,31 +44,9 @@ public class MediaEndpoint : Equatable, Hashable {
         self.uri = mediaUri
     }
     
-    
     public func forceProtocol(_ mediaProtocol:MediaProtocol) -> MediaEndpoint{
         self.forcedProtocol = mediaProtocol
         return self
     }
-    
-    
-    // Create an AudioPlayer using this MediaEndpoint.
-    // It detects the best matching MediaProtocol and establishes
-    // a session object to control content and metadata of the stream.
-//    public func audioPlayer(listener:AudioPlayerListener?) -> AudioPlayer? {
-//
-//        let session = MediaSession(on: self)
-//        do {
-//            try session.connect()
-//        } catch {
-//            if let audioDataError = error as? AudioPlayerError {
-//                listener?.error(ErrorSeverity.fatal, audioDataError)
-//            } else {
-//                listener?.error(ErrorSeverity.fatal, ApiError(ErrorKind.unknown, "cannot connect to endpoint", error))
-//            }
-//            return nil
-//        }
-//        return AudioPlayer(session: session, listener: listener)
-//    }
-
 }
 

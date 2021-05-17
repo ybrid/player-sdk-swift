@@ -1,5 +1,5 @@
 //
-// ApiError.swift
+// SessionError.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -46,10 +46,8 @@ class OptionsTaskState : Equatable, LocalizedError {
             return lhs.osstatus == rhs.osstatus
         }
         
-        private static let completed = OptionsTaskState(0, "completed", .notice) /// loading finished
-        
         private static var knownErrorStates: [OptionsTaskState] = [
-            completed,
+            OptionsTaskState(0, "completed", .notice), /// loading finished
             OptionsTaskState(-1001, "timed out", .notice), /// timeout fallback
             OptionsTaskState(-1005, "connection lost", .notice),
             

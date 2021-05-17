@@ -42,12 +42,10 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
-        guard let playbackUri = player.session?.playbackUri else {
-            XCTFail("playbackUri expected"); return
-        }
+        let playbackUri = player.session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = player.session?.fetchMetadataSync() else {
+        guard let metadata = player.session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
         print("running \(metadata.displayTitle ?? "(nil)")")
@@ -61,12 +59,10 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
-        guard let playbackUri = player.session?.playbackUri else {
-            XCTFail("playbackUri expected"); return
-        }
+        let playbackUri = player.session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
-        guard let metadata = player.session?.fetchMetadataSync() else {
+        guard let metadata = player.session.fetchMetadataSync() else {
             XCTFail("ybrid metadata expected"); return
         }
         print("running \(metadata.displayTitle ?? "(nil")")
@@ -79,11 +75,9 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
-        guard let playbackUri = player.session?.playbackUri else {
-            XCTFail("playbackUri expected"); return
-        }
+        let playbackUri = player.session.playbackUri
         XCTAssertEqual(endpoint.uri, playbackUri)
-        let metadata = player.session?.fetchMetadataSync()
+        let metadata = player.session.fetchMetadataSync()
         XCTAssertNil(metadata, "no icy metadata expected")
         XCTAssertEqual(0, listener.errors.count)
         player.close()
@@ -95,12 +89,10 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
-        guard let playbackUri = player.session?.playbackUri else {
-            XCTFail("playbackUri expected"); return
-        }
+        let playbackUri = player.session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         
-        let metadata = player.session?.fetchMetadataSync()
+        let metadata = player.session.fetchMetadataSync()
         XCTAssertNil(metadata, "no opus metadata expected")
         XCTAssertEqual(0, listener.errors.count)
         player.close()
@@ -112,11 +104,9 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
-        guard let playbackUri = player.session?.playbackUri else {
-            XCTFail("playbackUri expected"); return
-        }
+        let playbackUri = player.session.playbackUri
         XCTAssertEqual(uri, playbackUri)
-        let metadata = player.session?.fetchMetadataSync()
+        let metadata = player.session.fetchMetadataSync()
         XCTAssertNil(metadata, "no metadata expected")
         XCTAssertEqual(0, listener.errors.count)
         player.close()

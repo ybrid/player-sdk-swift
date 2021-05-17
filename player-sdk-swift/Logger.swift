@@ -45,7 +45,7 @@ public class Logger {
     static let loading: Logger = Logger(category: "loading")
     static let decoding: Logger = Logger(category: "decoding")
     static let playing: Logger = Logger(category: "playing")
-    static let api: Logger = Logger(category: "api")
+    static let controlling: Logger = Logger(category: "controlling")
     
     private var log:OSLog?
     

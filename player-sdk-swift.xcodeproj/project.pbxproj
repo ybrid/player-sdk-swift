@@ -41,9 +41,9 @@
 		17539E82262720F5000FE902 /* JsonRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E81262720F5000FE902 /* JsonRequest.swift */; };
 		17539E83262720F5000FE902 /* JsonRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E81262720F5000FE902 /* JsonRequest.swift */; };
 		17539E84262720F5000FE902 /* JsonRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E81262720F5000FE902 /* JsonRequest.swift */; };
-		17539E8B26272AC8000FE902 /* ApiError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* ApiError.swift */; };
-		17539E8C26272AC8000FE902 /* ApiError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* ApiError.swift */; };
-		17539E8D26272AC8000FE902 /* ApiError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* ApiError.swift */; };
+		17539E8B26272AC8000FE902 /* SessionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* SessionError.swift */; };
+		17539E8C26272AC8000FE902 /* SessionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* SessionError.swift */; };
+		17539E8D26272AC8000FE902 /* SessionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E8A26272AC8000FE902 /* SessionError.swift */; };
 		17539E94262869E7000FE902 /* MediaControlFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E93262869E7000FE902 /* MediaControlFactory.swift */; };
 		17539E95262869E7000FE902 /* MediaControlFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E93262869E7000FE902 /* MediaControlFactory.swift */; };
 		17539E96262869E7000FE902 /* MediaControlFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E93262869E7000FE902 /* MediaControlFactory.swift */; };
@@ -184,7 +184,7 @@
 		17539E512626D2C6000FE902 /* YbridV2Driver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridV2Driver.swift; sourceTree = "<group>"; };
 		17539E702626E18F000FE902 /* MediaProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaProtocolTests.swift; sourceTree = "<group>"; };
 		17539E81262720F5000FE902 /* JsonRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonRequest.swift; sourceTree = "<group>"; };
-		17539E8A26272AC8000FE902 /* ApiError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiError.swift; sourceTree = "<group>"; };
+		17539E8A26272AC8000FE902 /* SessionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionError.swift; sourceTree = "<group>"; };
 		17539E93262869E7000FE902 /* MediaControlFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlFactory.swift; sourceTree = "<group>"; };
 		17539E9C26286F98000FE902 /* YbridJsonResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridJsonResponse.swift; sourceTree = "<group>"; };
 		17539EBD26287B6D000FE902 /* UseEndpointPlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseEndpointPlayerTests.swift; sourceTree = "<group>"; };
@@ -326,7 +326,7 @@
 				17CBC9B425E3C36000B2F7E7 /* decoding */,
 				17CBC9B325E3C33B00B2F7E7 /* playing */,
 				17CBC9B225E3C30F00B2F7E7 /* loading */,
-				17539E502626D108000FE902 /* api */,
+				17539E502626D108000FE902 /* controlling */,
 				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
 				1799DC8D25D565A10055C973 /* Logger.swift */,
 				175AFB2825FA428100005046 /* AudioPlayerError.swift */,
@@ -334,7 +334,6 @@
 				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
 				1732222125F614BC00AEC833 /* Metadata.swift */,
 				17539E3E26257A9A000FE902 /* MediaEndpoint.swift */,
-				17539E47262591C3000FE902 /* MediaSession.swift */,
 			);
 			path = "player-sdk-swift";
 			sourceTree = "<group>";
@@ -349,19 +348,20 @@
 			path = "player-sdk-swiftTests";
 			sourceTree = "<group>";
 		};
-		17539E502626D108000FE902 /* api */ = {
+		17539E502626D108000FE902 /* controlling */ = {
 			isa = PBXGroup;
 			children = (
+				17539E47262591C3000FE902 /* MediaSession.swift */,
 				17539E93262869E7000FE902 /* MediaControlFactory.swift */,
 				171345C3263153500054DB9D /* MediaControl.swift */,
 				17539E512626D2C6000FE902 /* YbridV2Driver.swift */,
 				17D01BFB262F174D007B0A3C /* IcyDriver.swift */,
 				17539E9C26286F98000FE902 /* YbridJsonResponse.swift */,
 				17539E81262720F5000FE902 /* JsonRequest.swift */,
-				17539E8A26272AC8000FE902 /* ApiError.swift */,
 				1711D182263AB45400882D2B /* MetadataMappings.swift */,
+				17539E8A26272AC8000FE902 /* SessionError.swift */,
 			);
-			path = api;
+			path = controlling;
 			sourceTree = "<group>";
 		};
 		175849E4264BB6500071FEE6 /* util */ = {
@@ -898,7 +898,7 @@
 				1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */,
 				175849E6264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */,
 				1799DCAC25D565DB0055C973 /* MpegDecoder.swift in Sources */,
-				17539E8B26272AC8000FE902 /* ApiError.swift in Sources */,
+				17539E8B26272AC8000FE902 /* SessionError.swift in Sources */,
 				1799DC8F25D565A10055C973 /* Logger.swift in Sources */,
 				1799DC8425D565970055C973 /* AudioDataLoader.swift in Sources */,
 				1799DC8525D565970055C973 /* AudioData.swift in Sources */,
@@ -931,7 +931,7 @@
 				1799DCC725D566AF0055C973 /* DataAccumulator.swift in Sources */,
 				175849E7264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */,
 				17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */,
-				17539E8C26272AC8000FE902 /* ApiError.swift in Sources */,
+				17539E8C26272AC8000FE902 /* SessionError.swift in Sources */,
 				1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
 				175849DF264A5D6E0071FEE6 /* PlayerContextTests.swift in Sources */,
@@ -1024,7 +1024,7 @@
 				17CBC8D925E2517F00B2F7E7 /* AudioPlayer.swift in Sources */,
 				175849E8264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */,
 				17CBC8DA25E2517F00B2F7E7 /* MpegDecoder.swift in Sources */,
-				17539E8D26272AC8000FE902 /* ApiError.swift in Sources */,
+				17539E8D26272AC8000FE902 /* SessionError.swift in Sources */,
 				17CBC8DB25E2517F00B2F7E7 /* Logger.swift in Sources */,
 				17CBC8DC25E2517F00B2F7E7 /* AudioDataLoader.swift in Sources */,
 				17CBC8DD25E2517F00B2F7E7 /* AudioData.swift in Sources */,

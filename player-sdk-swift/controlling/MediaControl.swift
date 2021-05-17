@@ -39,7 +39,7 @@ class MediaDriver : MediaControl {
     var playbackUri:String
     var valid:Bool = true //  { get }
     var connected:Bool = false { didSet {
-        Logger.api.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
+        Logger.controlling.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
 
     init(session:MediaSession, version:MediaProtocol) {

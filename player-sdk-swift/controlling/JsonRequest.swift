@@ -56,7 +56,7 @@ class JsonRequest {
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {
         
-        Logger.api.debug("calling OPTIONS on \(url.absoluteString)")
+        Logger.controlling.debug("calling OPTIONS on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
         var apiError:ApiError? { didSet {
@@ -76,7 +76,7 @@ class JsonRequest {
             if let error = error {
                 let optionsState = OptionsTaskState.getOptionsState(error)
                 if optionsState.severity == ErrorSeverity.notice {
-                    if Logger.verbose { Logger.api.debug(error.localizedDescription) }
+                    if Logger.verbose { Logger.controlling.debug(error.localizedDescription) }
                     semaphore.signal()
                     return
                 }
@@ -86,7 +86,7 @@ class JsonRequest {
             }
            
             if let apiError = self.validateJsonResponse(response) {
-                if Logger.verbose { Logger.api.debug(apiError.localizedDescription) }
+                if Logger.verbose { Logger.controlling.debug(apiError.localizedDescription) }
                 semaphore.signal()
                 return
             }
@@ -97,7 +97,7 @@ class JsonRequest {
             }
             
             if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
-                Logger.api.debug("parsing \(dataString) into \(responseType)")
+                Logger.controlling.debug("parsing \(dataString) into \(responseType)")
             }
             
             do {
@@ -116,7 +116,7 @@ class JsonRequest {
         _ = semaphore.wait(timeout: .distantFuture)
         
         if task.state != URLSessionDataTask.State.completed {
-            Logger.api.notice("cancelling task in state \(describe(task.state))")
+            Logger.controlling.notice("cancelling task in state \(describe(task.state))")
             task.cancel()
         }
         
@@ -130,7 +130,7 @@ class JsonRequest {
     
     func performPostSync<T : Decodable>(responseType: T.Type) throws -> T? {
         
-        Logger.api.debug("calling POST on \(url.absoluteString)")
+        Logger.controlling.debug("calling POST on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
         var apiError:ApiError? { didSet {
@@ -163,7 +163,7 @@ class JsonRequest {
             }
             
             if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
-                Logger.api.debug("parsing \(dataString) into \(responseType)")
+                Logger.controlling.debug("parsing \(dataString) into \(responseType)")
             }
             
             do {
@@ -182,7 +182,7 @@ class JsonRequest {
         _ = semaphore.wait(timeout: .distantFuture)
         
         if task.state != URLSessionDataTask.State.completed {
-            Logger.api.notice("cancelling task in state \(describe(task.state))")
+            Logger.controlling.notice("cancelling task in state \(describe(task.state))")
             task.cancel()
         }
         
@@ -197,7 +197,7 @@ class JsonRequest {
     private func validateJsonResponse(_ response: URLResponse?) -> ApiError? {
         
         if let response = response {
-            if Logger.verbose { Logger.api.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
+            if Logger.verbose { Logger.controlling.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
         }
         guard let mime = response?.mimeType, mime == JsonRequest.applicationJson else {
             return ApiError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
@@ -207,7 +207,7 @@ class JsonRequest {
         }
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            Logger.api.error(response.debugDescription)
+            Logger.controlling.error(response.debugDescription)
             return ApiError(ErrorKind.serverError, "no http response")
         }
         

@@ -16,8 +16,8 @@ After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the f
 ```swift
 import YbridPlayerSDK
 
-let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
-let player = endpoint.audioPlayer(listener: nil)
+let endpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
+let player = AudioPlayer.open(for: endpoint, listener: nil)
 player.play()
 // of course the program must not end here
  ...

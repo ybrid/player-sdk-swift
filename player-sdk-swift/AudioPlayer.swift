@@ -69,7 +69,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    // Create an AudioPlayer for this MediaEndpoint.
+    // Create an AudioPlayer for a MediaEndpoint.
     //
     // The matching MediaProtocol is detected and a session
     // to control content and metadata of the stream is established.
@@ -93,8 +93,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         return playbackState
     }}
     
-    public var mediaUrl:URL?
-    public var session:MediaSession?
+    public var session:MediaSession
     public var canPause:Bool = false
     
     var loader: AudioDataLoader?
@@ -113,15 +112,6 @@ public class AudioPlayer: BufferListener, PipelineListener {
                 }
             }
         }
-    }
-    
-    // get ready for playing (do not use with ybrid)
-    // mediaUrl - the url of the audio stream. Supports mp3, aac and opus.
-    // listener - object to be called back from the player process
-    public init(mediaUrl: URL, listener: AudioPlayerListener?) {
-        self.playerListener = listener
-        self.mediaUrl = mediaUrl
-        PlayerContext.setupAudioSession()
     }
     
     // get ready for playing.
@@ -149,7 +139,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
         if playbackState == .stopped {
             playbackState = .buffering
             self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
-            let playbackUrl = getPlaybackUrl()
+            let playbackUrl = URL(string: session.playbackUri)!
             playerQueue.async {
                 self.playWhenReady(playbackUrl)
             }
@@ -199,17 +189,7 @@ public class AudioPlayer: BufferListener, PipelineListener {
                 self.playbackState = .stopped
             }
         }
-        session?.close()
-    }
-    
-    private func getPlaybackUrl() -> URL {
-        let playbackUrl:URL
-        if let playbackUri = session?.playbackUri {
-            playbackUrl = URL(string: playbackUri)!
-        } else {
-            playbackUrl = mediaUrl!
-        }
-        return playbackUrl
+        session.close()
     }
     
     private func playWhenReady(_ playbackUrl: URL) {

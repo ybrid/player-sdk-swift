@@ -96,30 +96,33 @@ class ThreadsafeDequeueTests: XCTestCase {
     }
     
     func testPutPopWild() throws {
-        wild(100...1000) {
+        var stopIt = false
+        wild(100...1000, &stopIt) {
             let char = String(UnicodeScalar(UInt8.random(in: 65...90))) // from A to Z
             print ("putting \(char)")
             self.items.put(char)
         }
-        wild(100...1000) {
+        wild(100...1000, &stopIt) {
             print ("taking \((self.items.pop() ?? "nil"))")
         }
         
-        wild( 10...1500) {
+        wild( 10...1500, &stopIt) {
             print ("size is \((self.items.count))")
         }
         
         Thread.sleep(forTimeInterval: 5.0)
+        stopIt = true
+        print("\nstopped")
     }
     
-    private func wild(_ rangeUS:ClosedRange<Int>, act: @escaping () -> ()) {
+    private func wild(_ rangeUS:ClosedRange<Int>,_ endFlag: UnsafePointer<Bool>, act: @escaping () -> ()) {
         DispatchQueue.global(qos: .background).async {
-            while true {
+            while !endFlag.pointee {
                 usleep(useconds_t(Int.random(in: rangeUS)))
                 act()
             }
         }
     }
-    
+
 }
 

@@ -76,7 +76,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let controller = player.session?.mediaControl else {
+        guard let controller = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
@@ -94,7 +94,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:ybridSwr3Endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let controller = player.session?.mediaControl else {
+        guard let controller = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, controller.mediaProtocol)
@@ -106,7 +106,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let controller = player.session?.mediaControl else {
+        guard let controller = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
@@ -129,7 +129,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session?.mediaControl else {
+        guard let driver = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
@@ -151,9 +151,9 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        XCTAssertNotNil(player.session?.mediaControl)
+        XCTAssertNotNil(player.session.mediaControl)
         
-        XCTAssertEqual(endpoint.uri, player.session?.playbackUri)
+        XCTAssertEqual(endpoint.uri, player.session.playbackUri)
     }
     
     
@@ -162,7 +162,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session?.mediaControl else {
+        guard let driver = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
@@ -175,7 +175,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session?.mediaControl else {
+        guard let driver = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
@@ -188,7 +188,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session?.mediaControl else {
+        guard let driver = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
@@ -201,7 +201,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.open(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session?.mediaControl else {
+        guard let driver = player.session.mediaControl else {
             XCTFail("expected a controller"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)

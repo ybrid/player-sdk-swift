@@ -57,17 +57,17 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     private var infinite: Bool = true // default live
     
     weak var playerListener:AudioPlayerListener?
-    weak var mediaSession:MediaSession?
+    let session:MediaSession
 
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
-    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession? = nil) {
+    init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession) {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
-        self.mediaSession = session
+        self.session = session
         /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackUri coming from the session.
-        if let metadata = self.mediaSession?.fetchMetadataSync() {
+        if let metadata = self.session.fetchMetadataSync() {
             self.notifyMetadataChanged(metadata)
         }
         PlayerContext.registerMemoryListener(listener: self)
@@ -207,12 +207,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         
         if firstMetadata {
             firstMetadata = false
-            guard let session = mediaSession else {
-                self.notifyMetadataChanged(metadata)
-                return
-            }
             metadataQueue.async {
-                if let metadata = session.fetchMetadataSync() {
+                if let metadata = self.session.fetchMetadataSync() {
                     self.notifyMetadataChanged(metadata)
                     return
                 }
@@ -221,15 +217,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
             return
         }
         if let timeToMetadataPlaying = buffer?.size {
-            guard let session = mediaSession else {
-                metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                    self.notifyMetadataChanged(metadata)
-                }
-                return
-            }
             let metadataId = session.maintainMetadata(metadata: metadata)
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
-                if let delayedMd = session.popMetadata(uuid: metadataId) {
+                if let delayedMd = self.session.popMetadata(uuid: metadataId) {
                     self.notifyMetadataChanged(delayedMd)
                 }
             }

@@ -36,7 +36,7 @@ class UseAudioPlayerTests: XCTestCase {
     }
  
     // of course you may choose your own radio station here
-    let url = URL.init(string: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")!
+    let myEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
    
     // see tests using the listener
     let playerListener = TestAudioPlayerListener()
@@ -50,7 +50,9 @@ class UseAudioPlayerTests: XCTestCase {
     Stop could need a second to clean up.
     */
     func test01_PlaySomeSeconds() {
-        let player = AudioPlayer(mediaUrl: url, listener: nil)
+        guard let player = AudioPlayer.open(for: myEndpoint, listener: nil) else {
+            XCTFail("no player, something went wrong"); return
+        }
         player.play()
         sleep(6)
         player.stop() // If the process is killed without stop()
@@ -64,7 +66,9 @@ class UseAudioPlayerTests: XCTestCase {
      In this test we assume it takes no longer than 3 seconds.
      */
     func test02_PlayerStates() {
-        let player = AudioPlayer(mediaUrl: url, listener: nil)
+        guard let player = AudioPlayer.open(for: myEndpoint, listener: nil) else {
+            XCTFail("no player, something went wrong"); return
+        }
         XCTAssertEqual(player.state, PlaybackState.stopped)
         player.play()
         XCTAssertEqual(player.state, PlaybackState.buffering)
@@ -84,7 +88,9 @@ class UseAudioPlayerTests: XCTestCase {
      */
 
     func test03_ListenToPlayer() {
-        let player = AudioPlayer(mediaUrl: url, listener: playerListener)
+        guard let player = AudioPlayer.open(for: myEndpoint, listener: playerListener) else {
+            XCTFail("no player, something went wrong"); return
+        }
         player.play()
         sleep(3)
         player.stop()
@@ -99,18 +105,17 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test04_ErrorWithPlayer() {
 
-        let badUrl = URL.init(string: "https://swr-swr3.cast.io/bad/url")!
-        let player = AudioPlayer(mediaUrl: badUrl, listener: playerListener)
-        player.play()
-        XCTAssertEqual(player.state, PlaybackState.buffering)
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.stopped)
+        let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
+        let player = AudioPlayer.open(for: badEndpoint, listener: playerListener)
+        XCTAssertNil(player, "no player expected")
         
         XCTAssertEqual(playerListener.errors.count, 1)
-        let lastError = playerListener.errors.last!
+        guard let lastError = playerListener.errors.last else {
+            return
+        }
         XCTAssertNotEqual(0, lastError.code) // error occured
         XCTAssertNotEqual(0, lastError.osstatus)
-        XCTAssertEqual(201, lastError.code) // ErrorKind.networkFatal
+        XCTAssertEqual(603, lastError.code) // ErrorKind.serverError
         XCTAssertEqual(-1003, lastError.osstatus) // host not found
     }
 
@@ -119,8 +124,10 @@ class UseAudioPlayerTests: XCTestCase {
      The audio codec opus is supported
      */
     func test05_PlayOpus() {
-        let opusUrl = URL.init(string: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")!
-        let player = AudioPlayer(mediaUrl: opusUrl, listener: playerListener)
+        let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        guard let player = AudioPlayer.open(for: opusEndpoint, listener: playerListener) else {
+            XCTFail("no player. Something went wrong"); return
+        }
         player.play()
         sleep(6)
         player.stop()
@@ -133,8 +140,10 @@ class UseAudioPlayerTests: XCTestCase {
      Remember, all actions are asynchronous. So assertions in this test are delayed.
      */
     func test06_OnDemandPlayPausePlayPauseStop() {
-        let opusUrl = URL.init(string: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")!
-        let player = AudioPlayer(mediaUrl: opusUrl, listener: playerListener)
+        let onDemandEndpoint = MediaEndpoint(mediaUri:  "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
+        guard let player = AudioPlayer.open(for: onDemandEndpoint, listener: playerListener) else {
+            XCTFail("no player. Something went wrong"); return
+        }
         XCTAssertFalse(player.canPause)
         player.play()
         XCTAssertEqual(player.state, PlaybackState.buffering)
@@ -162,7 +171,9 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test07_ListenToMetadata() {
 
-        let player = AudioPlayer(mediaUrl: url, listener: playerListener)
+        guard let player = AudioPlayer.open(for: myEndpoint, listener: playerListener) else {
+            XCTFail("no player. Something went wrong"); return
+        }
         player.play()
         sleep(3)
         player.stop()
