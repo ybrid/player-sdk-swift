@@ -181,15 +181,12 @@ class UseAudioContollerTests: XCTestCase {
         XCTAssertEqual(-1003, error.osstatus) // host not found
     }
 
- 
+
     // MARK: helper function
     private func wait(_ ybrid:YbridControl, until:PlaybackState, maxSeconds:Int) {
-        wait(ybrid as SimpleControl, until: until, maxSeconds: maxSeconds)
+        wait(ybrid as! PlaybackControl, until: until, maxSeconds: maxSeconds)
     }
     private func wait(_ playback:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
-        wait(playback as SimpleControl, until: until, maxSeconds: maxSeconds)
-    }
-    private func wait(_ playback:SimpleControl, until:PlaybackState, maxSeconds:Int) {
 
         var seconds = 0
         while playback.state != until && seconds <= maxSeconds {

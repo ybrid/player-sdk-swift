@@ -109,6 +109,7 @@ class YbridV2Driver : MediaDriver {
         if let playout = response.playout {
             playbackUri = playout.playbackURI
             baseUrl = playout.baseURL
+            offsetToLiveS = Double(playout.offsetToLive) / 1000
             //            updatePlayout(response.getRawPlayout());
             //            updateSwapInfo(response.getRawSwapInfo());
         }

@@ -41,6 +41,7 @@ class MediaDriver : MediaControl {
     var connected:Bool = false { didSet {
         Logger.controlling.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
+    var offsetToLiveS:TimeInterval?
 
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
