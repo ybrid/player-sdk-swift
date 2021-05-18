@@ -53,8 +53,7 @@ public enum PlaybackState {
 }
 
 
-public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
-    
+public class AudioPlayer: OnDemandControl, PlaybackControl, BufferListener, PipelineListener {
     
     public static var versionString:String {
         get {
@@ -272,4 +271,10 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
             }
         }
     }
+}
+
+class YbridAudioPlayer : AudioPlayer, YbridControl {
+    var offsetToLiveS: TimeInterval { get {
+        return session.offsetToLiveS ?? 0.0
+    }}
 }

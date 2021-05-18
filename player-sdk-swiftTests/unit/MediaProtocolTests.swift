@@ -59,7 +59,7 @@ class MediaProtocolTests: XCTestCase {
         do {
             _ = try factory.getVersion("no url")
         } catch {
-            XCTAssertTrue(error is ApiError)
+            XCTAssertTrue(error is SessionError)
             return
         }
         XCTFail()

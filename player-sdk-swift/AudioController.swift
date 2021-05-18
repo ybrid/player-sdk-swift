@@ -26,23 +26,52 @@
 import Foundation
 
 
-public protocol PlaybackControl {
+public protocol SimpleControl {
     func play()
     func stop()
+    
     var state:PlaybackState { get }
-    var canPause:Bool { get }
-    func pause()
     func close()
 }
 
-public class AudioController {
+public protocol LiveControl : SimpleControl {
+
+}
+
+public protocol OnDemandControl : LiveControl {
+    func pause()
+}
+
+public protocol PlaybackControl: SimpleControl  {
+    var canPause:Bool { get }
+    func pause()
+}
+
+public protocol YbridControl : OnDemandControl {
+    var offsetToLiveS:TimeInterval { get }
+}
+
+
+
+
+public extension AudioPlayer {
     static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
+
+    typealias PlaybackControllerCallback = (PlaybackControl,MediaProtocol) -> ()
+    typealias LiveControllerCallback = (LiveControl) -> ()
+    typealias OnDemandControllerCallback = (OnDemandControl) -> ()
+    typealias YbridControllerCallback = (YbridControl) -> ()
     
-    // Create an AudioPlayer for a MediaEndpoint.
+    // Create a matching AudioContoller for a MediaEndpoint.
     //
     // The matching MediaProtocol is detected and a session
     // to control content and metadata of the stream is established.
-    public static func create(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil, playbackControl: @escaping (PlaybackControl, MediaProtocol) -> () ) throws {
+    //
+    // One of the callback methods is called when the controller is available
+    //
+    static func initialize(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
+            playbackControl: PlaybackControllerCallback? = nil,
+              ybridControl: YbridControllerCallback? = nil ) throws {
         
         let session = MediaSession(on: endpoint)
         do {
@@ -58,11 +87,54 @@ public class AudioController {
             }
         }
         
-        AudioController.controllerQueue.async {
-            let audioPlayer = AudioPlayer(session: session, listener: listener)
-            playbackControl(audioPlayer, session.mediaProtocol!)
+        controllerQueue.async {
+            switch session.mediaProtocol {
+            case .ybridV2:
+                let player = YbridAudioPlayer(session: session, listener: listener)
+                ybridControl?(player)
+            default:
+                let player = AudioPlayer(session: session, listener: listener)
+                playbackControl?(player, session.mediaProtocol!)
+            }
         }
     }
+    
+
+    static func initialize(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
+            liveControl: LiveControllerCallback? = nil,
+            onDemandControl: OnDemandControllerCallback? = nil,
+            ybridControl: YbridControllerCallback? = nil ) throws {
+        
+        let session = MediaSession(on: endpoint)
+        do {
+            try session.connect()
+        } catch {
+            if let audioDataError = error as? AudioPlayerError {
+                listener?.error(ErrorSeverity.fatal, audioDataError)
+                throw audioDataError
+            } else {
+                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
+                listener?.error(ErrorSeverity.fatal, sessionError )
+                throw sessionError
+            }
+        }
+        
+        controllerQueue.async {
+            switch session.mediaProtocol {
+            case .ybridV2:
+                let player = YbridAudioPlayer(session: session, listener: listener)
+                ybridControl?(player)
+            default:
+                let player = AudioPlayer(session: session, listener: listener)
+                if player.pipeline?.infinite == true {
+                    liveControl?(player)
+                } else {
+                    onDemandControl?(player)
+                }
+            }
+        }
+    }
+    
     
 }
 

@@ -54,7 +54,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
-    private var infinite: Bool = true // default live
+    var infinite: Bool = true // default live
     
     weak var playerListener:AudioPlayerListener?
     let session:MediaSession

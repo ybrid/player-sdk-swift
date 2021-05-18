@@ -42,94 +42,102 @@ class UseAudioContollerTests: XCTestCase {
     
     func test01_Ybrid_PlaySomeSeconds() throws {
         
-        try AudioController.create(for: ybridDemoEndpoint) { [self]
-            (playback, mediaProtocol) in
-            XCTAssertEqual(MediaProtocol.ybridV2, mediaProtocol)
-            
-            playback.play()
-            wait(playback, until: .playing, maxSeconds: 10)
-            sleep(3)
-            playback.stop()
-            wait(playback, until: .stopped, maxSeconds: 2)
-            
-            semaphore?.signal()
-        }
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: nil,
+               ybridControl: { [self] (ybridControl) in
+                
+                let offset = ybridControl.offsetToLiveS
+                Logger.testing.notice("offset to live is \(offset.S)")
+                XCTAssertLessThan(offset, -0.5)
+                XCTAssertGreaterThan(offset, -5.0)
+                
+                ybridControl.play()
+                wait(ybridControl, until: .playing, maxSeconds: 10)
+                sleep(3)
+                ybridControl.stop()
+                wait(ybridControl, until: .stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
- 
 
     func test02_Icy_PlaySomeSeconds() throws {
 
-        try AudioController.create(for: icecastHr2Endpoint) { [self]
-            (playback, mediaProtocol) in
-            XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+        try AudioPlayer.initialize(for: icecastHr2Endpoint,
+            playbackControl: { [self] (playback, mediaProtocol) in
             
-            playback.play()
-            wait(playback, until: .playing, maxSeconds: 10)
-            sleep(3)
-            playback.stop()
-            wait(playback, until: .stopped, maxSeconds: 2)
-            
-            semaphore?.signal()
-        }
+                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+                
+                playback.play()
+                wait(playback, until: .playing, maxSeconds: 10)
+                sleep(3)
+                playback.stop()
+                wait(playback, until: .stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+           })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
 
     func test04_Icy_Opus_PlaySomeSeconds() throws {
         
-        try AudioController.create(for: opusDlfEndpoint) { [self]
-            (playback, mediaProtocol) in
-            XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
-            playback.play()
-            wait(playback, until: .playing, maxSeconds: 10)
-            sleep(3)
-            playback.stop()
-            wait(playback, until: .stopped, maxSeconds: 2)
-            
-            semaphore?.signal()
-        }
+        try AudioPlayer.initialize(for: opusDlfEndpoint,
+            playbackControl: { [self] (playback, mediaProtocol) in
+                
+                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+               
+                playback.play()
+                wait(playback, until: .playing, maxSeconds: 10)
+                sleep(3)
+                playback.stop()
+                wait(playback, until: .stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+           })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
 
     
     func test05_Icy_OnDemand_PlayPausePlay() throws {
 
-        try AudioController.create(for: onDemandMp3Endpoint) { [self]
-            (playback, mediaProtocol) in
-            XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
-            XCTAssertFalse(playback.canPause)
-            
-            playback.play()
-            wait(playback, until: .playing, maxSeconds: 10)
-            XCTAssertTrue(playback.canPause)
-            sleep(3)
-            playback.pause()
-            wait(playback, until: .pausing, maxSeconds: 2)
-            playback.play()
-            wait(playback, until: .playing, maxSeconds: 5)
-            sleep(1)
-            playback.stop()
-            wait(playback, until: .stopped, maxSeconds: 2)
-            
-            semaphore?.signal()
-        }
+        try AudioPlayer.initialize(for: onDemandMp3Endpoint,
+            playbackControl: { [self] (playback, mediaProtocol) in
+                
+                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+                XCTAssertFalse(playback.canPause)
+                
+                playback.play()
+                wait(playback, until: .playing, maxSeconds: 10)
+                XCTAssertTrue(playback.canPause)
+                sleep(3)
+                playback.pause()
+                wait(playback, until: .pausing, maxSeconds: 2)
+                playback.play()
+                wait(playback, until: .playing, maxSeconds: 5)
+                sleep(1)
+                playback.stop()
+                wait(playback, until: .stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+            })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
     func test06_AudioDataError_PlayStops() {
         let endpoint = MediaEndpoint(mediaUri: "https://cast.ybrid.io/bad/url")
         do {
-            try AudioController.create(for: endpoint, listener: playerListener) { [self]
-                (playback, mediaProtocol) in
-                XCTAssertEqual(.icy, mediaProtocol)
+            try AudioPlayer.initialize(for: endpoint, listener: playerListener,
+                playbackControl: { [self] (playback, mediaProtocol) in
+                    
+                    XCTAssertEqual(.icy, mediaProtocol)
 
-                playback.play()
-                wait(playback, until: .buffering, maxSeconds: 1)
-                wait(playback, until: .stopped, maxSeconds: 15)
+                    playback.play()
+                    wait(playback, until: .buffering, maxSeconds: 1)
+                    wait(playback, until: .stopped, maxSeconds: 15)
                 
                 semaphore?.signal()
-            }
+            })
         } catch {
             XCTFail("should not be called, error reading wrong data tyoe expected");
             semaphore?.signal(); return
@@ -146,11 +154,13 @@ class UseAudioContollerTests: XCTestCase {
     func test07_ControllingError_NoPlayerg() {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
         do {
-            try AudioController.create(for: endpoint, listener: playerListener) { [self]
-                (playback, mediaProtocol) in
-                XCTFail("should not be called, we get no player")
+            try AudioPlayer.initialize(for: endpoint, listener: playerListener,
+               playbackControl: { [self] (playback, mediaProtocol) in
+                
+                    XCTFail("should not be called, we get no player")
+                
                 semaphore?.signal()
-            }
+            })
         } catch {
             XCTAssertTrue( error is SessionError )
             guard let sessionError = error as? SessionError else {
@@ -173,8 +183,13 @@ class UseAudioContollerTests: XCTestCase {
 
  
     // MARK: helper function
-    
+    private func wait(_ ybrid:YbridControl, until:PlaybackState, maxSeconds:Int) {
+        wait(ybrid as SimpleControl, until: until, maxSeconds: maxSeconds)
+    }
     private func wait(_ playback:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
+        wait(playback as SimpleControl, until: until, maxSeconds: maxSeconds)
+    }
+    private func wait(_ playback:SimpleControl, until:PlaybackState, maxSeconds:Int) {
 
         var seconds = 0
         while playback.state != until && seconds <= maxSeconds {
