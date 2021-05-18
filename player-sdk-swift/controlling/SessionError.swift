@@ -25,8 +25,7 @@
 
 import Foundation
 
-class SessionError : AudioPlayerError {
-    
+public class SessionError : AudioPlayerError {
     
     init(_ kind:ErrorKind, _ message:String, _ cause:Error? = nil) {
         super.init(kind, message, cause)
@@ -36,9 +35,7 @@ class SessionError : AudioPlayerError {
         super.init(kind, cause.message, cause)
         super.osstatus = cause.osstatus
     }
-    
 }
-    
     
 class OptionsTaskState : Equatable, LocalizedError {
         

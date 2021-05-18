@@ -52,15 +52,6 @@ public enum PlaybackState {
     case pausing // no audio will play
 }
 
-public protocol PlaybackControl {
-    var mediaProtocol:MediaProtocol? { get }
-    func play()
-    func stop()
-    var state:PlaybackState { get }
-    var canPause:Bool { get }
-    func pause()
-    func close()
-}
 
 public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     
@@ -100,35 +91,6 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         return AudioPlayer(session: session, listener: listener)
     }
 
-    static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
-    
-    // Create an AudioPlayer for a MediaEndpoint.
-    //
-    // The matching MediaProtocol is detected and a session
-    // to control content and metadata of the stream is established.
-    public static func create(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil, playback: @escaping (PlaybackControl) -> ()) throws {
-        
-        let session = MediaSession(on: endpoint)
-        do {
-            try session.connect()
-        } catch {
-            if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
-                throw audioDataError
-            } else {
-                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                listener?.error(ErrorSeverity.fatal, sessionError )
-                throw sessionError
-            }
-        }
-        AudioPlayer.controllerQueue.async {
-            let audioPlayer = AudioPlayer(session: session, listener: listener)
-            playback(audioPlayer)
-        }
-    }
-    
-    
-    
     public var state: PlaybackState { get {
         return playbackState
     }}

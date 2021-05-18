@@ -25,7 +25,7 @@
 
 import Foundation
 
-class LoadingError : AudioPlayerError {
+public class LoadingError : AudioPlayerError {
     
     init(_ kind:ErrorKind, _ message:String, _ cause:Error? = nil) {
         super.init(kind, message, cause)

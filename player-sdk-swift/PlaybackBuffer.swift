@@ -240,22 +240,6 @@ class PlaybackBuffer {
             return cleared
         }
     }
-
-//    class ThreadsafeDequeue<T> {
-//
-//
-//        private var element = [T]()
-//        var count:Int {queue.sync { element.count } }
-//        var all:[T] { queue.sync { return element } }
-//        func put(_ package: T) { queue.async { self.element.append(package) } }
-//        func take() -> T? {
-//            queue.sync {
-//                guard self.element.count > 0 else { return nil }
-//                return self.element.removeFirst()
-//            }
-//        }
-//        func clear() { queue.async { self.element.removeAll() } }
-//    }
 }
 
 extension TimeInterval {

@@ -26,7 +26,7 @@
 import Foundation
 import AVFoundation
 
-class AudioDataError : AudioPlayerError {
+public class AudioDataError : AudioPlayerError {
 
     init(_ kind: ErrorKind) {
         super.init(kind, nil)
@@ -45,7 +45,7 @@ class AudioDataError : AudioPlayerError {
 
 }
 
-class DecoderError : AudioPlayerError {
+public class DecoderError : AudioPlayerError {
 
     init(_ kind:ErrorKind, _ code: OSStatus? = nil) {
         guard let code = code else {
