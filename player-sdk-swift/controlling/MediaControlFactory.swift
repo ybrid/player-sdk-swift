@@ -54,7 +54,7 @@ class MediaControlFactory {
     func getVersion(_ uri:String) throws -> MediaProtocol {
         
         guard let url = URL(string: uri) else {
-            throw ApiError(ErrorKind.invalidUri, uri)
+            throw SessionError(ErrorKind.invalidUri, uri)
         }
         
         let ybridVersions = try getSupportedVersionsFromYbridV2Server(url: url)
@@ -74,10 +74,10 @@ class MediaControlFactory {
             let info = ybridResponse.__responseHeader
             Logger.controlling.debug(String(data: try JSONEncoder().encode(info), encoding: .utf8) ?? "(no ybrid info struct)")
             if !info.success {
-                throw ApiError(ErrorKind.invalidResponse, "__responseHeader.success is false")
+                throw SessionError(ErrorKind.invalidResponse, "__responseHeader.success is false")
             }
             if !(200...299).contains(info.statusCode) {
-                throw ApiError(ErrorKind.invalidResponse, "__responseHeader.statusCode is \(info.statusCode)")
+                throw SessionError(ErrorKind.invalidResponse, "__responseHeader.statusCode is \(info.statusCode)")
             }
             versions = ybridResponse.__responseHeader.supportedVersions
         } catch {

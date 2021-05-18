@@ -103,7 +103,7 @@ class UseAudioPlayerTests: XCTestCase {
      
      listener.error lets you see all errors, warnings and notifications
      */
-    func test04_ErrorWithPlayer() {
+    func test04_ErrorNoPlayer() {
 
         let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
         let player = AudioPlayer.open(for: badEndpoint, listener: playerListener)
@@ -114,11 +114,38 @@ class UseAudioPlayerTests: XCTestCase {
             return
         }
         XCTAssertNotEqual(0, lastError.code) // error occured
-        XCTAssertNotEqual(0, lastError.osstatus)
+        XCTAssertNotNil(lastError.osstatus) // more info
+        
         XCTAssertEqual(603, lastError.code) // ErrorKind.serverError
         XCTAssertEqual(-1003, lastError.osstatus) // host not found
     }
 
+    /*
+     You want to see a problem?
+     Filter the console output by '-- '
+     
+     listener.error lets you see all errors, warnings and notifications
+     */
+    func test04_ErrorWithPlayer() {
+
+        let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
+        guard let player = AudioPlayer.open(for: badEndpoint, listener: playerListener) else {
+            XCTFail("no player, something went wrong"); return
+        }
+        XCTAssertEqual(.icy, player.mediaProtocol)
+        XCTAssertEqual(playerListener.errors.count, 0)
+        player.play()
+        sleep(2)
+        XCTAssertEqual(playerListener.errors.count, 1)
+        guard let lastError = playerListener.errors.last else {
+            return
+        }
+        XCTAssertNotEqual(0, lastError.code) // error occured
+        XCTAssertEqual(302, lastError.code) // ErrorKind.cannotProcessMimeType
+
+        XCTAssertNil(lastError.osstatus)
+    }
+    
     
     /*
      The audio codec opus is supported

@@ -25,7 +25,7 @@
 
 import Foundation
 
-class ApiError : AudioPlayerError {
+class SessionError : AudioPlayerError {
     
     
     init(_ kind:ErrorKind, _ message:String, _ cause:Error? = nil) {

@@ -28,11 +28,6 @@ import YbridPlayerSDK
 
 class UseEndpointPlayerTests: XCTestCase {
     
-    var player:AudioPlayer? { willSet {
-        if let lastPlayer = player {
-            lastPlayer.close()
-        }
-    }}
 
     let playerListener = TestAudioPlayerListener()
     override func setUpWithError() throws {
@@ -41,116 +36,172 @@ class UseEndpointPlayerTests: XCTestCase {
         playerListener.reset()
     }
     
+    var player:PlaybackControl?
     override func tearDownWithError() throws {
+        player?.close()
+        player = nil
     }
     
     func test01_Ybrid_PlaySomeSeconds() throws {
-        player = AudioPlayer.open(for: ybridDemoEndpoint, listener: nil)
-        guard let player = player else {
-            XCTFail(); return
+        try AudioPlayer.create(for: ybridDemoEndpoint) { [self]
+            (playbackControl) in
+            XCTAssertEqual(MediaProtocol.ybridV2, playbackControl.mediaProtocol)
+            player = playbackControl
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
         }
-        XCTAssertEqual(MediaProtocol.ybridV2, player.session.mediaProtocol)
-        
-        player.play()
-        _ = wait(until: .playing, maxSeconds: 10)
+        wait(until: .playing, maxSeconds: 10)
         sleep(3)
-        player.stop()
-        _ = wait(until: .stopped, maxSeconds: 2)
+        player?.stop()
+        wait(until: .stopped, maxSeconds: 2)
+    }
+    
+ 
+
+    func test02_Icy_PlaySomeSeconds() throws {
+
+        try AudioPlayer.create(for: icecastHr2Endpoint) { [self]
+            (playbackControl) in
+            XCTAssertEqual(MediaProtocol.icy, playbackControl.mediaProtocol)
+            player = playbackControl
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
+        }
+        wait(until: .playing, maxSeconds: 10)
+        sleep(3)
+        player?.stop()
+        wait(until: .stopped, maxSeconds: 2)
+    }
+
+    func test04_Icy_Opus_PlaySomeSeconds() throws {
+        
+        try AudioPlayer.create(for: opusDlfEndpoint) { [self]
+            (playbackControl) in
+            player = playbackControl
+            XCTAssertEqual(MediaProtocol.icy, playbackControl.mediaProtocol)
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
+        }
+        wait(until: .playing, maxSeconds: 10)
+        sleep(3)
+        player?.stop()
+        wait(until: .stopped, maxSeconds: 2)
+    }
+
+    
+    func test05_Icy_OnDemand_PlayPausePlay() throws {
+
+        try AudioPlayer.create(for: onDemandMp3Endpoint) { [self]
+            (playbackControl) in
+            XCTAssertEqual(MediaProtocol.icy, playbackControl.mediaProtocol)
+            player = playbackControl
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
+        }
+        wait(until: .playing, maxSeconds: 10)
+        sleep(3)
+        player?.pause()
+        wait(until: .pausing, maxSeconds: 2)
+        player?.play()
+        wait(until: .playing, maxSeconds: 5)
+        sleep(1)
+        player?.stop()
+        wait(until: .stopped, maxSeconds: 2)
     }
     
     
     func test02_WrongUri_PlayStops() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/wronguri")
-        player = AudioPlayer.open(for: endpoint, listener: playerListener)
-        guard let player = player else {
-            XCTFail(); return
+        try AudioPlayer.create(for: endpoint, listener: playerListener) { [self]
+            (playbackControl) in
+            XCTAssertEqual(MediaProtocol.icy, playbackControl.mediaProtocol)
+            player = playbackControl
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
-        player.play()
-        _ = wait(until: .stopped, maxSeconds: 2)
-        
+        wait(until: .buffering, maxSeconds: 3)
+        wait(until: .stopped, maxSeconds: 5)
         XCTAssertEqual(1, playerListener.errors.count)
         let lastError = playerListener.errors.last!
         XCTAssertNotEqual(0, lastError.code)
         XCTAssertNotEqual(0, lastError.osstatus) // cannotProcessMimeType, cannot process text/plain with filename wrongurl.txt
     }
 
-    func test03_Icy_PlaySomeSeconds() throws {
-
-        player = AudioPlayer.open(for: icecastHr2Endpoint, listener: nil)
-        guard let player = player else {
-            XCTFail(); return
+    
+    func test06_Error_WithPlayer_cannotProcessMimeType() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://cast.ybrid.io/bad/url")
+        do {
+        try AudioPlayer.create(for: endpoint, listener: playerListener) { [self]
+            (playbackControl) in
+            XCTAssertEqual(.icy, playbackControl.mediaProtocol)
+            self.player = playbackControl
+            playbackControl.play()
+            wait(playbackControl, until: .buffering, maxSeconds: 1)
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
-        player.play()
-        _ = wait(until: .playing, maxSeconds: 10)
-        sleep(3)
-        player.stop()
-        _ = wait(until: .stopped, maxSeconds: 2)
-    }
-
-    func test04_Icy_Opus_PlaySomeSeconds() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        player = AudioPlayer.open(for: endpoint, listener: playerListener)
-        guard let player = player else {
-            XCTFail(); return
+        wait(until: .buffering, maxSeconds: 5)
+        wait(until: .stopped, maxSeconds: 15)
+            
+        XCTAssertEqual(1, playerListener.errors.count)
+        let error = playerListener.errors[0]
+            XCTAssertNotEqual(0, error.code) // error occured
+            XCTAssertEqual(302, error.code) // ErrorKind.cannotProcessMimeType
+        } catch {
+            XCTFail("should not be called, error in loading"); return
         }
-        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
-        
-        player.play()
-        _ = wait(until: .playing, maxSeconds: 10)
-        sleep(3)
-        player.stop()
-        _ = wait(until: .stopped, maxSeconds: 2)
-    }
-
-    func test05_Icy_OnDemand_PlayPausePlay() throws {
-
-        player = AudioPlayer.open(for: onDemandMp3Endpoint, listener: playerListener)
-        guard let player = player else {
-            XCTFail(); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, player.session.mediaProtocol)
-        player.play()
-        _ = wait(until: .playing, maxSeconds: 10)
-        sleep(3)
-        player.pause()
-        _ = wait(until: .pausing, maxSeconds: 2)
-        player.play()
-        _ = wait(until: .playing, maxSeconds: 10)
-        sleep(1)
-        player.stop()
-        _ = wait(until: .stopped, maxSeconds: 2)
     }
     
-
-    func test06_Error_NoPlayer_HostNotFound() {
+    func test06_Error_NoPlayer_HostNotFound() throws {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
-        player = AudioPlayer.open(for: endpoint, listener: playerListener)
+        do {
+        try AudioPlayer.create(for: endpoint, listener: playerListener) { [self]
+            (playbackControl) in
+            XCTFail("should not be called, we get no player")
+        }
+        sleep(5)
         XCTAssertNil(player)
 
         XCTAssertEqual(1, playerListener.errors.count)
         let error = playerListener.errors[0]
         XCTAssertNotEqual(0, error.code)
         XCTAssertEqual(-1003, error.osstatus) //  OSStatus=-1003, host not found
+        } catch {
+            guard let sessionError = error as? AudioPlayerError else {
+                XCTFail("must be an audio error"); return
+            }
+            XCTAssertNotEqual(0, sessionError.code)
+            XCTAssertEqual(603, sessionError.code) // ErrorKind.serverError
+            XCTAssertEqual(-1003, sessionError.osstatus) // host not found
+        }
     }
     
+    
+
  
     // MARK: helper function
-    
-    private func wait(until:PlaybackState, maxSeconds:Int) -> Int {
-        guard let player = player else {
-            XCTFail("no player"); return -1
-        }
-        
+    private func wait(until:PlaybackState, maxSeconds:Int) {
         var seconds = 0
-        while player.state != until && seconds <= maxSeconds {
+        while player == nil && seconds <= maxSeconds {
             sleep(1)
             seconds += 1
         }
-        print("took \(seconds) second\(seconds > 1 ? "s" : "") until \(player.state)")
-        XCTAssertEqual(until, player.state)
-        return seconds
+        while player?.state == nil || (player?.state != until && seconds <= maxSeconds) {
+                sleep(1)
+                seconds += 1
+            }
+        print("took \(seconds) second\(seconds > 1 ? "s" : "") until \(player?.state)")
+            XCTAssertEqual(until, player?.state)
+    }
+    
+    
+    private func wait(_ playback:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
+
+        var seconds = 0
+        while playback.state != until && seconds <= maxSeconds {
+            sleep(1)
+            seconds += 1
+        }
+        print("took \(seconds) second\(seconds > 1 ? "s" : "") until \(playback.state)")
+        XCTAssertEqual(until, playback.state)
     }
 
 }

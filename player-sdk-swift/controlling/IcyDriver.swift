@@ -38,7 +38,7 @@ class IcyDriver : MediaDriver {
         }
         
         if !valid {
-            throw ApiError(ErrorKind.invalidSession, "session is not valid.")
+            throw SessionError(ErrorKind.invalidSession, "session is not valid.")
         }
         connected = true
     }

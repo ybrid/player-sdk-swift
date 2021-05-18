@@ -59,7 +59,7 @@ class JsonRequest {
         Logger.controlling.debug("calling OPTIONS on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
-        var apiError:ApiError? { didSet {
+        var apiError:SessionError? { didSet {
             semaphore.signal()
         }}
         
@@ -81,7 +81,7 @@ class JsonRequest {
                     return
                 }
   
-                apiError = ApiError(ErrorKind.serverError, optionsState)
+                apiError = SessionError(ErrorKind.serverError, optionsState)
                 return
             }
            
@@ -92,7 +92,7 @@ class JsonRequest {
             }
             
             guard let data = data else {
-                apiError = ApiError(ErrorKind.invalidResponse, "missing data")
+                apiError = SessionError(ErrorKind.invalidResponse, "missing data")
                 return
             }
             
@@ -105,10 +105,10 @@ class JsonRequest {
                 semaphore.signal()
             } catch {
                 guard let dataString = String(data: data, encoding: .utf8) else {
-                    apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                    apiError = SessionError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
                     return
                 }
-                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
+                apiError = SessionError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
                 return
             }
         }
@@ -133,7 +133,7 @@ class JsonRequest {
         Logger.controlling.debug("calling POST on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
-        var apiError:ApiError? { didSet {
+        var apiError:SessionError? { didSet {
             semaphore.signal()
         }}
         
@@ -153,12 +153,12 @@ class JsonRequest {
                 return
             }
             if let error = error {
-                apiError = ApiError(ErrorKind.serverError, "error in POST \(self.url.absoluteString)", error)
+                apiError = SessionError(ErrorKind.serverError, "error in POST \(self.url.absoluteString)", error)
                 return
             }
             
             guard let data = data else {
-                apiError = ApiError(ErrorKind.invalidResponse, "missing data")
+                apiError = SessionError(ErrorKind.invalidResponse, "missing data")
                 return
             }
             
@@ -171,10 +171,10 @@ class JsonRequest {
                 semaphore.signal()
             } catch {
                 guard let dataString = String(data: data, encoding: .utf8) else {
-                    apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
+                    apiError = SessionError(ErrorKind.invalidResponse, "error parsing \(data.debugDescription) into \(responseType)", error)
                     return
                 }
-                apiError = ApiError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
+                apiError = SessionError(ErrorKind.invalidResponse, "error parsing \(dataString) into \(responseType)", error)
                 return
             }
         }
@@ -194,33 +194,33 @@ class JsonRequest {
     }
     
     
-    private func validateJsonResponse(_ response: URLResponse?) -> ApiError? {
+    private func validateJsonResponse(_ response: URLResponse?) -> SessionError? {
         
         if let response = response {
             if Logger.verbose { Logger.controlling.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
         }
         guard let mime = response?.mimeType, mime == JsonRequest.applicationJson else {
-            return ApiError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
+            return SessionError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
         }
         guard let length = response?.expectedContentLength, length > 0 else {
-            return ApiError(ErrorKind.invalidData, "content length not > 0")
+            return SessionError(ErrorKind.invalidData, "content length not > 0")
         }
         
         guard let httpResponse = response as? HTTPURLResponse else {
             Logger.controlling.error(response.debugDescription)
-            return ApiError(ErrorKind.serverError, "no http response")
+            return SessionError(ErrorKind.serverError, "no http response")
         }
         
         guard (200...299).contains(httpResponse.statusCode) else {
-            return ApiError(ErrorKind.serverError, "http status \(httpResponse.statusCode)")
+            return SessionError(ErrorKind.serverError, "http status \(httpResponse.statusCode)")
         }
         
         let headers = httpResponse.allHeaderFields
         guard let type = headers["Content-Type"] as? String else {
-            return ApiError(ErrorKind.invalidResponse,"missing Content-Type")
+            return SessionError(ErrorKind.invalidResponse,"missing Content-Type")
         }
         guard type.lowercased().contains(JsonRequest.applicationJson) else {
-            return ApiError(ErrorKind.missingMimeType,"unsupported Content-Type \(type)")
+            return SessionError(ErrorKind.missingMimeType,"unsupported Content-Type \(type)")
         }
         return nil
     }

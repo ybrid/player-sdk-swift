@@ -49,7 +49,7 @@ class YbridV2Driver : MediaDriver {
         }
  
         if !valid {
-            throw ApiError(ErrorKind.invalidSession, "session is not valid.")
+            throw SessionError(ErrorKind.invalidSession, "session is not valid.")
         }
         
         Logger.controlling.debug("creating ybrid session")
@@ -120,18 +120,18 @@ class YbridV2Driver : MediaDriver {
     
     private func ctrlRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw ApiError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
         if let token = token {
             ctrlUrl.query = "session-id=\(token)"
         }
         guard let url = ctrlUrl.url else {
-            throw ApiError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
         
         do {
             guard let result = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
-                throw ApiError(ErrorKind.invalidResponse, "no json result")
+                throw SessionError(ErrorKind.invalidResponse, "no json result")
             }
             let sessionObj = result.__responseObject
             let responseString = String(data: try encoder.encode(sessionObj), encoding: .utf8) ?? "(no response struct)"
@@ -139,7 +139,7 @@ class YbridV2Driver : MediaDriver {
             return sessionObj
         } catch {
             Logger.controlling.error(error.localizedDescription)
-            throw ApiError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
         }
     }
     

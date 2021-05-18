@@ -52,7 +52,18 @@ public enum PlaybackState {
     case pausing // no audio will play
 }
 
-public class AudioPlayer: BufferListener, PipelineListener {
+public protocol PlaybackControl {
+    var mediaProtocol:MediaProtocol? { get }
+    func play()
+    func stop()
+    var state:PlaybackState { get }
+    var canPause:Bool { get }
+    func pause()
+    func close()
+}
+
+public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
+    
     
     public static var versionString:String {
         get {
@@ -82,18 +93,51 @@ public class AudioPlayer: BufferListener, PipelineListener {
             if let audioDataError = error as? AudioPlayerError {
                 listener?.error(ErrorSeverity.fatal, audioDataError)
             } else {
-                listener?.error(ErrorSeverity.fatal, ApiError(ErrorKind.unknown, "cannot connect to endpoint", error))
+                listener?.error(ErrorSeverity.fatal, SessionError(ErrorKind.unknown, "cannot connect to endpoint", error))
             }
             return nil
         }
         return AudioPlayer(session: session, listener: listener)
     }
+
+    static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
+    
+    // Create an AudioPlayer for a MediaEndpoint.
+    //
+    // The matching MediaProtocol is detected and a session
+    // to control content and metadata of the stream is established.
+    public static func create(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil, playback: @escaping (PlaybackControl) -> ()) throws {
+        
+        let session = MediaSession(on: endpoint)
+        do {
+            try session.connect()
+        } catch {
+            if let audioDataError = error as? AudioPlayerError {
+                listener?.error(ErrorSeverity.fatal, audioDataError)
+                throw audioDataError
+            } else {
+                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
+                listener?.error(ErrorSeverity.fatal, sessionError )
+                throw sessionError
+            }
+        }
+        AudioPlayer.controllerQueue.async {
+            let audioPlayer = AudioPlayer(session: session, listener: listener)
+            playback(audioPlayer)
+        }
+    }
+    
+    
     
     public var state: PlaybackState { get {
         return playbackState
     }}
     
-    public var session:MediaSession
+    public var mediaProtocol:MediaProtocol? { get {
+        return session.mediaControl?.mediaProtocol
+    }}
+    
+    var session:MediaSession
     public var canPause:Bool = false
     
     var loader: AudioDataLoader?
@@ -114,8 +158,8 @@ public class AudioPlayer: BufferListener, PipelineListener {
         }
     }
     
-    // get ready for playing.
-    // session - the MediaSession connected to the MediaEndpoint. Supports mp3, aac and opus.
+    // get ready for playing audio. Supports codecs mp3, aac and opus.
+    // session - the MediaSession connected to the MediaEndpoint. Supports icecast, plain http and ybrid
     // listener - object to be called back from the player process
     init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener

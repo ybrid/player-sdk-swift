@@ -321,8 +321,8 @@
 		170703D225D2F44400549B8A /* player-sdk-swift */ = {
 			isa = PBXGroup;
 			children = (
-				175849E4264BB6500071FEE6 /* util */,
 				170703D425D2F44400549B8A /* Info.plist */,
+				175849E4264BB6500071FEE6 /* util */,
 				17CBC9B425E3C36000B2F7E7 /* decoding */,
 				17CBC9B325E3C33B00B2F7E7 /* playing */,
 				17CBC9B225E3C30F00B2F7E7 /* loading */,
