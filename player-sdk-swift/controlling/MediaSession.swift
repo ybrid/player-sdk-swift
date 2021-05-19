@@ -33,12 +33,15 @@ public class MediaSession  {
     let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
+    
     var offsetToLiveS:TimeInterval? { get {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.info()
-            return v2Control.offsetToLiveS
+        return (mediaControl as? YbridV2Driver)?.offsetToLiveS
+    }}
+        
+    weak var ybridListener:YbridControlListener? { didSet {
+        if let v2Control = mediaControl as? YbridV2Driver {
+            v2Control.listener = ybridListener
         }
-        return nil
     }}
     
     public var mediaProtocol:MediaProtocol? { get {

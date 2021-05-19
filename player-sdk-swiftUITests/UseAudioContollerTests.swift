@@ -1,5 +1,5 @@
 //
-// UseEndpointPlayerTests.swift
+// UseAudioControlTests.swift
 // player-sdk-swiftUITests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -26,7 +26,7 @@
 import XCTest
 import YbridPlayerSDK
 
-class UseAudioContollerTests: XCTestCase {
+class UseAudioContolTests: XCTestCase {
     
 
     let playerListener = TestAudioPlayerListener()

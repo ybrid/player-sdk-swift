@@ -274,7 +274,13 @@ public class AudioPlayer: OnDemandControl, PlaybackControl, BufferListener, Pipe
 }
 
 class YbridAudioPlayer : AudioPlayer, YbridControl {
+    
+    var listener: YbridControlListener? { didSet {
+        session.ybridListener = listener
+    }}
+    
     var offsetToLiveS: TimeInterval { get {
         return session.offsetToLiveS ?? 0.0
     }}
+    
 }

@@ -48,10 +48,16 @@ public protocol PlaybackControl: SimpleControl  {
 }
 
 public protocol YbridControl : OnDemandControl {
+    var listener:YbridControlListener? { get set }
     var offsetToLiveS:TimeInterval { get }
 }
 
+public protocol ControlListener : class {
+}
 
+public protocol YbridControlListener : ControlListener {
+    func offsetToLiveChanged()
+}
 
 
 public extension AudioPlayer {

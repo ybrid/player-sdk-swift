@@ -34,9 +34,16 @@ class YbridV2Driver : MediaDriver {
         if let start = startDate, startDate != oldValue {
             Logger.controlling.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: start))")
         }
-    }
-    }
+    }}
+    
+    var offsetToLiveS:TimeInterval? { didSet {
+        if oldValue != offsetToLiveS {
+            listener?.offsetToLiveChanged()
+        }
+    }}
     var ybridMetadata:YbridV2Metadata?
+    
+    weak var listener:YbridControlListener?
     
     init(session:MediaSession) {
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
