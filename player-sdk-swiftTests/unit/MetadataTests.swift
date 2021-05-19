@@ -36,7 +36,7 @@ class MetadataTests: XCTestCase {
     
     func toYbridV2Metadata(_ inString:String) -> YbridV2Metadata {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
+        decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMillis)
         let metadata:YbridV2Metadata = try! decoder.decode(YbridV2Metadata.self, from: inString.data(using: .utf8)! )
             return metadata
     }

@@ -53,8 +53,16 @@ public enum PlaybackState {
 }
 
 
-public class AudioPlayer: OnDemandControl, PlaybackControl, BufferListener, PipelineListener {
-    
+public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Hashable {
+    public static func == (lhs: AudioPlayer, rhs: AudioPlayer) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+    public var hashValue: Int { return uuid.hashValue}
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
+    }
+    let uuid = UUID()
+
     public static var versionString:String {
         get {
             let bundleId = "io.ybrid.player-sdk-swift"

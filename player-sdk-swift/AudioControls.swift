@@ -106,40 +106,40 @@ public extension AudioPlayer {
     }
     
 
-    static func initialize(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
-            liveControl: LiveControllerCallback? = nil,
-            onDemandControl: OnDemandControllerCallback? = nil,
-            ybridControl: YbridControllerCallback? = nil ) throws {
-        
-        let session = MediaSession(on: endpoint)
-        do {
-            try session.connect()
-        } catch {
-            if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
-                throw audioDataError
-            } else {
-                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                listener?.error(ErrorSeverity.fatal, sessionError )
-                throw sessionError
-            }
-        }
-        
-        controllerQueue.async {
-            switch session.mediaProtocol {
-            case .ybridV2:
-                let player = YbridAudioPlayer(session: session, listener: listener)
-                ybridControl?(player)
-            default:
-                let player = AudioPlayer(session: session, listener: listener)
-                if player.pipeline?.infinite == true {
-                    liveControl?(player)
-                } else {
-                    onDemandControl?(player)
-                }
-            }
-        }
-    }
+//    static func initialize(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
+//            liveControl: LiveControllerCallback? = nil,
+//            onDemandControl: OnDemandControllerCallback? = nil,
+//            ybridControl: YbridControllerCallback? = nil ) throws {
+//
+//        let session = MediaSession(on: endpoint)
+//        do {
+//            try session.connect()
+//        } catch {
+//            if let audioDataError = error as? AudioPlayerError {
+//                listener?.error(ErrorSeverity.fatal, audioDataError)
+//                throw audioDataError
+//            } else {
+//                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
+//                listener?.error(ErrorSeverity.fatal, sessionError )
+//                throw sessionError
+//            }
+//        }
+//
+//        controllerQueue.async {
+//            switch session.mediaProtocol {
+//            case .ybridV2:
+//                let player = YbridAudioPlayer(session: session, listener: listener)
+//                ybridControl?(player)
+//            default:
+//                let player = AudioPlayer(session: session, listener: listener)
+//                if player.pipeline?.infinite == true {
+//                    liveControl?(player)
+//                } else {
+//                    onDemandControl?(player)
+//                }
+//            }
+//        }
+//    }
     
     
 }

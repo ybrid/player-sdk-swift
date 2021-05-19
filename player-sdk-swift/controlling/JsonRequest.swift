@@ -26,7 +26,7 @@
 import Foundation
 
 extension Formatter {
-    static let iso8601withMilliSeconds: DateFormatter = {
+    static let iso8601withMillis: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .iso8601)
         formatter.locale = Locale.current
@@ -34,6 +34,25 @@ extension Formatter {
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
         return formatter
     }()
+    static let iso8601NoMillis: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .iso8601)
+        formatter.locale = Locale.current
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
+        return formatter
+    }()
+}
+
+extension JSONDecoder.DateDecodingStrategy {
+    static let flexMillisIso8601 = custom {
+        let container = try $0.singleValueContainer()
+        let string = try container.decode(String.self)
+        if let date = Formatter.iso8601withMillis.date(from: string) ?? Formatter.iso8601NoMillis.date(from: string) {
+            return date
+        }
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date: \(string)")
+    }
 }
 
 class JsonRequest {
@@ -51,7 +70,7 @@ class JsonRequest {
         self.url = url
         configuration.timeoutIntervalForResource = 3
         configuration.timeoutIntervalForRequest = 3
-        self.decoder.dateDecodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
+        self.decoder.dateDecodingStrategy = JSONDecoder.DateDecodingStrategy.flexMillisIso8601
     }
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {

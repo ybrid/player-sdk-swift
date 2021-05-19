@@ -32,7 +32,7 @@ class YbridV2Driver : MediaDriver {
     var token:String?
     var startDate:Date? { didSet {
         if let start = startDate, startDate != oldValue {
-            Logger.controlling.debug("start date is \(Formatter.iso8601withMilliSeconds.string(from: start))")
+            Logger.controlling.debug("start date is \(Formatter.iso8601withMillis.string(from: start))")
         }
     }}
     
@@ -46,7 +46,7 @@ class YbridV2Driver : MediaDriver {
     weak var listener:YbridControlListener?
     
     init(session:MediaSession) {
-        self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMilliSeconds)
+        self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
         super.init(session:session, version: .ybridV2)
     }
     
@@ -143,7 +143,7 @@ class YbridV2Driver : MediaDriver {
             }
             let sessionObj = result.__responseObject
             let responseString = String(data: try encoder.encode(sessionObj), encoding: .utf8) ?? "(no response struct)"
-            Logger.controlling.debug("__responseObject is \(responseString)")
+            Logger.controlling.debug("\(actionString) __responseObject is \(responseString)")
             return sessionObj
         } catch {
             Logger.controlling.error(error.localizedDescription)
