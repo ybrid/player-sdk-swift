@@ -29,6 +29,7 @@ import XCTest
 class AbortBufferingTests: XCTestCase {
     
     override func tearDownWithError() throws {
+        sleep(5)
     }
     
     func test00_LoggerVerboseDefault() {
@@ -39,79 +40,116 @@ class AbortBufferingTests: XCTestCase {
     
     // MARK: abort playing mp3
         
-    func testAbortMp3_until100msAfterConnect_CleanedUp() throws {
-        Logger.verbose = true
+    func testAbortMp3_until200msAfterConnect_CleanedUp() throws {
+        Logger.verbose = false
         let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
-        let abortingListener = AbortingListener()
-        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
-            XCTFail(); return
-        }
-        abortingListener.player = player
-        
-        var interval:TimeInterval = 0.000
-        repeat {
-            abortingListener.prepare(interval)
-            player.play()
-            
-            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
-            let failed = reportAndCheck(interval, cycle, abortingListener)
-            
-            if failed {
-                player.close()
-                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
-                abortingListener.player = player
-            }
-            
-            interval += 0.005
-        } while interval <= 0.101
-    }
+        try executeYbrid(endpoint: endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
+      }
 
+    func testAbortMp3_until500msAfterConnect_CleanedUp() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
+        try executeYbrid(endpoint: endpoint, startInterval: 0.010, endInterval: 0.501, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
+    }
     
-    private func reportAndCheck(_ interval:TimeInterval, _ seconds:Int, _ listener:AbortingListener) -> Bool {
+    func testAbortOpus_0until100msAfterConnect_CleanedUp() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        let failed = try executeIcy(endpoint: endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
+        Logger.testing.notice("\(failed) failed abortion tests")
+    }
+    
+    func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
+        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        let failed = try executeIcy(endpoint: endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
+        Logger.testing.notice("\(failed) failed abortion tests")
+    }
+    
+    func executeYbrid(endpoint: MediaEndpoint, startInterval:TimeInterval, endInterval:TimeInterval, increaseInterval:TimeInterval, increaseInCaseOfFailure:TimeInterval ) throws {
+        var interval = startInterval
+    newAfterFailed: repeat {
+        let semaphore = DispatchSemaphore(value: 0)
+        let abortingListener = CtrlStopListener()
+        var passed = true
+        try AudioPlayer.initialize(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
+            abortingListener.control = ybridCtrl as? PlaybackControl
+            passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
+            if !passed { ybridCtrl.close(); sleep(3) }
+            semaphore.signal()
+            return})
+        _ = semaphore.wait(timeout: .distantFuture)
+        let lastInterval = interval-increaseInterval
+        if passed {
+            Logger.testing.notice("passed stopping after \(lastInterval.S)")
+        } else {
+            Logger.testing.error("failed stopping after \(lastInterval.S)")
+            interval = lastInterval + increaseInCaseOfFailure
+        }
+    } while interval <= endInterval
+    }
+    
+    func executeIcy(endpoint: MediaEndpoint, startInterval:TimeInterval, endInterval:TimeInterval, increaseInterval:TimeInterval, increaseInCaseOfFailure:TimeInterval ) throws -> Int { // failedCount
+        var failedCount = 0
+        var interval = startInterval
+    newAfterFailed: repeat {
+        let semaphore = DispatchSemaphore(value: 0)
+        let abortingListener = CtrlStopListener()
+        var passed = true
+        try AudioPlayer.initialize(for: endpoint, listener: abortingListener, playbackControl: { [self] (control,mediaProtocol) in
+            abortingListener.control = control
+            passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
+            if !passed { control.close(); sleep(3) }
+            semaphore.signal()
+        return})
+        _ = semaphore.wait(timeout: .distantFuture)
+        if passed {
+            Logger.testing.notice("passed stopping after \(interval.S)")
+        } else {
+            failedCount += 1
+            interval -= increaseInterval
+            interval += increaseInCaseOfFailure
+            Logger.testing.error("failed stopping after \(interval.S)")
+        }
+    } while interval <= endInterval
+        return failedCount
+    }
+ 
+    private func repeatToggling(abortingListener:CtrlStopListener, interval: inout TimeInterval, increaseInterval:TimeInterval, endInterval:TimeInterval) -> Bool { // passed --> true
+        var passed = true
+        let control = abortingListener.control!
+        toggling: repeat {
+            abortingListener.prepare(interval)
+            control.play()
+            let cycle = wait(control, until: .stopped, maxSeconds: maxSecondsWait)
+            passed = checkAndReport(interval, cycle, abortingListener)
+            if !passed {
+                break toggling
+            }
+            interval += increaseInterval
+        } while passed && interval <= endInterval
+        return passed
+    }
+    
+    private func checkAndReport(_ interval:TimeInterval, _ seconds:Int, _ listener:CtrlStopListener) -> Bool { // true -> passed
         
-        let state = (listener.player?.state)!
-        Logger.testing.notice("-- \(state) after \(seconds) seconds")
+        let state = (listener.control?.state)!
         
-        let played = listener.hasPlayed ? "played" : "not played"
-        Logger.testing.notice("-- aborted \(interval.S) after connect: \(played), \(state) after \(seconds) seconds, \(listener.problemCount) errors occured, \(listener.cleanedUp)")
+        Logger.testing.notice("-- aborted \(interval.S) after connect:\(listener.hasPlayed ? "":" not") played, \(state) after \(seconds) seconds, \(listener.problemCount) errors occured,\(listener.cleanedUp ? "":" not") cleaned up")
         
         XCTAssertEqual(0, listener.problemCount)
-        XCTAssertTrue(listener.cleanedUp,"-- \(interval.S) after connect: not cleaned up after \(seconds) seconds")
+        XCTAssertTrue(listener.cleanedUp,"\(interval.S) after connect: not cleaned up after \(seconds) seconds")
         
-        XCTAssertEqual(PlaybackState.stopped, state, "-- \(interval.S) after connect: \(state) after \(seconds) seconds")
-        XCTAssertTrue(seconds <= maxSecondsWait, "-- \(interval.S) after connect: took \(seconds) seconds")
+        XCTAssertTrue(seconds <= maxSecondsWait, "aborted \(interval.S) after connect.  \(state) after \(seconds) seconds is unexpected")
         
-        return seconds > maxSecondsWait
+        return seconds <= maxSecondsWait && state == PlaybackState.stopped
+            && listener.problemCount == 0 && listener.cleanedUp
     }
-    
-    func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
-        Logger.verbose = true
-        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
-        let abortingListener = AbortingListener()
-        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
-            XCTFail(); return
-        }
-        abortingListener.player = player
-        
-        var interval:TimeInterval = 0.010
-        repeat {
-            abortingListener.prepare(interval)
-            player.play()
 
-            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
-            let failed = reportAndCheck(interval, cycle, abortingListener)
-            
-            if failed {
-                player.close()
-                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
-                abortingListener.player = player
-            }
-            
-            interval += 0.050
-        } while interval <= 1
-    }
-    
     private func wait(_ player:AudioPlayer, until:PlaybackState, maxSeconds:Int) -> Int {
+        wait(player as PlaybackControl, until: until, maxSeconds: maxSeconds)
+    }
+    private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) -> Int {
+        wait(control as! PlaybackControl, until: until, maxSeconds: maxSeconds)
+    }
+    private func wait(_ player:PlaybackControl, until:PlaybackState, maxSeconds:Int) -> Int {
         var seconds = 0
         while player.state != until && seconds <= maxSeconds {
             sleep(1)
@@ -122,73 +160,22 @@ class AbortBufferingTests: XCTestCase {
         return seconds
     }
     
-    // MARK: abort playing opus
+ 
     
-    func testAbortOpus_until100msAfterConnect_CleanedUp() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        let abortingListener = AbortingListener()
-        guard var player = AudioPlayer.open(for: endpoint, listener: abortingListener) else {
-            XCTFail(); return
-        }
-        abortingListener.player = player
-        
-        var interval:TimeInterval = 0.000
-        repeat {
-            abortingListener.prepare(interval)
-            player.play()
-
-            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
-            let failed = reportAndCheck(interval, cycle, abortingListener)
-            
-            if failed {
-                player.close()
-                player = AudioPlayer.open(for: endpoint, listener: abortingListener)!
-                abortingListener.player = player
-            }
-            
-            interval += 0.005
-        } while interval <= 0.101
-    }
-
-    func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
-        Logger.verbose = true
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        let aborting = AbortingListener()
-        guard var player = AudioPlayer.open(for: endpoint, listener: aborting) else {
-            XCTFail(); return
-        }
-        aborting.player = player
-        
-        var interval:TimeInterval = 0.010
-        repeat {
-            aborting.prepare(interval)
-            player.play()
-
-            let cycle = wait(player, until: .stopped, maxSeconds: maxSecondsWait)
-            let failed = reportAndCheck(interval, cycle, aborting)
-            
-            if failed {
-                player.close()
-                player = AudioPlayer.open(for: endpoint, listener: aborting)!
-                aborting.player = player
-            }
-            
-            interval += 0.050
-        } while interval <= 1
-    }
 }
+// MARK: abort playing
 
-class AbortingListener : AbstractAudioPlayerListener  {
+class CtrlStopListener: AbstractAudioPlayerListener  {
     var afterConnect:TimeInterval = -1.0
     
-    var player:AudioPlayer?
-    private let testQueue = DispatchQueue(label: "io.ybrid.player-sdk-tests")
+    var control:PlaybackControl?
+    private let testQueue = DispatchQueue(label: "io.ybrid.player.aborting")
     
     var hasPlayed = false
     var problemCount = 0
     
     var cleanedUp:Bool {
-        guard let pbEngine = player?.playback as! PlaybackEngine? else {
+        guard let pbEngine = (control as? AudioPlayer)?.playback as? PlaybackEngine else {
             return true
         }
         return pbEngine.cleanedUp()
@@ -203,12 +190,12 @@ class AbortingListener : AbstractAudioPlayerListener  {
     
     private func abort() {
         Logger.testing.notice("-- aborting player")
-        player?.stop()
+        control?.stop()
     }
     
     override func durationConnected(_ seconds: TimeInterval?) {
         Logger.testing.notice("-- recieved first data from url after \(seconds!.S) seconds ")
-        guard let state = player?.state else {
+        guard let state = control?.state else {
             XCTFail("durationConnected -- player without state.")
             return
         }
@@ -226,7 +213,7 @@ class AbortingListener : AbstractAudioPlayerListener  {
             Logger.testing.error("-- durationReadyToPlay is nil")
             return
         }
-        guard let state = player?.state else {
+        guard let state = control?.state else {
             XCTFail("-- player without state.")
             return
         }
@@ -241,7 +228,9 @@ class AbortingListener : AbstractAudioPlayerListener  {
             Logger.testing.notice("-- durationReady took \(duration.S) seconds ")
         }
     }
+
 }
+
 
 extension PlaybackEngine {
     func cleanedUp() -> Bool {
