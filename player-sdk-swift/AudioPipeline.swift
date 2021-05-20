@@ -94,6 +94,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         firstPCM = true
         firstMetadata = true
         resumed = true
+        metadataQueue.async {
+            self.session.refresh()
+        }
     }
     
     // MARK: setup pipeline
