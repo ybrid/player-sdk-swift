@@ -50,8 +50,8 @@
 		17539E9D26286F98000FE902 /* YbridJsonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E9C26286F98000FE902 /* YbridJsonResponse.swift */; };
 		17539E9E26286F98000FE902 /* YbridJsonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E9C26286F98000FE902 /* YbridJsonResponse.swift */; };
 		17539E9F26286F98000FE902 /* YbridJsonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E9C26286F98000FE902 /* YbridJsonResponse.swift */; };
-		17539EBE26287B6D000FE902 /* UseAudioContollerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* UseAudioContollerTests.swift */; };
-		17539EBF26287B6D000FE902 /* UseAudioContollerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* UseAudioContollerTests.swift */; };
+		17539EBE26287B6D000FE902 /* UseContolsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* UseContolsTests.swift */; };
+		17539EBF26287B6D000FE902 /* UseContolsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* UseContolsTests.swift */; };
 		175849DF264A5D6E0071FEE6 /* PlayerContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */; };
 		175849E6264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */; };
 		175849E7264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */; };
@@ -138,6 +138,8 @@
 		17D01BFC262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
 		17D01BFD262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
 		17D01BFE262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
+		17D45D7D2657180600983025 /* ConsumeOffsetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */; };
+		17D45D7E2657180600983025 /* ConsumeOffsetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */; };
 		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		17E9AB842653A808001ED9C8 /* AudioControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB832653A808001ED9C8 /* AudioControls.swift */; };
@@ -195,7 +197,7 @@
 		17539E8A26272AC8000FE902 /* SessionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionError.swift; sourceTree = "<group>"; };
 		17539E93262869E7000FE902 /* MediaControlFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlFactory.swift; sourceTree = "<group>"; };
 		17539E9C26286F98000FE902 /* YbridJsonResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridJsonResponse.swift; sourceTree = "<group>"; };
-		17539EBD26287B6D000FE902 /* UseAudioContollerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseAudioContollerTests.swift; sourceTree = "<group>"; };
+		17539EBD26287B6D000FE902 /* UseContolsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseContolsTests.swift; sourceTree = "<group>"; };
 		175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerContextTests.swift; sourceTree = "<group>"; };
 		175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsafeCollections.swift; sourceTree = "<group>"; };
 		175849EA264BB6C00071FEE6 /* ThreadsafeDequeueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsafeDequeueTests.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17D01BFB262F174D007B0A3C /* IcyDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcyDriver.swift; sourceTree = "<group>"; };
+		17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeOffsetTests.swift; sourceTree = "<group>"; };
 		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
 		17E9AB832653A808001ED9C8 /* AudioControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioControls.swift; sourceTree = "<group>"; };
@@ -440,6 +443,7 @@
 		1799DD8425D599190055C973 /* player-sdk-swiftUITests */ = {
 			isa = PBXGroup;
 			children = (
+				17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */,
 				175849F2264F31390071FEE6 /* UITestsEndpoints.swift */,
 				17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */,
 				17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */,
@@ -447,7 +451,7 @@
 				1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */,
 				17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */,
 				1799DD8725D599190055C973 /* Info.plist */,
-				17539EBD26287B6D000FE902 /* UseAudioContollerTests.swift */,
+				17539EBD26287B6D000FE902 /* UseContolsTests.swift */,
 				171345B426306D780054DB9D /* ConsumeMetadataTests.swift */,
 			);
 			path = "player-sdk-swiftUITests";
@@ -1005,11 +1009,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17D45D7E2657180600983025 /* ConsumeOffsetTests.swift in Sources */,
 				171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
 				1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */,
-				17539EBF26287B6D000FE902 /* UseAudioContollerTests.swift in Sources */,
+				17539EBF26287B6D000FE902 /* UseContolsTests.swift in Sources */,
 				1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */,
 				175849F4264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,
 				1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */,
@@ -1020,11 +1025,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17D45D7D2657180600983025 /* ConsumeOffsetTests.swift in Sources */,
 				171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
 				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
 				17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */,
-				17539EBE26287B6D000FE902 /* UseAudioContollerTests.swift in Sources */,
+				17539EBE26287B6D000FE902 /* UseContolsTests.swift in Sources */,
 				1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */,
 				175849F3264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,
 				17CD394525E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,

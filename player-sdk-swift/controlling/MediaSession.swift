@@ -73,9 +73,10 @@ public class MediaSession  {
     func refresh() {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
+            v2Control.listener?.offsetToLiveChanged()
         }
     }
-    
+     
     func fetchMetadataSync() -> AbstractMetadata? {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
