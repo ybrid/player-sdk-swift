@@ -84,14 +84,11 @@ class OptionsTaskState : Equatable, LocalizedError {
             let nserr = error as NSObject
             let code = nserr.value(forKey: "code") as! NSNumber.IntegerLiteralType
             let message = String(format: "OSStatus=%d %@", code , error.localizedDescription)
-            Logger.loading.debug(message)
-            
-            Logger.loading.debug(message)
+            Logger.controlling.debug(message)
             guard let networkError = knownErrorStates.first(where: { $0.osstatus == code }) else {
                 return OptionsTaskState(OSStatus(code), error.localizedDescription, ErrorSeverity.fatal)
             }
             return networkError
-    
         }
     }
 

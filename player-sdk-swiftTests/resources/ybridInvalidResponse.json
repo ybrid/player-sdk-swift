@@ -1,0 +1,70 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-05-19T12:55:11Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "adaptive-demo",
+            "availableServices": [
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "adaptive-demo"
+                },
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "ad-injection-demo"
+                }
+            ],
+            "bouquetId": "ybrid-demo-services",
+            "primaryServiceId": "adaptive-demo"
+        },
+        "duration": 0,
+        "id": "72513a34-4cf3-42d8-80c1-175926017aeb",
+        "metadata": {
+            "currentItem": {
+                "artist": "Air",
+                "companions": [],
+                "description": "",
+                "durationMillis": 268416,
+                "id": "284",
+                "title": "All I Need",
+                "type": "MUSIC"
+            },
+            "nextItem": {
+                "artist": "Ybrid® Hybrid Dynamic Live Audio Technology",
+                "companions": [],
+                "description": "",
+                "durationMillis": 9912,
+                "id": "285",
+                "title": "Your Personal Audio Experience",
+                "type": "JINGLE"
+            },
+            "station": {
+                "genre": "",
+                "name": ""
+            }
+        },
+        "playout": {
+            "baseURL": "https://edge01-democast.ybrid.io/adaptive-demo",
+            "playbackURI": "icyxs://edge01-democast.ybrid.io:443/adaptive-demo?session-id\u003d72513a34-4cf3-42d8-80c1-175926017aeb",
+            "currentBitRate": -1,
+            "host": "edge01-democast.ybrid.io",
+            "maxBitRate": -1,
+            "offsetToLive": -504
+        },
+        "sessionId": "72513a34-4cf3-42d8-80c1-175926017aeb",
+        "startDate": "2021-05-19T12:55:10.999Z",
+        "swapInfo": {
+            "nextSwapReturnsToMain": false,
+            "swapsLeft": 0
+        },
+        "valid": true
+    }
+}

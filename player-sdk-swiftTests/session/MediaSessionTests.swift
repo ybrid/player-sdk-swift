@@ -53,6 +53,9 @@ class MediaSessionTests: XCTestCase {
         XCTAssertEqual(0, listener.errors.count)
         player.close()
     }
+    
+    
+    
 
     func testSession_YbridSwr3() throws {
         _ = ybridSwr3Endpoint.forceProtocol(MediaProtocol.ybridV2)
@@ -97,6 +100,9 @@ class MediaSessionTests: XCTestCase {
         XCTAssertEqual(0, listener.errors.count)
         player.close()
     }
+    
+    
+    
     
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"

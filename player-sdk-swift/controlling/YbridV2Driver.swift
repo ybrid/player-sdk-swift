@@ -141,7 +141,9 @@ class YbridV2Driver : MediaDriver {
             guard let result = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
                 throw SessionError(ErrorKind.invalidResponse, "no json result")
             }
+
             let sessionObj = result.__responseObject
+            
             let responseString = String(data: try encoder.encode(sessionObj), encoding: .utf8) ?? "(no response struct)"
             Logger.controlling.debug("\(actionString) __responseObject is \(responseString)")
             return sessionObj

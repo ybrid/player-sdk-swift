@@ -35,11 +35,13 @@ class ConsumeMetadataTests: XCTestCase {
     override func setUpWithError() throws { }
     override func tearDownWithError() throws {
         player?.close()
+        _ = wait(until: .stopped, maxSeconds: 3)
         consumer = TestMetadataCallsConsumer()
     }
 
 
     func test01_MetadataYbrid_OnEachPlayAndInStream_FullCurrentNext() {
+
         player = AudioPlayer.open(for: ybridDemoEndpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
@@ -56,7 +58,6 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertTrue(checkIsDemoItem(next))
         
         guard let _ = metadata.station else { XCTFail("next expected"); return }
-        
     }
     
     

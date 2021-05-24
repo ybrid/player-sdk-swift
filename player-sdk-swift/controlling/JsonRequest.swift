@@ -47,11 +47,15 @@ extension Formatter {
 extension JSONDecoder.DateDecodingStrategy {
     static let flexMillisIso8601 = custom {
         let container = try $0.singleValueContainer()
-        let string = try container.decode(String.self)
-        if let date = Formatter.iso8601withMillis.date(from: string) ?? Formatter.iso8601NoMillis.date(from: string) {
+        let jsonString = try container.decode(String.self)
+        if let date = Formatter.iso8601withMillis.date(from: jsonString) {
             return date
         }
-        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date: \(string)")
+        if let date = Formatter.iso8601NoMillis.date(from: jsonString) {
+            Logger.controlling.notice("no millis in date \(jsonString)")
+            return date
+        }
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "corrupted date: \(jsonString)")
     }
 }
 

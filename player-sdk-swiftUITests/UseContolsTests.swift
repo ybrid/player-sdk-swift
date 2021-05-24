@@ -60,7 +60,6 @@ class UseContolsTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
-    
 
     func test02_Icy_PlaySomeSeconds() throws {
 
@@ -129,7 +128,7 @@ class UseContolsTests: XCTestCase {
         do {
             try AudioPlayer.initialize(for: endpoint, listener: playerListener,
                 playbackControl: { [self] (playback, mediaProtocol) in
-                    
+
                     XCTAssertEqual(.icy, mediaProtocol)
 
                     playback.play()
