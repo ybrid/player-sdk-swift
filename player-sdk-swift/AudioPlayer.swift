@@ -294,4 +294,8 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func wind(by:TimeInterval) {
         session.wind(by:by)
     }
+    
+    func windToLive() {
+        session.windToLive()
+    }
 }

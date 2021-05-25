@@ -28,19 +28,22 @@ import YbridPlayerSDK
 
 class YbridControlTests: XCTestCase {
 
-    let defaultOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
+    let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
+    let maxWindResponseS = 2
     
     var player:YbridControl?
     let allListener = TestYbridPlayerListener()
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
-        // Log additional debug information in this tests
-        Logger.verbose = true
+        // don't log additional debug information in this tests
+        Logger.verbose = false
         allListener.reset()
         semaphore = DispatchSemaphore(value: 0)
     }
     
-    override func tearDownWithError() throws {}
+    override func tearDownWithError() throws {
+        print( "offsets were \(allListener.offsets)")
+    }
     
     func test01_YbridControl_GettingOffset_NoListener() throws {
         
@@ -49,13 +52,13 @@ class YbridControlTests: XCTestCase {
                 
                 let offset = ybridControl.offsetToLiveS
                 Logger.testing.notice("offset to live is \(offset.S)")
-                XCTAssertTrue(defaultOffsetRange_LostSign.contains(-offset))
+                XCTAssertTrue(liveOffsetRange_LostSign.contains(-offset))
                 
                 ybridControl.play()
-                _ = wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(1)
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
                 ybridControl.stop()
-                _ = wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 semaphore?.signal()
                })
@@ -74,10 +77,10 @@ class YbridControlTests: XCTestCase {
                 control.listener = allListener
                 
                 ybridControl.play()
-                _ = wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(1)
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
                 ybridControl.stop()
-                _ = wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 semaphore?.signal()
                })
@@ -85,15 +88,12 @@ class YbridControlTests: XCTestCase {
         
         XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 1)
         allListener.offsets.forEach{
-            Logger.testing.notice("offset to live was \($0.S)")
-            XCTAssertTrue(defaultOffsetRange_LostSign.contains(-$0))
+            XCTAssertTrue(liveOffsetRange_LostSign.contains(-$0))
         }
-        
     }
     
-    func test02_YbridControl_WindBack() throws {
-        Logger.verbose = true
-        try AudioPlayer.initialize(for: ybridStageDemoEndpoint, listener: allListener,
+    func test03_YbridControl_WindBack() throws {
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
                 
@@ -101,14 +101,15 @@ class YbridControlTests: XCTestCase {
                 control.listener = allListener
                 
                 ybridControl.play()
-                _ = wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+        
+                ybridControl.wind(by: -20.0)
+                wait(ybridControl, shifted: -20.0, maxSeconds: 2)
                 sleep(4)
                 
-                ybridControl.wind(by:-20.0)
-    
-                sleep(4)
                 ybridControl.stop()
-                _ = wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 semaphore?.signal()
                })
@@ -118,8 +119,40 @@ class YbridControlTests: XCTestCase {
         guard let lastOffset = allListener.offsets.last else {
             XCTFail(); return
         }
-        let shiftedRangeNegated = shift(defaultOffsetRange_LostSign, by: +20.0)
-        XCTAssertTrue(shiftedRangeNegated.contains(lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
+        let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: +20.0)
+        XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
+    }
+    
+    func test04_YbridControl_WindToLive() throws {
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+                ybridControl.wind(by:-20.0)
+                wait(ybridControl, shifted: -20.0, maxSeconds: maxWindResponseS)
+                sleep(4)
+                ybridControl.windToLive()
+                wait(ybridControl, shifted: 0.0, maxSeconds: maxWindResponseS)
+                sleep(4)
+                ybridControl.stop()
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: maxWindResponseS)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 3, "expected to be at least the initial and two more changes of offset")
+        guard let lastOffset = allListener.offsets.last else {
+            XCTFail(); return
+        }
+        XCTAssertTrue(liveOffsetRange_LostSign.contains(-lastOffset), "\(-lastOffset) not within \(liveOffsetRange_LostSign)")
+        
     }
     
     
@@ -128,14 +161,34 @@ class YbridControlTests: XCTestCase {
         return shiftedRange
     }
 
-    private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) -> Int {
+    private func wait(_ control:YbridControl, shifted: TimeInterval, maxSeconds:Int) {
+        let shiftedRange_LostSign = shift(liveOffsetRange_LostSign, by: -shifted)
+        let took = wait(max: maxSeconds) {
+            return isOffset(control.offsetToLiveS, shifted: shifted)
+        }
+        XCTAssertLessThanOrEqual(took, maxSeconds, "offset to live not \((-shiftedRange_LostSign.lowerBound).S) ..< \((-shiftedRange_LostSign.upperBound).S) within \(maxSeconds) s")
+    }
+    
+    private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) {
+        let took = wait(max: maxSeconds) {
+            return control.state == until
+        }
+        XCTAssertLessThanOrEqual(took, maxSeconds, "not \(until) within \(maxSeconds) s")
+    }
+    
+    private func wait(max maxSeconds:Int, until:() -> (Bool)) -> Int {
         var seconds = 0
-        while control.state != until && seconds < maxSeconds {
+        while !until() && seconds <= maxSeconds {
             sleep(1)
             seconds += 1
         }
-        XCTAssertEqual(until, control.state, "not \(until) within \(maxSeconds) s")
+        XCTAssertTrue(until(), "condition not satisfied within \(maxSeconds) s")
         return seconds
+    }
+    
+    func isOffset(_ offset:TimeInterval, shifted:TimeInterval) -> Bool {
+        let shiftedRange_LostSign = shift(liveOffsetRange_LostSign, by: -shifted)
+        return shiftedRange_LostSign.contains(-offset)
     }
     
 }

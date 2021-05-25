@@ -1,0 +1,33 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-05-25T12:11:54.880Z"
+    },
+    "__responseObject": {
+        "requestedTimestamp": -1,
+        "requestedWindDuration": -10000,
+        "effectiveWindDuration": -10080,
+        "newCurrentItem": {
+            "cuePoints": {},
+            "altContent": [],
+            "artist": "Antonello Venditti",
+            "companions": [],
+            "description": "radiomax:SWR3-BAD-MAX:12777605",
+            "replaceable": false,
+            "title": "Notte prima degli esami",
+            "url": "",
+            "classifiedType": "MUSIC",
+            "durationMillis": 283600,
+            "id": "playlist--swr3-radiomax-swr3-bad-max-12777605",
+            "type": "MUSIC"
+        },
+        "timestampWindedTo": 1621944665069,
+        "totalOffset": -49392
+    }
+}

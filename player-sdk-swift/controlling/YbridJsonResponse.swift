@@ -42,6 +42,7 @@ struct YbridSessionResponse: Decodable {
     let __responseHeader: YbridInfo
     let __responseObject: YbridSessionObject
 }
+
 struct YbridSessionObject: Codable {
     let duration: Int
 //    let id: String?
@@ -81,7 +82,35 @@ struct YbridItem : Codable, Equatable {
     let type : String
 }
 
+struct YbridItemEx : Codable, Equatable {
+    let id: String
+    let artist: String
+    let title: String
+    let description: String
+    let durationMillis: Int64
+    let type : String
+//         "cuePoints": {},
+//         "altContent": [],
+//         "replaceable": false,
+//         "url": "",
+//         "classifiedType": "MUSIC",
+}
+
 struct YbridStation : Codable, Equatable {
     let genre: String
     let name: String
+}
+
+struct YbridWindResponse: Decodable  {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridWindedObject
+}
+
+struct YbridWindedObject : Codable, Equatable {
+//    let requestedTimestamp: Int // -1, not in windToLive response
+//    let requestedWindDuration: Int // -10000, not in windToLive response
+    let effectiveWindDuration: Int //-10080,
+    let timestampWindedTo: Int64 //1621944665069,
+    let totalOffset: Int //-49392
+    let newCurrentItem: YbridItemEx
 }

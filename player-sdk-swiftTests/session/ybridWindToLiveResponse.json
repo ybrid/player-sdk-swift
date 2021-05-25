@@ -1,0 +1,31 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-05-25T17:33:42.564Z"
+    },
+    "__responseObject": {
+        "effectiveWindDuration": 22176,
+        "newCurrentItem": {
+            "cuePoints": {},
+            "altContent": [],
+            "artist": "Billy Joel",
+            "companions": [],
+            "description": "radiomax:SWR3-BAD-MAX:12778443",
+            "replaceable": false,
+            "title": "We didn\u0027t start the fire",
+            "url": "",
+            "classifiedType": "MUSIC",
+            "durationMillis": 260600,
+            "id": "playlist--swr3-radiomax-swr3-bad-max-12778443",
+            "type": "MUSIC"
+        },
+        "timestampWindedTo": 1621964022197,
+        "totalOffset": 0
+    }
+}

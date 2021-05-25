@@ -99,29 +99,6 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    func wind(by:TimeInterval) {
-
-        if !connected {
-            Logger.controlling.error("no connected ybrid session")
-            return
-        }
-        Logger.controlling.debug("wind \(by.S) seconds ybrid session")
-        
-        do {
-            let millis = Int(by * 1000)
-            let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
-            let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind \(by.S) seconds", queryParam: windByMillis)
-            accecpt(response: sessionObj)
-            if !valid {
-                try reconnect()
-            }
-        } catch {
-            Logger.controlling.error(error.localizedDescription)
-        }
-        
-    }
-    
-    
     private func reconnect() throws {
         Logger.controlling.info("reconnecting ybrid session")
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
@@ -134,7 +111,6 @@ class YbridV2Driver : MediaDriver {
         token = response.sessionId
         // updateBouquet(response.getRawBouquet());
         ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
-
         
         if let playout = response.playout {
             playbackUri = playout.playbackURI
@@ -150,13 +126,12 @@ class YbridV2Driver : MediaDriver {
     }
 
     
-    
     private func ctrlRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
         var urlQueries:[URLQueryItem] = []
-        let token = URLQueryItem(name: "session-id",value: token)
+        let token = URLQueryItem(name: "session-id", value: token)
         urlQueries.append(token)
         if let queryParam = queryParam {
             urlQueries.append(queryParam)
@@ -167,19 +142,94 @@ class YbridV2Driver : MediaDriver {
         }
         
         do {
-            guard let result = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
+            guard let result:YbridSessionResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
                 throw SessionError(ErrorKind.invalidResponse, "no json result")
             }
 
-            let sessionObj = result.__responseObject
-            
-            let responseString = String(data: try encoder.encode(sessionObj), encoding: .utf8) ?? "(no response struct)"
-            Logger.controlling.debug("\(actionString) __responseObject is \(responseString)")
-            return sessionObj
+            return result.__responseObject
+    
         } catch {
             Logger.controlling.error(error.localizedDescription)
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
         }
+    }
+    
+    // MARK: winding
+    
+    func wind(by:TimeInterval) {
+
+        if !connected {
+            Logger.controlling.error("no connected ybrid session")
+            return
+        }
+        Logger.controlling.debug("wind \(by.S) ybrid session")
+        
+        do {
+            let millis = Int(by * 1000)
+            let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
+            let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind \(by.S) seconds", queryParam: windByMillis)
+            accecpt(winded: windedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.controlling.error(error.localizedDescription)
+        }
+        
+    }
+    
+    func windToLive() {
+
+        if !connected {
+            Logger.controlling.error("no connected ybrid session")
+            return
+        }
+        Logger.controlling.debug("wind to live ybrid session")
+        
+        do {
+            let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
+            accecpt(winded: windedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.controlling.error(error.localizedDescription)
+        }
+        
+    }
+    
+    private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
+        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+        }
+        var urlQueries:[URLQueryItem] = []
+        let token = URLQueryItem(name: "session-id", value: token)
+        urlQueries.append(token)
+        if let queryParam = queryParam {
+            urlQueries.append(queryParam)
+        }
+        ctrlUrl.queryItems = urlQueries
+        guard let url = ctrlUrl.url else {
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+        }
+        
+        do {
+            guard let result:YbridWindResponse = try JsonRequest(url: url).performPostSync(responseType: YbridWindResponse.self) else {
+                throw SessionError(ErrorKind.invalidResponse, "no json result")
+            }
+
+            let windedObject = result.__responseObject
+            return windedObject
+        } catch {
+            Logger.controlling.error(error.localizedDescription)
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+        }
+    }
+
+    private func accecpt(winded:YbridWindedObject) {
+      
+        offsetToLiveS = Double(winded.totalOffset) / 1000
+//        ybridMetadata?.currentItem = winded.newCurrentItem
     }
     
     func logMetadata(_ data: YbridV2Metadata) {

@@ -110,7 +110,12 @@ public class MediaSession  {
             v2Control.wind(by: by)
         }
     }
-     
+    
+    func windToLive() {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.windToLive()
+        }
+    }
 }
 
 

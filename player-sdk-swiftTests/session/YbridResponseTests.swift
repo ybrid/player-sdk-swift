@@ -66,4 +66,28 @@ class YbridResponseTests : XCTestCase {
         print(ybrid)
     }
     
+    
+    
+    func testYbridWindedResponse() throws {
+        guard let jsonData = try readJsonFromFile("ybridWindBackResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridWindResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+    }
+    
+    
+    
+    func testYbridWindedToLiveResponse() throws {
+        guard let jsonData = try readJsonFromFile("ybridWindToLiveResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridWindResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+    }
+    
 }
