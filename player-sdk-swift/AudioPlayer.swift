@@ -290,5 +290,8 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     var offsetToLiveS: TimeInterval { get {
         return session.offsetToLiveS ?? 0.0
     }}
-    
+ 
+    func wind(by:TimeInterval) {
+        session.wind(by:by)
+    }
 }

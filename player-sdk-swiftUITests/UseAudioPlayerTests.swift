@@ -39,7 +39,7 @@ class UseAudioPlayerTests: XCTestCase {
     let myEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
    
     // see tests using the listener
-    let playerListener = TestYbridPlayerListener()
+    let playerListener = TestAudioPlayerListener()
     
     /*
     Let the player play your radio.

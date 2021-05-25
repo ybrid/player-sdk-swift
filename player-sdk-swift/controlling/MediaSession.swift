@@ -104,6 +104,13 @@ public class MediaSession  {
         return metadataDict.pop(id:uuid)
     }
     
+    
+    func wind(by:TimeInterval) {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.wind(by: by)
+        }
+    }
+     
 }
 
 

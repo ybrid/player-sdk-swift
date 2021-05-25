@@ -29,7 +29,7 @@ import YbridPlayerSDK
 class UseContolsTests: XCTestCase {
     
 
-    let playerListener = TestYbridPlayerListener()
+    let playerListener = TestAudioPlayerListener()
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         // Log additional debug information in this tests

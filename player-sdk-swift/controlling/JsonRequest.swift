@@ -222,13 +222,6 @@ class JsonRequest {
         if let response = response {
             if Logger.verbose { Logger.controlling.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
         }
-        guard let mime = response?.mimeType, mime == JsonRequest.applicationJson else {
-            return SessionError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
-        }
-        guard let length = response?.expectedContentLength, length > 0 else {
-            return SessionError(ErrorKind.invalidData, "content length not > 0")
-        }
-        
         guard let httpResponse = response as? HTTPURLResponse else {
             Logger.controlling.error(response.debugDescription)
             return SessionError(ErrorKind.serverError, "no http response")
@@ -237,6 +230,15 @@ class JsonRequest {
         guard (200...299).contains(httpResponse.statusCode) else {
             return SessionError(ErrorKind.serverError, "http status \(httpResponse.statusCode)")
         }
+        
+        guard let mime = response?.mimeType, mime == JsonRequest.applicationJson else {
+            return SessionError(ErrorKind.missingMimeType, "missing mime type \(JsonRequest.applicationJson)")
+        }
+        guard let length = response?.expectedContentLength, length > 0 else {
+            return SessionError(ErrorKind.invalidData, "content length not > 0")
+        }
+        
+
         
         let headers = httpResponse.allHeaderFields
         guard let type = headers["Content-Type"] as? String else {

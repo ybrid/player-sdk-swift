@@ -1,6 +1,6 @@
 //
-// ConsumeOffsetTests.swift
-// player-sdk-swift
+// YbridControlTests.swift
+// player-sdk-swiftUITests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
 //
@@ -26,8 +26,10 @@
 import XCTest
 import YbridPlayerSDK
 
-class ConsumeOffsetTests: XCTestCase {
+class YbridControlTests: XCTestCase {
 
+    let defaultOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
+    
     var player:YbridControl?
     let allListener = TestYbridPlayerListener()
     var semaphore:DispatchSemaphore?
@@ -40,15 +42,14 @@ class ConsumeOffsetTests: XCTestCase {
     
     override func tearDownWithError() throws {}
     
-    func test01_YbridCanGet_ButNoListener() throws {
+    func test01_YbridControl_GettingOffset_NoListener() throws {
         
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 
                 let offset = ybridControl.offsetToLiveS
                 Logger.testing.notice("offset to live is \(offset.S)")
-                XCTAssertLessThan(offset, -0.5)
-                XCTAssertGreaterThan(offset, -5.0)
+                XCTAssertTrue(defaultOffsetRange_LostSign.contains(-offset))
                 
                 ybridControl.play()
                 _ = wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -60,10 +61,10 @@ class ConsumeOffsetTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(0, allListener.offsetChanges)
+        XCTAssertEqual(allListener.offsetChanges, 0)
     }
     
-    func test02_YbridControl_WithListener() throws {
+    func test02_YbridControl_ListeningToOffsetChanges() throws {
         
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: nil,
                ybridControl: { [self] (ybridControl) in
@@ -82,9 +83,50 @@ class ConsumeOffsetTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(1, allListener.offsetChanges)
+        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 1)
+        allListener.offsets.forEach{
+            Logger.testing.notice("offset to live was \($0.S)")
+            XCTAssertTrue(defaultOffsetRange_LostSign.contains(-$0))
+        }
+        
     }
     
+    func test02_YbridControl_WindBack() throws {
+        Logger.verbose = true
+        try AudioPlayer.initialize(for: ybridStageDemoEndpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                _ = wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(4)
+                
+                ybridControl.wind(by:-20.0)
+    
+                sleep(4)
+                ybridControl.stop()
+                _ = wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 2, "expected to be at least the initial and one more change of offset")
+        guard let lastOffset = allListener.offsets.last else {
+            XCTFail(); return
+        }
+        let shiftedRangeNegated = shift(defaultOffsetRange_LostSign, by: +20.0)
+        XCTAssertTrue(shiftedRangeNegated.contains(lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
+    }
+    
+    
+    private func shift( _ range:Range<TimeInterval>, by:TimeInterval ) -> Range<TimeInterval> {
+        let shiftedRange = range.lowerBound+by ..< range.upperBound+by
+        return shiftedRange
+    }
 
     private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) -> Int {
         var seconds = 0
@@ -98,23 +140,21 @@ class ConsumeOffsetTests: XCTestCase {
     
 }
 
-class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
+class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
     
     var control:YbridControl?
     
-    var offsetChanges = 0
+    var offsetChanges:Int { get {
+        return offsets.count
+    }}
+    
+    var offsets:[TimeInterval] = []
     func offsetToLiveChanged() {
-        offsetChanges += 1
-        
         guard let offset = control?.offsetToLiveS else { XCTFail(); return }
-        Logger.testing.notice("offset to live is \(offset.S)")
-        XCTAssertLessThan(offset, -0.5)
-        XCTAssertGreaterThan(offset, -5.0)
-        
+        offsets.append(offset)
     }
     
-    override func reset() {
-        super.reset()
-        offsetChanges = 0
+    func reset() {
+        offsets.removeAll()
     }
 }

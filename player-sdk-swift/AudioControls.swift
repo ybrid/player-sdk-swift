@@ -50,6 +50,7 @@ public protocol PlaybackControl: SimpleControl  {
 public protocol YbridControl : OnDemandControl {
     var listener:YbridControlListener? { get set }
     var offsetToLiveS:TimeInterval { get }
+    func wind(by:TimeInterval)
 }
 
 public protocol ControlListener : class {

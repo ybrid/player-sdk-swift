@@ -99,6 +99,29 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
+    func wind(by:TimeInterval) {
+
+        if !connected {
+            Logger.controlling.error("no connected ybrid session")
+            return
+        }
+        Logger.controlling.debug("wind \(by.S) seconds ybrid session")
+        
+        do {
+            let millis = Int(by * 1000)
+            let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
+            let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind \(by.S) seconds", queryParam: windByMillis)
+            accecpt(response: sessionObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.controlling.error(error.localizedDescription)
+        }
+        
+    }
+    
+    
     private func reconnect() throws {
         Logger.controlling.info("reconnecting ybrid session")
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
@@ -125,14 +148,20 @@ class YbridV2Driver : MediaDriver {
         //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
         //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
     }
+
     
-    private func ctrlRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
+    
+    private func ctrlRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
-        if let token = token {
-            ctrlUrl.query = "session-id=\(token)"
+        var urlQueries:[URLQueryItem] = []
+        let token = URLQueryItem(name: "session-id",value: token)
+        urlQueries.append(token)
+        if let queryParam = queryParam {
+            urlQueries.append(queryParam)
         }
+        ctrlUrl.queryItems = urlQueries
         guard let url = ctrlUrl.url else {
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }

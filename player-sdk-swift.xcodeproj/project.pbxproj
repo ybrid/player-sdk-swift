@@ -138,8 +138,8 @@
 		17D01BFC262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
 		17D01BFD262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
 		17D01BFE262F174D007B0A3C /* IcyDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D01BFB262F174D007B0A3C /* IcyDriver.swift */; };
-		17D45D7D2657180600983025 /* ConsumeOffsetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */; };
-		17D45D7E2657180600983025 /* ConsumeOffsetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */; };
+		17D45D7D2657180600983025 /* YbridControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* YbridControlTests.swift */; };
+		17D45D7E2657180600983025 /* YbridControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* YbridControlTests.swift */; };
 		17D45D802659591F00983025 /* YbridSteelinessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */; };
 		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
@@ -241,7 +241,7 @@
 		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17D01BFB262F174D007B0A3C /* IcyDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcyDriver.swift; sourceTree = "<group>"; };
-		17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeOffsetTests.swift; sourceTree = "<group>"; };
+		17D45D7C2657180600983025 /* YbridControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridControlTests.swift; sourceTree = "<group>"; };
 		17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSteelinessTests.swift; sourceTree = "<group>"; };
 		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
@@ -451,7 +451,7 @@
 				1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */,
 				175849F2264F31390071FEE6 /* UITestsEndpoints.swift */,
 				171345B426306D780054DB9D /* ConsumeMetadataTests.swift */,
-				17D45D7C2657180600983025 /* ConsumeOffsetTests.swift */,
+				17D45D7C2657180600983025 /* YbridControlTests.swift */,
 			);
 			path = "player-sdk-swiftUITests";
 			sourceTree = "<group>";
@@ -1013,7 +1013,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17D45D7E2657180600983025 /* ConsumeOffsetTests.swift in Sources */,
+				17D45D7E2657180600983025 /* YbridControlTests.swift in Sources */,
 				171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
@@ -1029,7 +1029,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17D45D7D2657180600983025 /* ConsumeOffsetTests.swift in Sources */,
+				17D45D7D2657180600983025 /* YbridControlTests.swift in Sources */,
 				171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
 				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
