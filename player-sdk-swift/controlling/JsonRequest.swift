@@ -52,7 +52,6 @@ extension JSONDecoder.DateDecodingStrategy {
             return date
         }
         if let date = Formatter.iso8601NoMillis.date(from: jsonString) {
-            Logger.controlling.notice("no millis in date \(jsonString)")
             return date
         }
         throw DecodingError.dataCorruptedError(in: container, debugDescription: "corrupted date: \(jsonString)")

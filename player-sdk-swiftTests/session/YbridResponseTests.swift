@@ -90,4 +90,59 @@ class YbridResponseTests : XCTestCase {
         print(ybrid)
     }
     
+    
+    func testYbridDateMillisTest() throws {
+        guard let jsonData = try readJsonFromFile("ybridDateDecoding") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridTestDate.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        
+        print(ybrid)
+
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp0)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp1)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp2)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp3)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp4)!)
+    }
+    
+    struct YbridTestDate: Codable {
+        let timestamp0: Date
+        let timestamp1: Date
+        let timestamp2: Date
+        let timestamp3: Date
+        let timestamp4: Date
+    }
+    
+    func testYbridDateNoMicrosTest() throws {
+        guard let jsonData = try readJsonFromFile("ybridDateDecodingNanos") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridTestDate.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        
+        print(ybrid)
+
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp0)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp1)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp2)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp3)!)
+        print(Formatter.iso8601withNanos.string(for: ybrid.timestamp4)!)
+    }
 }
+
+extension Formatter {
+    static let iso8601withNanos: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .iso8601)
+        formatter.locale = Locale.current
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXXXX"
+        return formatter
+    }()
+}
+
+
