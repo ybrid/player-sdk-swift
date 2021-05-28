@@ -156,6 +156,71 @@ class YbridControlTests: XCTestCase {
     }
     
     
+    func test03_YbridControl_LastNewsNextMusic() throws {
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+        
+                ybridControl.skipBackward(ItemType.NEWS)
+                wait(ybridControl, type: ItemType.NEWS, maxSeconds: 4)
+                sleep(8)
+  
+                ybridControl.skipForward(ItemType.MUSIC)
+                wait(ybridControl, type: ItemType.MUSIC, maxSeconds: 4)
+                sleep(6)
+                
+                ybridControl.stop()
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+    }
+    
+    
+    
+    func test03_YbridControl_LastItemAgain() throws {
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+        
+                ybridControl.skipBackward(nil)
+                let type = allListener.currentlyPlaying?.current?.type
+                XCTAssertNotNil(type)
+                Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
+
+                sleep(8)
+  
+                ybridControl.skipBackward(nil)
+                let typeNow = allListener.currentlyPlaying?.current?.type
+                XCTAssertEqual(type, typeNow)
+                Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
+
+                sleep(8)
+                
+                ybridControl.stop()
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+    }
+   
+    
     private func shift( _ range:Range<TimeInterval>, by:TimeInterval ) -> Range<TimeInterval> {
         let shiftedRange = range.lowerBound+by ..< range.upperBound+by
         return shiftedRange
@@ -168,6 +233,15 @@ class YbridControlTests: XCTestCase {
         }
         XCTAssertLessThanOrEqual(took, maxSeconds, "offset to live not \((-shiftedRange_LostSign.lowerBound).S) ..< \((-shiftedRange_LostSign.upperBound).S) within \(maxSeconds) s")
     }
+    
+    private func wait(_ control:YbridControl, type: ItemType, maxSeconds:Int) {
+
+        let took = wait(max: maxSeconds) {
+            return allListener.isItem(type)
+        }
+        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(allListener.currentlyPlaying?.current?.type), not \(type)")
+    }
+    
     
     private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) {
         let took = wait(max: maxSeconds) {
@@ -191,23 +265,46 @@ class YbridControlTests: XCTestCase {
         return shiftedRange_LostSign.contains(-offset)
     }
     
+    
+
+    
 }
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
     
+  
+    
+    func reset() {
+        offsets.removeAll()
+    }
+    
     var control:YbridControl?
+    var currentlyPlaying:Metadata?
+    var offsets:[TimeInterval] = []
     
     var offsetChanges:Int { get {
         return offsets.count
     }}
     
-    var offsets:[TimeInterval] = []
+    func isItem(_ type:ItemType) -> Bool {
+        if let currentType = currentlyPlaying?.current?.type {
+            return type == currentType
+        }
+        return false
+    }
+    
+    
     func offsetToLiveChanged() {
         guard let offset = control?.offsetToLiveS else { XCTFail(); return }
         offsets.append(offset)
     }
     
-    func reset() {
-        offsets.removeAll()
+    override func metadataChanged(_ metadata: Metadata) {
+        currentlyPlaying = metadata
     }
+
+    
+    
+
+    
 }

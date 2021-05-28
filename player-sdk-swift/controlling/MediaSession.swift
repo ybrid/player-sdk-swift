@@ -116,6 +116,18 @@ public class MediaSession  {
             v2Control.windToLive()
         }
     }
+    
+    func skipForward(_ type:ItemType?) {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.skipItem(true, type)
+        }
+    }
+    
+    func skipBackward(_ type:ItemType?) {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.skipItem(false, type)
+        }
+    }
 }
 
 

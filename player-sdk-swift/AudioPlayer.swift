@@ -298,4 +298,12 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func windToLive() {
         session.windToLive()
     }
+    
+    func skipForward(_ type:ItemType?) {
+        session.skipForward(type)
+    }
+
+    func skipBackward(_ type:ItemType?) {
+        session.skipBackward(type)
+    }
 }

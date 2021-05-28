@@ -131,8 +131,8 @@ class YbridV2Driver : MediaDriver {
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
         var urlQueries:[URLQueryItem] = []
-        let token = URLQueryItem(name: "session-id", value: token)
-        urlQueries.append(token)
+        let tokenQuery = URLQueryItem(name: "session-id", value: token)
+        urlQueries.append(tokenQuery)
         if let queryParam = queryParam {
             urlQueries.append(queryParam)
         }
@@ -162,7 +162,7 @@ class YbridV2Driver : MediaDriver {
             Logger.controlling.error("no connected ybrid session")
             return
         }
-        Logger.controlling.debug("wind \(by.S) ybrid session")
+        Logger.controlling.debug("wind by \(by.S)")
         
         do {
             let millis = Int(by * 1000)
@@ -184,7 +184,7 @@ class YbridV2Driver : MediaDriver {
             Logger.controlling.error("no connected ybrid session")
             return
         }
-        Logger.controlling.debug("wind to live ybrid session")
+        Logger.controlling.debug("wind to live")
         
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
@@ -198,13 +198,42 @@ class YbridV2Driver : MediaDriver {
         
     }
     
+    
+    func skipItem(_ forwards:Bool, _ type:ItemType?) {
+
+        if !connected {
+            Logger.controlling.error("no connected ybrid session")
+            return
+        }
+        let direction = forwards ? "forwards":"backwards"
+        Logger.controlling.debug("skip \(direction) to item of type \(type?.rawValue ?? "(all)")")
+        
+        do {
+            let windedObj:YbridWindedObject
+            if let type = type, type != ItemType.UNKNOWN {
+                let skipType = URLQueryItem(name: "item-type", value: type.rawValue)
+                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to \(type)", queryParam: skipType)
+            } else {
+                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to next item", queryParam: nil)
+            }
+            accecpt(winded: windedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.controlling.error(error.localizedDescription)
+        }
+        
+    }
+ 
+    
     private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
         }
         var urlQueries:[URLQueryItem] = []
-        let token = URLQueryItem(name: "session-id", value: token)
-        urlQueries.append(token)
+        let tokenQuery = URLQueryItem(name: "session-id", value: token)
+        urlQueries.append(tokenQuery)
         if let queryParam = queryParam {
             urlQueries.append(queryParam)
         }
