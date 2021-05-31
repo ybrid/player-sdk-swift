@@ -128,7 +128,7 @@ class YbridV2Driver : MediaDriver {
     
     private func ctrlRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }
         var urlQueries:[URLQueryItem] = []
         let tokenQuery = URLQueryItem(name: "session-id", value: token)
@@ -138,7 +138,7 @@ class YbridV2Driver : MediaDriver {
         }
         ctrlUrl.queryItems = urlQueries
         guard let url = ctrlUrl.url else {
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
         }
         
         do {
@@ -146,6 +146,7 @@ class YbridV2Driver : MediaDriver {
                 throw SessionError(ErrorKind.invalidResponse, "no json result")
             }
 
+            Logger.session.debug(String(describing: result.__responseObject))
             return result.__responseObject
     
         } catch {
@@ -162,7 +163,7 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.session.debug("wind by \(by.S)")
+        Logger.session.info("wind by \(by.S)")
         
         do {
             let millis = Int(by * 1000)
@@ -184,10 +185,33 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.session.debug("wind to live")
+        Logger.session.info("wind to live")
         
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
+            accecpt(winded: windedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.session.error(error.localizedDescription)
+        }
+        
+    }
+    
+    func wind(to:Date) {
+
+        if !connected {
+            Logger.session.error("no connected ybrid session")
+            return
+        }
+        Logger.session.info("wind to \(to)")
+        
+        do {
+            let dateDouble = to.timeIntervalSince1970
+            let tsString = String(Int(dateDouble*1000))
+            let tsQuery = URLQueryItem(name: "ts", value: tsString)
+            let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind to \(to)", queryParam: tsQuery)
             accecpt(winded: windedObj)
             if !valid {
                 try reconnect()
@@ -206,15 +230,16 @@ class YbridV2Driver : MediaDriver {
             return
         }
         let direction = forwards ? "forwards":"backwards"
-        Logger.session.debug("skip \(direction) to item of type \(type?.rawValue ?? "(all)")")
         
         do {
             let windedObj:YbridWindedObject
             if let type = type, type != ItemType.UNKNOWN {
+                Logger.session.info("skip \(direction) to item of type \(type)")
                 let skipType = URLQueryItem(name: "item-type", value: type.rawValue)
                 windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to \(type)", queryParam: skipType)
             } else {
-                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to next item", queryParam: nil)
+                Logger.session.info("skip \(direction) to item")
+                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to item", queryParam: nil)
             }
             accecpt(winded: windedObj)
             if !valid {
@@ -229,7 +254,7 @@ class YbridV2Driver : MediaDriver {
     
     private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }
         var urlQueries:[URLQueryItem] = []
         let tokenQuery = URLQueryItem(name: "session-id", value: token)
@@ -239,7 +264,7 @@ class YbridV2Driver : MediaDriver {
         }
         ctrlUrl.queryItems = urlQueries
         guard let url = ctrlUrl.url else {
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session")
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
         }
         
         do {
@@ -248,10 +273,11 @@ class YbridV2Driver : MediaDriver {
             }
 
             let windedObject = result.__responseObject
+            Logger.session.debug(String(describing: windedObject))
             return windedObject
         } catch {
             Logger.session.error(error.localizedDescription)
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
         }
     }
 

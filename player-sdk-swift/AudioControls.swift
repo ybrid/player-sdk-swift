@@ -52,6 +52,7 @@ public protocol YbridControl : OnDemandControl {
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
     func windToLive()
+    func wind(to:Date)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
 }

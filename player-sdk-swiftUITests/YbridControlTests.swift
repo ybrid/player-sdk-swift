@@ -92,7 +92,7 @@ class YbridControlTests: XCTestCase {
         }
     }
     
-    func test03_YbridControl_WindBack() throws {
+    func test03_YbridControl_WindBackward120Forward60() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -104,9 +104,14 @@ class YbridControlTests: XCTestCase {
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
         
-                ybridControl.wind(by: -20.0)
-                wait(ybridControl, shifted: -20.0, maxSeconds: 2)
+                ybridControl.wind(by: -120.0)
+                wait(ybridControl, shifted: -120.0, maxSeconds: 2)
                 sleep(4)
+                
+                ybridControl.wind(by: 60.0)
+                wait(ybridControl, shifted: -60.0, maxSeconds: 2)
+                sleep(4)
+                
                 
                 ybridControl.stop()
                 wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
@@ -119,7 +124,7 @@ class YbridControlTests: XCTestCase {
         guard let lastOffset = allListener.offsets.last else {
             XCTFail(); return
         }
-        let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: +20.0)
+        let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: +60.0)
         XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
     }
     
@@ -155,8 +160,33 @@ class YbridControlTests: XCTestCase {
         
     }
     
+    func test05_YbridControl_WindToDate_LastFullHour_News() throws {
+        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+        
+                let date = lastFullHour()
+                ybridControl.wind(to:date)
+                wait(ybridControl, type: ItemType.NEWS, maxSeconds: 4)
+                sleep(8)
+
+                ybridControl.stop()
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: maxWindResponseS)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+    }
     
-    func test03_YbridControl_LastNewsNextMusic() throws {
+    
+    func test06_YbridControl_SkipBackwardNewsForwardMusic() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -184,9 +214,7 @@ class YbridControlTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
-    
-    
-    func test03_YbridControl_LastItemAgain() throws {
+    func test07_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -220,6 +248,20 @@ class YbridControlTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
     }
    
+ 
+    func lastFullHour() -> Date {
+        let date = Date()
+        var components = Calendar.current.dateComponents([.minute, .second], from: date)
+        let minute = components.minute ?? 0
+        if minute > 0 {
+            components.minute = -minute
+        }
+        let seconds = components.second ?? 0
+        if seconds > 0 {
+            components.second = -seconds
+        }
+        return Calendar.current.date(byAdding: components, to: date)!
+    }
     
     private func shift( _ range:Range<TimeInterval>, by:TimeInterval ) -> Range<TimeInterval> {
         let shiftedRange = range.lowerBound+by ..< range.upperBound+by
@@ -264,10 +306,6 @@ class YbridControlTests: XCTestCase {
         let shiftedRange_LostSign = shift(liveOffsetRange_LostSign, by: -shifted)
         return shiftedRange_LostSign.contains(-offset)
     }
-    
-    
-
-    
 }
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {

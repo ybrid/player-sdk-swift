@@ -110,19 +110,21 @@ public class MediaSession  {
             v2Control.wind(by: by)
         }
     }
-    
     func windToLive() {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.windToLive()
         }
     }
-    
+    func wind(to:Date) {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.wind(to:to)
+        }
+    }
     func skipForward(_ type:ItemType?) {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.skipItem(true, type)
         }
     }
-    
     func skipBackward(_ type:ItemType?) {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.skipItem(false, type)

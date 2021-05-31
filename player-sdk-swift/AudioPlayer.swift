@@ -299,6 +299,10 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.windToLive()
     }
     
+    func wind(to:Date) {
+        session.wind(to:to)
+    }
+    
     func skipForward(_ type:ItemType?) {
         session.skipForward(type)
     }
