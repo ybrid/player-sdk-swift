@@ -143,15 +143,19 @@ class YbridV2Driver : MediaDriver {
         
         do {
             guard let result:YbridSessionResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
-                throw SessionError(ErrorKind.invalidResponse, "no json result")
+                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
+                (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, error)
+                throw error
             }
 
             Logger.session.debug(String(describing: result.__responseObject))
             return result.__responseObject
     
         } catch {
-            Logger.session.error(error.localizedDescription)
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+            (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, cannot)
+            throw cannot
         }
     }
     
@@ -194,6 +198,7 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
+            
             Logger.session.error(error.localizedDescription)
         }
         
@@ -239,7 +244,7 @@ class YbridV2Driver : MediaDriver {
                 windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to \(type)", queryParam: skipType)
             } else {
                 Logger.session.info("skip \(direction) to item")
-                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to item", queryParam: nil)
+                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to item")
             }
             accecpt(winded: windedObj)
             if !valid {
@@ -269,15 +274,18 @@ class YbridV2Driver : MediaDriver {
         
         do {
             guard let result:YbridWindResponse = try JsonRequest(url: url).performPostSync(responseType: YbridWindResponse.self) else {
-                throw SessionError(ErrorKind.invalidResponse, "no json result")
+                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
+                (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, error)
+                throw error
             }
 
             let windedObject = result.__responseObject
             Logger.session.debug(String(describing: windedObject))
             return windedObject
         } catch {
-            Logger.session.error(error.localizedDescription)
-            throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, cannot)
+            throw cannot
         }
     }
 

@@ -128,7 +128,45 @@ class YbridControlTests: XCTestCase {
         XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
     }
     
-    func test04_YbridControl_WindToLive() throws {
+    
+    func test04_YbridControl_CannotWind() throws {
+        try AudioPlayer.initialize(for: ybridDemoEndpoint, listener: allListener,
+               ybridControl: { [self] (ybridControl) in
+                var control = ybridControl
+                
+                allListener.control = ybridControl
+                control.listener = allListener
+                
+                ybridControl.play()
+                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+        
+                ybridControl.wind(by: -120.0)
+                sleep(4)
+                
+                ybridControl.stop()
+                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 1, "expected to be only the initial change of offset")
+        guard let lastOffset = allListener.offsets.last else {
+            XCTFail(); return
+        }
+        let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: 0.0)
+        XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
+        
+        guard let error = allListener.errors.last else {
+            XCTFail( "expected an error message"); return
+        }
+        XCTAssertTrue(error.message?.contains("cannot wind ") == true, "human readably message expected" )
+    }
+
+    
+    
+    func test05_YbridControl_WindToLive() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -160,7 +198,7 @@ class YbridControlTests: XCTestCase {
         
     }
     
-    func test05_YbridControl_WindToDate_LastFullHour_News() throws {
+    func test06_YbridControl_WindToDate_BeforeLastFullHour_Advertisement() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -172,9 +210,9 @@ class YbridControlTests: XCTestCase {
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
         
-                let date = lastFullHour()
+                let date = lastFullHour(secondsBefore:15)
                 ybridControl.wind(to:date)
-                wait(ybridControl, type: ItemType.NEWS, maxSeconds: 4)
+                wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: 4)
                 sleep(8)
 
                 ybridControl.stop()
@@ -186,7 +224,7 @@ class YbridControlTests: XCTestCase {
     }
     
     
-    func test06_YbridControl_SkipBackwardNewsForwardMusic() throws {
+    func test07_YbridControl_SkipBackwardNewsForwardMusic() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -214,7 +252,7 @@ class YbridControlTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
-    func test07_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
+    func test08_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
         try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
                ybridControl: { [self] (ybridControl) in
                 var control = ybridControl
@@ -249,7 +287,7 @@ class YbridControlTests: XCTestCase {
     }
    
  
-    func lastFullHour() -> Date {
+    func lastFullHour(secondsBefore:Int) -> Date {
         let date = Date()
         var components = Calendar.current.dateComponents([.minute, .second], from: date)
         let minute = components.minute ?? 0
@@ -258,7 +296,7 @@ class YbridControlTests: XCTestCase {
         }
         let seconds = components.second ?? 0
         if seconds > 0 {
-            components.second = -seconds
+            components.second = -seconds - secondsBefore
         }
         return Calendar.current.date(byAdding: components, to: date)!
     }
@@ -314,11 +352,13 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     
     func reset() {
         offsets.removeAll()
+        errors.removeAll()
     }
     
     var control:YbridControl?
     var currentlyPlaying:Metadata?
     var offsets:[TimeInterval] = []
+    var errors:[AudioPlayerError] = []
     
     var offsetChanges:Int { get {
         return offsets.count
@@ -341,7 +381,9 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         currentlyPlaying = metadata
     }
 
-    
+    override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+        errors.append(exception)
+    }
     
 
     
