@@ -78,7 +78,7 @@ class JsonRequest {
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {
         
-        Logger.controlling.debug("calling OPTIONS on \(url.absoluteString)")
+        Logger.session.debug("calling OPTIONS on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
         var apiError:SessionError? { didSet {
@@ -98,7 +98,7 @@ class JsonRequest {
             if let error = error {
                 let optionsState = OptionsTaskState.getOptionsState(error)
                 if optionsState.severity == ErrorSeverity.notice {
-                    if Logger.verbose { Logger.controlling.debug(error.localizedDescription) }
+                    if Logger.verbose { Logger.session.debug(error.localizedDescription) }
                     semaphore.signal()
                     return
                 }
@@ -108,7 +108,7 @@ class JsonRequest {
             }
            
             if let apiError = self.validateJsonResponse(response) {
-                if Logger.verbose { Logger.controlling.debug(apiError.localizedDescription) }
+                if Logger.verbose { Logger.session.debug(apiError.localizedDescription) }
                 semaphore.signal()
                 return
             }
@@ -119,7 +119,7 @@ class JsonRequest {
             }
             
             if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
-                Logger.controlling.debug("parsing \(dataString) into \(responseType)")
+                Logger.session.debug("parsing \(dataString) into \(responseType)")
             }
             
             do {
@@ -138,7 +138,7 @@ class JsonRequest {
         _ = semaphore.wait(timeout: .distantFuture)
         
         if task.state != URLSessionDataTask.State.completed {
-            Logger.controlling.notice("cancelling task in state \(describe(task.state))")
+            Logger.session.notice("cancelling task in state \(describe(task.state))")
             task.cancel()
         }
         
@@ -152,7 +152,7 @@ class JsonRequest {
     
     func performPostSync<T : Decodable>(responseType: T.Type) throws -> T? {
         
-        Logger.controlling.debug("calling POST on \(url.absoluteString)")
+        Logger.session.debug("calling POST on \(url.absoluteString)")
         
         let semaphore = DispatchSemaphore(value: 0)
         var apiError:SessionError? { didSet {
@@ -185,7 +185,7 @@ class JsonRequest {
             }
             
             if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
-                Logger.controlling.debug("parsing \(dataString) into \(responseType)")
+                Logger.session.debug("parsing \(dataString) into \(responseType)")
             }
             
             do {
@@ -204,7 +204,7 @@ class JsonRequest {
         _ = semaphore.wait(timeout: .distantFuture)
         
         if task.state != URLSessionDataTask.State.completed {
-            Logger.controlling.notice("cancelling task in state \(describe(task.state))")
+            Logger.session.notice("cancelling task in state \(describe(task.state))")
             task.cancel()
         }
         
@@ -219,10 +219,10 @@ class JsonRequest {
     private func validateJsonResponse(_ response: URLResponse?) -> SessionError? {
         
         if let response = response {
-            if Logger.verbose { Logger.controlling.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
+            if Logger.verbose { Logger.session.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
         }
         guard let httpResponse = response as? HTTPURLResponse else {
-            Logger.controlling.error(response.debugDescription)
+            Logger.session.error(response.debugDescription)
             return SessionError(ErrorKind.serverError, "no http response")
         }
         

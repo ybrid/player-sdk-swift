@@ -32,7 +32,7 @@ class YbridV2Driver : MediaDriver {
     var token:String?
     var startDate:Date? { didSet {
         if let start = startDate, startDate != oldValue {
-            Logger.controlling.debug("start date is \(Formatter.iso8601withMillis.string(from: start))")
+            Logger.session.debug("start date is \(Formatter.iso8601withMillis.string(from: start))")
         }
     }}
     
@@ -59,7 +59,7 @@ class YbridV2Driver : MediaDriver {
             throw SessionError(ErrorKind.invalidSession, "session is not valid.")
         }
         
-        Logger.controlling.debug("creating ybrid session")
+        Logger.session.debug("creating ybrid session")
         
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
         accecpt(response: sessionObj)
@@ -70,23 +70,23 @@ class YbridV2Driver : MediaDriver {
         if !connected {
             return
         }
-        Logger.controlling.debug("closing ybrid session")
+        Logger.session.debug("closing ybrid session")
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
             accecpt(response: sessionObj)
             connected = false
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
         }
     }
     
     func info() {
         if !connected {
-            Logger.controlling.error("no connected ybrid session")
+            Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.controlling.debug("getting info about ybrid session")
+        Logger.session.debug("getting info about ybrid session")
         
         do {
             let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
@@ -95,12 +95,12 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
         }
     }
     
     private func reconnect() throws {
-        Logger.controlling.info("reconnecting ybrid session")
+        Logger.session.info("reconnecting ybrid session")
         let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
         accecpt(response: sessionObj)
         connected = true
@@ -149,7 +149,7 @@ class YbridV2Driver : MediaDriver {
             return result.__responseObject
     
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
         }
     }
@@ -159,10 +159,10 @@ class YbridV2Driver : MediaDriver {
     func wind(by:TimeInterval) {
 
         if !connected {
-            Logger.controlling.error("no connected ybrid session")
+            Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.controlling.debug("wind by \(by.S)")
+        Logger.session.debug("wind by \(by.S)")
         
         do {
             let millis = Int(by * 1000)
@@ -173,7 +173,7 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
         }
         
     }
@@ -181,10 +181,10 @@ class YbridV2Driver : MediaDriver {
     func windToLive() {
 
         if !connected {
-            Logger.controlling.error("no connected ybrid session")
+            Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.controlling.debug("wind to live")
+        Logger.session.debug("wind to live")
         
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
@@ -193,7 +193,7 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
         }
         
     }
@@ -202,11 +202,11 @@ class YbridV2Driver : MediaDriver {
     func skipItem(_ forwards:Bool, _ type:ItemType?) {
 
         if !connected {
-            Logger.controlling.error("no connected ybrid session")
+            Logger.session.error("no connected ybrid session")
             return
         }
         let direction = forwards ? "forwards":"backwards"
-        Logger.controlling.debug("skip \(direction) to item of type \(type?.rawValue ?? "(all)")")
+        Logger.session.debug("skip \(direction) to item of type \(type?.rawValue ?? "(all)")")
         
         do {
             let windedObj:YbridWindedObject
@@ -221,7 +221,7 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
         }
         
     }
@@ -250,7 +250,7 @@ class YbridV2Driver : MediaDriver {
             let windedObject = result.__responseObject
             return windedObject
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
             throw SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
         }
     }
@@ -265,9 +265,9 @@ class YbridV2Driver : MediaDriver {
         do {
             let currentItemData = try encoder.encode(data.currentItem)
             let metadataString = String(data: currentItemData, encoding: .utf8)!
-            Logger.controlling.debug("current item is \(metadataString)")
+            Logger.session.debug("current item is \(metadataString)")
         } catch {
-            Logger.controlling.error("cannot log metadata")
+            Logger.session.error("cannot log metadata")
         }
     }
     

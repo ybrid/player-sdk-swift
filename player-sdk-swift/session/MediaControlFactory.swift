@@ -47,7 +47,7 @@ class MediaControlFactory {
         case .plain, .icy: driver = IcyDriver(session:session)
         case .ybridV2: driver = YbridV2Driver(session:session)
         }
-        Logger.controlling.notice("selected media protocol is \(apiVersion)")
+        Logger.session.notice("selected media protocol is \(apiVersion)")
         return driver
     }
     
@@ -72,7 +72,7 @@ class MediaControlFactory {
                 return versions
             }
             let info = ybridResponse.__responseHeader
-            Logger.controlling.debug(String(data: try JSONEncoder().encode(info), encoding: .utf8) ?? "(no ybrid info struct)")
+            Logger.session.debug(String(data: try JSONEncoder().encode(info), encoding: .utf8) ?? "(no ybrid info struct)")
             if !info.success {
                 throw SessionError(ErrorKind.invalidResponse, "__responseHeader.success is false")
             }
@@ -81,7 +81,7 @@ class MediaControlFactory {
             }
             versions = ybridResponse.__responseHeader.supportedVersions
         } catch {
-            Logger.controlling.error(error.localizedDescription)
+            Logger.session.error(error.localizedDescription)
             throw error
         }
         return versions

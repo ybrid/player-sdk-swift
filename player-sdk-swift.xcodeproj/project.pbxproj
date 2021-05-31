@@ -353,7 +353,7 @@
 				17CBC9B425E3C36000B2F7E7 /* decoding */,
 				17CBC9B325E3C33B00B2F7E7 /* playing */,
 				17CBC9B225E3C30F00B2F7E7 /* loading */,
-				17539E502626D108000FE902 /* controlling */,
+				17539E502626D108000FE902 /* session */,
 				17E9AB832653A808001ED9C8 /* AudioControls.swift */,
 				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
 				1799DC8D25D565A10055C973 /* Logger.swift */,
@@ -377,7 +377,7 @@
 			path = "player-sdk-swiftTests";
 			sourceTree = "<group>";
 		};
-		17539E502626D108000FE902 /* controlling */ = {
+		17539E502626D108000FE902 /* session */ = {
 			isa = PBXGroup;
 			children = (
 				17539E47262591C3000FE902 /* MediaSession.swift */,
@@ -390,7 +390,7 @@
 				1711D182263AB45400882D2B /* MetadataMappings.swift */,
 				17539E8A26272AC8000FE902 /* SessionError.swift */,
 			);
-			path = controlling;
+			path = session;
 			sourceTree = "<group>";
 		};
 		175849E4264BB6500071FEE6 /* util */ = {
