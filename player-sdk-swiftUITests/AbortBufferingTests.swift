@@ -70,7 +70,7 @@ class AbortBufferingTests: XCTestCase {
         let abortingListener = CtrlStopListener()
         var passed = true
         try AudioPlayer.initialize(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
-            abortingListener.control = ybridCtrl as? PlaybackControl
+            abortingListener.control = ybridCtrl
             passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
             if !passed { ybridCtrl.close(); sleep(3) }
             semaphore.signal()
@@ -147,7 +147,7 @@ class AbortBufferingTests: XCTestCase {
         wait(player as PlaybackControl, until: until, maxSeconds: maxSeconds)
     }
     private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) -> Int {
-        wait(control as! PlaybackControl, until: until, maxSeconds: maxSeconds)
+        wait(control as PlaybackControl, until: until, maxSeconds: maxSeconds)
     }
     private func wait(_ player:PlaybackControl, until:PlaybackState, maxSeconds:Int) -> Int {
         var seconds = 0

@@ -213,7 +213,7 @@ class YbridControlTests: XCTestCase {
                 let date = lastFullHour(secondsBefore:15)
                 ybridControl.wind(to:date)
                 wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: 4)
-                sleep(8)
+                sleep(4)
 
                 ybridControl.stop()
                 wait(ybridControl, until: PlaybackState.stopped, maxSeconds: maxWindResponseS)
@@ -269,14 +269,14 @@ class YbridControlTests: XCTestCase {
                 XCTAssertNotNil(type)
                 Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
 
-                sleep(8)
+                sleep(4)
   
                 ybridControl.skipBackward(nil)
                 let typeNow = allListener.currentlyPlaying?.current?.type
                 XCTAssertEqual(type, typeNow)
                 Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
 
-                sleep(8)
+                sleep(4)
                 
                 ybridControl.stop()
                 wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
