@@ -82,8 +82,8 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     //
     // The matching MediaProtocol is detected and a session
     // to control content and metadata of the stream is established.
-    @available(*, deprecated, message: "use asynchronous AudioPlayer.initialize instead")
-    public static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
+    @available(*, deprecated, message: "use asynchronous AudioPlayer.open instead")
+    public static func openSync(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
         
         let session = MediaSession(on: endpoint)
         do {
@@ -284,12 +284,19 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
 
 class YbridAudioPlayer : AudioPlayer, YbridControl {
     
+    init(session:MediaSession, listener:ControlListener?) {
+        super.init(session: session, listener: listener as? AudioPlayerListener )
+        if let ybridListener = listener as? YbridControlListener  {
+            session.ybridListener = ybridListener
+        }
+    }
+    
     var listener: YbridControlListener? { didSet {
         session.ybridListener = listener
     }}
     
     var offsetToLiveS: TimeInterval { get {
-        return session.offsetToLiveS ?? 0.0
+        return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
     }}
  
     func wind(by:TimeInterval) {

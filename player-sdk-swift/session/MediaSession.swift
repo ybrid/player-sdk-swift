@@ -34,10 +34,10 @@ public class MediaSession  {
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
     
-    var offsetToLiveS:TimeInterval? { get {
-        return (mediaControl as? YbridV2Driver)?.offsetToLiveS
-    }}
-        
+//    var offsetToLiveS:TimeInterval? { get {
+//        return (mediaControl as? YbridV2Driver)?.offsetToLiveS
+//    }}
+//        
     weak var ybridListener:YbridControlListener? { didSet {
         if let v2Control = mediaControl as? YbridV2Driver {
             v2Control.listener = ybridListener
@@ -73,7 +73,7 @@ public class MediaSession  {
     func refresh() {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
-            v2Control.listener?.offsetToLiveChanged()
+            v2Control.listener?.offsetToLiveChanged(v2Control.offsetToLiveS)
         }
     }
      

@@ -29,7 +29,8 @@ import YbridPlayerSDK
 class UseContolsTests: XCTestCase {
     
 
-    let playerListener = TestAudioPlayerListener()
+    let playerListener = TestYbridPlayerListener()
+    
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         // Log additional debug information in this tests
@@ -42,7 +43,7 @@ class UseContolsTests: XCTestCase {
     
     func test01_Ybrid_PlaySomeSeconds() throws {
         
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: nil,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: nil,
                ybridControl: { [self] (ybridControl) in
                 
                 let offset = ybridControl.offsetToLiveS
@@ -63,7 +64,7 @@ class UseContolsTests: XCTestCase {
 
     func test02_Icy_PlaySomeSeconds() throws {
 
-        try AudioPlayer.initialize(for: icecastHr2Endpoint,
+        try AudioPlayer.open(for: icecastHr2Endpoint,
             playbackControl: { [self] (playback, mediaProtocol) in
             
                 XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
@@ -81,7 +82,7 @@ class UseContolsTests: XCTestCase {
 
     func test04_Icy_Opus_PlaySomeSeconds() throws {
         
-        try AudioPlayer.initialize(for: opusDlfEndpoint,
+        try AudioPlayer.open(for: opusDlfEndpoint,
             playbackControl: { [self] (playback, mediaProtocol) in
                 
                 XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
@@ -100,7 +101,7 @@ class UseContolsTests: XCTestCase {
     
     func test05_Icy_OnDemand_PlayPausePlay() throws {
 
-        try AudioPlayer.initialize(for: onDemandMp3Endpoint,
+        try AudioPlayer.open(for: onDemandMp3Endpoint,
             playbackControl: { [self] (playback, mediaProtocol) in
                 
                 XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
@@ -126,7 +127,7 @@ class UseContolsTests: XCTestCase {
     func test06_AudioDataError_PlayStops() {
         let endpoint = MediaEndpoint(mediaUri: "https://cast.ybrid.io/bad/url")
         do {
-            try AudioPlayer.initialize(for: endpoint, listener: playerListener,
+            try AudioPlayer.open(for: endpoint, listener: playerListener,
                 playbackControl: { [self] (playback, mediaProtocol) in
 
                     XCTAssertEqual(.icy, mediaProtocol)
@@ -150,10 +151,10 @@ class UseContolsTests: XCTestCase {
         XCTAssertEqual(302, error.code) // ErrorKind.cannotProcessMimeType
     }
     
-    func test07_ControllingError_NoPlayerg() {
+    func test07_ControllingError_NoPlayer() {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
         do {
-            try AudioPlayer.initialize(for: endpoint, listener: playerListener,
+            try AudioPlayer.open(for: endpoint, listener: playerListener,
                playbackControl: { [self] (playback, mediaProtocol) in
                 
                     XCTFail("should not be called, we get no player")
@@ -183,7 +184,7 @@ class UseContolsTests: XCTestCase {
 
     // MARK: helper function
     private func wait(_ ybrid:YbridControl, until:PlaybackState, maxSeconds:Int) {
-        wait(ybrid as! PlaybackControl, until: until, maxSeconds: maxSeconds)
+        wait(ybrid as PlaybackControl, until: until, maxSeconds: maxSeconds)
     }
     private func wait(_ playback:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
 

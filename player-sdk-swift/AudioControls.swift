@@ -53,7 +53,7 @@ public protocol ControlListener : class {
 }
 
 public protocol YbridControlListener : ControlListener {
-    func offsetToLiveChanged()
+    func offsetToLiveChanged(_ offset:TimeInterval?)
 }
 
 public extension AudioPlayer {
@@ -69,7 +69,7 @@ public extension AudioPlayer {
     //
     // One of the callback methods is called when the controller is available
     //
-    static func initialize(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
+    static func open(for endpoint:MediaEndpoint, listener: ControlListener? = nil,
             playbackControl: PlaybackControllerCallback? = nil,
               ybridControl: YbridControllerCallback? = nil ) throws {
         
@@ -78,11 +78,11 @@ public extension AudioPlayer {
             try session.connect()
         } catch {
             if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
+                (listener as? AudioPlayerListener)?.error(ErrorSeverity.fatal, audioDataError)
                 throw audioDataError
             } else {
                 let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                listener?.error(ErrorSeverity.fatal, sessionError )
+                (listener as? AudioPlayerListener)?.error(ErrorSeverity.fatal, sessionError )
                 throw sessionError
             }
         }
@@ -93,7 +93,7 @@ public extension AudioPlayer {
                 let player = YbridAudioPlayer(session: session, listener: listener)
                 ybridControl?(player)
             default:
-                let player = AudioPlayer(session: session, listener: listener)
+                let player = AudioPlayer(session: session, listener: listener as? AudioPlayerListener)
                 playbackControl?(player, session.mediaProtocol!)
             }
         }

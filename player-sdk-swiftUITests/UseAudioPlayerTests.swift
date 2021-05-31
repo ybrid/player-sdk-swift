@@ -50,7 +50,7 @@ class UseAudioPlayerTests: XCTestCase {
     Stop could need a second to clean up.
     */
     func test01_PlaySomeSeconds() {
-        guard let player = AudioPlayer.open(for: myEndpoint, listener: nil) else {
+        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: nil) else {
             XCTFail("no player, something went wrong"); return
         }
         player.play()
@@ -66,7 +66,7 @@ class UseAudioPlayerTests: XCTestCase {
      In this test we assume it takes no longer than 3 seconds.
      */
     func test02_PlayerStates() {
-        guard let player = AudioPlayer.open(for: myEndpoint, listener: nil) else {
+        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: nil) else {
             XCTFail("no player, something went wrong"); return
         }
         XCTAssertEqual(player.state, PlaybackState.stopped)
@@ -88,7 +88,7 @@ class UseAudioPlayerTests: XCTestCase {
      */
 
     func test03_ListenToPlayer() {
-        guard let player = AudioPlayer.open(for: myEndpoint, listener: playerListener) else {
+        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: playerListener) else {
             XCTFail("no player, something went wrong"); return
         }
         player.play()
@@ -106,7 +106,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test04_ErrorNoPlayer() {
 
         let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
-        let player = AudioPlayer.open(for: badEndpoint, listener: playerListener)
+        let player = AudioPlayer.openSync(for: badEndpoint, listener: playerListener)
         XCTAssertNil(player, "no player expected")
         
         XCTAssertEqual(playerListener.errors.count, 1)
@@ -129,7 +129,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test04_ErrorWithPlayer() {
 
         let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
-        guard let player = AudioPlayer.open(for: badEndpoint, listener: playerListener) else {
+        guard let player = AudioPlayer.openSync(for: badEndpoint, listener: playerListener) else {
             XCTFail("no player, something went wrong"); return
         }
         XCTAssertEqual(.icy, player.mediaProtocol)
@@ -152,7 +152,7 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test05_PlayOpus() {
         let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let player = AudioPlayer.open(for: opusEndpoint, listener: playerListener) else {
+        guard let player = AudioPlayer.openSync(for: opusEndpoint, listener: playerListener) else {
             XCTFail("no player. Something went wrong"); return
         }
         player.play()
@@ -168,7 +168,7 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test06_OnDemandPlayPausePlayPauseStop() {
         let onDemandEndpoint = MediaEndpoint(mediaUri:  "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let player = AudioPlayer.open(for: onDemandEndpoint, listener: playerListener) else {
+        guard let player = AudioPlayer.openSync(for: onDemandEndpoint, listener: playerListener) else {
             XCTFail("no player. Something went wrong"); return
         }
         XCTAssertFalse(player.canPause)
@@ -198,7 +198,7 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test07_ListenToMetadata() {
 
-        guard let player = AudioPlayer.open(for: myEndpoint, listener: playerListener) else {
+        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: playerListener) else {
             XCTFail("no player. Something went wrong"); return
         }
         player.play()

@@ -42,7 +42,7 @@ class ConsumeMetadataTests: XCTestCase {
 
     func test01_MetadataYbrid_OnEachPlayAndInStream_FullCurrentNext() {
 
-        player = AudioPlayer.open(for: ybridDemoEndpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
             secondCheck: { consumer.checkMetadataCalls(min:2) },
@@ -82,7 +82,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test02_MetadataYbrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() {
-        player = AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: ybridStageSwr3Endpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
             secondCheck: { consumer.checkMetadataCalls(min:2) },
@@ -111,7 +111,7 @@ class ConsumeMetadataTests: XCTestCase {
 
     
     func test03_MetadataIcy_InStreamOnly_CurrentStation() {
-        player = AudioPlayer.open(for: icecastHr2Endpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: icecastHr2Endpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
             secondCheck: { consumer.checkMetadataCalls(min:1) },
@@ -138,7 +138,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test04_MetadataOpusDlf_InStreamOnly_CurrentStation() throws {
-        player = AudioPlayer.open(for: opusDlfEndpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: opusDlfEndpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
             secondCheck: { consumer.checkMetadataCalls(min:1) },
@@ -165,7 +165,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test05_MetadataOpusCC_InStreamOnly_TitleArtistAlbum() throws {
-        player = AudioPlayer.open(for: opusCCEndpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: opusCCEndpoint, listener: consumer)
         self.playCheckPlayingCheckStopPlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:0) },
             secondCheck: { consumer.checkMetadataCalls(min:1) },
@@ -196,7 +196,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test06_MetadataOnDemand_OnBeginningNoneOnResume() throws {
-        player = AudioPlayer.open(for: onDemandOpusEndpoint, listener: consumer)
+        player = AudioPlayer.openSync(for: onDemandOpusEndpoint, listener: consumer)
         self.playPlayingCheckPausePlayPlayingCheck(
             fistCheck: { consumer.checkMetadataCalls(equal:1) },
             secondCheck: { consumer.checkMetadataCalls(equal:1) }

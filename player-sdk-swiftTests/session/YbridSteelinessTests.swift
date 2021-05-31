@@ -29,7 +29,7 @@ class YbridSteelinessTests: XCTestCase {
     
     let listener = MediaListener()
     func testSteelinessStage_InfoResponse_WithoutMillisHappen() throws {
-        guard let player = AudioPlayer.open(for: ybridStageDemoEndpoint, listener: listener) else {
+        guard let player = AudioPlayer.openSync(for: ybridStageDemoEndpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         for i in 1...5000 {
@@ -44,7 +44,7 @@ class YbridSteelinessTests: XCTestCase {
   
    
     func testSteelinessProd_InfoResponse_WithoutMillisHappen() throws {
-        guard let player = AudioPlayer.open(for: ybridSwr3Endpoint.forceProtocol(.ybridV2), listener: listener) else {
+        guard let player = AudioPlayer.openSync(for: ybridSwr3Endpoint.forceProtocol(.ybridV2), listener: listener) else {
             XCTFail("player expected"); return
         }
         for i in 1...5000 {
@@ -60,7 +60,7 @@ class YbridSteelinessTests: XCTestCase {
     func testSteelinessSession_OptionsCreateClose() throws {
         for i in 1...1000 {
           
-            guard let player = AudioPlayer.open(for: ybridStageDemoEndpoint, listener: listener) else {
+            guard let player = AudioPlayer.openSync(for: ybridStageDemoEndpoint, listener: listener) else {
                 XCTFail("player expected");
                 continue
             }
@@ -74,7 +74,7 @@ class YbridSteelinessTests: XCTestCase {
     func testSteelinessSession_CreateClose() throws {
         for i in 1...1000 {
           
-            guard let player = AudioPlayer.open(for: ybridStageDemoEndpoint.forceProtocol(.ybridV2), listener: listener) else {
+            guard let player = AudioPlayer.openSync(for: ybridStageDemoEndpoint.forceProtocol(.ybridV2), listener: listener) else {
                 XCTFail("player expected");
                 continue
             }

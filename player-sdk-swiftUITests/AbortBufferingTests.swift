@@ -69,7 +69,7 @@ class AbortBufferingTests: XCTestCase {
         let semaphore = DispatchSemaphore(value: 0)
         let abortingListener = CtrlStopListener()
         var passed = true
-        try AudioPlayer.initialize(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
+        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
             abortingListener.control = ybridCtrl
             passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
             if !passed { ybridCtrl.close(); sleep(3) }
@@ -93,7 +93,7 @@ class AbortBufferingTests: XCTestCase {
         let semaphore = DispatchSemaphore(value: 0)
         let abortingListener = CtrlStopListener()
         var passed = true
-        try AudioPlayer.initialize(for: endpoint, listener: abortingListener, playbackControl: { [self] (control,mediaProtocol) in
+        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: { [self] (control,mediaProtocol) in
             abortingListener.control = control
             passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
             if !passed { control.close(); sleep(3) }
@@ -165,7 +165,7 @@ class AbortBufferingTests: XCTestCase {
 }
 // MARK: abort playing
 
-class CtrlStopListener: AbstractAudioPlayerListener  {
+class CtrlStopListener: AbstractAudioPlayerListener, ControlListener  {
     var afterConnect:TimeInterval = -1.0
     
     var control:PlaybackControl?

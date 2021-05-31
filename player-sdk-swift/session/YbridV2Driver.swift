@@ -38,7 +38,7 @@ class YbridV2Driver : MediaDriver {
     
     var offsetToLiveS:TimeInterval? { didSet {
         if oldValue != offsetToLiveS {
-            listener?.offsetToLiveChanged()
+            listener?.offsetToLiveChanged(offsetToLiveS)
         }
     }}
     var ybridMetadata:YbridV2Metadata?

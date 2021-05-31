@@ -32,22 +32,22 @@ class YbridControlTests: XCTestCase {
     let maxWindResponseS = 2
     
     var player:YbridControl?
-    let allListener = TestYbridPlayerListener()
+    let ybridPlayerListener = TestYbridPlayerListener()
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         // don't log additional debug information in this tests
         Logger.verbose = false
-        allListener.reset()
+        ybridPlayerListener.reset()
         semaphore = DispatchSemaphore(value: 0)
     }
     
     override func tearDownWithError() throws {
-        print( "offsets were \(allListener.offsets)")
+        print( "offsets were \(ybridPlayerListener.offsets)")
     }
     
     func test01_YbridControl_GettingOffset_NoListener() throws {
         
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: nil,
                ybridControl: { [self] (ybridControl) in
                 
                 let offset = ybridControl.offsetToLiveS
@@ -64,17 +64,13 @@ class YbridControlTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(allListener.offsetChanges, 0)
+        XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
     }
     
     func test02_YbridControl_ListeningToOffsetChanges() throws {
         
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: nil,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -86,19 +82,15 @@ class YbridControlTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 1)
-        allListener.offsets.forEach{
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 1)
+        ybridPlayerListener.offsets.forEach{
             XCTAssertTrue(liveOffsetRange_LostSign.contains(-$0))
         }
     }
     
     func test03_YbridControl_WindBackward120Forward60() throws {
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -120,8 +112,8 @@ class YbridControlTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 2, "expected to be at least the initial and one more change of offset")
-        guard let lastOffset = allListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 2, "expected to be at least the initial and one more change of offset")
+        guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
         let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: +60.0)
@@ -130,12 +122,8 @@ class YbridControlTests: XCTestCase {
     
     
     func test04_YbridControl_CannotWind() throws {
-        try AudioPlayer.initialize(for: ybridDemoEndpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -151,28 +139,22 @@ class YbridControlTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 1, "expected to be only the initial change of offset")
-        guard let lastOffset = allListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 1, "expected to be only the initial change of offset")
+        guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
         let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: 0.0)
         XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
         
-        guard let error = allListener.errors.last else {
+        guard let error = ybridPlayerListener.errors.last else {
             XCTFail( "expected an error message"); return
         }
         XCTAssertTrue(error.message?.contains("cannot wind ") == true, "human readably message expected" )
     }
 
-    
-    
     func test05_YbridControl_WindToLive() throws {
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -190,8 +172,8 @@ class YbridControlTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(allListener.offsetChanges, 3, "expected to be at least the initial and two more changes of offset")
-        guard let lastOffset = allListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 3, "expected to be at least the initial and two more changes of offset")
+        guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
         XCTAssertTrue(liveOffsetRange_LostSign.contains(-lastOffset), "\(-lastOffset) not within \(liveOffsetRange_LostSign)")
@@ -199,12 +181,8 @@ class YbridControlTests: XCTestCase {
     }
     
     func test06_YbridControl_WindToDate_BeforeLastFullHour_Advertisement() throws {
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -225,12 +203,8 @@ class YbridControlTests: XCTestCase {
     
     
     func test07_YbridControl_SkipBackwardNewsForwardMusic() throws {
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -253,26 +227,22 @@ class YbridControlTests: XCTestCase {
     }
     
     func test08_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
-        try AudioPlayer.initialize(for: ybridStageSwr3Endpoint, listener: allListener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                var control = ybridControl
-                
-                allListener.control = ybridControl
-                control.listener = allListener
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
         
                 ybridControl.skipBackward(nil)
-                let type = allListener.currentlyPlaying?.current?.type
+                let type = ybridPlayerListener.currentlyPlaying?.current?.type
                 XCTAssertNotNil(type)
                 Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
 
                 sleep(4)
   
                 ybridControl.skipBackward(nil)
-                let typeNow = allListener.currentlyPlaying?.current?.type
+                let typeNow = ybridPlayerListener.currentlyPlaying?.current?.type
                 XCTAssertEqual(type, typeNow)
                 Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
 
@@ -317,9 +287,9 @@ class YbridControlTests: XCTestCase {
     private func wait(_ control:YbridControl, type: ItemType, maxSeconds:Int) {
 
         let took = wait(max: maxSeconds) {
-            return allListener.isItem(type)
+            return ybridPlayerListener.isItem(type)
         }
-        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(allListener.currentlyPlaying?.current?.type), not \(type)")
+        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.currentlyPlaying?.current?.type), not \(type)")
     }
     
     
@@ -355,7 +325,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         errors.removeAll()
     }
     
-    var control:YbridControl?
+//    var control:YbridControl?
     var currentlyPlaying:Metadata?
     var offsets:[TimeInterval] = []
     var errors:[AudioPlayerError] = []
@@ -372,8 +342,8 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }
     
     
-    func offsetToLiveChanged() {
-        guard let offset = control?.offsetToLiveS else { XCTFail(); return }
+    func offsetToLiveChanged(_ offset:TimeInterval?) {
+        guard let offset = offset else { XCTFail(); return }
         offsets.append(offset)
     }
     
