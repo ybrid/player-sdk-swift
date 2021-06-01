@@ -75,7 +75,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
 }
 
 
-class AbstractAudioPlayerListener : ControlListener {
+class AbstractAudioPlayerListener : AudioPlayerListener {
 
     func stateChanged(_ state: PlaybackState) {
         Logger.testing.notice("-- player is \(state)")

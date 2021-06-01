@@ -85,7 +85,7 @@ class YbridSteelinessTests: XCTestCase {
         }
     }
    
-    class MediaListener : ControlListener {
+    class MediaListener : AudioPlayerListener {
         func stateChanged(_ state: PlaybackState) {}
         func metadataChanged(_ metadata: Metadata) {}
         func playingSince(_ seconds: TimeInterval?) {}

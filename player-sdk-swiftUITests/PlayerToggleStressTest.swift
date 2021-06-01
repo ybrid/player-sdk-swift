@@ -26,7 +26,7 @@
 import XCTest
 import YbridPlayerSDK
 
-class PlayerToggleStressTest: XCTestCase, ControlListener {
+class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     
     var triggeredPlay:Int = 0
     var triggeredStop:Int = 0

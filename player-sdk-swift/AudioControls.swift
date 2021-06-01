@@ -42,7 +42,7 @@ public protocol PlaybackControl: SimpleControl  {
 }
 
 public protocol YbridControl : PlaybackControl {
-    var listener:YbridControlListener? { get set }
+//    var listener:YbridControlListener? { get set }
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
     func windToLive()
@@ -51,10 +51,7 @@ public protocol YbridControl : PlaybackControl {
     func skipBackward(_ type:ItemType?)
 }
 
-public protocol ControlListener : AudioPlayerListener {
-}
-
-public protocol YbridControlListener : ControlListener {
+public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
 }
 
@@ -71,7 +68,7 @@ public extension AudioPlayer {
     //
     // One of the callback methods is called when the controller is available
     //
-    static func open(for endpoint:MediaEndpoint, listener: ControlListener? = nil,
+    static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
             playbackControl: PlaybackControllerCallback? = nil,
               ybridControl: YbridControllerCallback? = nil ) throws {
         
@@ -80,11 +77,11 @@ public extension AudioPlayer {
             try session.connect()
         } catch {
             if let audioDataError = error as? AudioPlayerError {
-                (listener as? AudioPlayerListener)?.error(ErrorSeverity.fatal, audioDataError)
+                listener?.error(ErrorSeverity.fatal, audioDataError)
                 throw audioDataError
             } else {
                 let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                (listener as? AudioPlayerListener)?.error(ErrorSeverity.fatal, sessionError )
+                listener?.error(ErrorSeverity.fatal, sessionError )
                 throw sessionError
             }
         }
@@ -94,9 +91,8 @@ public extension AudioPlayer {
             case .ybridV2:
                 let player = YbridAudioPlayer(session: session, listener: listener)
                 ybridControl?(player)
-//                playbackControl?(player)
             default:
-                let player = AudioPlayer(session: session, listener: listener as? AudioPlayerListener)
+                let player = AudioPlayer(session: session, listener: listener)
                 playbackControl?(player)
             }
         }
