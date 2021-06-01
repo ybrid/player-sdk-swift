@@ -150,7 +150,14 @@ class OpusData : AudioData {
         if Logger.verbose { Logger.decoding.debug("page \(pageNo) nPackets \(nPackets) continued \(continued)") }
         
         var packets:[ogg_packet] = []
-        for _ in 1...nPackets { // TODO nPackets can be 0!!
+        
+        // nPackets can be 0!!
+        guard nPackets > 0 else {
+            Logger.decoding.notice("page \(pageNo) nPackets \(nPackets) continued \(continued)")
+            return packets
+        }
+        
+        for _ in 1...nPackets {
             
             var packet:ogg_packet = ogg_packet()
             let packetStatus = ogg_stream_packetout(&oggStreamState, &packet)
