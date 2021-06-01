@@ -50,6 +50,8 @@ class YbridV2Driver : MediaDriver {
         super.init(session:session, version: .ybridV2)
     }
     
+    // MARK: session
+    
     override func connect() throws {
         if connected {
             return
@@ -144,7 +146,7 @@ class YbridV2Driver : MediaDriver {
         do {
             guard let result:YbridSessionResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
                 let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, error)
+                listener?.error(ErrorSeverity.fatal, error)
                 throw error
             }
 
@@ -152,9 +154,8 @@ class YbridV2Driver : MediaDriver {
             return result.__responseObject
     
         } catch {
-
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
-            (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, cannot)
+            listener?.error(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -255,7 +256,6 @@ class YbridV2Driver : MediaDriver {
         }
         
     }
- 
     
     private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
@@ -271,11 +271,11 @@ class YbridV2Driver : MediaDriver {
         guard let url = ctrlUrl.url else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
         }
-        
+         
         do {
             guard let result:YbridWindResponse = try JsonRequest(url: url).performPostSync(responseType: YbridWindResponse.self) else {
                 let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, error)
+                listener?.error(ErrorSeverity.fatal, error)
                 throw error
             }
 
@@ -284,7 +284,7 @@ class YbridV2Driver : MediaDriver {
             return windedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            (listener as! AudioPlayerListener).error(ErrorSeverity.fatal, cannot)
+            listener?.error(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
