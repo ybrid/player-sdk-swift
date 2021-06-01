@@ -83,7 +83,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     // The matching MediaProtocol is detected and a session
     // to control content and metadata of the stream is established.
     @available(*, deprecated, message: "use asynchronous AudioPlayer.open instead")
-    public static func openSync(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
+    public static func openSync(for endpoint:MediaEndpoint, listener: ControlListener?) -> AudioPlayer? {
         
         let session = MediaSession(on: endpoint)
         do {
@@ -96,7 +96,15 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
             }
             return nil
         }
-        return AudioPlayer(session: session, listener: listener)
+
+        switch session.mediaProtocol {
+        case .plain, .icy:
+            return AudioPlayer(session: session, listener: listener)
+        case .ybridV2:
+            return YbridAudioPlayer(session: session, listener: listener)
+        default:
+            return nil
+        }
     }
 
     public var state: PlaybackState { get {

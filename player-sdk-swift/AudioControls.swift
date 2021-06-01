@@ -27,6 +27,8 @@ import Foundation
 
 
 public protocol SimpleControl {
+    var mediaProtocol:MediaProtocol? { get }
+    
     func play()
     func stop()
     
@@ -49,7 +51,7 @@ public protocol YbridControl : PlaybackControl {
     func skipBackward(_ type:ItemType?)
 }
 
-public protocol ControlListener : class {
+public protocol ControlListener : AudioPlayerListener {
 }
 
 public protocol YbridControlListener : ControlListener {
@@ -59,7 +61,7 @@ public protocol YbridControlListener : ControlListener {
 public extension AudioPlayer {
     static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
 
-    typealias PlaybackControllerCallback = (PlaybackControl,MediaProtocol) -> ()
+    typealias PlaybackControllerCallback = (PlaybackControl) -> ()
     typealias YbridControllerCallback = (YbridControl) -> ()
     
     // Create a matching AudioContoller for a MediaEndpoint.
@@ -92,9 +94,10 @@ public extension AudioPlayer {
             case .ybridV2:
                 let player = YbridAudioPlayer(session: session, listener: listener)
                 ybridControl?(player)
+//                playbackControl?(player)
             default:
                 let player = AudioPlayer(session: session, listener: listener as? AudioPlayerListener)
-                playbackControl?(player, session.mediaProtocol!)
+                playbackControl?(player)
             }
         }
     }

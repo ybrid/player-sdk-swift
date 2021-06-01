@@ -42,24 +42,24 @@ class AbortBufferingTests: XCTestCase {
         
     func testAbortMp3_until200msAfterConnect_CleanedUp() throws {
         Logger.verbose = false
-        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
-        try executeYbrid(endpoint: endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
+
+        try executeYbrid(endpoint: ybridStageSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
       }
 
     func testAbortMp3_until500msAfterConnect_CleanedUp() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
-        try executeYbrid(endpoint: endpoint, startInterval: 0.010, endInterval: 0.501, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
+
+        try executeYbrid(endpoint: ybridStageSwr3Endpoint, startInterval: 0.010, endInterval: 0.501, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
     }
     
     func testAbortOpus_0until100msAfterConnect_CleanedUp() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        let failed = try executeIcy(endpoint: endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
+
+        let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
         Logger.testing.notice("\(failed) failed abortion tests")
     }
     
     func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
-        let endpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        let failed = try executeIcy(endpoint: endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
+
+        let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
         Logger.testing.notice("\(failed) failed abortion tests")
     }
     
@@ -93,7 +93,7 @@ class AbortBufferingTests: XCTestCase {
         let semaphore = DispatchSemaphore(value: 0)
         let abortingListener = CtrlStopListener()
         var passed = true
-        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: { [self] (control,mediaProtocol) in
+        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: { [self] (control) in
             abortingListener.control = control
             passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
             if !passed { control.close(); sleep(3) }
@@ -165,7 +165,7 @@ class AbortBufferingTests: XCTestCase {
 }
 // MARK: abort playing
 
-class CtrlStopListener: AbstractAudioPlayerListener, ControlListener  {
+class CtrlStopListener: AbstractAudioPlayerListener  {
     var afterConnect:TimeInterval = -1.0
     
     var control:PlaybackControl?

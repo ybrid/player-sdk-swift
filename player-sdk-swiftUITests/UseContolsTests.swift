@@ -48,8 +48,8 @@ class UseContolsTests: XCTestCase {
                 
                 let offset = ybridControl.offsetToLiveS
                 Logger.testing.notice("offset to live is \(offset.S)")
-                XCTAssertLessThan(offset, -0.5)
-                XCTAssertGreaterThan(offset, -5.0)
+                XCTAssertLessThanOrEqual(offset, 0.0)
+                XCTAssertGreaterThan(offset, -10.0)
                 
                 ybridControl.play()
                 wait(ybridControl, until: .playing, maxSeconds: 10)
@@ -65,9 +65,9 @@ class UseContolsTests: XCTestCase {
     func test02_Icy_PlaySomeSeconds() throws {
 
         try AudioPlayer.open(for: icecastHr2Endpoint,
-            playbackControl: { [self] (playback, mediaProtocol) in
+            playbackControl: { [self] (playback) in
             
-                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+                XCTAssertEqual(MediaProtocol.icy, playback.mediaProtocol)
                 
                 playback.play()
                 wait(playback, until: .playing, maxSeconds: 10)
@@ -83,9 +83,9 @@ class UseContolsTests: XCTestCase {
     func test04_Icy_Opus_PlaySomeSeconds() throws {
         
         try AudioPlayer.open(for: opusDlfEndpoint,
-            playbackControl: { [self] (playback, mediaProtocol) in
+            playbackControl: { [self] (playback) in
                 
-                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+                XCTAssertEqual(MediaProtocol.icy, playback.mediaProtocol)
                
                 playback.play()
                 wait(playback, until: .playing, maxSeconds: 10)
@@ -102,9 +102,9 @@ class UseContolsTests: XCTestCase {
     func test05_Icy_OnDemand_PlayPausePlay() throws {
 
         try AudioPlayer.open(for: onDemandMp3Endpoint,
-            playbackControl: { [self] (playback, mediaProtocol) in
+            playbackControl: { [self] (playback) in
                 
-                XCTAssertEqual(MediaProtocol.icy, mediaProtocol)
+                XCTAssertEqual(MediaProtocol.icy, playback.mediaProtocol)
                 XCTAssertFalse(playback.canPause)
                 
                 playback.play()
@@ -128,9 +128,9 @@ class UseContolsTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri: "https://cast.ybrid.io/bad/url")
         do {
             try AudioPlayer.open(for: endpoint, listener: playerListener,
-                playbackControl: { [self] (playback, mediaProtocol) in
+                playbackControl: { [self] (playback) in
 
-                    XCTAssertEqual(.icy, mediaProtocol)
+                    XCTAssertEqual(.icy, playback.mediaProtocol)
 
                     playback.play()
                     wait(playback, until: .buffering, maxSeconds: 1)
@@ -155,7 +155,7 @@ class UseContolsTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.io/bad/url")
         do {
             try AudioPlayer.open(for: endpoint, listener: playerListener,
-               playbackControl: { [self] (playback, mediaProtocol) in
+               playbackControl: { [self] (playback) in
                 
                     XCTFail("should not be called, we get no player")
                 
