@@ -23,40 +23,58 @@
 // SOFTWARE.
 //
 
+//
+// This test class explains how to use YbridPlayerSDK.
+//
+
+
 import XCTest
 import YbridPlayerSDK
 
 class UseAudioPlayerTests: XCTestCase {
 
+    var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
-        // Log additional debug information in this tests
+        /// log additional debug information in this tests
         Logger.verbose = true
         
         playerListener.reset()
+        
+        /// recieving a player control is asynchrounous. So ending tests need to be synchronihzes manually.
+        semaphore = DispatchSemaphore(value: 0)
+    }
+    override func tearDownWithError() throws {
+        /// wait for signal() to end test
+        _ = semaphore?.wait(timeout: .distantFuture)
     }
  
-    // of course you may choose your own radio station here
-    let myEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
+    /// of course you may choose your own radio station here
+    let myEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
    
-    // see tests using the listener
+
+    /// see test03 and followings
     let playerListener = TestAudioPlayerListener()
     
     /*
-    Let the player play your radio.
-    
-    You should hear sound. Probably stop does not sound nice.
+    Let the player play your radio. You should hear sound.
+     
+    You act on the player control that is passed to you asynchronously.
      
     Player actions (play and stop) operate asynchronously.
-    Stop could need a second to clean up.
+    Stop could need a second to clean up. Otherwise it may not sound nice.
     */
-    func test01_PlaySomeSeconds() {
-        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: nil) else {
-            XCTFail("no player, something went wrong"); return
+    func test01_PlaySomeSeconds() throws {
+        
+        try AudioPlayer.open(for: myEndpoint, listener: nil) {
+            (control) in
+            
+            control.play()
+            sleep(6)
+            control.stop() /// If the process is killed without stop()
+            sleep(1) /// or immediately after stop you may hear crackling.
+            
+            self.semaphore?.signal() /// allow tear down to end test
         }
-        player.play()
-        sleep(6)
-        player.stop() // If the process is killed without stop()
-        sleep(1) // or immediately after stop you may hear crackling.
     }
 
     /*
@@ -65,85 +83,117 @@ class UseAudioPlayerTests: XCTestCase {
      Connecting and setting up depends on the infrastructure.
      In this test we assume it takes no longer than 3 seconds.
      */
-    func test02_PlayerStates() {
-        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: nil) else {
-            XCTFail("no player, something went wrong"); return
+    func test02_PlayerStates() throws {
+        
+        try AudioPlayer.open(for: myEndpoint, listener: nil) {
+            (control) in
+ 
+            XCTAssertEqual(control.state, PlaybackState.stopped)
+            control.play()
+            XCTAssertEqual(control.state, PlaybackState.buffering)
+            sleep(5)
+            XCTAssertEqual(control.state, PlaybackState.playing)
+            control.stop()
+            XCTAssertEqual(control.state, PlaybackState.playing)
+            sleep(1)
+            XCTAssertEqual(control.state, PlaybackState.stopped)
+            
+            self.semaphore?.signal()
         }
-        XCTAssertEqual(player.state, PlaybackState.stopped)
-        player.play()
-        XCTAssertEqual(player.state, PlaybackState.buffering)
-        sleep(5)
-        XCTAssertEqual(player.state, PlaybackState.playing)
-        player.stop()
-        XCTAssertEqual(player.state, PlaybackState.playing)
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.stopped)
     }
 
     /*
-     Use your own radio player listener to be called back.
+     Use your audio player listener to be called back.
      Filter console output by '-- ' and watch.
 
      Make sure the listener stays alive until it recieves stateChanged to '.stopped'.
      */
+    func test03_ListenToPlayer() throws {
+        
+        try AudioPlayer.open(for: myEndpoint, listener: playerListener) {
+            (control) in
 
-    func test03_ListenToPlayer() {
-        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: playerListener) else {
-            XCTFail("no player, something went wrong"); return
+            control.play()
+            sleep(3)
+            control.stop()
+            sleep(1) /// if not, the player listener may be gone to early to recieve the stop event
+            
+            self.semaphore?.signal()
         }
-        player.play()
-        sleep(3)
-        player.stop()
-        sleep(1) // if not, the player listener may be gone to early
     }
 
     /*
-     You want to see a problem?
+     Handling the problem "host not found".
      Filter the console output by '-- '
      
-     listener.error lets you see all errors, warnings and notifications
+     You don't recieve a player control but
+     - an exception and
+     - listener.error lets you see all errors, warnings and notifications
      */
-    func test04_ErrorNoPlayer() {
-
+    func test04a_Error_NoPlayer() throws {
+        defer { self.semaphore?.signal() }
+        
         let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
-        let player = AudioPlayer.openSync(for: badEndpoint, listener: playerListener)
-        XCTAssertNil(player, "no player expected")
+        do {
+            try AudioPlayer.open(for: badEndpoint, listener: playerListener) {
+                (control) in
+                
+                XCTFail("no player control expected")
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTAssertTrue(error is AudioPlayerError, "all known errors inherit from AudioPlayerError")
+            XCTAssertTrue(error is SessionError, "AudioPlayerError of type SessionError expected. There is a problem establishing a session with the endpoint")
+        }
         
+        /// AudioPlayerListener.error(...) recieves errors as well
         XCTAssertEqual(playerListener.errors.count, 1)
         guard let lastError = playerListener.errors.last else {
-            return
+            XCTFail(); return
         }
-        XCTAssertNotEqual(0, lastError.code) // error occured
-        XCTAssertNotNil(lastError.osstatus) // more info
+        XCTAssertNotEqual(0, lastError.code) /// error occured
+        XCTAssertNotNil(lastError.osstatus) /// more info
         
-        XCTAssertEqual(603, lastError.code) // ErrorKind.serverError
-        XCTAssertEqual(-1003, lastError.osstatus) // host not found
+        XCTAssertEqual(603, lastError.code) /// ErrorKind.serverError
+        XCTAssertEqual(-1003, lastError.osstatus) /// host not found
+        
+        
     }
 
     /*
-     You want to see a problem?
+     Handling a problem on play().
      Filter the console output by '-- '
      
      listener.error lets you see all errors, warnings and notifications
      */
-    func test04_ErrorWithPlayer() {
-
+    func test04b_Error_NoAudioData() {
+        
         let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
-        guard let player = AudioPlayer.openSync(for: badEndpoint, listener: playerListener) else {
-            XCTFail("no player, something went wrong"); return
-        }
-        XCTAssertEqual(.icy, player.mediaProtocol)
-        XCTAssertEqual(playerListener.errors.count, 0)
-        player.play()
-        sleep(2)
-        XCTAssertEqual(playerListener.errors.count, 1)
-        guard let lastError = playerListener.errors.last else {
-            return
-        }
-        XCTAssertNotEqual(0, lastError.code) // error occured
-        XCTAssertEqual(302, lastError.code) // ErrorKind.cannotProcessMimeType
+        
+        do {
+            try AudioPlayer.open(for: badEndpoint, listener: playerListener) {
+                [self] (control) in
+                defer { self.semaphore?.signal() }
+                
+                XCTAssertEqual(.icy, control.mediaProtocol) /// commincation with the endpoint is possible
+                XCTAssertEqual(playerListener.errors.count, 0) /// no error yet
+                
+                control.play()
+                sleep(2)
+                
+                XCTAssertEqual(playerListener.errors.count, 1)
+                guard let lastError = playerListener.errors.last else {
+                    return
+                }
+                XCTAssertNotEqual(0, lastError.code) /// error occured
+                XCTAssertEqual(302, lastError.code) /// ErrorKind.cannotProcessMimeType
 
-        XCTAssertNil(lastError.osstatus)
+                XCTAssertNil(lastError.osstatus)
+            }
+        } catch {
+            XCTFail("no player control, something went wrong");
+            self.semaphore?.signal(); return
+        }
     }
     
     
@@ -152,67 +202,89 @@ class UseAudioPlayerTests: XCTestCase {
      */
     func test05_PlayOpus() {
         let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let player = AudioPlayer.openSync(for: opusEndpoint, listener: playerListener) else {
-            XCTFail("no player. Something went wrong"); return
+        
+        do {
+            try AudioPlayer.open(for: opusEndpoint, listener: playerListener) {
+                (control) in
+                
+                control.play()
+                sleep(6)
+                control.stop()
+                sleep(1) /// if not, the player listener may be gone to early to recieve the stop event
+                
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player control. Something went wrong");
+            self.semaphore?.signal(); return
         }
-        player.play()
-        sleep(6)
-        player.stop()
-        sleep(1)
     }
     
     /*
-     HttpSessions on urls that offer "expected content length != -1"
+     HttpSessions on urls that offer no defined content length
      are identified as on demand files. They can be paused.
      Remember, all actions are asynchronous. So assertions in this test are delayed.
      */
     func test06_OnDemandPlayPausePlayPauseStop() {
         let onDemandEndpoint = MediaEndpoint(mediaUri:  "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        guard let player = AudioPlayer.openSync(for: onDemandEndpoint, listener: playerListener) else {
-            XCTFail("no player. Something went wrong"); return
+        do {
+            try AudioPlayer.open(for: onDemandEndpoint, listener: playerListener) {
+                (control) in
+                XCTAssertFalse(control.canPause)
+                control.play()
+                XCTAssertEqual(control.state, PlaybackState.buffering)
+                sleep(5)
+                XCTAssertTrue(control.canPause)
+                XCTAssertEqual(control.state, PlaybackState.playing)
+                control.pause()
+                sleep(1)
+                XCTAssertEqual(control.state, PlaybackState.pausing)
+                control.play()
+                sleep(1)
+                XCTAssertEqual(control.state, PlaybackState.playing)
+                control.pause()
+                sleep(1)
+                XCTAssertEqual(control.state, PlaybackState.pausing)
+                control.stop()
+                sleep(1)
+                XCTAssertEqual(control.state, PlaybackState.stopped)
+                
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore?.signal(); return
         }
-        XCTAssertFalse(player.canPause)
-        player.play()
-        XCTAssertEqual(player.state, PlaybackState.buffering)
-        sleep(5)
-        XCTAssertTrue(player.canPause)
-        XCTAssertEqual(player.state, PlaybackState.playing)
-        player.pause()
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.pausing)
-        player.play()
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.playing)
-        player.pause()
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.pausing)
-        player.stop()
-        sleep(1)
-        XCTAssertEqual(player.state, PlaybackState.stopped)
     }
-    
     
     /*
      listener.metadataChanged is called when metadata changes. In the beginning of streaming
-     there ist always a change comared to nothing.
+     there ist always a change compared to nothing.
      */
     func test07_ListenToMetadata() {
 
-        guard let player = AudioPlayer.openSync(for: myEndpoint, listener: playerListener) else {
-            XCTFail("no player. Something went wrong"); return
+        do {
+            try AudioPlayer.open(for: myEndpoint, listener: playerListener) {
+                [self] (control) in
+                
+                control.play()
+                sleep(3)
+                control.stop()
+                sleep(1)
+                
+                XCTAssertGreaterThan(playerListener.metadatas.count, 0)
+                guard playerListener.metadatas.count > 0 else {
+                    XCTFail("expected at least one metadata called"); return
+                }
+                let metadata = playerListener.metadatas[0]
+                XCTAssertNotNil(metadata.current?.displayTitle)
+                
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore?.signal(); return
         }
-        player.play()
-        sleep(3)
-        player.stop()
-        sleep(1)
-        
-        XCTAssertGreaterThan(playerListener.metadatas.count, 0)
-        guard playerListener.metadatas.count > 0 else {
-            XCTFail("expected at least one metadata called"); return
-        }
-        let metadata = playerListener.metadatas[0]
-        XCTAssertNotNil(metadata.current?.displayTitle)
-        
     }
 }
 

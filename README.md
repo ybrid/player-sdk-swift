@@ -17,17 +17,19 @@ After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the f
 import YbridPlayerSDK
 
 let endpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
-let player = AudioPlayer.open(for: endpoint, listener: nil)
-player.play()
-// of course the program must not end here
- ...
-player.stop()
-
- ...
-player.close()
+try AudioPlayer.open(for: myEndpoint, listener: nil) {
+    (control) in
+          
+    control.play()
+    sleep(10) // of course the program must not end here
+          
+    player.stop()
+    player.close()
+}
 ```
 
-MediaEndpoint.audioPlayer first detects the transmission protocol and encoding of the audio content and metadata and then returns the corresponding player. In future releases a matching type of player (incl. specific media controls) will be passed to you asynchronously.
+AudioPlayer.open first detects the transmission protocol and encoding of the audio content and metadata and then returns a playback control asynchronously. 
+A media specific control can be taken from an extended ```open``` method with more callbacks.
 
 Possible playback states of the player are
 ```swift
@@ -38,7 +40,7 @@ public enum PlaybackState {
     case pausing 
 }
 ```
-With urls addressing on demand files, you can safely use ```player.pause()``` if ```player.canPause``` is true.
+With mediaUri addressing an on demand file, you can safely use ```control.pause()``` if ```control.canPause``` is true.
 
 As a developer, you probably want to receive changes of the playback state. Implement AudioPlayerListener and pass it via the listener parameter above. You will also receive changes of metadata, hints on problems like network stalls as well as relevant durations and playback buffer size.
 ```swift

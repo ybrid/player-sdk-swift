@@ -61,14 +61,15 @@ public extension AudioPlayer {
     typealias PlaybackControllerCallback = (PlaybackControl) -> ()
     typealias YbridControllerCallback = (YbridControl) -> ()
     
-    // Create a matching AudioContoller for a MediaEndpoint.
+    // Create an audio control matching to the MediaEndpoint.
     //
-    // The matching MediaProtocol is detected and a session
-    // to control content and metadata of the stream is established.
+    // First the MediaProtocol is detected and a session is established
+    // to handle audio content and metadata of the stream.
     //
-    // One of the callback methods is called when the controller is available
+    // One of the callback methods provides the specific controller as soon
+    // as available.
     //
-    static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener? = nil,
+    static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
             playbackControl: PlaybackControllerCallback? = nil,
               ybridControl: YbridControllerCallback? = nil ) throws {
         
@@ -97,5 +98,18 @@ public extension AudioPlayer {
             }
         }
     }
+
+    
+    /*
+     This is a convenience method for tests. It provides a playback control
+     for an endpoint for any media protocol.
+     
+     There is only one callback for playback control. You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
+     */
+    static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
+            control: PlaybackControllerCallback? = nil ) throws {
+        try AudioPlayer.open(for: endpoint, listener: listener, playbackControl: control, ybridControl: control)
+    }
+    
 }
 

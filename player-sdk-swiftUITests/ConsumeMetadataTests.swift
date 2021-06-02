@@ -31,8 +31,11 @@ class ConsumeMetadataTests: XCTestCase {
     
     var consumer = TestMetadataCallsConsumer()
     var mediaSession:MediaSession?
-    var player:AudioPlayer?
-    override func setUpWithError() throws { }
+    var player:PlaybackControl?
+    var semaphore:DispatchSemaphore?
+    override func setUpWithError() throws {
+        semaphore = DispatchSemaphore(value: 0)
+    }
     override func tearDownWithError() throws {
         player?.close()
         _ = wait(until: .stopped, maxSeconds: 3)
@@ -40,15 +43,20 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
 
-    func test01_MetadataYbrid_OnEachPlayAndInStream_FullCurrentNext() {
+    func test01_MetadataYbrid_OnEachPlayAndInStream_FullCurrentNext() throws {
 
-        player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: consumer)
-        self.playCheckPlayingCheckStopPlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:1) },
-            secondCheck: { consumer.checkMetadataCalls(min:2) },
-            thirdCheck: { consumer.checkMetadataCalls(min:3) }
-        )
-                
+        try AudioPlayer.open (for: ybridDemoEndpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playCheckPlayingCheckStopPlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:1) },
+                secondCheck: { consumer.checkMetadataCalls(min:2) },
+                thirdCheck: { consumer.checkMetadataCalls(min:3) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
         let metadata = consumer.metadatas[0]
         guard let current = metadata.current else { XCTFail("current expected"); return }
         XCTAssertTrue(checkIsDemoItem(current))
@@ -81,13 +89,20 @@ class ConsumeMetadataTests: XCTestCase {
         return true
     }
     
-    func test02_MetadataYbrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() {
-        player = AudioPlayer.openSync(for: ybridStageSwr3Endpoint, listener: consumer)
-        self.playCheckPlayingCheckStopPlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:1) },
-            secondCheck: { consumer.checkMetadataCalls(min:2) },
-            thirdCheck: { consumer.checkMetadataCalls(min:3) }
-        )
+    func test02_MetadataYbrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() throws {
+        
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playCheckPlayingCheckStopPlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:1) },
+                secondCheck: { consumer.checkMetadataCalls(min:2) },
+                thirdCheck: { consumer.checkMetadataCalls(min:3) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
         
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
@@ -110,14 +125,20 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
     
-    func test03_MetadataIcy_InStreamOnly_CurrentStation() {
-        player = AudioPlayer.openSync(for: icecastHr2Endpoint, listener: consumer)
-        self.playCheckPlayingCheckStopPlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:0) },
-            secondCheck: { consumer.checkMetadataCalls(min:1) },
-            thirdCheck: { consumer.checkMetadataCalls(min:2) }
-        )
+    func test03_MetadataIcy_InStreamOnly_CurrentStation() throws {
         
+        try AudioPlayer.open(for: icecastHr2Endpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playCheckPlayingCheckStopPlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:0) },
+                secondCheck: { consumer.checkMetadataCalls(min:1) },
+                thirdCheck: { consumer.checkMetadataCalls(min:2) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+    
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
         currentItems.map{ $0.type }.forEach{ (type) in
@@ -138,13 +159,18 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test04_MetadataOpusDlf_InStreamOnly_CurrentStation() throws {
-        player = AudioPlayer.openSync(for: opusDlfEndpoint, listener: consumer)
-        self.playCheckPlayingCheckStopPlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:0) },
-            secondCheck: { consumer.checkMetadataCalls(min:1) },
-            thirdCheck: { consumer.checkMetadataCalls(min:2) }
-        )
-        
+        try AudioPlayer.open(for: opusDlfEndpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playCheckPlayingCheckStopPlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:0) },
+                secondCheck: { consumer.checkMetadataCalls(min:1) },
+                thirdCheck: { consumer.checkMetadataCalls(min:2) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+    
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
         currentItems.map{ $0.type }.forEach{ (type) in
@@ -165,12 +191,18 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test05_MetadataOpusCC_InStreamOnly_TitleArtistAlbum() throws {
-        player = AudioPlayer.openSync(for: opusCCEndpoint, listener: consumer)
-        self.playCheckPlayingCheckStopPlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:0) },
-            secondCheck: { consumer.checkMetadataCalls(min:1) },
-            thirdCheck: { consumer.checkMetadataCalls(min:2) }
-        )
+        
+        try AudioPlayer.open(for: opusCCEndpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playCheckPlayingCheckStopPlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:0) },
+                secondCheck: { consumer.checkMetadataCalls(min:1) },
+                thirdCheck: { consumer.checkMetadataCalls(min:2) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
         
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current }
         XCTAssertGreaterThan(currentItems.count, 1, "must be one current item")
@@ -196,12 +228,18 @@ class ConsumeMetadataTests: XCTestCase {
     }
     
     func test06_MetadataOnDemand_OnBeginningNoneOnResume() throws {
-        player = AudioPlayer.openSync(for: onDemandOpusEndpoint, listener: consumer)
-        self.playPlayingCheckPausePlayPlayingCheck(
-            fistCheck: { consumer.checkMetadataCalls(equal:1) },
-            secondCheck: { consumer.checkMetadataCalls(equal:1) }
-        )
-        
+
+        try AudioPlayer.open(for: onDemandOpusEndpoint, listener: consumer) {
+            [self] control in player = control
+            
+            self.playPlayingCheckPausePlayPlayingCheck(
+                fistCheck: { consumer.checkMetadataCalls(equal:1) },
+                secondCheck: { consumer.checkMetadataCalls(equal:1) }
+            )
+            semaphore?.signal()
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+    
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current }
         XCTAssertEqual(currentItems.count, 1, "must be one current item")
         guard let item = currentItems[0] else { XCTFail(); return }

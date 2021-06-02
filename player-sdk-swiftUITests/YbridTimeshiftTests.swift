@@ -26,7 +26,7 @@
 import XCTest
 import YbridPlayerSDK
 
-class YbridControlTests: XCTestCase {
+class YbridTimeshiftTests: XCTestCase {
 
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
     let maxWindResponseS = 2
@@ -235,14 +235,14 @@ class YbridControlTests: XCTestCase {
                 sleep(2)
         
                 ybridControl.skipBackward(nil)
-                let type = ybridPlayerListener.currentlyPlaying?.current?.type
+                let type = ybridPlayerListener.metadata?.current?.type
                 XCTAssertNotNil(type)
                 Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
 
                 sleep(4)
   
                 ybridControl.skipBackward(nil)
-                let typeNow = ybridPlayerListener.currentlyPlaying?.current?.type
+                let typeNow = ybridPlayerListener.metadata?.current?.type
                 XCTAssertEqual(type, typeNow)
                 Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
 
@@ -289,7 +289,7 @@ class YbridControlTests: XCTestCase {
         let took = wait(max: maxSeconds) {
             return ybridPlayerListener.isItem(type)
         }
-        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.currentlyPlaying?.current?.type), not \(type)")
+        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.metadata?.current?.type), not \(type)")
     }
     
     
@@ -325,8 +325,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         errors.removeAll()
     }
     
-//    var control:YbridControl?
-    var currentlyPlaying:Metadata?
+    var metadata:Metadata?
     var offsets:[TimeInterval] = []
     var errors:[AudioPlayerError] = []
     
@@ -335,7 +334,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }}
     
     func isItem(_ type:ItemType) -> Bool {
-        if let currentType = currentlyPlaying?.current?.type {
+        if let currentType = metadata?.current?.type {
             return type == currentType
         }
         return false
@@ -348,7 +347,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        currentlyPlaying = metadata
+        self.metadata = metadata
     }
 
     override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {

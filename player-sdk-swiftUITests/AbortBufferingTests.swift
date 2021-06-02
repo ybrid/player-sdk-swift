@@ -65,50 +65,50 @@ class AbortBufferingTests: XCTestCase {
     
     func executeYbrid(endpoint: MediaEndpoint, startInterval:TimeInterval, endInterval:TimeInterval, increaseInterval:TimeInterval, increaseInCaseOfFailure:TimeInterval ) throws {
         var interval = startInterval
-    newAfterFailed: repeat {
-        let semaphore = DispatchSemaphore(value: 0)
-        let abortingListener = CtrlStopListener()
-        var passed = true
-        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
-            abortingListener.control = ybridCtrl
-            passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
-            if !passed { ybridCtrl.close(); sleep(3) }
-            semaphore.signal()
-            return})
-        _ = semaphore.wait(timeout: .distantFuture)
-        let lastInterval = interval-increaseInterval
-        if passed {
-            Logger.testing.notice("passed stopping after \(lastInterval.S)")
-        } else {
-            Logger.testing.error("failed stopping after \(lastInterval.S)")
-            interval = lastInterval + increaseInCaseOfFailure
-        }
-    } while interval <= endInterval
+        newAfterFailed: repeat {
+            let semaphore = DispatchSemaphore(value: 0)
+            let abortingListener = CtrlStopListener()
+            var passed = true
+            try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: nil, ybridControl: { [self] (ybridCtrl) in
+                    abortingListener.control = ybridCtrl
+                    passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
+                    if !passed { ybridCtrl.close(); sleep(3) }
+                    semaphore.signal()
+            })
+            _ = semaphore.wait(timeout: .distantFuture)
+            let lastInterval = interval-increaseInterval
+            if passed {
+                Logger.testing.notice("passed stopping after \(lastInterval.S)")
+            } else {
+                Logger.testing.error("failed stopping after \(lastInterval.S)")
+                interval = lastInterval + increaseInCaseOfFailure
+            }
+        } while interval <= endInterval
     }
     
     func executeIcy(endpoint: MediaEndpoint, startInterval:TimeInterval, endInterval:TimeInterval, increaseInterval:TimeInterval, increaseInCaseOfFailure:TimeInterval ) throws -> Int { // failedCount
         var failedCount = 0
         var interval = startInterval
-    newAfterFailed: repeat {
-        let semaphore = DispatchSemaphore(value: 0)
-        let abortingListener = CtrlStopListener()
-        var passed = true
-        try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: { [self] (control) in
-            abortingListener.control = control
-            passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
-            if !passed { control.close(); sleep(3) }
-            semaphore.signal()
-        return})
-        _ = semaphore.wait(timeout: .distantFuture)
-        if passed {
-            Logger.testing.notice("passed stopping after \(interval.S)")
-        } else {
-            failedCount += 1
-            interval -= increaseInterval
-            interval += increaseInCaseOfFailure
-            Logger.testing.error("failed stopping after \(interval.S)")
-        }
-    } while interval <= endInterval
+        newAfterFailed: repeat {
+            let semaphore = DispatchSemaphore(value: 0)
+            let abortingListener = CtrlStopListener()
+            var passed = true
+            try AudioPlayer.open(for: endpoint, listener: abortingListener, playbackControl: { [self] (control) in
+                    abortingListener.control = control
+                    passed = repeatToggling(abortingListener: abortingListener, interval: &interval, increaseInterval: increaseInterval, endInterval: endInterval)
+                    if !passed { control.close(); sleep(3) }
+                    semaphore.signal()
+            })
+            _ = semaphore.wait(timeout: .distantFuture)
+            if passed {
+                Logger.testing.notice("passed stopping after \(interval.S)")
+            } else {
+                failedCount += 1
+                interval -= increaseInterval
+                interval += increaseInCaseOfFailure
+                Logger.testing.error("failed stopping after \(interval.S)")
+            }
+        } while interval <= endInterval
         return failedCount
     }
  
