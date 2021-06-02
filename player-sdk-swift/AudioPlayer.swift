@@ -332,4 +332,9 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             self.session.skipBackward(type)
         }
     }
+    func swapItem() {
+        playerQueue.async {
+            self.session.swapItem()
+        }
+    }
 }

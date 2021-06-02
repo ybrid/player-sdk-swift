@@ -132,6 +132,20 @@ class YbridResponseTests : XCTestCase {
         print(Formatter.iso8601withNanos.string(for: ybrid.timestamp3)!)
         print(Formatter.iso8601withNanos.string(for: ybrid.timestamp4)!)
     }
+    
+    // MARK: swap tests
+    
+    func testYbridSwapItemResponse() throws {
+        guard let jsonData = try readJsonFromFile("ybridSwapItemResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridSwapItemResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+    }
+    
+    
 }
 
 extension Formatter {

@@ -33,11 +33,7 @@ public class MediaSession  {
     let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
-    
-//    var offsetToLiveS:TimeInterval? { get {
-//        return (mediaControl as? YbridV2Driver)?.offsetToLiveS
-//    }}
-//        
+     
     weak var ybridListener:YbridControlListener? { didSet {
         if let v2Control = mediaControl as? YbridV2Driver {
             v2Control.listener = ybridListener
@@ -128,6 +124,12 @@ public class MediaSession  {
     func skipBackward(_ type:ItemType?) {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.skipItem(false, type)
+        }
+    }
+    
+    func swapItem() {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.swap()
         }
     }
 }

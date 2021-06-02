@@ -1,0 +1,16 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-06-02T17:23:05.465Z"
+    },
+    "__responseObject": {
+        "nextSwapReturnsToMain": false,
+        "swapsLeft": -1
+    }
+}

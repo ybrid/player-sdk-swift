@@ -114,3 +114,13 @@ struct YbridWindedObject : Codable, Equatable {
     let totalOffset: Int //-49392
     let newCurrentItem: YbridItemEx
 }
+
+struct YbridSwapItemResponse: Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridSwapInfo
+}
+
+struct YbridSwapInfo : Codable, Equatable {
+    let nextSwapReturnsToMain: Bool
+    let swapsLeft: Int // -1
+}

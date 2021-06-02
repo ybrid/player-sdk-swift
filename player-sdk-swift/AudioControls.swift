@@ -49,6 +49,8 @@ public protocol YbridControl : PlaybackControl {
     func wind(to:Date)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
+    
+    func swapItem()
 }
 
 public protocol YbridControlListener : AudioPlayerListener {

@@ -50,7 +50,7 @@ class YbridV2Driver : MediaDriver {
         super.init(session:session, version: .ybridV2)
     }
     
-    // MARK: session
+    // MARK: session and metadata
     
     override func connect() throws {
         if connected {
@@ -157,6 +157,16 @@ class YbridV2Driver : MediaDriver {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
             listener?.error(ErrorSeverity.fatal, cannot)
             throw cannot
+        }
+    }
+    
+    func logMetadata(_ data: YbridV2Metadata) {
+        do {
+            let currentItemData = try encoder.encode(data.currentItem)
+            let metadataString = String(data: currentItemData, encoding: .utf8)!
+            Logger.session.debug("current item is \(metadataString)")
+        } catch {
+            Logger.session.error("cannot log metadata")
         }
     }
     
@@ -295,14 +305,73 @@ class YbridV2Driver : MediaDriver {
 //        ybridMetadata?.currentItem = winded.newCurrentItem
     }
     
-    func logMetadata(_ data: YbridV2Metadata) {
+    // MARK: swap
+    
+    enum SwapMode : String {
+        case end2end /// Beginning of alternative content will be skipped to fit to the left main items duration.
+        case fade2end /// Alternative content starts from the beginning and will become faded out at the end.
+    }
+    
+    func swap() {
+
+        if !connected {
+            Logger.session.error("no connected ybrid session")
+            return
+        }
+        Logger.session.info("swap item")
+        
         do {
-            let currentItemData = try encoder.encode(data.currentItem)
-            let metadataString = String(data: currentItemData, encoding: .utf8)!
-            Logger.session.debug("current item is \(metadataString)")
+            let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
+            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: "swap item", queryParam: modeQuery)
+            accecpt(swapped: swappedObj)
+            if !valid {
+                try reconnect()
+            }
         } catch {
-            Logger.session.error("cannot log metadata")
+            Logger.session.error(error.localizedDescription)
+        }
+        
+    }
+
+    private func accecpt(swapped:YbridSwapInfo) {
+      // todo
+
+    }
+    
+    
+    private func swapRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSwapInfo {
+        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
+        }
+        var urlQueries:[URLQueryItem] = []
+        let tokenQuery = URLQueryItem(name: "session-id", value: token)
+        urlQueries.append(tokenQuery)
+        if let queryParam = queryParam {
+            urlQueries.append(queryParam)
+        }
+        ctrlUrl.queryItems = urlQueries
+        guard let url = ctrlUrl.url else {
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
+        }
+         
+        do {
+            guard let result:YbridSwapItemResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSwapItemResponse.self) else {
+                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
+                listener?.error(ErrorSeverity.fatal, error)
+                throw error
+            }
+
+            let swappedObject = result.__responseObject
+            Logger.session.debug(String(describing: swappedObject))
+            return swappedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
         }
     }
+
+    
+    
     
 }
