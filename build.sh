@@ -63,16 +63,14 @@ echo "building for $platform..."
 xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
     -destination="iOS" -sdk $platform -derivedDataPath $dd \
     -archivePath "$archivesPath/$platform.xcarchive" $opts >> "build-$platform.log"
-cp -R "$archivesPath/$platform.xcarchive/$generatedPath" "$builtPath/Archive-$platform"
 
 platform=iphonesimulator
 echo "building for $platform...."
 xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
     -destination="iOS Simulator" -sdk $platform -derivedDataPath $dd \
     -archivePath "$archivesPath/$platform.xcarchive" $opts > "build-$platform.log"
-cp -R "$archivesPath/$platform.xcarchive/$generatedPath" "$builtPath/Archive-$platform"
 
-platform=maccatalyst
+#platform=maccatalyst
 # currently broken because swift-opus does not correctly support opus on catalyst
 # echo "building for $platform...."
 # xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
@@ -86,19 +84,17 @@ echo "building for $platform..."
 xcodebuild archive -workspace player-sdk-swift.xcworkspace -scheme $scheme \
     -destination='My Mac' -sdk $platform -derivedDataPath $dd \
     -archivePath "$archivesPath/$platform.xcarchive" $opts > "build-$platform.log"
-cp -R "$archivesPath/$platform.xcarchive/$generatedPath" "$builtPath/Archive-$platform"
-
 
 # resulting player xcframework
 xcFramework=YbridPlayerSDK.xcframework
 rm -rfd $xcFramework
 
-products=`ls $builtPath | grep Archive`
+products=`ls $archivesPath | grep .xcarchive`
 echo "generating $xcFramework for \n$products\n..."
 
 cmd="xcodebuild -create-xcframework "
 for entry in $products; do
-    cmd="$cmd -framework $builtPath/$entry/$framework "
+    cmd="$cmd -framework $archivesPath/$entry/$generatedPath/$framework "
 done
 cmd="$cmd -output $xcFramework"
 #echo $cmd
