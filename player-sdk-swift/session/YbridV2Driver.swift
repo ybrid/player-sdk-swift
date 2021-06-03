@@ -1,5 +1,5 @@
 //
-// ApiDriver.swift
+// YbridV2Driver.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -41,8 +41,26 @@ class YbridV2Driver : MediaDriver {
             listener?.offsetToLiveChanged(offsetToLiveS)
         }
     }}
-    var ybridMetadata:YbridV2Metadata?
     
+    var ybridMetadata:YbridV2Metadata? { didSet {
+        if Logger.verbose == true,
+           let data = ybridMetadata, oldValue != ybridMetadata {
+            do {
+                let currentItemData = try encoder.encode(data.currentItem)
+                let metadataString = String(data: currentItemData, encoding: .utf8)!
+                Logger.session.debug("current item is \(metadataString)")
+            } catch {
+                Logger.session.error("cannot log metadata")
+            }
+        }
+    }}
+    
+    var swapsLeft:Int? { didSet {
+        if let swaps = swapsLeft, swaps != oldValue, swaps == 0 {
+            let notice = SessionError(ErrorKind.noSwapsLeft, "no swaps left")
+            listener?.error(.notice, notice)
+        }
+    }}
     weak var listener:YbridControlListener?
     
     init(session:MediaSession) {
@@ -117,16 +135,21 @@ class YbridV2Driver : MediaDriver {
         if let playout = response.playout {
             playbackUri = playout.playbackURI
             baseUrl = playout.baseURL
-            offsetToLiveS = Double(playout.offsetToLive) / 1000
+            accept(offset: playout.offsetToLive)
             //            updatePlayout(response.getRawPlayout());
-            //            updateSwapInfo(response.getRawSwapInfo());
         }
         startDate = response.startDate
-    
+        if let swapInfo = response.swapInfo {
+            accecpt(swapped: swapInfo)
+        }
+
         //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
         //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
     }
-
+    
+    func accept(offset: Int) {
+        offsetToLiveS = Double(offset) / 1000
+    }
     
     private func ctrlRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
@@ -159,16 +182,7 @@ class YbridV2Driver : MediaDriver {
             throw cannot
         }
     }
-    
-    func logMetadata(_ data: YbridV2Metadata) {
-        do {
-            let currentItemData = try encoder.encode(data.currentItem)
-            let metadataString = String(data: currentItemData, encoding: .utf8)!
-            Logger.session.debug("current item is \(metadataString)")
-        } catch {
-            Logger.session.error("cannot log metadata")
-        }
-    }
+
     
     // MARK: winding
     
@@ -209,7 +223,6 @@ class YbridV2Driver : MediaDriver {
                 try reconnect()
             }
         } catch {
-            
             Logger.session.error(error.localizedDescription)
         }
         
@@ -235,7 +248,6 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        
     }
     
     
@@ -246,16 +258,18 @@ class YbridV2Driver : MediaDriver {
             return
         }
         let direction = forwards ? "forwards":"backwards"
-        
+        let ctrlPath = "ctrl/v2/playout/skip/"+direction
         do {
             let windedObj:YbridWindedObject
             if let type = type, type != ItemType.UNKNOWN {
-                Logger.session.info("skip \(direction) to item of type \(type)")
+                let actionString = "skip \(direction) to \(type)"
+                Logger.session.info(actionString)
                 let skipType = URLQueryItem(name: "item-type", value: type.rawValue)
-                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to \(type)", queryParam: skipType)
+                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: skipType)
             } else {
-                Logger.session.info("skip \(direction) to item")
-                windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/skip/"+direction, actionString: "skip \(direction) to item")
+                let actionString = "skip \(direction) to item"
+                Logger.session.info(actionString)
+                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: actionString)
             }
             accecpt(winded: windedObj)
             if !valid {
@@ -264,7 +278,6 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        
     }
     
     private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
@@ -300,12 +313,16 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func accecpt(winded:YbridWindedObject) {
-      
-        offsetToLiveS = Double(winded.totalOffset) / 1000
-//        ybridMetadata?.currentItem = winded.newCurrentItem
+        accept(offset:winded.totalOffset)
+        if let oldMetadata = ybridMetadata {
+            let newMetatdata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: oldMetadata.nextItem, station: oldMetadata.station)
+            ybridMetadata = newMetatdata
+        } else {
+            ybridMetadata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
+        }
     }
     
-    // MARK: swap
+    // MARK: swapping
     
     enum SwapMode : String {
         case end2end /// Beginning of alternative content will be skipped to fit to the left main items duration.
@@ -319,6 +336,11 @@ class YbridV2Driver : MediaDriver {
             return
         }
         Logger.session.info("swap item")
+        guard swapsLeft != 0 else {
+            let warning = SessionError(ErrorKind.noSwapsLeft, "no swap available")
+            listener?.error(.recoverable, warning)
+            return
+        }
         
         do {
             let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
@@ -334,8 +356,7 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func accecpt(swapped:YbridSwapInfo) {
-      // todo
-
+        swapsLeft = swapped.swapsLeft
     }
     
     

@@ -72,6 +72,7 @@
 		17651DE72667EC59005D46BA /* YbridSwapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17651DE62667EC59005D46BA /* YbridSwapTests.swift */; };
 		17651DE82667EC59005D46BA /* YbridSwapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17651DE62667EC59005D46BA /* YbridSwapTests.swift */; };
 		17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */; };
+		17651DED2668577A005D46BA /* ybridInvalidResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DEC2668577A005D46BA /* ybridInvalidResponse.json */; };
 		1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
 		1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
 		1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
@@ -220,6 +221,7 @@
 		175AFB2825FA428100005046 /* AudioPlayerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerError.swift; sourceTree = "<group>"; };
 		17651DE62667EC59005D46BA /* YbridSwapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSwapTests.swift; sourceTree = "<group>"; };
 		17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapItemResponse.json; sourceTree = "<group>"; };
+		17651DEC2668577A005D46BA /* ybridInvalidResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridInvalidResponse.json; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
 		1799DC7C25D565970055C973 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -416,6 +418,23 @@
 			path = threadsafe;
 			sourceTree = "<group>";
 		};
+		17651DEB266856F9005D46BA /* res */ = {
+			isa = PBXGroup;
+			children = (
+				17651DEC2668577A005D46BA /* ybridInvalidResponse.json */,
+				17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */,
+				17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */,
+				17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */,
+				17E9AB8C2655467D001ED9C8 /* ybridResponseNoMilliseconds.json */,
+				17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */,
+				17268BE3265D6D9500E2F8E3 /* ybridWindToLiveResponse.json */,
+				17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */,
+				17268BE7265E8EF800E2F8E3 /* ybridDateDecodingNanos.json */,
+				17268BE5265E8CBE00E2F8E3 /* ybridDateDecoding.json */,
+			);
+			path = res;
+			sourceTree = "<group>";
+		};
 		1799DCA225D565DB0055C973 /* mpeg */ = {
 			isa = PBXGroup;
 			children = (
@@ -506,19 +525,11 @@
 		17E9AB872655456B001ED9C8 /* session */ = {
 			isa = PBXGroup;
 			children = (
-				17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */,
-				17268BE7265E8EF800E2F8E3 /* ybridDateDecodingNanos.json */,
-				17268BE5265E8CBE00E2F8E3 /* ybridDateDecoding.json */,
+				17651DEB266856F9005D46BA /* res */,
 				175849F5264F316E0071FEE6 /* TestsEndpoints.swift */,
 				17539E702626E18F000FE902 /* MediaProtocolTests.swift */,
 				17134568263015440054DB9D /* MediaSessionTests.swift */,
 				17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */,
-				17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */,
-				17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */,
-				17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */,
-				17E9AB8C2655467D001ED9C8 /* ybridResponseNoMilliseconds.json */,
-				17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */,
-				17268BE3265D6D9500E2F8E3 /* ybridWindToLiveResponse.json */,
 				17E9AB8E265547F9001ED9C8 /* YbridResponseTests.swift */,
 			);
 			path = session;
@@ -739,6 +750,7 @@
 				17268BE6265E8CBE00E2F8E3 /* ybridDateDecoding.json in Resources */,
 				17268BE4265D6D9500E2F8E3 /* ybridWindToLiveResponse.json in Resources */,
 				17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */,
+				17651DED2668577A005D46BA /* ybridInvalidResponse.json in Resources */,
 				17E9AB9E26554B6C001ED9C8 /* ybridResponseMilliseconds.json in Resources */,
 				17268BE8265E8EF800E2F8E3 /* ybridDateDecodingNanos.json in Resources */,
 			);

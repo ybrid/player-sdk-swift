@@ -45,12 +45,13 @@ struct YbridSessionResponse: Decodable {
 
 struct YbridSessionObject: Codable {
     let duration: Int
-//    let id: String?
+//    let id: String? // deprecated
     let sessionId: String?
     let valid: Bool
     let playout: YbridPlayout?
     let metadata: YbridV2Metadata?
     let startDate: Date?
+    let swapInfo: YbridSwapInfo?
 }
 struct YbridPlayout: Codable {
     let baseURL: URL
@@ -58,7 +59,7 @@ struct YbridPlayout: Codable {
     let currentBitRate: Int // -1
     let host: String // "edge01-stagecast.ybrid.io"
     let maxBitRate: Int // -1
-    let offsetToLive : Int // -504
+    let offsetToLive : Int // millis
 }
 
 struct YbridV2Metadata : Codable, Equatable {
@@ -80,20 +81,11 @@ struct YbridItem : Codable, Equatable {
     let description: String
     let durationMillis: Int64
     let type : String
-}
-
-struct YbridItemEx : Codable, Equatable {
-    let id: String
-    let artist: String
-    let title: String
-    let description: String
-    let durationMillis: Int64
-    let type : String
-//         "cuePoints": {},
-//         "altContent": [],
-//         "replaceable": false,
-//         "url": "",
-//         "classifiedType": "MUSIC",
+    //         "cuePoints": {}, // in newCurrentItem of YbridWindedObject
+    //         "altContent": [], // in newCurrentItem of YbridWindedObject
+    var replaceable: Bool? = nil // in newCurrentItem of YbridWindedObject
+    var url: String? = nil // in newCurrentItem of YbridWindedObject
+    var classifiedType: String? = nil // in newCurrentItem of YbridWindedObject
 }
 
 struct YbridStation : Codable, Equatable {
@@ -107,12 +99,12 @@ struct YbridWindResponse: Decodable  {
 }
 
 struct YbridWindedObject : Codable, Equatable {
-//    let requestedTimestamp: Int // -1, not in windToLive response
-//    let requestedWindDuration: Int // -10000, not in windToLive response
+    var requestedTimestamp: Int64? = nil // -1, not in windToLive response
+    var requestedWindDuration: Int? = nil // -10000, not in windToLive response
     let effectiveWindDuration: Int //-10080,
     let timestampWindedTo: Int64 //1621944665069,
-    let totalOffset: Int //-49392
-    let newCurrentItem: YbridItemEx
+    let totalOffset: Int // millis, -49392
+    let newCurrentItem: YbridItem
 }
 
 struct YbridSwapItemResponse: Decodable {
@@ -122,5 +114,5 @@ struct YbridSwapItemResponse: Decodable {
 
 struct YbridSwapInfo : Codable, Equatable {
     let nextSwapReturnsToMain: Bool
-    let swapsLeft: Int // -1
+    let swapsLeft: Int // -1 -> infinet
 }

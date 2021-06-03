@@ -68,6 +68,9 @@ enum ErrorKind : ErrorCode {
     case noSession = 605
     case invalidSession = 606
     
+    // ybrid actions
+    case noSwapsLeft = 701
+    
 }
 
 public class AudioPlayerError : LocalizedError {

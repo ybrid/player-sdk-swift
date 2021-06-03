@@ -32,11 +32,7 @@ class YbridResponseTests : XCTestCase {
         self.decoder.dateDecodingStrategy = JSONDecoder.DateDecodingStrategy.flexMillisIso8601
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func readJsonFromFile(_ filename:String) throws -> Data? {
+    private func readJsonFromFile(_ filename:String) throws -> Data? {
         let bundle = Bundle(for: type(of: self))
         if let url = bundle.url(forResource: filename, withExtension: "json")
         {
@@ -46,6 +42,27 @@ class YbridResponseTests : XCTestCase {
         return nil
     }
     
+    func testYbridV2DecodeJson_Standard() throws {
+        guard let jsonData = try readJsonFromFile("ybridSessionCreated") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridSessionResponse.self, from: jsonData )
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+        
+        let timestamp = ybrid.__responseHeader.timestamp
+        XCTAssertNotNil(timestamp)
+        
+        let currentItem = ybrid.__responseObject.metadata?.currentItem
+        XCTAssertNotNil(currentItem)
+        XCTAssertEqual("Air", currentItem?.artist)
+        
+        // not in info or session response
+        XCTAssertNil(currentItem?.classifiedType)
+    }
+    
+    
     func testYbridV2Response_DateWithoutMillis() throws {
         guard let jsonData = try readJsonFromFile("ybridResponseNoMilliseconds") else {
             XCTFail(); return
@@ -54,6 +71,8 @@ class YbridResponseTests : XCTestCase {
         let ybrid = try decoder.decode(YbridResponse.self, from: jsonData )
         XCTAssertNotNil(ybrid)
         print(ybrid)
+        let timestamp = ybrid.__responseHeader.timestamp
+        XCTAssertNotNil(timestamp)
     }
     
     func testYbridV2Response_DateWithMillis() throws {
@@ -64,6 +83,8 @@ class YbridResponseTests : XCTestCase {
         let ybrid = try decoder.decode(YbridResponse.self, from: jsonData)
         XCTAssertNotNil(ybrid)
         print(ybrid)
+        let timestamp = ybrid.__responseHeader.timestamp
+        XCTAssertNotNil(timestamp)
     }
     
     
@@ -76,9 +97,11 @@ class YbridResponseTests : XCTestCase {
         let ybrid = try decoder.decode(YbridWindResponse.self, from: jsonData)
         XCTAssertNotNil(ybrid)
         print(ybrid)
+        
+        let newType = ybrid.__responseObject.newCurrentItem.classifiedType
+        XCTAssertNotNil(newType)
+        XCTAssertEqual("MUSIC",newType)
     }
-    
-    
     
     func testYbridWindedToLiveResponse() throws {
         guard let jsonData = try readJsonFromFile("ybridWindToLiveResponse") else {
@@ -88,6 +111,10 @@ class YbridResponseTests : XCTestCase {
         let ybrid = try decoder.decode(YbridWindResponse.self, from: jsonData)
         XCTAssertNotNil(ybrid)
         print(ybrid)
+        
+        let newType = ybrid.__responseObject.newCurrentItem.classifiedType
+        XCTAssertNotNil(newType)
+        XCTAssertEqual("MUSIC",newType)
     }
     
     
@@ -143,6 +170,17 @@ class YbridResponseTests : XCTestCase {
         let ybrid = try decoder.decode(YbridSwapItemResponse.self, from: jsonData)
         XCTAssertNotNil(ybrid)
         print(ybrid)
+    }
+    
+    func testYbridInfoResponse() throws {
+        guard let jsonData = try readJsonFromFile("ybridNewsResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridSessionResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+        XCTAssertEqual(0,ybrid.__responseObject.swapInfo?.swapsLeft)
     }
     
     
