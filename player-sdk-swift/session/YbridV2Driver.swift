@@ -355,6 +355,35 @@ class YbridV2Driver : MediaDriver {
         
     }
 
+    func swapService(id:String) -> Bool {
+
+        if !connected {
+            Logger.session.error("no connected ybrid session")
+            return false
+        }
+        Logger.session.info("swap to service \(id)")
+        
+        
+        do {
+            let serviceQuery = URLQueryItem(name: "service-id", value: id)
+            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
+            accecpt(swapped: swappedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.session.error(error.localizedDescription)
+            return false
+        }
+        return true
+    }
+
+//    "/playout/back-to-main");
+
+    
+    
+    
+    
     private func accecpt(swapped:YbridSwapInfo) {
         swapsLeft = swapped.swapsLeft
     }

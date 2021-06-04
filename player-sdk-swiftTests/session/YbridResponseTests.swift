@@ -172,7 +172,7 @@ class YbridResponseTests : XCTestCase {
         print(ybrid)
     }
     
-    func testYbridInfoResponse() throws {
+    func testYbridInfoResponse_SwapsBouquet() throws {
         guard let jsonData = try readJsonFromFile("ybridNewsResponse") else {
             XCTFail(); return
         }
@@ -181,6 +181,10 @@ class YbridResponseTests : XCTestCase {
         XCTAssertNotNil(ybrid)
         print(ybrid)
         XCTAssertEqual(0,ybrid.__responseObject.swapInfo?.swapsLeft)
+        
+        let bouquet = ybrid.__responseObject.bouquet
+        XCTAssertNotNil(bouquet)
+        XCTAssertEqual(6, bouquet?.availableServices.count)
     }
     
     

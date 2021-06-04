@@ -52,6 +52,7 @@ struct YbridSessionObject: Codable {
     let metadata: YbridV2Metadata?
     let startDate: Date?
     let swapInfo: YbridSwapInfo?
+    let bouquet: YbridBouquet?
 }
 struct YbridPlayout: Codable {
     let baseURL: URL
@@ -115,4 +116,17 @@ struct YbridSwapItemResponse: Decodable {
 struct YbridSwapInfo : Codable, Equatable {
     let nextSwapReturnsToMain: Bool
     let swapsLeft: Int // -1 -> infinet
+}
+
+struct YbridBouquet : Codable, Equatable {
+    let activeServiceId: String
+    let availableServices: [YbridService]
+    let bouquetId: String
+    let primaryServiceId: String
+}
+
+struct YbridService : Codable, Equatable {
+    let iconURL: String
+    var displayName: String? = nil
+    let id: String
 }
