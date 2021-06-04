@@ -322,14 +322,14 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    // MARK: swapping
+    // MARK: swapping item
     
     enum SwapMode : String {
         case end2end /// Beginning of alternative content will be skipped to fit to the left main items duration.
         case fade2end /// Alternative content starts from the beginning and will become faded out at the end.
     }
     
-    func swap() {
+    func swapItem() {
 
         if !connected {
             Logger.session.error("no connected ybrid session")
@@ -355,18 +355,17 @@ class YbridV2Driver : MediaDriver {
         
     }
 
-    func swapService(id:String) -> Bool {
+    func swapToMainItem() -> Bool {
 
         if !connected {
             Logger.session.error("no connected ybrid session")
             return false
         }
-        Logger.session.info("swap to service \(id)")
         
+        Logger.session.info("swap to main item")
         
         do {
-            let serviceQuery = URLQueryItem(name: "service-id", value: id)
-            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
+            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/back-to-main", actionString: "swap to main item")
             accecpt(swapped: swappedObj)
             if !valid {
                 try reconnect()
@@ -377,11 +376,6 @@ class YbridV2Driver : MediaDriver {
         }
         return true
     }
-
-//    "/playout/back-to-main");
-
-    
-    
     
     
     private func accecpt(swapped:YbridSwapInfo) {
@@ -421,7 +415,68 @@ class YbridV2Driver : MediaDriver {
         }
     }
 
+    // MARK: swap service
     
+    func swapService(id:String) -> Bool {
+
+        if !connected {
+            Logger.session.error("no connected ybrid session")
+            return false
+        }
+        
+        Logger.session.info("swap to service \(id)")
+        
+        do {
+            let serviceQuery = URLQueryItem(name: "service-id", value: id)
+            let swappedObj = try swapServiceRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
+            accecpt(bouquetObj: swappedObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.session.error(error.localizedDescription)
+            return false
+        }
+        return true
+    }
+
+
     
+    private func swapServiceRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridBouquetObject {
+        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
+        }
+        var urlQueries:[URLQueryItem] = []
+        let tokenQuery = URLQueryItem(name: "session-id", value: token)
+        urlQueries.append(tokenQuery)
+        if let queryParam = queryParam {
+            urlQueries.append(queryParam)
+        }
+        ctrlUrl.queryItems = urlQueries
+        guard let url = ctrlUrl.url else {
+            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
+        }
+         
+        do {
+            guard let result = try JsonRequest(url: url).performPostSync(responseType: YbridSwapServiceResponse.self) else {
+                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
+                listener?.error(ErrorSeverity.fatal, error)
+                throw error
+            }
+
+            let swappedObject = result.__responseObject
+            Logger.session.debug(String(describing: swappedObject))
+            return swappedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
+    
+    private func accecpt(bouquetObj:YbridBouquetObject) {
+//        bouquet = bouquetObj.bouquet
+    }
     
 }

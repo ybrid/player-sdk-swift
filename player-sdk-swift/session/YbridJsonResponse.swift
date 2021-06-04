@@ -122,11 +122,20 @@ struct YbridBouquet : Codable, Equatable {
     let activeServiceId: String
     let availableServices: [YbridService]
     let bouquetId: String
-    let primaryServiceId: String
+    var primaryServiceId: String? = nil
+}
+
+struct YbridBouquetObject : Codable, Equatable {
+    let bouquet: YbridBouquet
 }
 
 struct YbridService : Codable, Equatable {
     let iconURL: String
     var displayName: String? = nil
     let id: String
+}
+
+struct YbridSwapServiceResponse : Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridBouquetObject
 }

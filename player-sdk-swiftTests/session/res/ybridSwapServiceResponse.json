@@ -1,0 +1,28 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-06-04T22:50:56.282Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "ad-injection-demo",
+            "availableServices": [
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "adaptive-demo"
+                },
+                {
+                    "iconURL": "https://dvhfup2pyap5o.cloudfront.net/media/ybrid-product.png",
+                    "id": "ad-injection-demo"
+                }
+            ],
+            "bouquetId": "ybrid-demo-services"
+        }
+    }
+}

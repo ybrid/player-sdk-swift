@@ -45,7 +45,7 @@ class YbridSwapTests: XCTestCase {
     }
     
 
-    func test01_Swap() throws {
+    func test01_SwapItem() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: nil,
                ybridControl: { [self] (ybridControl) in
                 
@@ -54,6 +54,11 @@ class YbridSwapTests: XCTestCase {
                 sleep(2)
                 
                 ybridControl.swapItem()
+                // todo read from metadata.
+                sleep(8)
+                
+                ybridControl.swapToMainItem()
+                // todo read from metadata.
                 sleep(8)
                 
                 ybridControl.stop()
@@ -66,6 +71,30 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
     }
 
+    func test02_SwapService() throws {
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: nil,
+               ybridControl: { [self] (ybridControl) in
+                
+                ybridControl.play()
+                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                sleep(2)
+                
+                ybridControl.swapService(to:"ad-injection-demo")
+                // todo read from metadata.service
+                sleep(8)
+                
+                         
+                ybridControl.stop()
+                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
+    }
+
+    
 }
 
 class Poller {

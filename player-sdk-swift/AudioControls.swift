@@ -51,6 +51,8 @@ public protocol YbridControl : PlaybackControl {
     func skipBackward(_ type:ItemType?)
     
     func swapItem()
+    func swapToMainItem()
+    func swapService(to id:String)
 }
 
 public protocol YbridControlListener : AudioPlayerListener {

@@ -129,7 +129,18 @@ public class MediaSession  {
     
     func swapItem() {
         if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.swap()
+            v2Control.swapItem()
+        }
+    }
+    func swapToMainItem() {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.swapToMainItem()
+        }
+    }
+    
+    func swapService(id:String) {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.swapService(id: id)
         }
     }
 }

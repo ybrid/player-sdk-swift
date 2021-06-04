@@ -172,7 +172,7 @@ class YbridResponseTests : XCTestCase {
         print(ybrid)
     }
     
-    func testYbridInfoResponse_SwapsBouquet() throws {
+    func testYbridInfoResponse_Swaps() throws {
         guard let jsonData = try readJsonFromFile("ybridNewsResponse") else {
             XCTFail(); return
         }
@@ -186,6 +186,21 @@ class YbridResponseTests : XCTestCase {
         XCTAssertNotNil(bouquet)
         XCTAssertEqual(6, bouquet?.availableServices.count)
     }
+    
+    func testYbridInfoResponse_SwapService() throws {
+        guard let jsonData = try readJsonFromFile("ybridSwapServiceResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridSwapServiceResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+        let bouquet = ybrid.__responseObject.bouquet
+        
+        XCTAssertNotNil(bouquet)
+        XCTAssertEqual(2, bouquet.availableServices.count)
+    }
+    
     
     
 }

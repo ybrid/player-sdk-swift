@@ -13,6 +13,7 @@
 		1711D183263AB45400882D2B /* MetadataMappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1711D182263AB45400882D2B /* MetadataMappings.swift */; };
 		1711D184263AB45400882D2B /* MetadataMappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1711D182263AB45400882D2B /* MetadataMappings.swift */; };
 		1711D185263AB45400882D2B /* MetadataMappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1711D182263AB45400882D2B /* MetadataMappings.swift */; };
+		171201BA266AE69900DB9463 /* ybridSwapServiceResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */; };
 		17134569263015440054DB9D /* MediaSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17134568263015440054DB9D /* MediaSessionTests.swift */; };
 		171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345B426306D780054DB9D /* ConsumeMetadataTests.swift */; };
 		171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345B426306D780054DB9D /* ConsumeMetadataTests.swift */; };
@@ -193,6 +194,7 @@
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		17109E1025F8DF4C003DA621 /* DecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodingError.swift; sourceTree = "<group>"; };
 		1711D182263AB45400882D2B /* MetadataMappings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataMappings.swift; sourceTree = "<group>"; };
+		171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapServiceResponse.json; sourceTree = "<group>"; };
 		17134568263015440054DB9D /* MediaSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSessionTests.swift; sourceTree = "<group>"; };
 		171345B426306D780054DB9D /* ConsumeMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeMetadataTests.swift; sourceTree = "<group>"; };
 		171345C3263153500054DB9D /* MediaControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControl.swift; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 		17651DEB266856F9005D46BA /* res */ = {
 			isa = PBXGroup;
 			children = (
+				171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */,
 				17651DEC2668577A005D46BA /* ybridBouquetResponse.json */,
 				17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */,
 				17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */,
@@ -749,6 +752,7 @@
 				17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */,
 				17268BE6265E8CBE00E2F8E3 /* ybridDateDecoding.json in Resources */,
 				17268BE4265D6D9500E2F8E3 /* ybridWindToLiveResponse.json in Resources */,
+				171201BA266AE69900DB9463 /* ybridSwapServiceResponse.json in Resources */,
 				17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */,
 				17651DED2668577A005D46BA /* ybridBouquetResponse.json in Resources */,
 				17E9AB9E26554B6C001ED9C8 /* ybridResponseMilliseconds.json in Resources */,
