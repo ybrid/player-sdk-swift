@@ -77,10 +77,13 @@ class OpusMetadata : AbstractMetadata {
 }
 
 class YbridMetadata : AbstractMetadata {
-    init(ybridV2:YbridV2Metadata) {
+    var bouquet:YbridBouquet?
+    
+    init(ybridV2:YbridV2Metadata, bouquet:YbridBouquet? = nil) {
         super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
                    next: YbridMetadata.createItem(ybrid: ybridV2.nextItem),
                    station: YbridMetadata.createStation(ybridV2.station) )
+        self.bouquet = bouquet
     }
     
     // content of __responseObject.metatdata.station
@@ -109,5 +112,7 @@ class YbridMetadata : AbstractMetadata {
         }
         return result
     }
+    
+    
 }
 

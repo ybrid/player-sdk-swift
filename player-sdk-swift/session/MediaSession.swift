@@ -77,7 +77,7 @@ public class MediaSession  {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                return YbridMetadata(ybridV2: ybridData)
+                return YbridMetadata(ybridV2: ybridData, bouquet: v2Control.bouquet)
             }
         }
         return nil
@@ -87,7 +87,7 @@ public class MediaSession  {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                let ybridMetadata = YbridMetadata(ybridV2: ybridData)
+                let ybridMetadata = YbridMetadata(ybridV2: ybridData, bouquet: v2Control.bouquet)
                 metadata.delegate(with: ybridMetadata)
             }
         }

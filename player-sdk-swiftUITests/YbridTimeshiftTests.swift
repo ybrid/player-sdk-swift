@@ -235,14 +235,14 @@ class YbridTimeshiftTests: XCTestCase {
                 sleep(2)
         
                 ybridControl.skipBackward(nil)
-                let type = ybridPlayerListener.metadata?.current?.type
+                let type = ybridPlayerListener.metadatas.last?.current?.type
                 XCTAssertNotNil(type)
                 Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
 
                 sleep(4)
   
                 ybridControl.skipBackward(nil)
-                let typeNow = ybridPlayerListener.metadata?.current?.type
+                let typeNow = ybridPlayerListener.metadatas.last?.current?.type
                 XCTAssertEqual(type, typeNow)
                 Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
 
@@ -289,7 +289,7 @@ class YbridTimeshiftTests: XCTestCase {
         let took = wait(max: maxSeconds) {
             return ybridPlayerListener.isItem(type)
         }
-        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.metadata?.current?.type), not \(type)")
+        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.metadatas.last?.current?.type), not \(type)")
     }
     
     
@@ -323,9 +323,10 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     func reset() {
         offsets.removeAll()
         errors.removeAll()
+        metadatas.removeAll()
     }
     
-    var metadata:Metadata?
+    var metadatas:[Metadata] = []
     var offsets:[TimeInterval] = []
     var errors:[AudioPlayerError] = []
     
@@ -334,7 +335,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }}
     
     func isItem(_ type:ItemType) -> Bool {
-        if let currentType = metadata?.current?.type {
+        if let currentType = metadatas.last?.current?.type {
             return type == currentType
         }
         return false
@@ -347,7 +348,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        self.metadata = metadata
+        metadatas.append(metadata)
     }
 
     override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {

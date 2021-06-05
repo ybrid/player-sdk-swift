@@ -293,10 +293,10 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
 class YbridAudioPlayer : AudioPlayer, YbridControl {
     
     override init(session:MediaSession, listener:AudioPlayerListener?) {
-        super.init(session: session, listener: listener)
         if let ybridListener = listener as? YbridControlListener {
             session.ybridListener = ybridListener
         }
+        super.init(session: session, listener: listener)
     }
     
     var offsetToLiveS: TimeInterval { get {

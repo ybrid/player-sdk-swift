@@ -38,6 +38,9 @@ public protocol Metadata {
     var station: Station? { get }
     var current: Item? { get }
     var next: Item? { get }
+    
+    var serviceId: String? { get }
+    var services: [String]? { get }
 }
 
 public struct Item {
@@ -138,6 +141,29 @@ class AbstractMetadata : Metadata {
             return delegate.next
         }
         return nextItem
+    }
+    
+    public final var serviceId: String? {
+        if let delegate = delegate {
+            return delegate.serviceId
+        }
+        
+        guard let ybrid = self as? YbridMetadata else {
+            return nil
+        }
+        return ybrid.bouquet?.activeServiceId
+    }
+    
+    public final var services: [String]? {
+        if let delegate = delegate {
+            return delegate.services
+        }
+        
+        guard let ybrid = self as? YbridMetadata,
+              let bouquet = ybrid.bouquet else {
+            return nil
+        }
+        return bouquet.availableServices.map{ $0.id }
     }
 }
 

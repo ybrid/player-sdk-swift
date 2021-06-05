@@ -41,25 +41,34 @@ class YbridSwapTests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
-        print( "offsets were \(ybridPlayerListener.offsets)")
+
+
     }
     
 
     func test01_SwapItem() throws {
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: nil,
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
+                let titleMain = ybridPlayerListener.metadatas.last?.displayTitle
+                print("title= \(titleMain ?? "(nil)")")
                 
                 ybridControl.swapItem()
-                // todo read from metadata.
-                sleep(8)
+                _ = poller.wait(max: 10) {
+                    let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle
+                    print("title=\(titleSwapped ?? "(nil)")")
+                    return titleMain != titleSwapped
+                }
                 
                 ybridControl.swapToMainItem()
-                // todo read from metadata.
-                sleep(8)
+                _ = poller.wait(max: 10) {
+                    let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle
+                    print("title=\(titleSwapped ?? "(nil)")")
+                    return titleMain == titleSwapped
+                }
                 
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
@@ -68,20 +77,29 @@ class YbridSwapTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
+        let titles:[String] =
+        ybridPlayerListener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        print( "titles were \(titles)")
+        
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.metadatas.count, 3)
     }
 
     func test02_SwapService() throws {
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: nil,
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                let mainService = ybridPlayerListener.metadatas.last?.serviceId
                 sleep(2)
                 
                 ybridControl.swapService(to:"ad-injection-demo")
-                // todo read from metadata.service
-                sleep(8)
+                _ = poller.wait(max: 10) {
+                    let serviceSwapped = ybridPlayerListener.metadatas.last?.serviceId
+                    print("service=\(serviceSwapped ?? "(nil)")")
+                    return serviceSwapped != mainService
+                }
+                sleep(2)
                 
                          
                 ybridControl.stop()
@@ -91,7 +109,11 @@ class YbridSwapTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
+        let services:[String] =
+        ybridPlayerListener.metadatas.map{ $0.serviceId ?? "(nil)"}
+        print( "services were \(services)")
+        
+        XCTAssertEqual(services.count, 3)
     }
 
     
@@ -108,7 +130,7 @@ class Poller {
         XCTAssertLessThanOrEqual(took, maxSeconds, "not \(until) within \(maxSeconds) s")
     }
 
-    private func wait(max maxSeconds:Int, until:() -> (Bool)) -> Int {
+    func wait(max maxSeconds:Int, until:() -> (Bool)) -> Int {
         var seconds = 0
         while !until() && seconds <= maxSeconds {
             sleep(1)

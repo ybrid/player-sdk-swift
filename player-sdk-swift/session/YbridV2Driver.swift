@@ -55,9 +55,22 @@ class YbridV2Driver : MediaDriver {
         }
     }}
     
+    var bouquet:YbridBouquet? { didSet {
+        if Logger.verbose == true,
+           let data = bouquet, oldValue != bouquet {
+            do {
+                let bouquetData = try encoder.encode(data)
+                let bouquetString = String(data: bouquetData, encoding: .utf8)!
+                Logger.session.debug("current bouquet is \(bouquetString)")
+            } catch {
+                Logger.session.error("cannot log bouquet")
+            }
+        }
+    }}
+    
     var swapsLeft:Int? { didSet {
         if let swaps = swapsLeft, swaps != oldValue, swaps == 0 {
-            let notice = SessionError(ErrorKind.noSwapsLeft, "no swaps left")
+            let notice = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
             listener?.error(.notice, notice)
         }
     }}
@@ -130,6 +143,7 @@ class YbridV2Driver : MediaDriver {
         valid = response.valid
         token = response.sessionId
         // updateBouquet(response.getRawBouquet());
+        bouquet = response.bouquet
         ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
         
         if let playout = response.playout {
@@ -337,7 +351,7 @@ class YbridV2Driver : MediaDriver {
         }
         Logger.session.info("swap item")
         guard swapsLeft != 0 else {
-            let warning = SessionError(ErrorKind.noSwapsLeft, "no swap available")
+            let warning = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
             listener?.error(.recoverable, warning)
             return
         }
@@ -476,7 +490,7 @@ class YbridV2Driver : MediaDriver {
 
     
     private func accecpt(bouquetObj:YbridBouquetObject) {
-//        bouquet = bouquetObj.bouquet
+        bouquet = bouquetObj.bouquet
     }
     
 }
