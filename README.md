@@ -23,8 +23,8 @@ try AudioPlayer.open(for: myEndpoint, listener: nil) {
     control.play()
     sleep(10) // of course the program must not end here
           
-    player.stop()
-    player.close()
+    control.stop()
+    control.close()
 }
 ```
 
