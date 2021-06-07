@@ -82,7 +82,15 @@ public class MediaSession  {
         }
         return nil
     }
-    
+    func fetchBouquetSync() -> AbstractMetadata? {
+        if let v2Control = (mediaControl as? YbridV2Driver) {
+            v2Control.info()
+            if let ybridData = v2Control.ybridMetadata {
+                return YbridMetadata(bouquet: v2Control.bouquet)
+            }
+        }
+        return nil
+    }
     func maintainMetadata(metadata: AbstractMetadata) -> UUID {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()

@@ -28,7 +28,7 @@ import YbridPlayerSDK
 
 class YbridSwapTests: XCTestCase {
 
-    var player:YbridControl?
+    var control:YbridControl?
     let ybridPlayerListener = TestYbridPlayerListener()
     var semaphore:DispatchSemaphore?
     
@@ -40,34 +40,40 @@ class YbridSwapTests: XCTestCase {
         semaphore = DispatchSemaphore(value: 0)
     }
     
-    override func tearDownWithError() throws {
-
-
-    }
+    override func tearDownWithError() throws {}
     
 
     func test01_SwapItem() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+                playbackControl: { [self] (control) in
+                    XCTFail("ybridControl expected");semaphore?.signal()},
+                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
-                let titleMain = ybridPlayerListener.metadatas.last?.displayTitle
-                print("title= \(titleMain ?? "(nil)")")
+                guard let titleMain = ybridPlayerListener.metadatas.last?.displayTitle else {
+                    XCTFail("must have recieved metadata");
+                    semaphore?.signal(); return
+                }
+                print("title= \(titleMain)")
                 
                 ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
-                    let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle
-                    print("title=\(titleSwapped ?? "(nil)")")
+                    guard let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle else {
+                        return false
+                    }
+                    print("title=\(titleSwapped)")
                     return titleMain != titleSwapped
                 }
                 
                 ybridControl.swapToMainItem()
                 _ = poller.wait(max: 10) {
-                    let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle
-                    print("title=\(titleSwapped ?? "(nil)")")
-                    return titleMain == titleSwapped
+                    guard let titleSwappedMain = ybridPlayerListener.metadatas.last?.displayTitle else {
+                        return false
+                    }
+                    print("title=\(titleSwappedMain)")
+                    return titleMain == titleSwappedMain
                 }
                 
                 ybridControl.stop()
@@ -81,11 +87,13 @@ class YbridSwapTests: XCTestCase {
         ybridPlayerListener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         print( "titles were \(titles)")
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.metadatas.count, 3)
+        XCTAssertTrue((3...4).contains(ybridPlayerListener.metadatas.count), "should be 3 (4 if item changed) metadata changes, but were \(ybridPlayerListener.metadatas.count)")
     }
 
     func test02_SwapService() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+               playbackControl: { [self] (control) in
+                     XCTFail("ybridControl expected");semaphore?.signal()},
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -113,7 +121,7 @@ class YbridSwapTests: XCTestCase {
         ybridPlayerListener.metadatas.map{ $0.serviceId ?? "(nil)"}
         print( "services were \(services)")
         
-        XCTAssertEqual(services.count, 3)
+        XCTAssertEqual(services.count, 3, "should be 3 service changes, but were \(services.count)")
     }
 
     

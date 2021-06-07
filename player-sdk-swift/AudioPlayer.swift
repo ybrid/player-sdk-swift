@@ -142,6 +142,9 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
+        if let bouquet = session.fetchBouquetSync() {
+            listener?.metadataChanged(bouquet)
+        }
         PlayerContext.setupAudioSession()
     }
 

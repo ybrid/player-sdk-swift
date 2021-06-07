@@ -86,6 +86,11 @@ class YbridMetadata : AbstractMetadata {
         self.bouquet = bouquet
     }
     
+    init(bouquet:YbridBouquet?) {
+        super.init(current: nil, next: nil, station: nil)
+        self.bouquet = bouquet
+    }
+    
     // content of __responseObject.metatdata.station
     private static func createStation(_ ybridStation: YbridStation) -> Station? {
         return Station(name: ybridStation.name, genre:  ybridStation.genre)
