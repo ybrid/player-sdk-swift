@@ -160,6 +160,8 @@
 		17E9AB9E26554B6C001ED9C8 /* ybridResponseMilliseconds.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */; };
 		17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */; };
 		17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */; };
+		17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
+		17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		2088CECD835FBD183B4DC801 /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */; };
 		359F457B7FAB28D802B89782 /* Pods_player_sdk_swift_mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */; };
 		98E6DEF77CC3F257968EDFB3 /* Pods_player_sdk_swift_player_sdk_swiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */; };
@@ -268,6 +270,7 @@
 		17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridResponseMilliseconds.json; sourceTree = "<group>"; };
 		17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSessionCreated.json; sourceTree = "<group>"; };
 		17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridNewsResponse.json; sourceTree = "<group>"; };
+		17F6A14E266F5B0100F48432 /* Bouquet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bouquet.swift; sourceTree = "<group>"; };
 		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
 		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
 		2C61FE7BFF24DBD6428AA129 /* Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift-player-sdk-swiftMacTests/Pods-player-sdk-swift-player-sdk-swiftMacTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -398,6 +401,7 @@
 				17539E81262720F5000FE902 /* JsonRequest.swift */,
 				1711D182263AB45400882D2B /* MetadataMappings.swift */,
 				17539E8A26272AC8000FE902 /* SessionError.swift */,
+				17F6A14E266F5B0100F48432 /* Bouquet.swift */,
 			);
 			path = session;
 			sourceTree = "<group>";
@@ -966,6 +970,7 @@
 				1799DC9725D565B30055C973 /* PlaybackBuffer.swift in Sources */,
 				1799DC9825D565B30055C973 /* PlaybackScheduling.swift in Sources */,
 				17539E48262591C3000FE902 /* MediaSession.swift in Sources */,
+				17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */,
 				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
 				1799DCAB25D565DB0055C973 /* MpegData.swift in Sources */,
 				17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */,
@@ -1100,6 +1105,7 @@
 				17CBC8D125E2517F00B2F7E7 /* PlaybackBuffer.swift in Sources */,
 				17CBC8D225E2517F00B2F7E7 /* PlaybackScheduling.swift in Sources */,
 				17539E4A262591C3000FE902 /* MediaSession.swift in Sources */,
+				17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */,
 				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
 				17CBC8D425E2517F00B2F7E7 /* MpegData.swift in Sources */,
 				17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */,

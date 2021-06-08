@@ -77,18 +77,30 @@ class OpusMetadata : AbstractMetadata {
 }
 
 class YbridMetadata : AbstractMetadata {
-    var bouquet:YbridBouquet?
+    var bouquet:Bouquet?
     
     init(ybridV2:YbridV2Metadata, bouquet:YbridBouquet? = nil) {
         super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
                    next: YbridMetadata.createItem(ybrid: ybridV2.nextItem),
                    station: YbridMetadata.createStation(ybridV2.station) )
-        self.bouquet = bouquet
+        if let bouquet = bouquet {
+            self.bouquet = createBouquet(bouquet)
+        }
     }
     
-    init(bouquet:YbridBouquet?) {
+    init(bouquet:YbridBouquet) {
         super.init(current: nil, next: nil, station: nil)
-        self.bouquet = bouquet
+        self.bouquet = createBouquet(bouquet)
+    }
+    
+    
+    private func createBouquet(_ ybridBouquet: YbridBouquet) -> Bouquet? {
+        do {
+            return try Bouquet(bouquet: ybridBouquet)
+        } catch {
+            Logger.session.error("\(error.localizedDescription)")
+        }
+        return nil
     }
     
     // content of __responseObject.metatdata.station

@@ -85,8 +85,9 @@ public class MediaSession  {
     func fetchBouquetSync() -> AbstractMetadata? {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
-            if let ybridData = v2Control.ybridMetadata {
-                return YbridMetadata(bouquet: v2Control.bouquet)
+            if let ybridData = v2Control.ybridMetadata,
+               let ybridBouquet = v2Control.bouquet {
+                return YbridMetadata(bouquet: ybridBouquet)
             }
         }
         return nil

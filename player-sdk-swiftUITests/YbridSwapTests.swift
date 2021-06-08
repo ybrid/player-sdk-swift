@@ -98,13 +98,13 @@ class YbridSwapTests: XCTestCase {
                 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                let mainService = ybridPlayerListener.metadatas.last?.serviceId
+                let mainService = ybridPlayerListener.metadatas.last?.activeService
                 sleep(2)
                 
                 ybridControl.swapService(to:"ad-injection-demo")
                 _ = poller.wait(max: 10) {
-                    let serviceSwapped = ybridPlayerListener.metadatas.last?.serviceId
-                    print("service=\(serviceSwapped ?? "(nil)")")
+                    let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
+                    print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped != mainService
                 }
                 sleep(2)
@@ -118,7 +118,7 @@ class YbridSwapTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
         
         let services:[String] =
-        ybridPlayerListener.metadatas.map{ $0.serviceId ?? "(nil)"}
+            ybridPlayerListener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
         print( "services were \(services)")
         
         XCTAssertEqual(services.count, 3, "should be 3 service changes, but were \(services.count)")

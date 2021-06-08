@@ -70,6 +70,7 @@ enum ErrorKind : ErrorCode {
     
     // ybrid actions
     case noSwapsLeft = 701
+    case invalidBouquet = 702
     
 }
 

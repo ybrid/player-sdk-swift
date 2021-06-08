@@ -1,5 +1,5 @@
 //
-// Config.xcconfig
+// Bouquet.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -23,26 +23,27 @@
 // SOFTWARE.
 //
 
-// Configuration settings file format documentation can be found at:
-// https://help.apple.com/xcode/#/dev745c5c974
+import Foundation
 
-#include "Pods/Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.release.xcconfig"
 
-// Product Version, PLEASE CHANGE HERE to affect all targets
-MARKETING_VERSION = 0.11.0
-// Build number, PLEASE CHANGE HERE to affect all targets
-CURRENT_PROJECT_VERSION = 24
-
-// Architectures
-ARCHS = arm64 armv7 x86_64 x86_64h i386
-EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64
-EXCLUDED_ARCHS[sdk=macosx*] = i386
-SUPPORTED_PLATFORMS = iphoneos iphonesimulator macosx
-
-// Deployment
-TARGETED_DEVICE_FAMILY = 1,2,6
-IPHONEOS_DEPLOYMENT_TARGET = 9.0
-MACOSX_DEPLOYMENT_TARGET = 10.10
-
-// Swift Compiler
-SWIFT_VERSION = 4.0
+public class Bouquet {
+    
+    let services:[Service]
+    private let defaultService:Service
+    let activeService:Service
+    
+    init(bouquet: YbridBouquet) throws {
+        self.services = bouquet.availableServices.map{ Service(identifier: $0.id, displayName: $0.displayName, iconUri: $0.iconURL) }
+        let mainServiceIndex = self.services.firstIndex { (service) in return service.identifier == bouquet.primaryServiceId }
+        guard let mainIndex = mainServiceIndex else {
+            throw SessionError(.invalidBouquet, "missing primary service id")
+        }
+        self.defaultService = services[mainIndex]
+        let activeServiceIndex = self.services.firstIndex { (service) in return service.identifier == bouquet.activeServiceId }
+        guard let activeIndex = activeServiceIndex else {
+            throw SessionError(.invalidBouquet, "missing active service id")
+        }
+        self.activeService = services[activeIndex]
+    }
+    
+}

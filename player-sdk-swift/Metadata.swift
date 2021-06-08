@@ -29,6 +29,13 @@
 
 import Foundation
 
+public enum SubInfo {
+    case metadata
+    case bouquet
+//    case PLAYOUT
+//    case CAPABILITIES
+//    case VALIDITY
+}
 
 public protocol Metadata {
     // fixed syntax containing TITLE and if available ARTIST
@@ -39,8 +46,8 @@ public protocol Metadata {
     var current: Item? { get }
     var next: Item? { get }
     
-    var serviceId: String? { get }
-    var services: [String]? { get }
+    var activeService: Service? { get }
+    var services: [Service]? { get }
 }
 
 public struct Item {
@@ -71,6 +78,13 @@ public enum ItemType : String  {
 public struct Station {
     public var name: String?
     public var genre: String?
+}
+
+public struct Service : Equatable {
+    public let identifier:String
+    public var displayName:String?
+    public var iconUri:String?
+    public var icon:Data?
 }
 
 class AbstractMetadata : Metadata {
@@ -143,18 +157,18 @@ class AbstractMetadata : Metadata {
         return nextItem
     }
     
-    public final var serviceId: String? {
+    public final var activeService: Service? {
         if let delegate = delegate {
-            return delegate.serviceId
+            return delegate.activeService
         }
         
         guard let ybrid = self as? YbridMetadata else {
             return nil
         }
-        return ybrid.bouquet?.activeServiceId
+        return ybrid.bouquet?.activeService
     }
     
-    public final var services: [String]? {
+    public final var services: [Service]? {
         if let delegate = delegate {
             return delegate.services
         }
@@ -163,7 +177,7 @@ class AbstractMetadata : Metadata {
               let bouquet = ybrid.bouquet else {
             return nil
         }
-        return bouquet.availableServices.map{ $0.id }
+        return bouquet.services
     }
 }
 
