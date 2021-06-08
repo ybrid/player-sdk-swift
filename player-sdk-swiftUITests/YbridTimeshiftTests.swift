@@ -317,18 +317,18 @@ class YbridTimeshiftTests: XCTestCase {
 }
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
-    
-  
-    
+
     func reset() {
         offsets.removeAll()
         errors.removeAll()
         metadatas.removeAll()
+        services.removeAll()
     }
     
     var metadatas:[Metadata] = []
     var offsets:[TimeInterval] = []
     var errors:[AudioPlayerError] = []
+    var services:[[Service]] = []
     
     var offsetChanges:Int { get {
         return offsets.count
@@ -344,14 +344,24 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
+        Logger.testing.info("-- current offset is \(offset.S)")
         offsets.append(offset)
     }
+
+    func servicesChanged(_ services: [Service]) {
+        Logger.testing.info("-- provided service ids are \(services.map{$0.identifier})")
+        self.services.append(services)
+    }
+    
     
     override func metadataChanged(_ metadata: Metadata) {
+        Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")
         metadatas.append(metadata)
+
     }
 
     override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+        super.error(severity, exception)
         errors.append(exception)
     }
     

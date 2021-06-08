@@ -162,6 +162,7 @@
 		17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */; };
 		17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
+		17F6A151266F789D00F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		2088CECD835FBD183B4DC801 /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D8C31E41E1042CFFDEF85BF /* Pods_player_sdk_swift_player_sdk_swiftIOSTests.framework */; };
 		359F457B7FAB28D802B89782 /* Pods_player_sdk_swift_mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51B753E7129C08D44B176455 /* Pods_player_sdk_swift_mac.framework */; };
 		98E6DEF77CC3F257968EDFB3 /* Pods_player_sdk_swift_player_sdk_swiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 004DC3B2C5C4871659887A5F /* Pods_player_sdk_swift_player_sdk_swiftTests.framework */; };
@@ -1037,6 +1038,7 @@
 				17D45D802659591F00983025 /* YbridSteelinessTests.swift in Sources */,
 				171345C5263153500054DB9D /* MediaControl.swift in Sources */,
 				1799DD3C25D580D40055C973 /* CustomErrorTests.swift in Sources */,
+				17F6A151266F789D00F48432 /* Bouquet.swift in Sources */,
 				1799DD3A25D580D40055C973 /* OpusMappingTests.swift in Sources */,
 				1799DCDD25D566C00055C973 /* OpusData.swift in Sources */,
 				1799DCCE25D566AF0055C973 /* AudioPipeline.swift in Sources */,

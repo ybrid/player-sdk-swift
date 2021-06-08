@@ -29,16 +29,17 @@ import Foundation
 public class Bouquet {
     
     let services:[Service]
-    private let defaultService:Service
+    var defaultService:Service?
     let activeService:Service
     
     init(bouquet: YbridBouquet) throws {
         self.services = bouquet.availableServices.map{ Service(identifier: $0.id, displayName: $0.displayName, iconUri: $0.iconURL) }
-        let mainServiceIndex = self.services.firstIndex { (service) in return service.identifier == bouquet.primaryServiceId }
-        guard let mainIndex = mainServiceIndex else {
-            throw SessionError(.invalidBouquet, "missing primary service id")
-        }
-        self.defaultService = services[mainIndex]
+        if let mainServiceIndex = self.services.firstIndex(where: { (service) in return service.identifier == bouquet.primaryServiceId }) {
+            self.defaultService = services[mainServiceIndex]
+        } else {
+            let error = SessionError(.invalidBouquet, "missing primary service id")
+            Logger.session.error(error.localizedDescription)
+       }
         let activeServiceIndex = self.services.firstIndex { (service) in return service.identifier == bouquet.activeServiceId }
         guard let activeIndex = activeServiceIndex else {
             throw SessionError(.invalidBouquet, "missing active service id")

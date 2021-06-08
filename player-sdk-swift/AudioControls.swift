@@ -57,6 +57,7 @@ public protocol YbridControl : PlaybackControl {
 
 public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
+    func servicesChanged(_ services:[Service])
 }
 
 public extension AudioPlayer {

@@ -29,6 +29,8 @@ protocol MediaControl {
     var playbackUri: String { get }
     var connected: Bool { get }
     var mediaProtocol: MediaProtocol { get }
+    func hasChanged(_ what: SubInfo) -> Bool
+    func clearChanged(_ what: SubInfo)
 }
 
 class MediaDriver : MediaControl {
@@ -41,7 +43,14 @@ class MediaDriver : MediaControl {
     var connected:Bool = false { didSet {
         Logger.session.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
-
+    
+    var bouquet:Bouquet? { didSet {
+        changed.insert(SubInfo.bouquet)
+    }}
+    
+    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
+    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
+    
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
         self.session = session
@@ -49,15 +58,17 @@ class MediaDriver : MediaControl {
         self.baseUrl = URL(string: session.endpoint.uri)!
     }
     
-    //    func executeRequest(@NotNull Request<Command> request) throws
     func connect() throws {}
     func disconnect() {}
-
     //    var playoutInfo: PlayoutInfo { get }
-    
     //    var capabilities: CapabilitySet { get }
-    //    void clearChanged(@NotNull SubInfo what);
-    //    func hasChanged(@NotNull SubInfo what) -> Bool
+    
+    func clearChanged(_ what: SubInfo) {
+        changed.remove(what)
+    }
+    func hasChanged(_ what: SubInfo) -> Bool {
+        return changed.contains(what)
+    }
     
     //    func getBouquet() -> Bouquet
     //    @NotNull Service getCurrentService();

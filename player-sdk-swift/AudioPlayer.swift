@@ -142,9 +142,6 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
         self.session = session
-        if let bouquet = session.fetchBouquetSync() {
-            listener?.metadataChanged(bouquet)
-        }
         PlayerContext.setupAudioSession()
     }
 
@@ -298,12 +295,19 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     override init(session:MediaSession, listener:AudioPlayerListener?) {
         if let ybridListener = listener as? YbridControlListener {
             session.ybridListener = ybridListener
+            if session.mediaControl?.hasChanged(SubInfo.bouquet) == true {
+                if let services = session.services() {
+                    ybridListener.servicesChanged(services)
+                }
+            }
         }
         super.init(session: session, listener: listener)
     }
     
     var offsetToLiveS: TimeInterval { get {
-        return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
+        playerQueue.sync {
+            return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
+        }
     }}
  
     func wind(by:TimeInterval) {
@@ -348,6 +352,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func swapService(to id:String) {
         playerQueue.async {
             self.session.swapService(id:id)
+            
         }
     }
 }

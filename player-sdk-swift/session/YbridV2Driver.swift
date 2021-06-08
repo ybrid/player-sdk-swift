@@ -42,31 +42,37 @@ class YbridV2Driver : MediaDriver {
         }
     }}
     
-    var ybridMetadata:YbridV2Metadata? { didSet {
-        if Logger.verbose == true,
-           let data = ybridMetadata, oldValue != ybridMetadata {
+    var ybridBouquet:YbridBouquet? { didSet {
+        if let ybridBouquet = ybridBouquet, ybridBouquet != oldValue {
             do {
-                let currentItemData = try encoder.encode(data.currentItem)
-                let metadataString = String(data: currentItemData, encoding: .utf8)!
-                Logger.session.debug("current item is \(metadataString)")
+                if Logger.verbose == true {
+                    let bouquetData = try encoder.encode(ybridBouquet)
+                    let bouquetString = String(data: bouquetData, encoding: .utf8)!
+                    Logger.session.debug("current bouquet is \(bouquetString)")
+                }
+                super.bouquet = try Bouquet(bouquet: ybridBouquet)
             } catch {
-                Logger.session.error("cannot log metadata")
+                Logger.session.error(error.localizedDescription)
             }
         }
     }}
     
-    var bouquet:YbridBouquet? { didSet {
-        if Logger.verbose == true,
-           let data = bouquet, oldValue != bouquet {
-            do {
-                let bouquetData = try encoder.encode(data)
-                let bouquetString = String(data: bouquetData, encoding: .utf8)!
-                Logger.session.debug("current bouquet is \(bouquetString)")
-            } catch {
-                Logger.session.error("cannot log bouquet")
+    var ybridMetadata:YbridV2Metadata? { didSet {
+        
+        if let data = ybridMetadata, oldValue != ybridMetadata {
+            if Logger.verbose == true {
+                do {
+                    let currentItemData = try encoder.encode(data.currentItem)
+                    let metadataString = String(data: currentItemData, encoding: .utf8)!
+                    Logger.session.debug("current item is \(metadataString)")
+                } catch {
+                    Logger.session.error("cannot log metadata")
+                }
             }
         }
+        
     }}
+    
     
     var swapsLeft:Int? { didSet {
         if let swaps = swapsLeft, swaps != oldValue, swaps == 0 {
@@ -143,7 +149,7 @@ class YbridV2Driver : MediaDriver {
         valid = response.valid
         token = response.sessionId
         // updateBouquet(response.getRawBouquet());
-        bouquet = response.bouquet
+        ybridBouquet = response.bouquet
         ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
         
         if let playout = response.playout {
@@ -359,6 +365,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
             let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: "swap item", queryParam: modeQuery)
+            Logger.session.info("swap item before accept")
             accecpt(swapped: swappedObj)
             if !valid {
                 try reconnect()
@@ -366,7 +373,7 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        
+        Logger.session.info("swap item done")
     }
 
     func swapToMainItem() -> Bool {
@@ -490,7 +497,7 @@ class YbridV2Driver : MediaDriver {
 
     
     private func accecpt(bouquetObj:YbridBouquetObject) {
-        bouquet = bouquetObj.bouquet
+        ybridBouquet = bouquetObj.bouquet
     }
     
 }

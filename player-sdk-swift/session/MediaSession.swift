@@ -77,26 +77,25 @@ public class MediaSession  {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                return YbridMetadata(ybridV2: ybridData, bouquet: v2Control.bouquet)
+                let metadata = YbridMetadata(ybridV2: ybridData)
+                metadata.currentService = mediaControl?.bouquet?.activeService
+                return metadata
             }
         }
         return nil
     }
-    func fetchBouquetSync() -> AbstractMetadata? {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.info()
-            if let ybridData = v2Control.ybridMetadata,
-               let ybridBouquet = v2Control.bouquet {
-                return YbridMetadata(bouquet: ybridBouquet)
-            }
-        }
-        return nil
+    
+    
+    func services() -> [Service]? {
+        return mediaControl?.bouquet?.services
     }
+    
     func maintainMetadata(metadata: AbstractMetadata) -> UUID {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.info()
             if let ybridData = v2Control.ybridMetadata {
-                let ybridMetadata = YbridMetadata(ybridV2: ybridData, bouquet: v2Control.bouquet)
+                let ybridMetadata = YbridMetadata(ybridV2: ybridData)
+                ybridMetadata.currentService = mediaControl?.bouquet?.activeService
                 metadata.delegate(with: ybridMetadata)
             }
         }
@@ -150,6 +149,12 @@ public class MediaSession  {
     func swapService(id:String) {
         if let v2Control = (mediaControl as? YbridV2Driver) {
             v2Control.swapService(id: id)
+//            if v2Control.swapService(id: id),
+//               let ybridV2Metadata = v2Control.ybridMetadata {
+//                let metadata = YbridMetadata(ybridV2: ybridV2Metadata)
+//                metadata.currentService = mediaControl?.bouquet?.activeService
+//                ybridListener?.metadataChanged(metadata)
+//            }
         }
     }
 }

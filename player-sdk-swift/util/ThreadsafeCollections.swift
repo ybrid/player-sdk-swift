@@ -64,6 +64,16 @@ class ThreadsafeSet<T:Hashable> {
             self.entries.insert(entry)
         }
     }
+    func contains(_ entry:T) -> Bool {
+        return queue.sync {
+            return self.entries.contains(entry)
+        }
+    }
+    func remove(_ entry:T) {
+        queue.async {
+            self.entries.remove(entry)
+        }
+    }
     func popAll(act: @escaping (T) -> () ) {
         queue.async {
             while let entry = self.entries.popFirst() {

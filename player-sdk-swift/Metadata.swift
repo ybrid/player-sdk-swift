@@ -47,7 +47,6 @@ public protocol Metadata {
     var next: Item? { get }
     
     var activeService: Service? { get }
-    var services: [Service]? { get }
 }
 
 public struct Item {
@@ -80,7 +79,7 @@ public struct Station {
     public var genre: String?
 }
 
-public struct Service : Equatable {
+public struct Service {
     public let identifier:String
     public var displayName:String?
     public var iconUri:String?
@@ -120,15 +119,6 @@ class AbstractMetadata : Metadata {
         stationInfo!.genre = genre
     }
     
-    func setStationInfo(broadcaster:String, genre:String) {
-        guard var station = stationInfo else {
-            stationInfo = Station(name:broadcaster, genre:genre)
-            return
-        }
-        station.name = broadcaster
-        station.genre = genre
-    }
-    
     public final var displayTitle: String? {
         if let delegate = delegate {
             return delegate.displayTitle
@@ -161,23 +151,11 @@ class AbstractMetadata : Metadata {
         if let delegate = delegate {
             return delegate.activeService
         }
-        
         guard let ybrid = self as? YbridMetadata else {
             return nil
         }
-        return ybrid.bouquet?.activeService
+        return ybrid.currentService
     }
     
-    public final var services: [Service]? {
-        if let delegate = delegate {
-            return delegate.services
-        }
-        
-        guard let ybrid = self as? YbridMetadata,
-              let bouquet = ybrid.bouquet else {
-            return nil
-        }
-        return bouquet.services
-    }
 }
 
