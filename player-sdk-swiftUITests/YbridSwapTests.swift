@@ -79,7 +79,8 @@ class YbridSwapTests: XCTestCase {
                     print("title back to main =\(titleSwappedMain)")
                     return titleSwappedMain == titleMain
                 }
-                
+                sleep(2)
+                    
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
@@ -94,7 +95,7 @@ class YbridSwapTests: XCTestCase {
         XCTAssertTrue((3...4).contains(ybridPlayerListener.metadatas.count), "should be 3 (4 if item changed) metadata changes, but were \(ybridPlayerListener.metadatas.count)")
     }
 
-    func test02_RecieveServices_BeforePlay() throws {
+    func test02_AvailableServices_BeforePlay() throws {
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
@@ -110,7 +111,45 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual(0,ybridPlayerListener.metadatas.count)
     }
     
-    func test03_SwapService() throws {
+    func test03_SwapService_BeforePlay() throws {
+        XCTAssertEqual(0,ybridPlayerListener.services.count)
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+               playbackControl: { [self] (control) in
+                     XCTFail("ybridControl expected"); semaphore?.signal()
+               },
+               ybridControl: { [self] (ybridControl) in
+
+                ybridControl.swapService(to: "ad-injection-demo")
+                sleep(2)
+                
+                ybridControl.play()
+                _ = poller.wait(max: 6) {
+                    let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
+                    print("service=\(String(describing: serviceSwapped))")
+                    return serviceSwapped?.identifier == "ad-injection-demo"
+                }
+                sleep(2)
+
+               ybridControl.stop()
+               poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertEqual(1,ybridPlayerListener.services.count)
+        XCTAssertEqual(2,ybridPlayerListener.services[0].count)
+        
+        let services:[String] =
+            ybridPlayerListener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+        print("services were \(services)")
+        
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.metadatas.count, 1)
+        XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.first?.activeService?.identifier)
+        XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.last?.activeService?.identifier)
+    }
+    
+    func test04_SwapService_OnPlay() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
                      XCTFail("ybridControl expected");semaphore?.signal()
@@ -144,7 +183,7 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual(services.count, 3, "should be 3 service changes, but were \(services.count)")
     }
     
-    func test04_SwapServiceBeforePlay() throws {
+    func test05_SwapService_AfterStop() throws {
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
@@ -152,62 +191,16 @@ class YbridSwapTests: XCTestCase {
                },
                ybridControl: { [self] (ybridControl) in
 
-                ybridControl.swapService(to: "ad-injection-demo")
-                sleep(2)
-                
                 ybridControl.play()
+                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
-                _ = poller.wait(max: 6) {
-                    let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
-                    print("service=\(String(describing: serviceSwapped))")
-                    return serviceSwapped?.identifier == "ad-injection-demo"
-                }
-
-               ybridControl.stop()
-               poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                
-                semaphore?.signal()
-               })
-        _ = semaphore?.wait(timeout: .distantFuture)
-        
-        
-        
-        let services:[String] =
-            ybridPlayerListener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
-        print("services were \(services)")
-        
-        XCTAssertEqual(1,ybridPlayerListener.services.count)
-        XCTAssertEqual(2,ybridPlayerListener.services[0].count)
-        
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.metadatas.count, 1)
-        XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.first?.activeService?.identifier)
-        XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.last?.activeService?.identifier)
-  
-    }
-   
-    
-    func test05_SwapServiceAfterStop() throws {
-        XCTAssertEqual(0,ybridPlayerListener.services.count)
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
-               playbackControl: { [self] (control) in
-                     XCTFail("ybridControl expected"); semaphore?.signal()
-               },
-               ybridControl: { [self] (ybridControl) in
-
-                
-                ybridControl.play()
-                sleep(2)
-                _ = poller.wait(max: 10) {
-                    let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
-                    print("service=\(String(describing: serviceSwapped))")
-                    return serviceSwapped?.identifier == "adaptive-demo"
-                }
 
                ybridControl.stop()
                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 ybridControl.swapService(to: "ad-injection-demo")
                 sleep(2)
+                
                 ybridControl.play()
                 _ = poller.wait(max: 10) {
                     let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
@@ -223,18 +216,16 @@ class YbridSwapTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
+        XCTAssertEqual(1,ybridPlayerListener.services.count)
+        XCTAssertEqual(2,ybridPlayerListener.services[0].count)
         
         let services:[String] =
             ybridPlayerListener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
         print( "services were \(services)")
         
-        XCTAssertEqual(1,ybridPlayerListener.services.count)
-        XCTAssertEqual(2,ybridPlayerListener.services[0].count)
-        
         XCTAssertEqual("adaptive-demo",  ybridPlayerListener.metadatas.first?.activeService?.identifier)
         XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.last?.activeService?.identifier)
     }
-
 }
 
 class Poller {
