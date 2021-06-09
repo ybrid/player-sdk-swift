@@ -152,7 +152,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
  
     var services: [Service] { get {
         playerQueue.sync {
-            return session.mediaControl?.bouquet?.services ?? []
+            return session.services ?? []
         }
     }}
     

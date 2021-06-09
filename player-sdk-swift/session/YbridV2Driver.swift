@@ -403,7 +403,6 @@ class YbridV2Driver : MediaDriver {
         swapsLeft = swapped.swapsLeft
     }
     
-    
     private func swapRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSwapInfo {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")

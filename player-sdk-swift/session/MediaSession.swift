@@ -35,9 +35,7 @@ public class MediaSession  {
     var mediaControl:MediaDriver?
      
     weak var ybridListener:YbridControlListener? { didSet {
-        if let v2Control = mediaControl as? YbridV2Driver {
-            v2Control.listener = ybridListener
-        }
+        v2Driver?.listener = ybridListener
     }}
     
     public var mediaProtocol:MediaProtocol? { get {
@@ -51,6 +49,16 @@ public class MediaSession  {
     var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
         DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
     )
+     
+    private var v2Driver:YbridV2Driver? { get {
+        return mediaControl as? YbridV2Driver
+    }}
+    var services: [Service]? { get {
+        return mediaControl?.bouquet?.services
+    }}
+    var offsetToLiveS: TimeInterval? { get {
+        return v2Driver?.offsetToLiveS
+    }}
     
     init(on endpoint:MediaEndpoint) {
         self.endpoint = endpoint
@@ -61,22 +69,21 @@ public class MediaSession  {
         self.mediaControl = mediaControl
         try mediaControl.connect()
     }
-    
     func close() {
         self.mediaControl?.disconnect()
     }
     
     func refresh() {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.info()
-            v2Control.listener?.offsetToLiveChanged(v2Control.offsetToLiveS)
+        if let media = v2Driver {
+            media.info()
+            media.listener?.offsetToLiveChanged(media.offsetToLiveS)
         }
     }
      
     func fetchMetadataSync() -> AbstractMetadata? {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.info()
-            if let ybridData = v2Control.ybridMetadata {
+        if let media = v2Driver {
+            media.info()
+            if let ybridData = media.ybridMetadata {
                 let metadata = YbridMetadata(ybridV2: ybridData)
                 metadata.currentService = mediaControl?.bouquet?.activeService
                 return metadata
@@ -84,16 +91,10 @@ public class MediaSession  {
         }
         return nil
     }
-    
-    
-    func services() -> [Service]? {
-        return mediaControl?.bouquet?.services
-    }
-    
     func maintainMetadata(metadata: AbstractMetadata) -> UUID {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.info()
-            if let ybridData = v2Control.ybridMetadata {
+        if let media = v2Driver {
+            media.info()
+            if let ybridData = media.ybridMetadata {
                 let ybridMetadata = YbridMetadata(ybridV2: ybridData)
                 ybridMetadata.currentService = mediaControl?.bouquet?.activeService
                 metadata.delegate(with: ybridMetadata)
@@ -103,59 +104,34 @@ public class MediaSession  {
         metadataDict.put(id: uuid, value: metadata)
         return uuid
     }
-    
     func popMetadata(uuid:UUID) -> AbstractMetadata? {
         return metadataDict.pop(id:uuid)
     }
     
-    
     func wind(by:TimeInterval) {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.wind(by: by)
-        }
+        v2Driver?.wind(by: by)
     }
     func windToLive() {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.windToLive()
-        }
+        v2Driver?.windToLive()
     }
     func wind(to:Date) {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.wind(to:to)
-        }
+        v2Driver?.wind(to:to)
     }
     func skipForward(_ type:ItemType?) {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.skipItem(true, type)
-        }
+        v2Driver?.skipItem(true, type)
     }
     func skipBackward(_ type:ItemType?) {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.skipItem(false, type)
-        }
+        v2Driver?.skipItem(false, type)
     }
     
     func swapItem() {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.swapItem()
-        }
+        v2Driver?.swapItem()
     }
     func swapToMainItem() {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.swapToMainItem()
-        }
+        _ = v2Driver?.swapToMainItem()
     }
-    
     func swapService(id:String) {
-        if let v2Control = (mediaControl as? YbridV2Driver) {
-            v2Control.swapService(id: id)
-//            if v2Control.swapService(id: id),
-//               let ybridV2Metadata = v2Control.ybridMetadata {
-//                let metadata = YbridMetadata(ybridV2: ybridV2Metadata)
-//                metadata.currentService = mediaControl?.bouquet?.activeService
-//                ybridListener?.metadataChanged(metadata)
-//            }
-        }
+        _ = v2Driver?.swapService(id: id)
     }
 }
 
