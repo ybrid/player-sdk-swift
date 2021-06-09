@@ -122,7 +122,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     var pipeline: AudioPipeline?
     var playback: Playback?
     
-    private weak var playerListener:AudioPlayerListener?
+    weak var playerListener:AudioPlayerListener?
     let playerQueue = DispatchQueue(label: "io.ybrid.playing")
     
     private var playbackState: PlaybackState = .stopped {
@@ -290,69 +290,3 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     }
 }
 
-class YbridAudioPlayer : AudioPlayer, YbridControl {
-    
-    override init(session:MediaSession, listener:AudioPlayerListener?) {
-        if let ybridListener = listener as? YbridControlListener {
-            session.ybridListener = ybridListener
-            if session.mediaControl?.hasChanged(SubInfo.bouquet) == true {
-                if let services = session.services() {
-                    ybridListener.servicesChanged(services)
-                }
-            }
-        }
-        super.init(session: session, listener: listener)
-    }
-    
-    var offsetToLiveS: TimeInterval { get {
-        playerQueue.sync {
-            return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
-        }
-    }}
- 
-    func wind(by:TimeInterval) {
-        playerQueue.async {
-            self.session.wind(by:by)
-        }
-    }
-    
-    func windToLive() {
-        playerQueue.async {
-            self.session.windToLive()
-        }
-    }
-    
-    func wind(to:Date) {
-        playerQueue.async {
-            self.session.wind(to:to)
-        }
-    }
-    
-    func skipForward(_ type:ItemType?) {
-        playerQueue.async {
-            self.session.skipForward(type)
-        }
-    }
-
-    func skipBackward(_ type:ItemType?) {
-        playerQueue.async {
-            self.session.skipBackward(type)
-        }
-    }
-    func swapItem() {
-        playerQueue.async {
-            self.session.swapItem()
-        }
-    }
-    func swapToMainItem() {
-        playerQueue.async {
-            self.session.swapToMainItem()
-        }
-    }
-    func swapService(to id:String) {
-        playerQueue.async {
-            self.session.swapService(id:id)
-            
-        }
-    }
-}

@@ -1,5 +1,5 @@
 //
-// AudioController.swift
+// YbridControl.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -41,8 +41,12 @@ public protocol PlaybackControl: SimpleControl  {
     func pause()
 }
 
+// MARK: ybrid control
+
 public protocol YbridControl : PlaybackControl {
-//    var listener:YbridControlListener? { get set }
+    
+    func select()
+    
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
     func windToLive()
@@ -52,6 +56,8 @@ public protocol YbridControl : PlaybackControl {
     
     func swapItem()
     func swapToMainItem()
+    
+    var services:[Service] { get }
     func swapService(to id:String)
 }
 
@@ -59,6 +65,8 @@ public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
     func servicesChanged(_ services:[Service])
 }
+
+// MARK: open
 
 public extension AudioPlayer {
     static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
@@ -104,17 +112,94 @@ public extension AudioPlayer {
         }
     }
 
-    
     /*
      This is a convenience method for tests. It provides a playback control
-     for an endpoint for any media protocol.
+     for all endpoints, regardless of the media protocol.
      
-     There is only one callback for playback control. You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
+     You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
      */
     static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
             control: PlaybackControllerCallback? = nil ) throws {
         try AudioPlayer.open(for: endpoint, listener: listener, playbackControl: control, ybridControl: control)
     }
-    
 }
 
+// MARK: YbridAudioPlayer
+
+class YbridAudioPlayer : AudioPlayer, YbridControl {
+    
+    override init(session:MediaSession, listener:AudioPlayerListener?) {
+        if let ybridListener = listener as? YbridControlListener {
+            session.ybridListener = ybridListener
+        }
+        super.init(session: session, listener: listener)
+        session.ybridListener?.servicesChanged(services)
+    }
+    
+    func select() {
+        session.ybridListener?.servicesChanged(services)
+        session.ybridListener?.offsetToLiveChanged(offsetToLiveS)
+        if let metadata = session.fetchMetadataSync() {
+            super.playerListener?.metadataChanged(metadata)
+        }
+    }
+    
+    var offsetToLiveS: TimeInterval { get {
+        playerQueue.sync {
+            return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
+        }
+    }}
+ 
+    var services: [Service] { get {
+        playerQueue.sync {
+            return session.mediaControl?.bouquet?.services ?? []
+        }
+    }}
+    
+    
+    func wind(by:TimeInterval) {
+        playerQueue.async {
+            self.session.wind(by:by)
+        }
+    }
+    
+    func windToLive() {
+        playerQueue.async {
+            self.session.windToLive()
+        }
+    }
+    
+    func wind(to:Date) {
+        playerQueue.async {
+            self.session.wind(to:to)
+        }
+    }
+    
+    func skipForward(_ type:ItemType?) {
+        playerQueue.async {
+            self.session.skipForward(type)
+        }
+    }
+
+    func skipBackward(_ type:ItemType?) {
+        playerQueue.async {
+            self.session.skipBackward(type)
+        }
+    }
+    func swapItem() {
+        playerQueue.async {
+            self.session.swapItem()
+        }
+    }
+    func swapToMainItem() {
+        playerQueue.async {
+            self.session.swapToMainItem()
+        }
+    }
+    func swapService(to id:String) {
+        playerQueue.async {
+            self.session.swapService(id:id)
+            
+        }
+    }
+}

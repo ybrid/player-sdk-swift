@@ -83,7 +83,6 @@ public struct Service {
     public let identifier:String
     public var displayName:String?
     public var iconUri:String?
-    public var icon:Data?
 }
 
 class AbstractMetadata : Metadata {
