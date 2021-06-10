@@ -58,7 +58,6 @@ class YbridV2Driver : MediaDriver {
     }}
     
     var ybridMetadata:YbridV2Metadata? { didSet {
-        
         if let data = ybridMetadata, oldValue != ybridMetadata {
             if Logger.verbose == true {
                 do {
@@ -70,9 +69,7 @@ class YbridV2Driver : MediaDriver {
                 }
             }
         }
-        
     }}
-    
     
     var swapsLeft:Int? { didSet {
         if let swaps = swapsLeft, swaps != oldValue, swaps == 0 {
@@ -80,6 +77,7 @@ class YbridV2Driver : MediaDriver {
             listener?.error(.notice, notice)
         }
     }}
+    
     weak var listener:YbridControlListener?
     
     init(session:MediaSession) {
@@ -98,9 +96,9 @@ class YbridV2Driver : MediaDriver {
             throw SessionError(ErrorKind.invalidSession, "session is not valid.")
         }
         
-        Logger.session.debug("creating ybrid session")
+        Logger.session.info("creating ybrid session")
         
-        let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
+        let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
         accecpt(response: sessionObj)
         connected = true
     }
@@ -109,10 +107,10 @@ class YbridV2Driver : MediaDriver {
         if !connected {
             return
         }
-        Logger.session.debug("closing ybrid session")
+        Logger.session.info("closing ybrid session")
         
         do {
-            let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
+            let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
             accecpt(response: sessionObj)
             connected = false
         } catch {
@@ -121,14 +119,14 @@ class YbridV2Driver : MediaDriver {
     }
     
     func info() {
-        if !connected {
+        guard connected else {
             Logger.session.error("no connected ybrid session")
             return
         }
         Logger.session.debug("getting info about ybrid session")
         
         do {
-            let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
+            let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
             accecpt(response: sessionObj)
             if !valid {
                 try reconnect()
@@ -140,84 +138,18 @@ class YbridV2Driver : MediaDriver {
     
     private func reconnect() throws {
         Logger.session.info("reconnecting ybrid session")
-        let sessionObj = try ctrlRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
+        let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
         accecpt(response: sessionObj)
         connected = true
     }
     
-    private func accecpt(response:YbridSessionObject) {
-        valid = response.valid
-        token = response.sessionId
-        // updateBouquet(response.getRawBouquet());
-        ybridBouquet = response.bouquet
-        ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
-        
-        if let playout = response.playout {
-            playbackUri = playout.playbackURI
-            baseUrl = playout.baseURL
-            accept(offset: playout.offsetToLive)
-            //            updatePlayout(response.getRawPlayout());
-        }
-        startDate = response.startDate
-        if let swapInfo = response.swapInfo {
-            accecpt(swapped: swapInfo)
-        }
-
-        //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
-        //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
-    }
-    
-    func accept(offset: Int) {
-        offsetToLiveS = Double(offset) / 1000
-    }
-    
-    private func ctrlRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
-        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
-        }
-        var urlQueries:[URLQueryItem] = []
-        let tokenQuery = URLQueryItem(name: "session-id", value: token)
-        urlQueries.append(tokenQuery)
-        if let queryParam = queryParam {
-            urlQueries.append(queryParam)
-        }
-        ctrlUrl.queryItems = urlQueries
-        guard let url = ctrlUrl.url else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
-        }
-        
-        do {
-            guard let result:YbridSessionResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSessionResponse.self) else {
-                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                listener?.error(ErrorSeverity.fatal, error)
-                throw error
-            }
-
-            Logger.session.debug(String(describing: result.__responseObject))
-            return result.__responseObject
-    
-        } catch {
-            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
-            throw cannot
-        }
-    }
-
-    
     // MARK: winding
     
     func wind(by:TimeInterval) {
-
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
-        Logger.session.info("wind by \(by.S)")
-        
         do {
             let millis = Int(by * 1000)
             let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
-            let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind \(by.S) seconds", queryParam: windByMillis)
+            let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind by \(by.S)", queryParam: windByMillis)
             accecpt(winded: windedObj)
             if !valid {
                 try reconnect()
@@ -225,17 +157,9 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        
     }
     
     func windToLive() {
-
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
-        Logger.session.info("wind to live")
-        
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
             accecpt(winded: windedObj)
@@ -245,17 +169,9 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        
     }
     
     func wind(to:Date) {
-
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
-        Logger.session.info("wind to \(to)")
-        
         do {
             let dateDouble = to.timeIntervalSince1970
             let tsString = String(Int(dateDouble*1000))
@@ -270,26 +186,17 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    
     func skipItem(_ forwards:Bool, _ type:ItemType?) {
 
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
         let direction = forwards ? "forwards":"backwards"
-        let ctrlPath = "ctrl/v2/playout/skip/"+direction
+        let ctrlPath = "ctrl/v2/playout/skip/" + direction
         do {
             let windedObj:YbridWindedObject
             if let type = type, type != ItemType.UNKNOWN {
-                let actionString = "skip \(direction) to \(type)"
-                Logger.session.info(actionString)
                 let skipType = URLQueryItem(name: "item-type", value: type.rawValue)
-                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: skipType)
+                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: "skip \(direction) to \(type)", queryParam: skipType)
             } else {
-                let actionString = "skip \(direction) to item"
-                Logger.session.info(actionString)
-                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: actionString)
+                windedObj = try windRequest(ctrlPath: ctrlPath, actionString: "skip \(direction) to item")
             }
             accecpt(winded: windedObj)
             if !valid {
@@ -300,48 +207,6 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
-        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
-        }
-        var urlQueries:[URLQueryItem] = []
-        let tokenQuery = URLQueryItem(name: "session-id", value: token)
-        urlQueries.append(tokenQuery)
-        if let queryParam = queryParam {
-            urlQueries.append(queryParam)
-        }
-        ctrlUrl.queryItems = urlQueries
-        guard let url = ctrlUrl.url else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
-        }
-         
-        do {
-            guard let result:YbridWindResponse = try JsonRequest(url: url).performPostSync(responseType: YbridWindResponse.self) else {
-                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                listener?.error(ErrorSeverity.fatal, error)
-                throw error
-            }
-
-            let windedObject = result.__responseObject
-            Logger.session.debug(String(describing: windedObject))
-            return windedObject
-        } catch {
-            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
-            throw cannot
-        }
-    }
-
-    private func accecpt(winded:YbridWindedObject) {
-        accept(offset:winded.totalOffset)
-        if let oldMetadata = ybridMetadata {
-            let newMetatdata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: oldMetadata.nextItem, station: oldMetadata.station)
-            ybridMetadata = newMetatdata
-        } else {
-            ybridMetadata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
-        }
-    }
-    
     // MARK: swapping item
     
     enum SwapMode : String {
@@ -349,23 +214,25 @@ class YbridV2Driver : MediaDriver {
         case fade2end /// Alternative content starts from the beginning and will become faded out at the end.
     }
     
-    func swapItem() {
+    func swapItem(_ mode: SwapMode? = nil) {
 
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
-        Logger.session.info("swap item")
+        var actionString = "swap item"
         guard swapsLeft != 0 else {
-            let warning = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
+            let warning = SessionError(ErrorKind.noSwapsLeft, actionString + " not available")
             listener?.error(.recoverable, warning)
+            Logger.session.notice(actionString + " not available")
             return
         }
         
+        let swappedObj:YbridSwapInfo
         do {
-            let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
-            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: "swap item", queryParam: modeQuery)
-            Logger.session.info("swap item before accept")
+            if let mode = mode {
+                actionString += " with mode \(mode.rawValue)"
+                let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
+                swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: actionString, queryParam: modeQuery)
+            } else {
+                swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: actionString)
+            }
             accecpt(swapped: swappedObj)
             if !valid {
                 try reconnect()
@@ -373,20 +240,11 @@ class YbridV2Driver : MediaDriver {
         } catch {
             Logger.session.error(error.localizedDescription)
         }
-        Logger.session.info("swap item done")
     }
 
     func swapToMainItem() -> Bool {
-
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return false
-        }
-        
-        Logger.session.info("swap to main item")
-        
         do {
-            let swappedObj = try swapRequest(ctrlPath: "ctrl/v2/playout/back-to-main", actionString: "swap to main item")
+            let swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/back-to-main", actionString: "swap to main item")
             accecpt(swapped: swappedObj)
             if !valid {
                 try reconnect()
@@ -398,54 +256,10 @@ class YbridV2Driver : MediaDriver {
         return true
     }
     
-    
-    private func accecpt(swapped:YbridSwapInfo) {
-        swapsLeft = swapped.swapsLeft
-    }
-    
-    private func swapRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSwapInfo {
-        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
-        }
-        var urlQueries:[URLQueryItem] = []
-        let tokenQuery = URLQueryItem(name: "session-id", value: token)
-        urlQueries.append(tokenQuery)
-        if let queryParam = queryParam {
-            urlQueries.append(queryParam)
-        }
-        ctrlUrl.queryItems = urlQueries
-        guard let url = ctrlUrl.url else {
-            throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
-        }
-         
-        do {
-            guard let result:YbridSwapItemResponse = try JsonRequest(url: url).performPostSync(responseType: YbridSwapItemResponse.self) else {
-                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                listener?.error(ErrorSeverity.fatal, error)
-                throw error
-            }
-
-            let swappedObject = result.__responseObject
-            Logger.session.debug(String(describing: swappedObject))
-            return swappedObject
-        } catch {
-            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
-            throw cannot
-        }
-    }
-
     // MARK: swap service
     
     func swapService(id:String) -> Bool {
 
-        if !connected {
-            Logger.session.error("no connected ybrid session")
-            return false
-        }
-        
-        Logger.session.info("swap to service \(id)")
-        
         do {
             let serviceQuery = URLQueryItem(name: "service-id", value: id)
             let swappedObj = try swapServiceRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
@@ -460,9 +274,126 @@ class YbridV2Driver : MediaDriver {
         return true
     }
 
-
+    // MARK: accept response objects
     
+    private func accecpt(response:YbridSessionObject) {
+        valid = response.valid
+        token = response.sessionId
+        
+        if let playout = response.playout {
+            playbackUri = playout.playbackURI
+            baseUrl = playout.baseURL
+            accept(offset: playout.offsetToLive)
+            //            updatePlayout(response.getRawPlayout());
+        }
+        
+        ybridBouquet = response.bouquet
+        ybridMetadata = response.metadata  // Metadata must be accepted after bouquet
+        startDate = response.startDate
+        if let swapInfo = response.swapInfo {
+            accecpt(swapped: swapInfo)
+        }
+
+        //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
+        //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
+    }
+    
+    private func accecpt(winded:YbridWindedObject) {
+
+        accept(offset:winded.totalOffset)
+        
+        if let oldMetadata = ybridMetadata {
+            let newMetatdata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: oldMetadata.nextItem, station: oldMetadata.station)
+            ybridMetadata = newMetatdata
+        } else {
+            ybridMetadata = YbridV2Metadata(currentItem: winded.newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
+        }
+    }
+    
+    private func accecpt(swapped:YbridSwapInfo) {
+        swapsLeft = swapped.swapsLeft
+    }
+    
+    private func accecpt(bouquetObj:YbridBouquetObject) {
+        ybridBouquet = bouquetObj.bouquet
+    }
+    
+    func accept(offset: Int) {
+        offsetToLiveS = Double(offset) / 1000
+    }
+    
+    // MARK: all requests
+    
+    private func sessionRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
+        
+        do {
+            let result:YbridSessionResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+
+            Logger.session.debug(String(describing: result.__responseObject))
+            return result.__responseObject
+    
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
+    private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
+        guard connected else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        }
+        Logger.session.info(actionString)
+        do {
+            let result:YbridWindResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+
+            let windedObject = result.__responseObject
+            Logger.session.debug(String(describing: windedObject))
+            return windedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+    
+    private func swapItemRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSwapInfo {
+        guard connected else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        }
+        Logger.session.info(actionString)
+        do {
+            let result:YbridSwapItemResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+
+            let swappedObject = result.__responseObject
+            Logger.session.debug(String(describing: swappedObject))
+            return swappedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
     private func swapServiceRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridBouquetObject {
+        guard connected else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        }
+        Logger.session.info(actionString)
+        do {
+            let result:YbridSwapServiceResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+
+            let swappedObject = result.__responseObject
+            Logger.session.debug(String(describing: swappedObject))
+            return swappedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
+    private func jsonRequest<T:Decodable>(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> T {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }
@@ -478,25 +409,16 @@ class YbridV2Driver : MediaDriver {
         }
          
         do {
-            guard let result = try JsonRequest(url: url).performPostSync(responseType: YbridSwapServiceResponse.self) else {
+            guard let result = try JsonRequest(url: url).performPostSync(responseType: T.self) else {
                 let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
                 listener?.error(ErrorSeverity.fatal, error)
                 throw error
             }
-
-            let swappedObject = result.__responseObject
-            Logger.session.debug(String(describing: swappedObject))
-            return swappedObject
+            return result
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
             listener?.error(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
-
-    
-    private func accecpt(bouquetObj:YbridBouquetObject) {
-        ybridBouquet = bouquetObj.bouquet
-    }
-    
 }

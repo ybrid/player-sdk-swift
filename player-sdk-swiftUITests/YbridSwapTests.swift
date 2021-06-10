@@ -95,6 +95,7 @@ class YbridSwapTests: XCTestCase {
         XCTAssertTrue((3...4).contains(ybridPlayerListener.metadatas.count), "should be 3 (4 if item changed) metadata changes, but were \(ybridPlayerListener.metadatas.count)")
     }
 
+    
     func test02_AvailableServices_BeforePlay() throws {
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,

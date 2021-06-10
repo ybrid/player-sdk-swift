@@ -30,6 +30,7 @@ import Foundation
 struct YbridResponse: Decodable {
     let __responseHeader: YbridInfo
 }
+
 struct YbridInfo: Codable {
     let responseVersion: String
     let statusCode: Int
@@ -43,6 +44,21 @@ struct YbridSessionResponse: Decodable {
     let __responseObject: YbridSessionObject
 }
 
+struct YbridWindResponse: Decodable  {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridWindedObject
+}
+
+struct YbridSwapItemResponse: Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridSwapInfo
+}
+
+struct YbridSwapServiceResponse : Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridBouquetObject
+}
+
 struct YbridSessionObject: Codable {
     let duration: Int
 //    let id: String? // deprecated
@@ -54,6 +70,7 @@ struct YbridSessionObject: Codable {
     let swapInfo: YbridSwapInfo?
     let bouquet: YbridBouquet?
 }
+
 struct YbridPlayout: Codable {
     let baseURL: URL
     let playbackURI: String
@@ -94,11 +111,6 @@ struct YbridStation : Codable, Equatable {
     let name: String
 }
 
-struct YbridWindResponse: Decodable  {
-    let __responseHeader: YbridInfo
-    let __responseObject: YbridWindedObject
-}
-
 struct YbridWindedObject : Codable, Equatable {
     var requestedTimestamp: Int64? = nil // -1, not in windToLive response
     var requestedWindDuration: Int? = nil // -10000, not in windToLive response
@@ -106,11 +118,6 @@ struct YbridWindedObject : Codable, Equatable {
     let timestampWindedTo: Int64 //1621944665069,
     let totalOffset: Int // millis, -49392
     let newCurrentItem: YbridItem
-}
-
-struct YbridSwapItemResponse: Decodable {
-    let __responseHeader: YbridInfo
-    let __responseObject: YbridSwapInfo
 }
 
 struct YbridSwapInfo : Codable, Equatable {
@@ -133,9 +140,4 @@ struct YbridService : Codable, Equatable {
     let iconURL: String
     var displayName: String? = nil
     let id: String
-}
-
-struct YbridSwapServiceResponse : Decodable {
-    let __responseHeader: YbridInfo
-    let __responseObject: YbridBouquetObject
 }
