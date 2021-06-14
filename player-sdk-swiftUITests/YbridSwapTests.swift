@@ -45,7 +45,7 @@ class YbridSwapTests: XCTestCase {
         print( "errors were \(errors)")
     }
 
-    func test01_SwapItem_SwapToMain() throws {
+    func test01_SwapItem_SwapItem() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
@@ -61,25 +61,28 @@ class YbridSwapTests: XCTestCase {
                 }
                 print("title main =\(titleMain)")
                 
+                var titleSwapped:String?
                 ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
-                    guard let titleSwapped = ybridPlayerListener.metadatas.last?.displayTitle else {
+                    guard let swapped = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
                     }
-                    print("title swapped =\(titleSwapped)")
-                    return titleMain != titleSwapped
+                    titleSwapped = swapped
+                    print("title swapped =\(titleSwapped!)")
+                    return titleMain != titleSwapped!
                 }
                 sleep(2)
                 
-                ybridControl.swapToMainItem()
+                ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
-                    guard let titleSwappedMain = ybridPlayerListener.metadatas.last?.displayTitle else {
+                    guard let titleSwapped2 = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
                     }
-                    print("title back to main =\(titleSwappedMain)")
-                    return titleSwappedMain == titleMain
+                    print("title swapped =\(titleSwapped2)")
+                    return titleSwapped2 != titleSwapped
                 }
                 sleep(2)
+ 
                     
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)

@@ -55,8 +55,6 @@ public protocol YbridControl : PlaybackControl {
     func skipBackward(_ type:ItemType?)
     
     func swapItem()
-    func swapToMainItem()
-    
     var services:[Service] { get }
     func swapService(to id:String)
 }
@@ -189,11 +187,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func swapItem() {
         playerQueue.async {
             self.session.swapItem()
-        }
-    }
-    func swapToMainItem() {
-        playerQueue.async {
-            self.session.swapToMainItem()
         }
     }
     func swapService(to id:String) {

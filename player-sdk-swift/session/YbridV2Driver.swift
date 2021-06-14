@@ -242,21 +242,7 @@ class YbridV2Driver : MediaDriver {
         }
     }
 
-    func swapToMainItem() -> Bool {
-        do {
-            let swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/back-to-main", actionString: "swap to main item")
-            accecpt(swapped: swappedObj)
-            if !valid {
-                try reconnect()
-            }
-        } catch {
-            Logger.session.error(error.localizedDescription)
-            return false
-        }
-        return true
-    }
-    
-    // MARK: swap service
+     // MARK: swap service
     
     func swapService(id:String) -> Bool {
 

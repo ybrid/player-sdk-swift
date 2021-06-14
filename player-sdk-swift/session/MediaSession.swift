@@ -127,9 +127,6 @@ public class MediaSession  {
     func swapItem() {
         v2Driver?.swapItem()
     }
-    func swapToMainItem() {
-        _ = v2Driver?.swapToMainItem()
-    }
     func swapService(id:String) {
         _ = v2Driver?.swapService(id: id)
     }
