@@ -124,11 +124,11 @@ public class MediaSession  {
         v2Driver?.skipItem(false, type)
     }
     
-    func swapItem() {
-        v2Driver?.swapItem()
+    func swapItem() -> Bool? {
+        return v2Driver?.swapItem(.end2end)
     }
-    func swapService(id:String) {
-        _ = v2Driver?.swapService(id: id)
+    func swapService(id:String) -> Bool? {
+        return v2Driver?.swapService(id: id)
     }
 }
 

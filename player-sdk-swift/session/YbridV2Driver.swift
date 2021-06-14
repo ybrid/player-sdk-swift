@@ -214,21 +214,21 @@ class YbridV2Driver : MediaDriver {
         case fade2end /// Alternative content starts from the beginning and will become faded out at the end.
     }
     
-    func swapItem(_ mode: SwapMode? = nil) {
+    func swapItem(_ mode: SwapMode? = nil) -> Bool {
 
         var actionString = "swap item"
         guard swapsLeft != 0 else {
             let warning = SessionError(ErrorKind.noSwapsLeft, actionString + " not available")
             listener?.error(.recoverable, warning)
             Logger.session.notice(actionString + " not available")
-            return
+            return false
         }
         
         let swappedObj:YbridSwapInfo
         do {
             if let mode = mode {
                 actionString += " with mode \(mode.rawValue)"
-                let modeQuery = URLQueryItem(name: "mode", value: SwapMode.end2end.rawValue)
+                let modeQuery = URLQueryItem(name: "mode", value: mode.rawValue)
                 swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: actionString, queryParam: modeQuery)
             } else {
                 swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: actionString)
@@ -239,7 +239,9 @@ class YbridV2Driver : MediaDriver {
             }
         } catch {
             Logger.session.error(error.localizedDescription)
+            return false
         }
+        return true
     }
 
      // MARK: swap service
