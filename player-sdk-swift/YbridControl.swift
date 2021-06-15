@@ -184,10 +184,11 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             self.session.skipBackward(type)
         }
     }
-    func swapItem(_ carriedOut: (()->())?) {
+    
+    func swapItem(_ carriedOut: (()->())? = nil) {
         playerQueue.async {
             if self.session.swapItem() == true,
-               let swappedContentIn = self.pipeline?.buffer?.size {
+               let swappedContentIn = self.pipeline?.bufferSize {
                 self.playerQueue.asyncAfter(deadline: .now() + swappedContentIn ) {
                     carriedOut?()
                 }
@@ -196,10 +197,10 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
         }
     }
-    func swapService(to id:String, _ carriedOut: (()->())?) {
+    public func swapService(to id:String, _ carriedOut: (()->())? = nil) {
         playerQueue.async {
             if self.session.swapService(id:id) == true,
-               let swappedContentIn = self.pipeline?.buffer?.size {
+               let swappedContentIn = self.pipeline?.bufferSize {
                 self.playerQueue.asyncAfter(deadline: .now() + swappedContentIn ) {
                     carriedOut?()
                 }

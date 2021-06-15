@@ -48,12 +48,16 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         Logger.loading.notice("icy fields \(icyFields ?? [:])")
     }}
 
+    var bufferSize:TimeInterval? { get {
+        return buffer?.size
+    }}
+    
     private var lastMetadata:Metadata? = nil
 
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
-    var buffer: PlaybackBuffer?
+    private var buffer: PlaybackBuffer?
     var infinite: Bool = true // default live
     
     weak var playerListener:AudioPlayerListener?

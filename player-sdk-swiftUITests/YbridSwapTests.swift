@@ -62,7 +62,7 @@ class YbridSwapTests: XCTestCase {
                 print("title main =\(titleMain)")
                 
                 var titleSwapped:String?
-                ybridControl.swapItem()
+                    ybridControl.swapItem(nil)
                 _ = poller.wait(max: 10) {
                     guard let swapped = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
@@ -73,7 +73,7 @@ class YbridSwapTests: XCTestCase {
                 }
                 sleep(2)
                 
-                ybridControl.swapItem()
+                ybridControl.swapItem(nil)
                 _ = poller.wait(max: 10) {
                     guard let titleSwapped2 = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
@@ -123,7 +123,7 @@ class YbridSwapTests: XCTestCase {
                },
                ybridControl: { [self] (ybridControl) in
 
-                ybridControl.swapService(to: "ad-injection-demo")
+                ybridControl.swapService(to: "ad-injection-demo", nil)
                 sleep(2)
                 
                 ybridControl.play()
@@ -165,7 +165,7 @@ class YbridSwapTests: XCTestCase {
                 let mainService = ybridPlayerListener.metadatas.last?.activeService
                 sleep(2)
                 
-                ybridControl.swapService(to:"ad-injection-demo")
+                ybridControl.swapService(to:"ad-injection-demo", nil)
                 _ = poller.wait(max: 10) {
                     let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
                     print("service=\(String(describing: serviceSwapped))")
@@ -202,7 +202,7 @@ class YbridSwapTests: XCTestCase {
                ybridControl.stop()
                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
-                ybridControl.swapService(to: "ad-injection-demo")
+                ybridControl.swapService(to: "ad-injection-demo", nil)
                 sleep(2)
                 
                 ybridControl.play()
