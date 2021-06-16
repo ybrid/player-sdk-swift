@@ -98,7 +98,7 @@ class JsonRequest {
             if let error = error {
                 let optionsState = OptionsTaskState.getOptionsState(error)
                 if optionsState.severity == ErrorSeverity.notice {
-                    if Logger.verbose { Logger.session.debug(error.localizedDescription) }
+                    Logger.session.debug(error.localizedDescription)
                     semaphore.signal()
                     return
                 }
@@ -108,7 +108,7 @@ class JsonRequest {
             }
            
             if let apiError = self.validateJsonResponse(response) {
-                if Logger.verbose { Logger.session.debug(apiError.localizedDescription) }
+                Logger.session.debug(apiError.localizedDescription)
                 semaphore.signal()
                 return
             }
@@ -118,7 +118,7 @@ class JsonRequest {
                 return
             }
             
-            if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
+            if let dataString = String(data: data, encoding: .utf8) {
                 Logger.session.debug("parsing \(dataString) into \(responseType)")
             }
             
@@ -184,7 +184,7 @@ class JsonRequest {
                 return
             }
             
-            if Logger.verbose, let dataString = String(data: data, encoding: .utf8) {
+            if let dataString = String(data: data, encoding: .utf8) {
                 Logger.session.debug("parsing \(dataString) into \(responseType)")
             }
             
@@ -219,7 +219,7 @@ class JsonRequest {
     private func validateJsonResponse(_ response: URLResponse?) -> SessionError? {
         
         if let response = response {
-            if Logger.verbose { Logger.session.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)") }
+            Logger.session.debug("mime is \(String(describing: response.mimeType)), expected length is \(response.expectedContentLength)")
         }
         guard let httpResponse = response as? HTTPURLResponse else {
             Logger.session.error(response.debugDescription)

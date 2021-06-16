@@ -62,11 +62,14 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         if let scheme = inUrl.absoluteURL.scheme, replaceSchemes.keys.contains(scheme) {
             var comps = URLComponents(url: inUrl, resolvingAgainstBaseURL: false)!
             comps.scheme = replaceSchemes[scheme]
+            if scheme == "icyxs" {
+                comps.port = 443
+            }
             return comps.url!
         }
         return inUrl
     }
-    
+ 
     init(mediaUrl: URL, pipeline: AudioPipeline, inclMetadata: Bool = true) {
         self.url = AudioDataLoader.mapProtocol(mediaUrl)
         self.pipeline = pipeline
@@ -164,6 +167,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
         }
         completionHandler(Foundation.URLSession.ResponseDisposition.allow)
+        
+        response.textEncodingName
         
         do {
             if response is HTTPURLResponse {

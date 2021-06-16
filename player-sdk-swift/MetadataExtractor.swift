@@ -181,7 +181,7 @@ class MetadataExtractor {
             case "StreamUrl", "StreamTitle":
                 result.updateValue(value, forKey: key)
             default:
-                Logger.loading.notice("unused metadata key ’\(property[0]) with value \(property[1])")
+                Logger.loading.notice("unused metadata key ’\(property[0])' with value '\(property[1])'")
             }
         }
         return result
