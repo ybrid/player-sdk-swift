@@ -45,7 +45,27 @@ class YbridSwapTests: XCTestCase {
         print( "errors were \(errors)")
     }
 
-    func test01_SwapItem_SwapItem() throws {
+    func test01_SwapsLeft_WithoutPlaying_0() throws {
+        Logger.verbose = true
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+                playbackControl: { [self] (control) in
+                    XCTFail("ybridControl expected");semaphore?.signal()
+                },
+                ybridControl: { [self] (ybridControl) in
+                
+                XCTAssertEqual(0, ybridControl.swapsLeft, "\(ybridControl.swapsLeft) swaps are left.")
+                    
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        let titles:[String] =
+        ybridPlayerListener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        print( "titles were \(titles)")
+    }
+
+    
+    func test02_SwapItem_WhilePlaying() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
@@ -54,7 +74,13 @@ class YbridSwapTests: XCTestCase {
                 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(2)
+                    
+                guard ybridControl.swapsLeft != 0 else {
+                    XCTFail("currently no swaps left. Execute test later")
+                    semaphore?.signal(); return
+                }
+                print("\(ybridControl.swapsLeft) swaps are left")
+                    
                 guard let titleMain = ybridPlayerListener.metadatas.last?.displayTitle else {
                     XCTFail("must have recieved metadata");
                     semaphore?.signal(); return
@@ -62,7 +88,7 @@ class YbridSwapTests: XCTestCase {
                 print("title main =\(titleMain)")
                 
                 var titleSwapped:String?
-                ybridControl.swapItem(nil)
+                    ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
                     guard let swapped = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
@@ -71,9 +97,8 @@ class YbridSwapTests: XCTestCase {
                     print("title swapped =\(titleSwapped!)")
                     return titleMain != titleSwapped!
                 }
-                sleep(2)
                 
-                ybridControl.swapItem(nil)
+                ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
                     guard let titleSwapped2 = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
@@ -81,12 +106,12 @@ class YbridSwapTests: XCTestCase {
                     print("title swapped =\(titleSwapped2)")
                     return titleSwapped2 != titleSwapped
                 }
-                sleep(2)
- 
                     
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
+                    
+                    
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
@@ -98,8 +123,51 @@ class YbridSwapTests: XCTestCase {
         XCTAssertTrue((3...4).contains(ybridPlayerListener.metadatas.count), "should be 3 (4 if item changed) metadata changes, but were \(ybridPlayerListener.metadatas.count)")
     }
 
+    func test03_SwapItem_CarriedOutCallbackIsCalled() throws {
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+                playbackControl: { [self] (control) in
+                    XCTFail("ybridControl expected");semaphore?.signal()
+                },
+                ybridControl: { [self] (ybridControl) in
+                
+                ybridControl.play()
+                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+              
+                guard ybridControl.swapsLeft != 0 else {
+                    XCTFail("currently no swaps left. Execute test later")
+                    semaphore?.signal(); return
+                }
+                print("\(ybridControl.swapsLeft) swaps are left")
+                    
+                var carriedOut = false
+                ybridControl.swapItem {
+                    carriedOut = true
+                }
+                _ = poller.wait(max: 10) {
+                    carriedOut == true
+                }
+                XCTAssertTrue(carriedOut, "swap was not carried out")
+                     
+                ybridControl.stop()
+                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        let titles:[String] =
+        ybridPlayerListener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        print( "titles were \(titles)")
+        
+        let differentTitles = Set(titles)
+        print( "different titles were \(differentTitles)")
+        XCTAssertEqual(2, differentTitles.count)
+        
+        XCTAssertTrue((2...3).contains(ybridPlayerListener.metadatas.count), "should be 2 (3 if item changed) metadata changes, but were \(ybridPlayerListener.metadatas.count)")
+    }
+
     
-    func test02_AvailableServices_BeforePlay() throws {
+    func test04_AvailableServices_BeforePlay() throws {
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
@@ -115,7 +183,7 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual(0,ybridPlayerListener.metadatas.count)
     }
     
-    func test03_SwapService_BeforePlay() throws {
+    func test05_SwapService_BeforePlay_CarriedOutIsCalled() throws {
         Logger.verbose = true
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
@@ -124,8 +192,45 @@ class YbridSwapTests: XCTestCase {
                },
                ybridControl: { [self] (ybridControl) in
 
-                ybridControl.swapService(to: "ad-injection-demo", nil)
-                sleep(2)
+                var carriedOut = false
+                ybridControl.swapService(to: "ad-injection-demo") {
+                    carriedOut = true
+                }
+                _ = poller.wait(max: 10) {
+                    carriedOut == true
+                }
+                XCTAssertTrue(carriedOut, "swap was not carried out")
+                
+
+                semaphore?.signal()
+               })
+        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        XCTAssertEqual(1,ybridPlayerListener.services.count)
+        XCTAssertEqual(2,ybridPlayerListener.services[0].count)
+        
+        let services:[String] =
+            ybridPlayerListener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+        print("services were \(services)")
+    }
+
+    func test06_SwapService_BeforePlayCarriedOut_ButDoesNotTakeEffekt__NotYet() throws {
+        Logger.verbose = true
+        XCTAssertEqual(0,ybridPlayerListener.services.count)
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+               playbackControl: { [self] (control) in
+                     XCTFail("ybridControl expected"); semaphore?.signal()
+               },
+               ybridControl: { [self] (ybridControl) in
+
+                var carriedOut = false
+                ybridControl.swapService(to: "ad-injection-demo") {
+                    carriedOut = true
+                }
+                _ = poller.wait(max: 10) {
+                    carriedOut == true
+                }
+                XCTAssertTrue(carriedOut, "swap was not carried out")
                 
                 ybridControl.play()
                 _ = poller.wait(max: 6) {
@@ -133,10 +238,9 @@ class YbridSwapTests: XCTestCase {
                     print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped?.identifier == "ad-injection-demo"
                 }
-                sleep(2)
-
-               ybridControl.stop()
-               poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                ybridControl.stop()
+                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 semaphore?.signal()
                })
@@ -153,8 +257,8 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.first?.activeService?.identifier)
         XCTAssertEqual("ad-injection-demo",  ybridPlayerListener.metadatas.last?.activeService?.identifier)
     }
-    
-    func test04_SwapService_OnPlay() throws {
+
+    func test07_SwapService_OnPlay_ActiveServiceInNextMetadata() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
                      XCTFail("ybridControl expected");semaphore?.signal()
@@ -164,15 +268,13 @@ class YbridSwapTests: XCTestCase {
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 let mainService = ybridPlayerListener.metadatas.last?.activeService
-                sleep(2)
                 
-                ybridControl.swapService(to:"ad-injection-demo", nil)
+                ybridControl.swapService(to:"ad-injection-demo")
                 _ = poller.wait(max: 10) {
                     let serviceSwapped = ybridPlayerListener.metadatas.last?.activeService
                     print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped?.identifier != mainService?.identifier
                 }
-                sleep(2)
                          
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
@@ -188,7 +290,7 @@ class YbridSwapTests: XCTestCase {
         XCTAssertEqual(services.count, 3, "should be 3 service changes, but were \(services.count)")
     }
     
-    func test05_SwapService_AfterStop() throws {
+    func test08_SwapService_AfterStop_TakesEffekt() throws {
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
@@ -198,13 +300,18 @@ class YbridSwapTests: XCTestCase {
 
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(2)
-
-               ybridControl.stop()
-               poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
-                ybridControl.swapService(to: "ad-injection-demo", nil)
-                sleep(2)
+                ybridControl.stop()
+                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                
+                var carriedOut = false
+                ybridControl.swapService(to: "ad-injection-demo") {
+                    carriedOut = true
+                }
+                _ = poller.wait(max: 10) {
+                    carriedOut == true
+                }
+                XCTAssertTrue(carriedOut, "swap was not carried out")
                 
                 ybridControl.play()
                 _ = poller.wait(max: 10) {
@@ -212,7 +319,6 @@ class YbridSwapTests: XCTestCase {
                     print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped?.identifier == "ad-injection-demo"
                 }
-                sleep(2)
                 
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)

@@ -55,9 +55,20 @@ public protocol YbridControl : PlaybackControl {
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
     
-    func swapItem(_ callback: (()->())?)
+    var swapsLeft:Int { get }
+    func swapItem(_ carriedOut: (()->())?)
     var services:[Service] { get }
-    func swapService(to id:String, _ callback: (()->())?)
+    func swapService(to id:String, _ carriedOut: (()->())?)
+}
+
+public extension YbridControl {
+    // allow actions without carriedOut callback parameter
+    func swapItem() {
+        swapItem(nil)
+    }
+    func swapService(to id:String) {
+        swapService(to:id, nil)
+    }
 }
 
 public protocol YbridControlListener : AudioPlayerListener {
@@ -149,6 +160,12 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }}
  
+    var swapsLeft: Int { get {
+        playerQueue.sync {
+            return session.swapsLeft ?? -1
+        }
+    }}
+    
     var services: [Service] { get {
         playerQueue.sync {
             return session.services ?? []
@@ -186,7 +203,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    func swapItem(_ carriedOut: (()->())? = nil) {
+    public func swapItem(_ carriedOut: (()->())?) {
         playerQueue.async {
             if self.session.swapItem() == true,
                let swappedContentIn = self.pipeline?.bufferSize {
@@ -198,7 +215,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
         }
     }
-    public func swapService(to id:String, _ carriedOut: (()->())? = nil) {
+    public func swapService(to id:String, _ carriedOut: (()->())?) {
         playerQueue.async {
             if self.session.swapService(id:id) == true,
                let swappedContentIn = self.pipeline?.bufferSize {

@@ -53,6 +53,9 @@ public class MediaSession  {
     private var v2Driver:YbridV2Driver? { get {
         return mediaControl as? YbridV2Driver
     }}
+    var swapsLeft: Int? { get {
+        return v2Driver?.swapsLeft
+    }}
     var services: [Service]? { get {
         return mediaControl?.bouquet?.services
     }}
