@@ -54,6 +54,8 @@ public enum PlaybackState {
 
 
 public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Hashable {
+
+    
     public static func == (lhs: AudioPlayer, rhs: AudioPlayer) -> Bool {
         return lhs.uuid == rhs.uuid
     }
@@ -113,6 +115,10 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener, Has
     
     public var mediaProtocol:MediaProtocol? { get {
         return session.mediaControl?.mediaProtocol
+    }}
+    
+    public var mediaEndpoint: MediaEndpoint { get {
+        return session.endpoint
     }}
     
     var session:MediaSession

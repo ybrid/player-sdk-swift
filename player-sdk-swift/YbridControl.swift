@@ -27,6 +27,7 @@ import Foundation
 
 
 public protocol SimpleControl {
+    var mediaEndpoint:MediaEndpoint { get }
     var mediaProtocol:MediaProtocol? { get }
     
     func play()

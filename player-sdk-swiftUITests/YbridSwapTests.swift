@@ -62,7 +62,7 @@ class YbridSwapTests: XCTestCase {
                 print("title main =\(titleMain)")
                 
                 var titleSwapped:String?
-                    ybridControl.swapItem(nil)
+                ybridControl.swapItem(nil)
                 _ = poller.wait(max: 10) {
                     guard let swapped = ybridPlayerListener.metadatas.last?.displayTitle else {
                         return false
@@ -116,6 +116,7 @@ class YbridSwapTests: XCTestCase {
     }
     
     func test03_SwapService_BeforePlay() throws {
+        Logger.verbose = true
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                playbackControl: { [self] (control) in
