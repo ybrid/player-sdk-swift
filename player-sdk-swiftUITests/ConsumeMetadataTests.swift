@@ -91,7 +91,7 @@ class ConsumeMetadataTests: XCTestCase {
     
     func test02_MetadataYbrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() throws {
         
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: consumer) {
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: consumer) {
             [self] control in player = control
             
             self.playCheckPlayingCheckStopPlayPlayingCheck(

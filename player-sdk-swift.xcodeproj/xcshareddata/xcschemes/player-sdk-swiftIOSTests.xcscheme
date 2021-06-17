@@ -21,6 +21,14 @@
                BlueprintName = "player-sdk-swiftIOSTests"
                ReferencedContainer = "container:player-sdk-swift.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AbortBufferingTests">
+               </Test>
+               <Test
+                  Identifier = "PlayerToggleStressTest">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

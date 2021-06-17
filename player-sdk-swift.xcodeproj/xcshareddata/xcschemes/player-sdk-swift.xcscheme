@@ -37,6 +37,11 @@
                BlueprintName = "player-sdk-swiftTests"
                ReferencedContainer = "container:player-sdk-swift.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "YbridSteelinessTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

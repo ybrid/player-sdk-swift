@@ -1,5 +1,5 @@
 //
-// SessionTests.swift
+// MediaSessionTests.swift
 // player-sdk-swiftTests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -38,8 +38,7 @@ class MediaSessionTests: XCTestCase {
 
     
     func testSession_YbridDemo() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/adaptive-demo")
-        guard let player = AudioPlayer.openSync(for: endpoint, listener: listener) else {
+        guard let player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         let playbackUri = player.session.playbackUri
@@ -58,7 +57,6 @@ class MediaSessionTests: XCTestCase {
     
 
     func testSession_YbridSwr3() throws {
-        _ = ybridSwr3Endpoint.forceProtocol(MediaProtocol.ybridV2)
         guard let player = AudioPlayer.openSync(for: ybridSwr3Endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
@@ -74,12 +72,12 @@ class MediaSessionTests: XCTestCase {
     }
     
     func testSession_IcySwr3() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        guard let player = AudioPlayer.openSync(for:endpoint, listener: listener) else {
+
+        guard let player = AudioPlayer.openSync(for:icecastSwr3Endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         let playbackUri = player.session.playbackUri
-        XCTAssertEqual(endpoint.uri, playbackUri)
+        XCTAssertEqual(icecastSwr3Endpoint.uri, playbackUri)
         let metadata = player.session.fetchMetadataSync()
         XCTAssertNil(metadata, "no icy metadata expected")
         XCTAssertEqual(0, listener.errors.count)
@@ -87,22 +85,18 @@ class MediaSessionTests: XCTestCase {
     }
     
     func testSession_DlfOpus() throws {
-        let uri = "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus"
-        let endpoint = MediaEndpoint(mediaUri: uri)
-        guard let player = AudioPlayer.openSync(for: endpoint, listener: listener) else {
+
+        guard let player = AudioPlayer.openSync(for: opusDlfEndpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
         let playbackUri = player.session.playbackUri
-        XCTAssertEqual(uri, playbackUri)
+        XCTAssertEqual(opusDlfEndpoint.uri, playbackUri)
         
         let metadata = player.session.fetchMetadataSync()
         XCTAssertNil(metadata, "no opus metadata expected")
         XCTAssertEqual(0, listener.errors.count)
         player.close()
     }
-    
-    
-    
     
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"

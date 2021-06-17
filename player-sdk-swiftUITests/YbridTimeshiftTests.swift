@@ -47,7 +47,7 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test01_YbridControl_GettingOffset_NoListener() throws {
         
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: nil,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil,
                ybridControl: { [self] (ybridControl) in
                 
                 let offset = ybridControl.offsetToLiveS
@@ -69,7 +69,7 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test02_YbridControl_ListeningToOffsetChanges() throws {
         
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -89,7 +89,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     func test03_YbridControl_WindBackward120Forward60() throws {
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -153,7 +153,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
 
     func test05_YbridControl_WindToLive() throws {
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -181,7 +181,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     func test06_YbridControl_WindToDate_BeforeLastFullHour_Advertisement() throws {
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -203,7 +203,7 @@ class YbridTimeshiftTests: XCTestCase {
     
     
     func test07_YbridControl_SkipBackwardNewsForwardMusic() throws {
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -227,7 +227,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     func test08_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()

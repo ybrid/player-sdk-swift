@@ -136,7 +136,8 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    private func reconnect() throws {
+    /// visible for tests
+    func reconnect() throws {
         Logger.session.info("reconnecting ybrid session")
         let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
         accecpt(response: sessionObj)

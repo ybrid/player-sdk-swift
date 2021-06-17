@@ -1,0 +1,92 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-06-17T17:05:17.967Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "swr3-live",
+            "availableServices": [
+                {
+                    "iconURL": "https://www.swr.de/unternehmen/kommunikation/service/SWR3-Logos%2C1560344662150%2Clogos-swr3-100~_v-16x9@2dS_-6be50a9c75559ca1aaf1d0b25bae287afdcd877a.png",
+                    "displayName": "SWR3 Live",
+                    "id": "swr3-live"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 09",
+                    "id": "swr-raka09"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 08",
+                    "id": "swr-raka08"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 05",
+                    "id": "swr-raka05"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 06",
+                    "id": "swr-raka06"
+                },
+                {
+                    "iconURL": "",
+                    "displayName": "SWR Raka 03",
+                    "id": "swr-raka03"
+                }
+            ],
+            "bouquetId": "swr3",
+            "primaryServiceId": "swr3-live"
+        },
+        "duration": 5040,
+        "id": "dcc0875e-f44b-4dc7-8a0a-41a3ee72529d",
+        "metadata": {
+            "currentItem": {
+                "artist": "",
+                "companions": [],
+                "description": "radiomax:SWR3-BAD-MAX:event-1623949492000",
+                "durationMillis": 169900,
+                "id": "playlist--swr3-radiomax-swr3-bad-max-event-1623949492000",
+                "title": "SWR3",
+                "type": "JINGLE"
+            },
+            "nextItem": {
+                "artist": "",
+                "companions": [],
+                "description": "",
+                "durationMillis": -1,
+                "id": "",
+                "title": "",
+                "type": "_unrecognized"
+            },
+            "station": {
+                "genre": "Pop Music",
+                "name": "SWR3"
+            }
+        },
+        "playout": {
+            "baseURL": "https://edge01-stagecast.ybrid.io/swr3/mp3/mid",
+            "playbackURI": "icyxs://edge01-stagecast.ybrid.io:443/swr3/mp3/mid?session-id\u003ddcc0875e-f44b-4dc7-8a0a-41a3ee72529d",
+            "currentBitRate": 128000,
+            "host": "edge01-stagecast.ybrid.io",
+            "maxBitRate": 128000,
+            "offsetToLive": 0
+        },
+        "sessionId": "dcc0875e-f44b-4dc7-8a0a-41a3ee72529d",
+        "startDate": "2021-06-17T17:05:12.299Z",
+        "swapInfo": {
+            "nextSwapReturnsToMain": false,
+            "swapsLeft": 0
+        },
+        "valid": false
+    }
+}

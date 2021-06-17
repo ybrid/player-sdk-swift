@@ -1,5 +1,5 @@
 //
-// ApiDriverTests.swift
+// MediaProtocolTests.swift
 // player-sdk-swiftTests
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -30,16 +30,16 @@ class MediaProtocolTests: XCTestCase {
     let factory = MediaControlFactory()
     
     func testFactoryGetVersion_YbridDemo() throws {
+        let version = try factory.getVersion("https://democast.ybrid.io/adaptive-demo")
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
+    }
+    
+    func testFactoryGetVersion_YbridStageDemo() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(MediaProtocol.ybridV2, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testFactoryGetVersion_Swr3() throws {
-        let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3/mid")
-        XCTAssertEqual(MediaProtocol.ybridV2, version)
-    }
-    
-    func testFactoryGetVersion_Swr3WrongUrl() throws {
+    func testFactoryGetVersion_wrongUrl() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
         XCTAssertEqual(MediaProtocol.icy, version)
     }
@@ -71,8 +71,8 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testDriver_YbridStageDemo_Connect_Disconnect() throws {
-        let endpoint = ybridStageDemoEndpoint
+    func testDriver_YbridDemo_Connect_Disconnect() throws {
+        let endpoint = ybridDemoEndpoint
         guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
@@ -91,7 +91,8 @@ class MediaProtocolTests: XCTestCase {
 
     
     func testDriver_YbridSwr3_MustBeForced() throws {
-        guard let player = AudioPlayer.openSync(for:ybridSwr3Endpoint, listener: nil) else {
+        let swr3Endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
+        guard let player = AudioPlayer.openSync(for:swr3Endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session.mediaControl else {
@@ -102,8 +103,8 @@ class MediaProtocolTests: XCTestCase {
         
         player.close()
         
-        let endpoint = ybridSwr3Endpoint.forceProtocol(.ybridV2)
-        guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
+        let forcedSwr3Endpoint = swr3Endpoint.forceProtocol(.ybridV2)
+        guard let player = AudioPlayer.openSync(for: forcedSwr3Endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session.mediaControl else {
@@ -124,9 +125,8 @@ class MediaProtocolTests: XCTestCase {
     
     
     
-    func testDriver_Swr3_Connect_Connect() throws {
-        let endpoint = ybridStageDemoEndpoint
-        guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
+    func testDriver_Stage_Connect_Connect() throws {
+        guard let player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session.mediaControl else {

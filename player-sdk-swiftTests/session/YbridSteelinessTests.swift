@@ -85,6 +85,176 @@ class YbridSteelinessTests: XCTestCase {
         }
     }
    
+    
+    func testPlaybackUriStatistic() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let listener = MediaListener()
+
+        var playbackUris:[String] = []
+        for i in (1...50) {
+            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener,
+                                 playbackControl: { (c) in return },
+                                 ybridControl: {
+                (ybridControl) in
+                if let ybrid = ybridControl as? YbridAudioPlayer {
+                    let uri = ybrid.session.playbackUri
+                    print( "playbackUri is \(uri)")
+                    playbackUris.append(uri)
+                    
+                    
+                }
+                if i % 25 == 0 {
+                    print(" \(i) created sessions")
+                }
+                ybridControl.close()
+            })
+            sleep(1)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+        let pbUrls:[URL] = playbackUris.map {
+            let url = URL(string: $0)!
+            var comps = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            comps.query = nil
+            return comps.url!
+        }
+        var uriCount: [URL:Int] = [:]
+        let uniqueUris = Set(pbUrls)
+        uniqueUris.forEach{ let uri = $0; let count = pbUrls.filter{$0==uri}.count;
+            uriCount[uri] = count
+        }
+        print("different uris are \(uriCount)")
+        print("\(listener.errors.count) errors occured")
+    }
+   
+    func testBaseURLsStatistic() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let listener = MediaListener()
+
+        var baseURLs:[URL] = []
+        for i in 1...50 {
+            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener,
+                                 playbackControl: { (c) in return },
+                                 ybridControl: {
+                (ybridControl) in
+                if let ybrid = ybridControl as? YbridAudioPlayer {
+                    if let base = ybrid.session.mediaControl?.baseUrl {
+                        print("base url is \(base)")
+                        baseURLs.append(base)
+                    }
+                }
+                if i % 25 == 0 {
+                    print(" \(i) created sessions")
+                }
+                ybridControl.close()
+            })
+            sleep(1)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+        
+        let baseHosts:[URL] = baseURLs.map {
+            var comps = URLComponents(url: $0, resolvingAgainstBaseURL: false)!
+            comps.query = nil
+            return comps.url!
+        }
+        var baseUrlCount: [URL:Int] = [:]
+        let uniqueBaseUrls = Set(baseHosts)
+        uniqueBaseUrls.forEach{ let uri = $0; let count = baseHosts.filter{$0==uri}.count;
+            baseUrlCount[uri] = count
+        }
+        print("different base urls are \(baseUrlCount)")
+        print("\(listener.errors.count) errors occured")
+    }
+   
+    func testReconnectSession_Swr3_Fails() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let listener = MediaListener()
+
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener,
+             playbackControl: { (c) in
+                XCTFail("should be ybrid")
+                semaphore.signal() },
+             ybridControl: { (ybridControl) in
+                if let ybrid = ybridControl as? YbridAudioPlayer {
+                    if let v2 = ybrid.session.mediaControl as? YbridV2Driver {
+                        print("base uri is \(v2.baseUrl)")
+                        let baseUrlOrig = v2.baseUrl
+                        
+                        // forcing to reconnect
+                        do {
+                            try v2.reconnect()
+                        } catch {
+                            Logger.session.error(error.localizedDescription)
+                            XCTFail("should work, but \(error.localizedDescription)")
+                        }
+                        print("base uri is \(v2.baseUrl)")
+                        let baseUrlReconnected = v2.baseUrl
+                        XCTAssertNotEqual(baseUrlOrig, baseUrlReconnected)
+                        
+                        ybrid.play()
+                        print("base uri is \(v2.baseUrl)")
+                    }
+                }
+                sleep(4)
+                semaphore.signal()
+             })
+        _ = semaphore.wait(timeout: .distantFuture)
+        let errCount = listener.errors.count
+        guard errCount == 0 else {
+            XCTAssertEqual(1, errCount, "\(errCount) errors occured")
+            let err = listener.errors[0]
+            Logger.session.error(err.localizedDescription)
+            XCTFail("cannot play on reconnected session, \(String(describing: err.message))")
+            return
+        }
+    }
+   
+    func testReconnectSession_Demo_ok() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let listener = MediaListener()
+
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
+             playbackControl: { (c) in
+                return },
+             ybridControl: { (ybridControl) in
+                if let ybrid = ybridControl as? YbridAudioPlayer {
+                    if let v2 = ybrid.session.mediaControl as? YbridV2Driver {
+                        print("base uri is \(v2.baseUrl)")
+                        let baseUrlOrig = v2.baseUrl
+                        
+                        // forcing to reconnect
+                        do {
+                            try v2.reconnect()
+                        } catch {
+                            Logger.session.error(error.localizedDescription)
+                            XCTFail("should work, but \(error.localizedDescription)")
+                        }
+                        print("base uri is \(v2.baseUrl)")
+                        let baseUrlReconnected = v2.baseUrl
+                        XCTAssertEqual(baseUrlOrig, baseUrlReconnected)
+ 
+                    
+                        ybrid.play()
+                        print("base uri is \(v2.baseUrl)")
+                    }
+                }
+                sleep(4)
+                ybridControl.close()
+                semaphore.signal()
+             })
+        _ = semaphore.wait(timeout: .distantFuture)
+        let errCount = listener.errors.count
+        guard errCount == 0 else {
+            XCTFail("recreating session should work")
+            return
+        }
+    }
+   
+
+    
+
+    
     class MediaListener : AudioPlayerListener {
         func stateChanged(_ state: PlaybackState) {}
         func metadataChanged(_ metadata: Metadata) {}

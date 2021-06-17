@@ -38,7 +38,7 @@ class ContolMatchesProtocolTests: XCTestCase {
     
     func test01_Ybrid_Play3Seconds() throws {
         
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: nil,
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: nil,
          playbackControl: { (control) in
             XCTFail("this should not be called. Protocol is not \(MediaProtocol.icy)")
             self.semaphore?.signal()
