@@ -147,7 +147,8 @@ class YbridSwapTests: XCTestCase {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
-                     
+                sleep(2)
+                    
                 ybridControl.stop()
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 

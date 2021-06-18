@@ -175,7 +175,7 @@ class YbridV2Driver : MediaDriver {
     func wind(to:Date) {
         do {
             let dateDouble = to.timeIntervalSince1970
-            let tsString = String(Int(dateDouble*1000))
+            let tsString = String(Int64(dateDouble*1000))
             let tsQuery = URLQueryItem(name: "ts", value: tsString)
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind to \(to)", queryParam: tsQuery)
             accecpt(winded: windedObj)

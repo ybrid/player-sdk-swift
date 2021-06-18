@@ -29,7 +29,7 @@ import YbridPlayerSDK
 class YbridTimeshiftTests: XCTestCase {
 
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
-    let maxWindResponseS = 2
+    let maxWindResponseS = 3
     
     var player:YbridControl?
     let ybridPlayerListener = TestYbridPlayerListener()
@@ -190,7 +190,7 @@ class YbridTimeshiftTests: XCTestCase {
         
                 let date = lastFullHour(secondsBefore:15)
                 ybridControl.wind(to:date)
-                wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: 4)
+                wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: 6)
                 sleep(4)
 
                 ybridControl.stop()
