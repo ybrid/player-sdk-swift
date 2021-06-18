@@ -55,6 +55,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var metadatas:[Metadata] = []
     override func metadataChanged(_ metadata: Metadata) {
         super.metadataChanged(metadata)
+        Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
         metadatas.append(metadata)
     }
     
