@@ -50,7 +50,7 @@ public protocol YbridControl : PlaybackControl {
     
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
-    func windToLive()
+    func windToLive(_ carriedOut: (()->())?)
     func wind(to:Date)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
@@ -179,9 +179,13 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    func windToLive() {
+    func windToLive( _ carriedOut: (()->())?) {
         playerQueue.async {
-            self.session.windToLive()
+            if self.session.windToLive() {
+                self.changeover(carriedOut)
+            } else {
+                carriedOut?()
+            }
         }
     }
     
@@ -205,11 +209,8 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     
     public func swapItem(_ carriedOut: (()->())?) {
         playerQueue.async {
-            if self.session.swapItem() == true,
-               let swappedContentIn = self.pipeline?.bufferSize {
-                self.playerQueue.asyncAfter(deadline: .now() + swappedContentIn ) {
-                    carriedOut?()
-                }
+            if self.session.swapItem() {
+                self.changeover(carriedOut)
             } else {
                 carriedOut?()
             }
@@ -217,14 +218,21 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     }
     public func swapService(to id:String, _ carriedOut: (()->())?) {
         playerQueue.async {
-            if self.session.swapService(id:id) == true,
-               let swappedContentIn = self.pipeline?.bufferSize {
-                self.playerQueue.asyncAfter(deadline: .now() + swappedContentIn ) {
-                    carriedOut?()
-                }
+            if self.session.swapService(id:id) {
+                self.changeover(carriedOut)
             } else {
                 carriedOut?()
             }
+        }
+    }
+    
+    private func changeover(_ carriedOut: (() -> ())? = nil) {
+        if let contentChangingIn = self.pipeline?.bufferSize {
+            self.playerQueue.asyncAfter(deadline: .now() + contentChangingIn) {
+                carriedOut?()
+            }
+        } else {
+            carriedOut?()
         }
     }
 }

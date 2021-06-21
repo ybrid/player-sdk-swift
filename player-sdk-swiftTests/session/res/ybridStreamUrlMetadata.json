@@ -1,0 +1,30 @@
+{
+    "currentBitRate": 128000,
+    "currentItem": {
+        "artist": "BTS",
+        "companions": [],
+        "description": "radiomax:SWR3-BAD-MAX:12862123",
+        "durationMillis": 160800,
+        "id": "playlist--swr3-radiomax-swr3-bad-max-12862123",
+        "title": "Butter",
+        "type": "MUSIC"
+    },
+    "nextItem": {
+        "artist": "",
+        "companions": [],
+        "description": "",
+        "durationMillis": 65900,
+        "id": "playlist--swr3-radiomax-swr3-bad-max-12869032",
+        "title": "Dachgeschosswohnungen – Ein unsichtbares Problem",
+        "type": "VOICE"
+    },
+    "station": {
+        "genre": "Pop Music",
+        "name": "SWR3"
+    },
+    "swapInfo": {
+        "nextSwapReturnsToMain": false,
+        "swapsLeft": 0
+    },
+    "timeToNextItemMillis": 78144
+}

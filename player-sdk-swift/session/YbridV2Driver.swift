@@ -160,7 +160,7 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
-    func windToLive() {
+    func windToLive() -> Bool {
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
             accecpt(winded: windedObj)
@@ -169,7 +169,9 @@ class YbridV2Driver : MediaDriver {
             }
         } catch {
             Logger.session.error(error.localizedDescription)
+            return false
         }
+        return true
     }
     
     func wind(to:Date) {

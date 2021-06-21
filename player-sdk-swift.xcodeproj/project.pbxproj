@@ -156,10 +156,11 @@
 		17E9AB852653A808001ED9C8 /* YbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB832653A808001ED9C8 /* YbridControl.swift */; };
 		17E9AB862653A808001ED9C8 /* YbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB832653A808001ED9C8 /* YbridControl.swift */; };
 		17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB8C2655467D001ED9C8 /* ybridResponseNoMilliseconds.json */; };
-		17E9AB8F265547F9001ED9C8 /* YbridResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB8E265547F9001ED9C8 /* YbridResponseTests.swift */; };
+		17E9AB8F265547F9001ED9C8 /* YbridV2ResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB8E265547F9001ED9C8 /* YbridV2ResponseTests.swift */; };
 		17E9AB9E26554B6C001ED9C8 /* ybridResponseMilliseconds.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */; };
 		17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */; };
 		17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */; };
+		17F3C23D267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */; };
 		17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A151266F789D00F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
@@ -267,10 +268,11 @@
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
 		17E9AB832653A808001ED9C8 /* YbridControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridControl.swift; sourceTree = "<group>"; };
 		17E9AB8C2655467D001ED9C8 /* ybridResponseNoMilliseconds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridResponseNoMilliseconds.json; sourceTree = "<group>"; };
-		17E9AB8E265547F9001ED9C8 /* YbridResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridResponseTests.swift; sourceTree = "<group>"; };
+		17E9AB8E265547F9001ED9C8 /* YbridV2ResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridV2ResponseTests.swift; sourceTree = "<group>"; };
 		17E9AB9B26554B6C001ED9C8 /* ybridResponseMilliseconds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridResponseMilliseconds.json; sourceTree = "<group>"; };
 		17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSessionCreated.json; sourceTree = "<group>"; };
 		17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridNewsResponse.json; sourceTree = "<group>"; };
+		17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridStreamUrlMetadata.json; sourceTree = "<group>"; };
 		17F6A14E266F5B0100F48432 /* Bouquet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bouquet.swift; sourceTree = "<group>"; };
 		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
 		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
@@ -428,6 +430,7 @@
 		17651DEB266856F9005D46BA /* res */ = {
 			isa = PBXGroup;
 			children = (
+				17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */,
 				171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */,
 				17651DEC2668577A005D46BA /* ybridBouquetResponse.json */,
 				17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */,
@@ -538,7 +541,7 @@
 				17539E702626E18F000FE902 /* MediaProtocolTests.swift */,
 				17134568263015440054DB9D /* MediaSessionTests.swift */,
 				17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */,
-				17E9AB8E265547F9001ED9C8 /* YbridResponseTests.swift */,
+				17E9AB8E265547F9001ED9C8 /* YbridV2ResponseTests.swift */,
 			);
 			path = session;
 			sourceTree = "<group>";
@@ -752,6 +755,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */,
+				17F3C23D267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json in Resources */,
 				17268BE2265D2C4400E2F8E3 /* ybridWindBackResponse.json in Resources */,
 				17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */,
 				17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */,
@@ -1030,7 +1034,7 @@
 				1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */,
 				1732222325F614BC00AEC833 /* Metadata.swift in Sources */,
 				1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */,
-				17E9AB8F265547F9001ED9C8 /* YbridResponseTests.swift in Sources */,
+				17E9AB8F265547F9001ED9C8 /* YbridV2ResponseTests.swift in Sources */,
 				17539E712626E18F000FE902 /* MediaProtocolTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,

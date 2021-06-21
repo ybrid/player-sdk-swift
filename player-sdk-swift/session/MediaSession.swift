@@ -114,8 +114,8 @@ public class MediaSession  {
     func wind(by:TimeInterval) {
         v2Driver?.wind(by: by)
     }
-    func windToLive() {
-        v2Driver?.windToLive()
+    func windToLive() -> Bool {
+        return v2Driver?.windToLive() ?? false
     }
     func wind(to:Date) {
         v2Driver?.wind(to:to)
@@ -127,11 +127,11 @@ public class MediaSession  {
         v2Driver?.skipItem(false, type)
     }
     
-    func swapItem() -> Bool? {
-        return v2Driver?.swapItem(.end2end)
+    func swapItem() -> Bool {
+        return v2Driver?.swapItem(.end2end) ?? false
     }
-    func swapService(id:String) -> Bool? {
-        return v2Driver?.swapService(id: id)
+    func swapService(id:String) -> Bool {
+        return v2Driver?.swapService(id: id) ?? false
     }
 }
 

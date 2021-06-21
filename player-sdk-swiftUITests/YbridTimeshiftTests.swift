@@ -162,7 +162,7 @@ class YbridTimeshiftTests: XCTestCase {
                 ybridControl.wind(by:-20.0)
                 wait(ybridControl, shifted: -20.0, maxSeconds: maxWindResponseS)
                 sleep(4)
-                ybridControl.windToLive()
+                ybridControl.windToLive(nil)
                 wait(ybridControl, shifted: 0.0, maxSeconds: maxWindResponseS)
                 sleep(4)
                 ybridControl.stop()
