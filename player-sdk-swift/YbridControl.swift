@@ -63,6 +63,9 @@ public protocol YbridControl : PlaybackControl {
 
 public extension YbridControl {
     // allow actions without carriedOut callback parameter
+    func windToLive() {
+        windToLive(nil)
+    }
     func swapItem() {
         swapItem(nil)
     }
