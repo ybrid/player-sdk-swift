@@ -167,7 +167,7 @@ class YbridSteelinessTests: XCTestCase {
         print("\(listener.errors.count) errors occured")
     }
    
-    func testReconnectSession_Swr3_Fails() throws {
+    func testReconnectSession_Swr3_InternallyFromEndpointUri() throws {
         let semaphore = DispatchSemaphore(value: 0)
         let listener = MediaListener()
 

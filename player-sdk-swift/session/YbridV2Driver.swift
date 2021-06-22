@@ -98,7 +98,7 @@ class YbridV2Driver : MediaDriver {
         
         Logger.session.info("creating ybrid session")
         
-        let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
+        let sessionObj = try createSessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
         accecpt(response: sessionObj)
         connected = true
     }
@@ -139,7 +139,7 @@ class YbridV2Driver : MediaDriver {
     /// visible for tests
     func reconnect() throws {
         Logger.session.info("reconnecting ybrid session")
-        let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
+        let sessionObj = try createSessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
         accecpt(response: sessionObj)
         connected = true
     }
@@ -315,10 +315,26 @@ class YbridV2Driver : MediaDriver {
     
     // MARK: all requests
     
-    private func sessionRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSessionObject {
+    
+    private func createSessionRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
+        do {
+            let result:YbridSessionResponse = try jsonRequest(baseUrl: endpointUri, ctrlPath: ctrlPath, actionString: actionString)
+
+            Logger.session.debug(String(describing: result.__responseObject))
+            return result.__responseObject
+    
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
+            listener?.error(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
+    
+    private func sessionRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
         
         do {
-            let result:YbridSessionResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+            let result:YbridSessionResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString)
 
             Logger.session.debug(String(describing: result.__responseObject))
             return result.__responseObject
@@ -336,7 +352,7 @@ class YbridV2Driver : MediaDriver {
         }
         Logger.session.info(actionString)
         do {
-            let result:YbridWindResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+            let result:YbridWindResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let windedObject = result.__responseObject
             Logger.session.debug(String(describing: windedObject))
@@ -354,7 +370,7 @@ class YbridV2Driver : MediaDriver {
         }
         Logger.session.info(actionString)
         do {
-            let result:YbridSwapItemResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+            let result:YbridSwapItemResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let swappedObject = result.__responseObject
             Logger.session.debug(String(describing: swappedObject))
@@ -372,7 +388,7 @@ class YbridV2Driver : MediaDriver {
         }
         Logger.session.info(actionString)
         do {
-            let result:YbridSwapServiceResponse = try jsonRequest(ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+            let result:YbridSwapServiceResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let swappedObject = result.__responseObject
             Logger.session.debug(String(describing: swappedObject))
@@ -384,7 +400,7 @@ class YbridV2Driver : MediaDriver {
         }
     }
 
-    private func jsonRequest<T:Decodable>(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> T {
+    private func jsonRequest<T:Decodable>(baseUrl: URL, ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> T {
         guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }

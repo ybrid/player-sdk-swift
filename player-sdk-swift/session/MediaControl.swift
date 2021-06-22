@@ -36,6 +36,7 @@ protocol MediaControl {
 class MediaDriver : MediaControl {
     
     let mediaProtocol:MediaProtocol
+    var endpointUri:URL
     var baseUrl:URL
     var playbackUri:String
     var valid:Bool = true //  { get }
@@ -53,7 +54,8 @@ class MediaDriver : MediaControl {
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
         self.playbackUri = session.endpoint.uri
-        self.baseUrl = URL(string: session.endpoint.uri)!
+        self.endpointUri = URL(string: session.endpoint.uri)!
+        self.baseUrl = endpointUri
     }
     
     func connect() throws {}
