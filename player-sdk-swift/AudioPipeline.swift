@@ -66,6 +66,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
+    static let filename = "swr3recIncl1024MD.mp3"
+    let rec:Recorder = Recorder(recordingName: filename)
+    
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession) {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
@@ -75,6 +78,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
             self.notifyMetadataChanged(metadata)
         }
         PlayerContext.registerMemoryListener(listener: self)
+        
+        rec.clear(recordingName: AudioPipeline.filename)
+        rec.start()
+        
+
     }
     deinit {
         Logger.decoding.debug()
@@ -137,7 +145,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     
     // MARK: "main" is decode
     
+
     func process(data: Data) {
+        rec.add(data)
         
         let treatedData = treatMetadata(data: data)
         
@@ -306,4 +316,60 @@ fileprivate func describe(format: AVAudioFormat?) -> String {
     let desc = fmt.streamDescription.pointee
     
     return String(format: "audio %@ %d ch %.0f Hz %@ %@", AudioData.describeFormatId(desc.mFormatID) , desc.mChannelsPerFrame, desc.mSampleRate, AudioData.describeBitdepth(format?.commonFormat), fmt.isInterleaved ? "interleaved" : "non interleaved" )
+}
+
+
+public class Recorder {
+
+    var fileUrl: URL?
+    private var outputStream: OutputStream?
+
+    var mediadata:Data = Data()
+    
+    init(recordingName: String) {
+        self.fileUrl = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        .appendingPathComponent(recordingName)
+        print("recording to \(fileUrl?.absoluteString)")
+    }
+
+    func start() {
+        if let file = fileUrl {
+            outputStream = OutputStream(url: file, append: true)
+            outputStream!.open()
+        }
+    }
+
+    
+    func add(_ data:Data) {
+        if let ostream = outputStream {
+            _ = try! data.withUnsafeBytes { (body:UnsafeRawBufferPointer) throws in
+                if let unsafeBytes = body.baseAddress?.assumingMemoryBound(to: UInt8.self) {
+                    ostream.write(unsafeBytes, maxLength: data.count)
+                }
+            }
+        }
+        
+        mediadata.append(data)
+    }
+    
+    func stop() {
+        if let file = fileUrl {
+            print("\(mediadata.count) bytes recorded to \(file.absoluteString)")
+            outputStream?.close()
+        }
+    }
+    
+    func clear(recordingName: String) {
+        if let file = fileUrl {
+            do {
+                try FileManager.default.removeItem(at: file)
+                print("\(file) deleted")
+            } catch {
+                print("could not delete \(file), Error: \(error)")
+            }
+            self.fileUrl = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                .appendingPathComponent(recordingName)
+            print("recording to \(file.absoluteString)")
+        }
+    }
 }

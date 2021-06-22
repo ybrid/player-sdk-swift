@@ -39,6 +39,9 @@
             </BuildableReference>
             <SkippedTests>
                <Test
+                  Identifier = "AnalyseDataTests">
+               </Test>
+               <Test
                   Identifier = "YbridSteelinessTests">
                </Test>
             </SkippedTests>

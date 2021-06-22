@@ -25,6 +25,7 @@
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
 		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
+		17241ECF2682126500CCBB77 /* AnalyseDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */; };
 		17268BE2265D2C4400E2F8E3 /* ybridWindBackResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */; };
 		17268BE4265D6D9500E2F8E3 /* ybridWindToLiveResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17268BE3265D6D9500E2F8E3 /* ybridWindToLiveResponse.json */; };
 		17268BE6265E8CBE00E2F8E3 /* ybridDateDecoding.json in Resources */ = {isa = PBXBuildFile; fileRef = 17268BE5265E8CBE00E2F8E3 /* ybridDateDecoding.json */; };
@@ -74,6 +75,8 @@
 		17651DE82667EC59005D46BA /* YbridSwapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17651DE62667EC59005D46BA /* YbridSwapTests.swift */; };
 		17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */; };
 		17651DED2668577A005D46BA /* ybridBouquetResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DEC2668577A005D46BA /* ybridBouquetResponse.json */; };
+		178F6374268230DB007AB54B /* RealdataMetadataExtractorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */; };
+		178F637B2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */; };
 		1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
 		1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
 		1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
@@ -203,6 +206,7 @@
 		171345B426306D780054DB9D /* ConsumeMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeMetadataTests.swift; sourceTree = "<group>"; };
 		171345C3263153500054DB9D /* MediaControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControl.swift; sourceTree = "<group>"; };
 		1714DA84263A0B7700DD17B8 /* MetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataTests.swift; sourceTree = "<group>"; };
+		17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyseDataTests.swift; sourceTree = "<group>"; };
 		17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridWindBackResponse.json; sourceTree = "<group>"; };
 		17268BE3265D6D9500E2F8E3 /* ybridWindToLiveResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridWindToLiveResponse.json; sourceTree = "<group>"; };
 		17268BE5265E8CBE00E2F8E3 /* ybridDateDecoding.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridDateDecoding.json; sourceTree = "<group>"; };
@@ -228,6 +232,8 @@
 		17651DE62667EC59005D46BA /* YbridSwapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSwapTests.swift; sourceTree = "<group>"; };
 		17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapItemResponse.json; sourceTree = "<group>"; };
 		17651DEC2668577A005D46BA /* ybridBouquetResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridBouquetResponse.json; sourceTree = "<group>"; };
+		178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealdataMetadataExtractorTest.swift; sourceTree = "<group>"; };
+		178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_kaputt2.mp3; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
 		1799DC7C25D565970055C973 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -363,11 +369,11 @@
 		170703D225D2F44400549B8A /* player-sdk-swift */ = {
 			isa = PBXGroup;
 			children = (
+				178F6381268247E9007AB54B /* decoding */,
+				178F63802682469A007AB54B /* playing */,
+				178F637F26824658007AB54B /* loading */,
 				170703D425D2F44400549B8A /* Info.plist */,
 				175849E4264BB6500071FEE6 /* util */,
-				17CBC9B425E3C36000B2F7E7 /* decoding */,
-				17CBC9B325E3C33B00B2F7E7 /* playing */,
-				17CBC9B225E3C30F00B2F7E7 /* loading */,
 				17539E502626D108000FE902 /* session */,
 				17E9AB832653A808001ED9C8 /* YbridControl.swift */,
 				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
@@ -384,10 +390,11 @@
 		170703DD25D2F44400549B8A /* player-sdk-swiftTests */ = {
 			isa = PBXGroup;
 			children = (
-				170703E025D2F44400549B8A /* Info.plist */,
 				1799DD3125D580D40055C973 /* unit */,
+				170703E025D2F44400549B8A /* Info.plist */,
 				175849E9264BB6890071FEE6 /* threadsafe */,
 				17E9AB872655456B001ED9C8 /* session */,
+				17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */,
 			);
 			path = "player-sdk-swiftTests";
 			sourceTree = "<group>";
@@ -446,6 +453,47 @@
 			path = res;
 			sourceTree = "<group>";
 		};
+		178F63792682327A007AB54B /* res */ = {
+			isa = PBXGroup;
+			children = (
+				178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */,
+			);
+			path = res;
+			sourceTree = "<group>";
+		};
+		178F637F26824658007AB54B /* loading */ = {
+			isa = PBXGroup;
+			children = (
+				1799DC7E25D565970055C973 /* AudioDataLoader.swift */,
+				1799DC7D25D565970055C973 /* DataAccumulator.swift */,
+				1799DC8E25D565A10055C973 /* MetadataExtractor.swift */,
+				17B54DD725F7B45800CDEBAD /* LoadingError.swift */,
+			);
+			path = loading;
+			sourceTree = "<group>";
+		};
+		178F63802682469A007AB54B /* playing */ = {
+			isa = PBXGroup;
+			children = (
+				1799DC9425D565B30055C973 /* PlaybackBuffer.swift */,
+				1799DC9625D565B30055C973 /* PlaybackEngine.swift */,
+				1799DC9525D565B30055C973 /* PlaybackScheduling.swift */,
+			);
+			path = playing;
+			sourceTree = "<group>";
+		};
+		178F6381268247E9007AB54B /* decoding */ = {
+			isa = PBXGroup;
+			children = (
+				1799DCA525D565DB0055C973 /* opus */,
+				1799DCA225D565DB0055C973 /* mpeg */,
+				1799DC8025D565970055C973 /* AudioDecoder.swift */,
+				1799DC7F25D565970055C973 /* AudioData.swift */,
+				17109E1025F8DF4C003DA621 /* DecodingError.swift */,
+			);
+			path = decoding;
+			sourceTree = "<group>";
+		};
 		1799DCA225D565DB0055C973 /* mpeg */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,8 +524,10 @@
 				1799DD3525D580D40055C973 /* PlaybackEngineTests.swift */,
 				1799DD3825D580D40055C973 /* MetadataExtractorTests.swift */,
 				1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */,
+				178F63792682327A007AB54B /* res */,
 				1714DA84263A0B7700DD17B8 /* MetadataTests.swift */,
 				175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */,
+				178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -498,39 +548,6 @@
 				17651DE62667EC59005D46BA /* YbridSwapTests.swift */,
 			);
 			path = "player-sdk-swiftUITests";
-			sourceTree = "<group>";
-		};
-		17CBC9B225E3C30F00B2F7E7 /* loading */ = {
-			isa = PBXGroup;
-			children = (
-				1799DC7E25D565970055C973 /* AudioDataLoader.swift */,
-				1799DC7D25D565970055C973 /* DataAccumulator.swift */,
-				1799DC8E25D565A10055C973 /* MetadataExtractor.swift */,
-				17B54DD725F7B45800CDEBAD /* LoadingError.swift */,
-			);
-			name = loading;
-			sourceTree = "<group>";
-		};
-		17CBC9B325E3C33B00B2F7E7 /* playing */ = {
-			isa = PBXGroup;
-			children = (
-				1799DC9425D565B30055C973 /* PlaybackBuffer.swift */,
-				1799DC9625D565B30055C973 /* PlaybackEngine.swift */,
-				1799DC9525D565B30055C973 /* PlaybackScheduling.swift */,
-			);
-			name = playing;
-			sourceTree = "<group>";
-		};
-		17CBC9B425E3C36000B2F7E7 /* decoding */ = {
-			isa = PBXGroup;
-			children = (
-				1799DCA525D565DB0055C973 /* opus */,
-				1799DCA225D565DB0055C973 /* mpeg */,
-				1799DC8025D565970055C973 /* AudioDecoder.swift */,
-				1799DC7F25D565970055C973 /* AudioData.swift */,
-				17109E1025F8DF4C003DA621 /* DecodingError.swift */,
-			);
-			name = decoding;
 			sourceTree = "<group>";
 		};
 		17E9AB872655456B001ED9C8 /* session */ = {
@@ -760,6 +777,7 @@
 				17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */,
 				17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */,
 				17268BE6265E8CBE00E2F8E3 /* ybridDateDecoding.json in Resources */,
+				178F637B2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 in Resources */,
 				17268BE4265D6D9500E2F8E3 /* ybridWindToLiveResponse.json in Resources */,
 				171201BA266AE69900DB9463 /* ybridSwapServiceResponse.json in Resources */,
 				17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */,
@@ -1014,6 +1032,7 @@
 				175849F6264F316E0071FEE6 /* TestsEndpoints.swift in Sources */,
 				1799DCDB25D566C00055C973 /* OpusMapping.swift in Sources */,
 				1799DCDA25D566C00055C973 /* OggContainer.swift in Sources */,
+				178F6374268230DB007AB54B /* RealdataMetadataExtractorTest.swift in Sources */,
 				1799DCCA25D566AF0055C973 /* AudioDecoder.swift in Sources */,
 				17D01BFD262F174D007B0A3C /* IcyDriver.swift in Sources */,
 				17539E532626D2C6000FE902 /* YbridV2Driver.swift in Sources */,
@@ -1024,6 +1043,7 @@
 				17539E8C26272AC8000FE902 /* SessionError.swift in Sources */,
 				1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
+				17241ECF2682126500CCBB77 /* AnalyseDataTests.swift in Sources */,
 				175849DF264A5D6E0071FEE6 /* PlayerContextTests.swift in Sources */,
 				17539E95262869E7000FE902 /* MediaControlFactory.swift in Sources */,
 				17E9AB852653A808001ED9C8 /* YbridControl.swift in Sources */,

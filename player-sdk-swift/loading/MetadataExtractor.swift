@@ -78,7 +78,6 @@ class MetadataExtractor {
         }
     }
     
-    
     func handle(payload: Data) -> Data {
         totalBytesTreated += UInt32(payload.count)
         let audio:PayloadCollector = PayloadCollector("audio")
