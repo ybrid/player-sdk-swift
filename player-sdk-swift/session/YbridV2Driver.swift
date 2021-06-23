@@ -72,9 +72,12 @@ class YbridV2Driver : MediaDriver {
     }}
     
     var swapsLeft:Int? { didSet {
-        if let swaps = swapsLeft, swaps != oldValue, swaps == 0 {
-            let notice = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
-            listener?.error(.notice, notice)
+        if let swaps = swapsLeft, swaps != oldValue {
+            listener?.swapsChanged(swaps)
+//            if swaps == 0 {
+//                let notice = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
+//                listener?.error(.notice, notice)
+//            }
         }
     }}
     

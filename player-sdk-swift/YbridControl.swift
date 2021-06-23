@@ -77,6 +77,7 @@ public extension YbridControl {
 public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
     func servicesChanged(_ services:[Service])
+    func swapsChanged(_ swapsLeft:Int)
 }
 
 // MARK: open
@@ -152,6 +153,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func select() {
         session.ybridListener?.servicesChanged(services)
         session.ybridListener?.offsetToLiveChanged(offsetToLiveS)
+        session.ybridListener?.swapsChanged(swapsLeft)
         if let metadata = session.fetchMetadataSync() {
             super.playerListener?.metadataChanged(metadata)
         }

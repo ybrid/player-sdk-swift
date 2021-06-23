@@ -369,11 +369,11 @@
 		170703D225D2F44400549B8A /* player-sdk-swift */ = {
 			isa = PBXGroup;
 			children = (
-				178F6381268247E9007AB54B /* decoding */,
-				178F63802682469A007AB54B /* playing */,
-				178F637F26824658007AB54B /* loading */,
 				170703D425D2F44400549B8A /* Info.plist */,
 				175849E4264BB6500071FEE6 /* util */,
+				178F637F26824658007AB54B /* loading */,
+				178F6381268247E9007AB54B /* decoding */,
+				178F63802682469A007AB54B /* playing */,
 				17539E502626D108000FE902 /* session */,
 				17E9AB832653A808001ED9C8 /* YbridControl.swift */,
 				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
