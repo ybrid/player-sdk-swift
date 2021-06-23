@@ -264,7 +264,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test07_ListenToMetadata() {
 
         do {
-            try AudioPlayer.open(for: myEndpoint, listener: playerListener) {
+            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: playerListener) {
                 [self] (control) in
                 
                 control.play()

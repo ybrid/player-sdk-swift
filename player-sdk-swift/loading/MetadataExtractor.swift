@@ -31,10 +31,10 @@ class MetadataExtractor {
     
     let intervalBytes:Int
     fileprivate var nextMetadataAt:Int
-    fileprivate var metadata:PayloadCollector = PayloadCollector("metadata")
-    var totalBytesTreated:UInt32 = 0
-    var totalBytesExtracted:UInt32 = 0
-    var totalBytesAudio:UInt32 = 0
+    fileprivate var metadata:PayloadCollector? // = PayloadCollector("metadata")
+//    var totalBytesTreated:UInt32 = 0
+//    var totalBytesExtracted:UInt32 = 0
+//    var totalBytesAudio:UInt32 = 0
     weak var listener: MetadataListener?
     private var lastMetadataHash: Data?
     
@@ -52,10 +52,17 @@ class MetadataExtractor {
         
         let name:String /// helps debugging / logging
         var data:Data
+        var outstanding:Int? /// remaining bytes (of metadata)
         
         init(_ name: String) {
             self.name = name
             self.data = Data()
+        }
+        
+        init(_ name: String, _ length:Int) {
+            self.name = name
+            self.data = Data()
+            self.outstanding = length
         }
         
         func appendUntilEnd(of: Data, idx: Int) -> Int {
@@ -65,6 +72,7 @@ class MetadataExtractor {
             }
             self.data.append(of.subdata(in: (idx..<of.count)))
             let appended = of.count - idx
+            self.outstanding? -= appended
             return appended
         }
         
@@ -74,72 +82,84 @@ class MetadataExtractor {
                 return 0
             }
             self.data.append(of.subdata(in: (index..<index+count)))
+            self.outstanding? -= count
             return count
         }
     }
-    
+
     func handle(payload: Data) -> Data {
-        totalBytesTreated += UInt32(payload.count)
-        let audio:PayloadCollector = PayloadCollector("audio")
+//        totalBytesTreated += UInt32(payload.count)
+        let audio = PayloadCollector("audio")
         
         var index:Int = 0
         iteratePayload: repeat {
             
-            // audio until end
-            if nextMetadataAt >= payload.count {
-                if index < payload.count {
-                    index += audio.appendUntilEnd(of: payload, idx: index)
+            if self.metadata == nil {
+                
+                // audio until end
+                if nextMetadataAt >= payload.count {
+                    if index < payload.count {
+                        index += audio.appendUntilEnd(of: payload, idx: index)
+                    }
+                    nextMetadataAt -= payload.count
+                    break iteratePayload
                 }
-                nextMetadataAt -= payload.count
+                
+                // audio until metadata
+                if index < nextMetadataAt {
+                    index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
+                    continue iteratePayload
+                }
+                
+                guard index == nextMetadataAt else {
+                    Logger.loading.error("-guard: index=\(index) and nMd=\(nextMetadataAt) must be equal")
+                    break iteratePayload
+                }
+                
+                // begin with metadata
+                let mdLength: Int = Int(payload[index]) * 16
+                index += 1
+//                totalBytesExtracted += 1
+                if mdLength == 0 {
+                    // empty metadata
+                    nextMetadataAt = index + intervalBytes
+                    continue iteratePayload
+                }
+                
+                self.metadata = PayloadCollector("metadata", mdLength)
+            }
+
+            guard let metadata = metadata,
+                  let outstanding = metadata.outstanding else {
+                Logger.loading.error("unexpected state in extracting metadata from payload ")
                 break iteratePayload
-            }
-            
-            // audio until metadata
-            if index < nextMetadataAt {
-                index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
-                continue iteratePayload
-            }
-            
-            guard index == nextMetadataAt else {
-                Logger.loading.error("-guard: index=\(index) and nMd=\(nextMetadataAt) must be equal")
-                break iteratePayload
-            }
-            
-            // begin with metadata
-            let mdLength: Int = Int(payload[index]) * 16
-            index += 1
-            totalBytesExtracted += 1
-            if mdLength == 0 {
-                // empty metadata
-                nextMetadataAt = index + intervalBytes
-                continue iteratePayload
             }
             
             // metadata until end
-            if index+mdLength > payload.count {
+            if index+outstanding > payload.count {
                 index += metadata.appendUntilEnd(of: payload, idx: index)
                 nextMetadataAt = index + intervalBytes - payload.count
                 break iteratePayload
             }
             
             // metadata until audio
-            index += metadata.appendCount(of: payload, index: index, count: mdLength)
-            metadataDone()
+            index += metadata.appendCount(of: payload, index: index, count: outstanding)
             nextMetadataAt = index + intervalBytes
+            extracted(metadata)
+            self.metadata = nil
 
         } while (index <= payload.count)
         
-        if metadata.data.count > 0 {
-            if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(metadata.data.count) bytes") }
+        if let md = metadata?.data, md.count > 0 {
+            if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(md.count) bytes") }
         }
-        totalBytesAudio += UInt32(audio.data.count)
+//        totalBytesAudio += UInt32(audio.data.count)
         return audio.data
     }
     
-    fileprivate func metadataDone() {
-        totalBytesExtracted += UInt32(metadata.data.count)
+    fileprivate func extracted(_ metadata:PayloadCollector) {
+//        totalBytesExtracted += UInt32(metadata.data.count)
         let hashed = hash(data: metadata.data)
-        Logger.loading.debug("\(hashed == lastMetadataHash ? "unchanged":"changed") icy metadata hash \(hashed.base64EncodedString())")
         guard hashed != lastMetadataHash else {
             return
         }
@@ -150,8 +170,6 @@ class MetadataExtractor {
         if Logger.verbose { Logger.decoding.debug("extracted icy metadata is \(metaDict)") }
         let icyMetadata = IcyMetadata(icyData: metaDict)
         listener?.metadataReady(icyMetadata)
-        
-        metadata = PayloadCollector("metadata")
     }
     
     func hash(data : Data) -> Data {
@@ -168,7 +186,13 @@ class MetadataExtractor {
         for entry in entries {
             let property:[String] = entry.split(separator: "=", maxSplits: 1).map(String.init)
             guard property.count == 2 else {
-                Logger.loading.error("cannot parse metadata entry '\(entry)'")
+                var value = entry
+                if let until = value.firstIndex(of: "\0") {
+                    value = String(value[..<until])
+                }
+                if !value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
+                    Logger.loading.error("cannot parse metadata entry '\(value)'")
+                }
                 continue
             }
             let key = property[0]
@@ -180,7 +204,7 @@ class MetadataExtractor {
             case "StreamUrl", "StreamTitle":
                 result.updateValue(value, forKey: key)
             default:
-                Logger.loading.notice("unused metadata key ’\(property[0])' with value '\(property[1])'")
+                Logger.loading.debug("unused metadata key ’\(property[0])' with value '\(property[1])'")
             }
         }
         return result

@@ -168,8 +168,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         }
         completionHandler(Foundation.URLSession.ResponseDisposition.allow)
         
-        response.textEncodingName
-        
         do {
             if response is HTTPURLResponse {
                 var icyMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")

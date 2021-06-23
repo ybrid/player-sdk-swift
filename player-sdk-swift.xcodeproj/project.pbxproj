@@ -75,8 +75,8 @@
 		17651DE82667EC59005D46BA /* YbridSwapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17651DE62667EC59005D46BA /* YbridSwapTests.swift */; };
 		17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */; };
 		17651DED2668577A005D46BA /* ybridBouquetResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17651DEC2668577A005D46BA /* ybridBouquetResponse.json */; };
-		178F6374268230DB007AB54B /* RealdataMetadataExtractorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */; };
-		178F637B2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */; };
+		178F6374268230DB007AB54B /* MetadataRealpayloadExtractorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178F6373268230DB007AB54B /* MetadataRealpayloadExtractorTest.swift */; };
+		178F637B2682327A007AB54B /* swr3recIncl1024MD_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 178F637A2682327A007AB54B /* swr3recIncl1024MD_1.mp3 */; };
 		1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
 		1799DC8225D565970055C973 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7C25D565970055C973 /* AudioPlayer.swift */; };
 		1799DC8325D565970055C973 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
@@ -126,6 +126,7 @@
 		17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
 		17B54DD925F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
 		17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
+		17BB101B26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 17BB101A26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 */; };
 		17CBC8CC25E2517F00B2F7E7 /* DataAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7D25D565970055C973 /* DataAccumulator.swift */; };
 		17CBC8CD25E2517F00B2F7E7 /* AudioDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC8025D565970055C973 /* AudioDecoder.swift */; };
 		17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DC7B25D565970055C973 /* AudioPipeline.swift */; };
@@ -232,8 +233,8 @@
 		17651DE62667EC59005D46BA /* YbridSwapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSwapTests.swift; sourceTree = "<group>"; };
 		17651DE92667F72B005D46BA /* ybridSwapItemResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapItemResponse.json; sourceTree = "<group>"; };
 		17651DEC2668577A005D46BA /* ybridBouquetResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridBouquetResponse.json; sourceTree = "<group>"; };
-		178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealdataMetadataExtractorTest.swift; sourceTree = "<group>"; };
-		178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_kaputt2.mp3; sourceTree = "<group>"; };
+		178F6373268230DB007AB54B /* MetadataRealpayloadExtractorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataRealpayloadExtractorTest.swift; sourceTree = "<group>"; };
+		178F637A2682327A007AB54B /* swr3recIncl1024MD_1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_1.mp3; sourceTree = "<group>"; };
 		1796DCC525D5272C00B5439F /* player-sdk-swiftMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftMacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1799DC7B25D565970055C973 /* AudioPipeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
 		1799DC7C25D565970055C973 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -265,6 +266,7 @@
 		1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevelopingPlayerTests.swift; sourceTree = "<group>"; };
 		1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITestsHelper.swift; sourceTree = "<group>"; };
 		17B54DD725F7B45800CDEBAD /* LoadingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingError.swift; sourceTree = "<group>"; };
+		17BB101A26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_2.mp3; sourceTree = "<group>"; };
 		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17CD394425E8FCE10085B274 /* AbortBufferingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17D01BFB262F174D007B0A3C /* IcyDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcyDriver.swift; sourceTree = "<group>"; };
@@ -456,7 +458,8 @@
 		178F63792682327A007AB54B /* res */ = {
 			isa = PBXGroup;
 			children = (
-				178F637A2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 */,
+				17BB101A26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 */,
+				178F637A2682327A007AB54B /* swr3recIncl1024MD_1.mp3 */,
 			);
 			path = res;
 			sourceTree = "<group>";
@@ -527,7 +530,7 @@
 				178F63792682327A007AB54B /* res */,
 				1714DA84263A0B7700DD17B8 /* MetadataTests.swift */,
 				175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */,
-				178F6373268230DB007AB54B /* RealdataMetadataExtractorTest.swift */,
+				178F6373268230DB007AB54B /* MetadataRealpayloadExtractorTest.swift */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -776,8 +779,9 @@
 				17268BE2265D2C4400E2F8E3 /* ybridWindBackResponse.json in Resources */,
 				17651DEA2667F72B005D46BA /* ybridSwapItemResponse.json in Resources */,
 				17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */,
+				17BB101B26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 in Resources */,
 				17268BE6265E8CBE00E2F8E3 /* ybridDateDecoding.json in Resources */,
-				178F637B2682327A007AB54B /* swr3recIncl1024MD_kaputt2.mp3 in Resources */,
+				178F637B2682327A007AB54B /* swr3recIncl1024MD_1.mp3 in Resources */,
 				17268BE4265D6D9500E2F8E3 /* ybridWindToLiveResponse.json in Resources */,
 				171201BA266AE69900DB9463 /* ybridSwapServiceResponse.json in Resources */,
 				17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */,
@@ -1032,7 +1036,7 @@
 				175849F6264F316E0071FEE6 /* TestsEndpoints.swift in Sources */,
 				1799DCDB25D566C00055C973 /* OpusMapping.swift in Sources */,
 				1799DCDA25D566C00055C973 /* OggContainer.swift in Sources */,
-				178F6374268230DB007AB54B /* RealdataMetadataExtractorTest.swift in Sources */,
+				178F6374268230DB007AB54B /* MetadataRealpayloadExtractorTest.swift in Sources */,
 				1799DCCA25D566AF0055C973 /* AudioDecoder.swift in Sources */,
 				17D01BFD262F174D007B0A3C /* IcyDriver.swift in Sources */,
 				17539E532626D2C6000FE902 /* YbridV2Driver.swift in Sources */,

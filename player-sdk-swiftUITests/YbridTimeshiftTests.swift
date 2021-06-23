@@ -317,6 +317,7 @@ class YbridTimeshiftTests: XCTestCase {
 }
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
+    
 
     func reset() {
         offsets.removeAll()
@@ -353,6 +354,9 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         self.services.append(services)
     }
     
+    func swapsChanged(_ swapsLeft: Int) {
+        Logger.testing.info("-- swaps left \(swapsLeft)")
+    }
     
     override func metadataChanged(_ metadata: Metadata) {
         Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")

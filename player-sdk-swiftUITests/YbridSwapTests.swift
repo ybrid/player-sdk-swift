@@ -71,19 +71,22 @@ class YbridSwapTests: XCTestCase {
                     XCTFail("ybridControl expected");semaphore?.signal()
                 },
                 ybridControl: { [self] (ybridControl) in
-                
+                defer {
+                    ybridControl.stop()
+                    poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                    semaphore?.signal()
+                }
+                    
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                     
                 guard ybridControl.swapsLeft != 0 else {
-                    XCTFail("currently no swaps left. Execute test later")
-                    semaphore?.signal(); return
+                    XCTFail("currently no swaps left. Execute test later"); return
                 }
                 print("\(ybridControl.swapsLeft) swaps are left")
                     
                 guard let titleMain = ybridPlayerListener.metadatas.last?.displayTitle else {
-                    XCTFail("must have recieved metadata");
-                    semaphore?.signal(); return
+                    XCTFail("must have recieved metadata"); return
                 }
                 print("title main =\(titleMain)")
                 
@@ -106,13 +109,7 @@ class YbridSwapTests: XCTestCase {
                     print("title swapped =\(titleSwapped2)")
                     return titleSwapped2 != titleSwapped
                 }
-                    
-                ybridControl.stop()
-                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                
-                    
-                    
-                semaphore?.signal()
+
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
@@ -129,13 +126,17 @@ class YbridSwapTests: XCTestCase {
                     XCTFail("ybridControl expected");semaphore?.signal()
                 },
                 ybridControl: { [self] (ybridControl) in
-                
+                defer {
+                    ybridControl.stop()
+                    poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                    semaphore?.signal()
+                }
                 ybridControl.play()
                 poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
               
                 guard ybridControl.swapsLeft != 0 else {
                     XCTFail("currently no swaps left. Execute test later")
-                    semaphore?.signal(); return
+                    return
                 }
                 print("\(ybridControl.swapsLeft) swaps are left")
                     
@@ -149,10 +150,6 @@ class YbridSwapTests: XCTestCase {
                 XCTAssertTrue(carriedOut, "swap was not carried out")
                 sleep(2)
                     
-                ybridControl.stop()
-                poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                
-                semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
@@ -201,8 +198,7 @@ class YbridSwapTests: XCTestCase {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
-                
-
+            
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)

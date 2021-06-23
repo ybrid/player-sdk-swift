@@ -51,7 +51,7 @@ class AnalyseDataTests: XCTestCase {
         
         rec.add(input)
         rec.add(input)
-//        rec.stop()
+        rec.stop()
     }
     
 }
