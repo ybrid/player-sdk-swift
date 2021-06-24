@@ -287,5 +287,69 @@ class UseAudioPlayerTests: XCTestCase {
             semaphore?.signal(); return
         }
     }
+
+    
+    /*
+     Use an endpoint that supports ybridV2 and implement the ybridControl callback.
+     Here you can access all audio content interaction features of ybrid interactive radio.
+     */
+    func test10_UseYbridControl() {
+
+        do {
+            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() },
+             ybridControl: {
+                [self] (control) in
+               
+                control.play()
+                sleep(2)
+                control.skipBackward(ItemType.NEWS)
+                sleep(8)
+                print("offset to live is \(control.offsetToLiveS)")
+                control.stop()
+                
+                self.semaphore?.signal()
+            })
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore?.signal(); return
+        }
+    }
+
+    /*
+     The YbridControlListener extends AudioPlayerListener.
+     The consumer is notified of ybrid states in the beginning of the session.
+     Later the methods are called when the specific state changes or
+     when select() is called.
+     */
+    func test11_YbridControlListener_Select() {
+        let ybridPlayerListener = TestYbridPlayerListener()
+        do {
+            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() })  {
+                [self] (control) in
+               
+                control.select()
+
+                
+                control.close()
+                sleep(1)
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore?.signal(); return
+        }
+        _ = semaphore?.wait(timeout: .distantFuture)
+
+        
+        XCTAssertEqual(2, ybridPlayerListener.services.count, "YbridControlListener.serviceChanged(...) should have been called twice, but was \(ybridPlayerListener.services.count)")
+        
+        XCTAssertEqual(2, ybridPlayerListener.offsets.count, "YbridControlListener.offsetToLiveChanged(...) should have been called twice, but was \(ybridPlayerListener.offsets.count)")
+        
+        XCTAssertEqual(2, ybridPlayerListener.swaps.count, "YbridControlListener.swapsChanged(...) should not have been called, twice, but was \(ybridPlayerListener.swaps.count)")
+        
+        semaphore?.signal()
+    }
+
+    
 }
 

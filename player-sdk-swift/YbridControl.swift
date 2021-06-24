@@ -148,6 +148,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
         super.init(session: session, listener: listener)
         session.ybridListener?.servicesChanged(services)
+        session.ybridListener?.swapsChanged(swapsLeft)
     }
     
     func select() {

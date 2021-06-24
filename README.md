@@ -16,20 +16,22 @@ After [integrating](https://github.com/ybrid/player-sdk-swift#integration) the f
 ```swift
 import YbridPlayerSDK
 
-let endpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
+let myEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
 try AudioPlayer.open(for: myEndpoint, listener: nil) {
-    (control) in
+    (control) in /// called asychronously
           
     control.play()
-    sleep(10) // of course the program must not end here
+    sleep(10) /// listen to audio
           
     control.stop()
+    /// ...
     control.close()
 }
+sleep(10) /// of course the program must not end here
 ```
 
 AudioPlayer.open first detects the transmission protocol and encoding of the audio content and metadata and then returns a playback control asynchronously. 
-A media specific control can be taken from an extended ```open``` method with more callbacks.
+A media specific control can be taken from the full ```open``` method, [see README_Ybrid](./README_Ybrid.md).
 
 Possible playback states of the player are
 ```swift
@@ -87,7 +89,9 @@ Unzip the files into a directory called 'Frameworks' of your XCode project. In t
 Please report any issue to tell us your need.
 
 ## Further documentation
-An excellent start to dive into technical details is [the overview](https://github.com/ybrid/overview) 
+An excellent start to dive into technical details is [the overview](https://github.com/ybrid/overview). 
+
+For a deeper insight into the structure of metadata and the power of ybrid [see ybrid docs](https://github.com/ybrid/player-interaction/blob/master/doc).
 
 ## Contributing
 You are welcome to [contribute](https://github.com/ybrid/player-sdk-swift/blob/master/CONTRIBUTING.md) in many ways.

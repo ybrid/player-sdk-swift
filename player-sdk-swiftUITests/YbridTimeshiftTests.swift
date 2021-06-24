@@ -64,7 +64,7 @@ class YbridTimeshiftTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertEqual(ybridPlayerListener.offsetChanges, 0)
+        XCTAssertEqual(ybridPlayerListener.offsets.count, 0)
     }
     
     func test02_YbridControl_ListeningToOffsetChanges() throws {
@@ -82,7 +82,7 @@ class YbridTimeshiftTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 1)
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 1)
         ybridPlayerListener.offsets.forEach{
             XCTAssertTrue(liveOffsetRange_LostSign.contains(-$0))
         }
@@ -112,7 +112,7 @@ class YbridTimeshiftTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 2, "expected to be at least the initial and one more change of offset")
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 2, "expected to be at least the initial and one more change of offset")
         guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
@@ -139,7 +139,7 @@ class YbridTimeshiftTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 1, "expected to be only the initial change of offset")
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 1, "expected to be only the initial change of offset")
         guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
@@ -172,7 +172,7 @@ class YbridTimeshiftTests: XCTestCase {
                })
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsetChanges, 3, "expected to be at least the initial and two more changes of offset")
+        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 3, "expected to be at least the initial and two more changes of offset")
         guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
         }
@@ -330,10 +330,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     var offsets:[TimeInterval] = []
     var errors:[AudioPlayerError] = []
     var services:[[Service]] = []
-    
-    var offsetChanges:Int { get {
-        return offsets.count
-    }}
+    var swaps:[Int] = []
     
     func isItem(_ type:ItemType) -> Bool {
         if let currentType = metadatas.last?.current?.type {
@@ -356,6 +353,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     
     func swapsChanged(_ swapsLeft: Int) {
         Logger.testing.info("-- swaps left \(swapsLeft)")
+        self.swaps.append(swapsLeft)
     }
     
     override func metadataChanged(_ metadata: Metadata) {
