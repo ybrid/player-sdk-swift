@@ -291,22 +291,22 @@ class UseAudioPlayerTests: XCTestCase {
     
     /*
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
-     Here you can access all audio content interaction features of ybrid interactive radio.
+     YbridControl allows to time shift and change to alternatice audio content.
      */
     func test10_UseYbridControl() {
 
         do {
             try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() },
              ybridControl: {
-                [self] (control) in
+                [self] (control) in /// called asychronously
                
                 control.play()
                 sleep(2)
                 control.skipBackward(ItemType.NEWS)
-                sleep(8)
-                print("offset to live is \(control.offsetToLiveS)")
-                control.stop()
+                sleep(8) /// listen to the news
                 
+                control.stop()
+                sleep(1)
                 self.semaphore?.signal()
             })
         } catch {
@@ -319,16 +319,15 @@ class UseAudioPlayerTests: XCTestCase {
      The YbridControlListener extends AudioPlayerListener.
      The consumer is notified of ybrid states in the beginning of the session.
      Later the methods are called when the specific state changes or
-     when select() is called.
+     when refresh() is called.
      */
-    func test11_YbridControlListener_Select() {
+    func test11_YbridControlListener_Refresh() {
         let ybridPlayerListener = TestYbridPlayerListener()
         do {
             try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() })  {
                 [self] (control) in
                
-                control.select()
-
+                control.refresh()
                 
                 control.close()
                 sleep(1)

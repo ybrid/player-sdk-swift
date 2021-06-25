@@ -46,19 +46,22 @@ public protocol PlaybackControl: SimpleControl  {
 
 public protocol YbridControl : PlaybackControl {
     
-    func select()
-    
+    /// time shifting
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
-    func windToLive(_ carriedOut: (()->())?)
+    func windToLive(_ audioComplete: (()->())?)
     func wind(to:Date)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
     
+    /// change content
     var swapsLeft:Int { get }
-    func swapItem(_ carriedOut: (()->())?)
+    func swapItem(_ audioComplete: (()->())?)
     var services:[Service] { get }
-    func swapService(to id:String, _ carriedOut: (()->())?)
+    func swapService(to id:String, _ audioComplete: (()->())?)
+    
+    /// refresh all states, all methods of the YbridControlListener are called
+    func refresh()
 }
 
 public extension YbridControl {
@@ -151,7 +154,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.ybridListener?.swapsChanged(swapsLeft)
     }
     
-    func select() {
+    func refresh() {
         session.ybridListener?.servicesChanged(services)
         session.ybridListener?.offsetToLiveChanged(offsetToLiveS)
         session.ybridListener?.swapsChanged(swapsLeft)

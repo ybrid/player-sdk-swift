@@ -55,22 +55,21 @@ public protocol YbridControl : PlaybackControl {
     var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
     func wind(to:Date)
-    func windToLive(_ carriedOut: (()->())?)
+    func windToLive(_ audioComplete: (()->())?)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
 
     /// change content
     var swapsLeft:Int { get }
-    func swapItem(_ carriedOut: (()->())?)
+    func swapItem(_ audioComplete: (()->())?)
     var services:[Service] { get }
-    func swapService(to id:String, _ carriedOut: (()->())?)
+    func swapService(to id:String, _ audioComplete: (()->())?)
 
     /// refresh all states, all methods of the YbridControlListener are called
-    func select() 
+    func refresh() 
 }
 ```
-
-If you call an action it'll take a short time until you hear the requested change of audio content. `carriedOut` hooks to an action are called when the requested changeover is fulfilled. Use these callbacks to express the change in the user interface.
+If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks to an action are called when the requested changeover is fullfilled. Use these callbacks to express the change in the user interface.
 
 Implement YbridControlListener and pass it via the listener parameter of `AudioPlayer.open`. You will receive the following notifications on startup and when the value changes
 
