@@ -45,31 +45,23 @@ class YbridTimeshiftTests: XCTestCase {
         print( "offsets were \(ybridPlayerListener.offsets)")
     }
     
-    func test01_YbridControl_GettingOffset_NoListener() throws {
-        
-        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil,
+    func test01_NoInitialOffsetChange() throws {
+
+        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
-                
-                let offset = ybridControl.offsetToLiveS
-                Logger.testing.notice("offset to live is \(offset.S)")
-                XCTAssertTrue(liveOffsetRange_LostSign.contains(-offset))
-                
-                ybridControl.play()
-                wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(2)
-                ybridControl.stop()
-                wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                
+
+                sleep(1)
+
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
-        
+
         XCTAssertEqual(ybridPlayerListener.offsets.count, 0)
     }
     
-    func test02_YbridControl_ListeningToOffsetChanges() throws {
+    func test02_PlayOffsetChanges() throws {
         
-        try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -88,7 +80,7 @@ class YbridTimeshiftTests: XCTestCase {
         }
     }
     
-    func test03_YbridControl_WindBackward120Forward60() throws {
+    func test03_WindBackward120_WindForward60() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -97,13 +89,12 @@ class YbridTimeshiftTests: XCTestCase {
                 sleep(2)
         
                 ybridControl.wind(by: -120.0)
-                wait(ybridControl, shifted: -120.0, maxSeconds: 2)
+                wait(ybridPlayerListener, shifted: -120.0, maxSeconds: 4)
                 sleep(4)
                 
                 ybridControl.wind(by: 60.0)
-                wait(ybridControl, shifted: -60.0, maxSeconds: 2)
+                wait(ybridPlayerListener, shifted: -60.0, maxSeconds: 4)
                 sleep(4)
-                
                 
                 ybridControl.stop()
                 wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
@@ -121,7 +112,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     
-    func test04_YbridControl_CannotWind() throws {
+    func test04_Wind_Cannot() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -152,7 +143,7 @@ class YbridTimeshiftTests: XCTestCase {
         XCTAssertTrue(error.message?.contains("cannot wind ") == true, "human readably message expected" )
     }
 
-    func test05_YbridControl_WindToLive() throws {
+    func test05_WindToLive() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -160,10 +151,10 @@ class YbridTimeshiftTests: XCTestCase {
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
                 ybridControl.wind(by:-20.0)
-                wait(ybridControl, shifted: -20.0, maxSeconds: maxWindResponseS)
+                wait(ybridPlayerListener, shifted: -20.0, maxSeconds: maxWindResponseS)
                 sleep(4)
                 ybridControl.windToLive()
-                wait(ybridControl, shifted: 0.0, maxSeconds: maxWindResponseS)
+                wait(ybridPlayerListener, shifted: 0.0, maxSeconds: maxWindResponseS)
                 sleep(4)
                 ybridControl.stop()
                 wait(ybridControl, until: PlaybackState.stopped, maxSeconds: maxWindResponseS)
@@ -180,7 +171,7 @@ class YbridTimeshiftTests: XCTestCase {
         
     }
     
-    func test06_YbridControl_WindToDate_BeforeLastFullHour_Advertisement() throws {
+    func test06_WindToDate_BeforeFullHourAdvertisement() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -202,7 +193,7 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     
-    func test07_YbridControl_SkipBackwardNewsForwardMusic() throws {
+    func test07_SkipBackwardNews_SkipForwardMusic() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -226,7 +217,7 @@ class YbridTimeshiftTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
-    func test08_YbridControl_SkipBackwardsItem_LastItemAgain() throws {
+    func test08_SkipBackwardItem_LastItemAgain() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
                 
@@ -234,14 +225,14 @@ class YbridTimeshiftTests: XCTestCase {
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
         
-                ybridControl.skipBackward(nil)
+                ybridControl.skipBackward()
                 let type = ybridPlayerListener.metadatas.last?.current?.type
                 XCTAssertNotNil(type)
                 Logger.testing.notice("currently playing \(type ?? ItemType.UNKNOWN)")
 
                 sleep(4)
   
-                ybridControl.skipBackward(nil)
+                ybridControl.skipBackward()
                 let typeNow = ybridPlayerListener.metadatas.last?.current?.type
                 XCTAssertEqual(type, typeNow)
                 Logger.testing.notice("again playing \(type ?? ItemType.UNKNOWN)")
@@ -276,10 +267,13 @@ class YbridTimeshiftTests: XCTestCase {
         return shiftedRange
     }
 
-    private func wait(_ control:YbridControl, shifted: TimeInterval, maxSeconds:Int) {
+    private func wait(_ consumer:TestYbridPlayerListener, shifted: TimeInterval, maxSeconds:Int) {
         let shiftedRange_LostSign = shift(liveOffsetRange_LostSign, by: -shifted)
         let took = wait(max: maxSeconds) {
-            return isOffset(control.offsetToLiveS, shifted: shifted)
+            guard let offset = consumer.offsetToLive else {
+                return false
+            }
+            return isOffset(offset, shifted: shifted)
         }
         XCTAssertLessThanOrEqual(took, maxSeconds, "offset to live not \((-shiftedRange_LostSign.lowerBound).S) ..< \((-shiftedRange_LostSign.upperBound).S) within \(maxSeconds) s")
     }
@@ -332,6 +326,18 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     var services:[[Service]] = []
     var swaps:[Int] = []
     
+    
+    // the latest recieved value for offset
+    var offsetToLive:TimeInterval? { get {
+        return offsets.last
+    }}
+    
+    // the latest value for swapsLeft
+    var swapsLeft:Int? { get {
+        return swaps.last
+    }}
+    
+    
     func isItem(_ type:ItemType) -> Bool {
         if let currentType = metadatas.last?.current?.type {
             return type == currentType
@@ -339,10 +345,9 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         return false
     }
     
-    
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
-        Logger.testing.info("-- current offset is \(offset.S)")
+        Logger.testing.info("-- offset is \(offset.S)")
         offsets.append(offset)
     }
 
@@ -366,7 +371,5 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         super.error(severity, exception)
         errors.append(exception)
     }
-    
 
-    
 }

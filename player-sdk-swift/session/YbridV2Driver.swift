@@ -38,7 +38,9 @@ class YbridV2Driver : MediaDriver {
     
     var offsetToLiveS:TimeInterval? { didSet {
         if oldValue != offsetToLiveS {
-            listener?.offsetToLiveChanged(offsetToLiveS)
+            DispatchQueue.global().async {
+                super.listener?.offsetToLiveChanged(self.offsetToLiveS)
+            }
         }
     }}
     
@@ -73,15 +75,11 @@ class YbridV2Driver : MediaDriver {
     
     var swapsLeft:Int? { didSet {
         if let swaps = swapsLeft, swaps != oldValue {
-            listener?.swapsChanged(swaps)
-//            if swaps == 0 {
-//                let notice = SessionError(ErrorKind.noSwapsLeft, "swap item not available")
-//                listener?.error(.notice, notice)
-//            }
+            DispatchQueue.global().async {
+                super.listener?.swapsChanged(swaps)
+            }
         }
     }}
-    
-    weak var listener:YbridControlListener?
     
     init(session:MediaSession) {
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
@@ -225,7 +223,7 @@ class YbridV2Driver : MediaDriver {
         var actionString = "swap item"
         guard swapsLeft != 0 else {
             let warning = SessionError(ErrorKind.noSwapsLeft, actionString + " not available")
-            listener?.error(.recoverable, warning)
+            super.notify(.recoverable, warning)
             Logger.session.notice(actionString + " not available")
             return false
         }
@@ -328,7 +326,7 @@ class YbridV2Driver : MediaDriver {
     
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -344,7 +342,7 @@ class YbridV2Driver : MediaDriver {
     
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString) ybrid session", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -362,7 +360,7 @@ class YbridV2Driver : MediaDriver {
             return windedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -380,7 +378,7 @@ class YbridV2Driver : MediaDriver {
             return swappedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -398,7 +396,7 @@ class YbridV2Driver : MediaDriver {
             return swappedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }
@@ -421,13 +419,13 @@ class YbridV2Driver : MediaDriver {
         do {
             guard let result = try JsonRequest(url: url).performPostSync(responseType: T.self) else {
                 let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                listener?.error(ErrorSeverity.fatal, error)
+                super.notify(ErrorSeverity.fatal, error)
                 throw error
             }
             return result
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            listener?.error(ErrorSeverity.fatal, cannot)
+            super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
         }
     }

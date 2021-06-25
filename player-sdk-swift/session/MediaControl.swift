@@ -51,6 +51,9 @@ class MediaDriver : MediaControl {
 //    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
 //    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
     
+    
+    weak var listener:YbridControlListener?
+    
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
         self.playbackUri = session.endpoint.uri
@@ -72,4 +75,10 @@ class MediaDriver : MediaControl {
     
     //    func getBouquet() -> Bouquet
     //    @NotNull Service getCurrentService();
+    
+    func notify(_ severity:ErrorSeverity, _ error: SessionError ) {
+        DispatchQueue.global().async {
+            self.listener?.error(severity, error)
+        }
+    }
 }

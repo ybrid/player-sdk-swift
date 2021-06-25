@@ -47,7 +47,6 @@ public protocol PlaybackControl: SimpleControl  {
 public protocol YbridControl : PlaybackControl {
     
     /// time shifting
-    var offsetToLiveS:TimeInterval { get }
     func wind(by:TimeInterval)
     func windToLive(_ audioComplete: (()->())?)
     func wind(to:Date)
@@ -55,9 +54,7 @@ public protocol YbridControl : PlaybackControl {
     func skipBackward(_ type:ItemType?)
     
     /// change content
-    var swapsLeft:Int { get }
     func swapItem(_ audioComplete: (()->())?)
-    var services:[Service] { get }
     func swapService(to id:String, _ audioComplete: (()->())?)
     
     /// refresh all states, all methods of the YbridControlListener are called
@@ -65,16 +62,12 @@ public protocol YbridControl : PlaybackControl {
 }
 
 public extension YbridControl {
-    // allow actions without carriedOut callback parameter
-    func windToLive() {
-        windToLive(nil)
-    }
-    func swapItem() {
-        swapItem(nil)
-    }
-    func swapService(to id:String) {
-        swapService(to:id, nil)
-    }
+    /// allow actions without audioComplete callback parameter
+    func windToLive() { windToLive(nil) }
+    func swapItem() { swapItem(nil) }
+    func swapService(to id:String) { swapService(to:id, nil) }
+    func skipBackward() { skipBackward(nil) }
+    func skipForward() { skipForward(nil) }
 }
 
 public protocol YbridControlListener : AudioPlayerListener {
@@ -150,16 +143,20 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             session.ybridListener = ybridListener
         }
         super.init(session: session, listener: listener)
-        session.ybridListener?.servicesChanged(services)
-        session.ybridListener?.swapsChanged(swapsLeft)
+        DispatchQueue.global().async {
+            session.ybridListener?.servicesChanged(self.services)
+            session.ybridListener?.swapsChanged(self.swapsLeft)
+        }
     }
-    
+
     func refresh() {
-        session.ybridListener?.servicesChanged(services)
-        session.ybridListener?.offsetToLiveChanged(offsetToLiveS)
-        session.ybridListener?.swapsChanged(swapsLeft)
-        if let metadata = session.fetchMetadataSync() {
-            super.playerListener?.metadataChanged(metadata)
+        DispatchQueue.global().async {
+            self.session.ybridListener?.offsetToLiveChanged(self.offsetToLiveS)
+            self.session.ybridListener?.servicesChanged(self.services)
+            self.session.ybridListener?.swapsChanged(self.swapsLeft)
+            if let metadata = self.session.fetchMetadataSync() {
+                super.playerListener?.metadataChanged(metadata)
+            }
         }
     }
     
@@ -188,12 +185,12 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    func windToLive( _ carriedOut: (()->())?) {
+    func windToLive( _ audioComplete: (()->())?) {
         playerQueue.async {
             if self.session.windToLive() {
-                self.changeover(carriedOut)
+                self.changeover(audioComplete)
             } else {
-                carriedOut?()
+                audioComplete?()
             }
         }
     }
@@ -216,32 +213,32 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    public func swapItem(_ carriedOut: (()->())?) {
+    public func swapItem(_ audioComplete: (()->())?) {
         playerQueue.async {
             if self.session.swapItem() {
-                self.changeover(carriedOut)
+                self.changeover(audioComplete)
             } else {
-                carriedOut?()
+                audioComplete?()
             }
         }
     }
-    public func swapService(to id:String, _ carriedOut: (()->())?) {
+    public func swapService(to id:String, _ audioComplete: (()->())?) {
         playerQueue.async {
             if self.session.swapService(id:id) {
-                self.changeover(carriedOut)
+                self.changeover(audioComplete)
             } else {
-                carriedOut?()
+                audioComplete?()
             }
         }
     }
     
-    private func changeover(_ carriedOut: (() -> ())? = nil) {
+    private func changeover(_ audioComplete: (() -> ())? = nil) {
         if let contentChangingIn = self.pipeline?.bufferSize {
             self.playerQueue.asyncAfter(deadline: .now() + contentChangingIn) {
-                carriedOut?()
+                audioComplete?()
             }
         } else {
-            carriedOut?()
+            audioComplete?()
         }
     }
 }

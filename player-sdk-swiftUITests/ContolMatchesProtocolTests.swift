@@ -47,11 +47,6 @@ class ContolMatchesProtocolTests: XCTestCase {
             
             XCTAssertEqual(.ybridV2, ybridControl.mediaProtocol)
             
-            let offset = ybridControl.offsetToLiveS
-            Logger.testing.notice("offset to live is \(offset.S)")
-            XCTAssertLessThanOrEqual(offset, 0.0)
-            XCTAssertGreaterThan(offset, -10.0)
-            
             ybridControl.play()
             wait(ybridControl, until: .playing, maxSeconds: 10)
             sleep(3)
