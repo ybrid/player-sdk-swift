@@ -70,7 +70,7 @@ public protocol YbridControl : PlaybackControl {
 }
 ```
 
-If you call an action it'll take a short time until you hear the requested change of audio content. `carriedOut` hooks of an action are called when the requested changeover is fulfilled. Use these callbacks to express the change in the user interface.
+If you call an action it'll take a short time until you hear the requested change of audio content. `carriedOut` hooks to an action are called when the requested changeover is fulfilled. Use these callbacks to express the change in the user interface.
 
 Implement YbridControlListener and pass it via the listener parameter of `AudioPlayer.open`. You will receive the following notifications on startup and when the value changes
 
