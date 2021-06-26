@@ -43,7 +43,7 @@ class OggContainer {
     }
     
     var opusListener:OpusDataListener?
-    init(delegate: AudioPlayerListener?) throws {
+    init() throws {
         if let info = Bundle(identifier: OggContainer.oggBundleIdentifier)?.infoDictionary {
             Logger.decoding.debug("bundle \(OggContainer.oggBundleIdentifier) info \(info)")
             let version = info["CFBundleShortVersionString"] ?? "(unknown)"

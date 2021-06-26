@@ -145,7 +145,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         endSession()
         startSession(configuration: configuration)
         pipeline.reset() /// also buffer is cleared
-        pipeline.pipelineListener.error(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
+        pipeline.pipelineListener.notify(ErrorSeverity.notice, LoadingError( ErrorKind.noError, "resume loading data"))
     }
     
     fileprivate func networkStalled(_ cause:SessionTaskState) {
@@ -155,7 +155,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         }
         stalled = true
         let error = LoadingError(ErrorKind.networkStall, cause)
-        pipeline.pipelineListener.error(ErrorSeverity.recoverable, error)
+        pipeline.pipelineListener.notify(ErrorSeverity.recoverable, error)
     }
     
     // MARK: session begins
@@ -187,9 +187,9 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             handleMediaLength(response.expectedContentLength)
         } catch {
             if let playerError = error as? AudioPlayerError {
-                pipeline.pipelineListener.error(ErrorSeverity.fatal, playerError)
+                pipeline.pipelineListener.notify(ErrorSeverity.fatal, playerError)
             } else  {
-                pipeline.pipelineListener.error(ErrorSeverity.fatal, LoadingError( ErrorKind.unknown, "error handling url response", error))
+                pipeline.pipelineListener.notify(ErrorSeverity.fatal, LoadingError( ErrorKind.unknown, "error handling url response", error))
             }
             endSession()
         }
@@ -319,10 +319,10 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             networkStalled(taskState)
         case .fatal:
             let error = LoadingError(ErrorKind.networkFatal, taskState)
-            pipeline.pipelineListener.error( stalled ? taskState.severityWhileStalling : taskState.severity, error)
+            pipeline.pipelineListener.notify( stalled ? taskState.severityWhileStalling : taskState.severity, error)
         case .notice:
             let notice = LoadingError(ErrorKind.noError, taskState)
-            pipeline.pipelineListener.error(taskState.severity,notice)
+            pipeline.pipelineListener.notify(taskState.severity,notice)
         }
 
     }

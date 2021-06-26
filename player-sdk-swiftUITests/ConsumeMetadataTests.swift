@@ -28,7 +28,6 @@ import YbridPlayerSDK
 
 class ConsumeMetadataTests: XCTestCase {
     
-    
     var consumer = TestMetadataCallsConsumer()
     var mediaSession:MediaSession?
     var player:PlaybackControl?
@@ -43,7 +42,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
 
-    func test01_MetadataYbrid_OnEachPlayAndInStream_FullCurrentNext() throws {
+    func test01_Ybrid_OnEachPlayAndInStream_FullCurrentNext() throws {
 
         try AudioPlayer.open (for: ybridDemoEndpoint, listener: consumer) {
             [self] control in player = control
@@ -89,7 +88,7 @@ class ConsumeMetadataTests: XCTestCase {
         return true
     }
     
-    func test02_MetadataYbrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() throws {
+    func test02_Ybrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() throws {
         
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: consumer) {
             [self] control in player = control
@@ -125,7 +124,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
     
-    func test03_MetadataIcy_InStreamOnly_CurrentStation() throws {
+    func test03_Icy_InStreamOnly_CurrentStation() throws {
         
         try AudioPlayer.open(for: icecastHr2Endpoint, listener: consumer) {
             [self] control in player = control
@@ -158,7 +157,7 @@ class ConsumeMetadataTests: XCTestCase {
         
     }
     
-    func test04_MetadataOpusDlf_InStreamOnly_CurrentStation() throws {
+    func test04_OpusDlf_InStreamOnly_CurrentStation() throws {
         try AudioPlayer.open(for: opusDlfEndpoint, listener: consumer) {
             [self] control in player = control
             
@@ -190,7 +189,7 @@ class ConsumeMetadataTests: XCTestCase {
 
     }
     
-    func test05_MetadataOpusCC_InStreamOnly_TitleArtistAlbum() throws {
+    func test05_OpusCC_InStreamOnly_TitleArtistAlbum() throws {
         
         try AudioPlayer.open(for: opusCCEndpoint, listener: consumer) {
             [self] control in player = control
@@ -227,7 +226,7 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertEqual("Creative Commons", station.genre)
     }
     
-    func test06_MetadataOnDemand_OnBeginningNoneOnResume() throws {
+    func test06_OnDemand_OnBeginningNoneOnResume() throws {
 
         try AudioPlayer.open(for: onDemandOpusEndpoint, listener: consumer) {
             [self] control in player = control

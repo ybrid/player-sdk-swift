@@ -160,22 +160,16 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    var offsetToLiveS: TimeInterval { get {
-        playerQueue.sync {
-            return (session.mediaControl as? YbridV2Driver)?.offsetToLiveS ?? 0.0
-        }
+    private var offsetToLiveS: TimeInterval { get {
+        return session.offsetToLiveS ?? 0.0
     }}
- 
-    var swapsLeft: Int { get {
-        playerQueue.sync {
-            return session.swapsLeft ?? -1
-        }
+
+    private var swapsLeft: Int { get {
+        return session.swapsLeft ?? -1
     }}
-    
-    var services: [Service] { get {
-        playerQueue.sync {
-            return session.services ?? []
-        }
+
+    private var services: [Service] { get {
+        return session.services ?? []
     }}
     
     

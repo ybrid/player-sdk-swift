@@ -27,15 +27,14 @@ import AVFoundation
  
 protocol PipelineListener: class {
     func ready(playback: Playback)
-    func error(_ severity: ErrorSeverity, _ error: AudioPlayerError)
+    func notify(_ severity:ErrorSeverity, _ error: AudioPlayerError)
 }
 
 protocol MetadataListener: class {
     func metadataReady(_ metadata: AbstractMetadata)
 }
 
-class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
-{
+class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     let pipelineListener: PipelineListener
     var started = Date()
@@ -117,7 +116,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         
         switch audioContentType {
         case kAudioFormatOpus:
-            let ogg = try OggContainer(delegate: playerListener)
+            let ogg = try OggContainer()
             self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
         default:
             self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
@@ -132,7 +131,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
     
     func notifyExceedsMemoryLimit() {
         Logger.loading.notice("stop audio processing due to memory limit")
-        playerListener?.error(ErrorSeverity.recoverable, AudioPlayerError(.memoryLimitExceeded, "audio truncated") )
+        pipelineListener.notify(ErrorSeverity.recoverable, AudioPlayerError(.memoryLimitExceeded, "audio truncated"))
         stopProcessing()
     }
     
@@ -167,7 +166,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         do {
             if let pcmTargetFormat = try decoder?.create(from: sourceFormat) {
                 if self.buffer == nil {
-                    let engine = PlaybackEngine(format: pcmTargetFormat, listener: self.playerListener )
+                    let engine = PlaybackEngine(format: pcmTargetFormat, listener: playerListener )
                     if !infinite { engine.canPause = true }
                     self.buffer = engine.start()
                     self.pipelineListener.ready(playback: engine)
@@ -180,9 +179,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         } catch {
             Logger.decoding.error(error.localizedDescription)
             if let audioDataError = error as? AudioPlayerError {
-                pipelineListener.error(ErrorSeverity.fatal, audioDataError)
+                pipelineListener.notify(ErrorSeverity.fatal, audioDataError)
             } else {
-                pipelineListener.error(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "problem with audio format", error))
+                pipelineListener.notify(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "problem with audio format", error))
             }
             return
         }
@@ -198,7 +197,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
         
         if firstPCM {
             firstPCM = false
-            playerListener?.durationReadyToPlay(Date().timeIntervalSince(self.started))
+            DispatchQueue.global().async {
+                self.playerListener?.durationReadyToPlay(Date().timeIntervalSince(self.started))
+            }
         }
     }
     
@@ -274,9 +275,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
                 }
                 Logger.decoding.error(error.localizedDescription)
                 if let playerError = error as? AudioPlayerError {
-                    self.pipelineListener.error(ErrorSeverity.fatal, playerError)
+                    self.pipelineListener.notify(ErrorSeverity.fatal, playerError)
                 } else {
-                    self.pipelineListener.error(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "cannot convert audio data", error))
+                    self.pipelineListener.notify(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "cannot convert audio data", error))
                 }
             }
         }
@@ -291,7 +292,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener
             Logger.decoding.notice("no metadata to notifiy")
             return
         }
-        self.playerListener?.metadataChanged(metadata)
+        DispatchQueue.global().async {
+            self.playerListener?.metadataChanged(metadata)
+        }
     }
     
     ///  delegate for visibility

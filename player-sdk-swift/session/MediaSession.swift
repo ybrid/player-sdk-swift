@@ -35,7 +35,7 @@ public class MediaSession  {
     var mediaControl:MediaDriver?
      
     weak var ybridListener:YbridControlListener? { didSet {
-        v2Driver?.listener = ybridListener
+        mediaControl?.listener = ybridListener
     }}
     
     public var mediaProtocol:MediaProtocol? { get {
@@ -46,13 +46,14 @@ public class MediaSession  {
         return mediaControl?.playbackUri ?? endpoint.uri
     }}
     
-    var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
+    private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
         DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
     )
      
     private var v2Driver:YbridV2Driver? { get {
         return mediaControl as? YbridV2Driver
     }}
+    
     var swapsLeft: Int? { get {
         return v2Driver?.swapsLeft
     }}
@@ -79,7 +80,6 @@ public class MediaSession  {
     func refresh() {
         if let media = v2Driver {
             media.info()
-            media.listener?.offsetToLiveChanged(media.offsetToLiveS)
         }
     }
      

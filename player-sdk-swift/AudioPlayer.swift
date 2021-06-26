@@ -81,10 +81,12 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         do {
             try session.connect()
         } catch {
-            if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
-            } else {
-                listener?.error(ErrorSeverity.fatal, SessionError(ErrorKind.unknown, "cannot connect to endpoint", error))
+            DispatchQueue.global().async {
+                if let audioDataError = error as? AudioPlayerError {
+                    listener?.error(ErrorSeverity.fatal, audioDataError)
+                } else {
+                    listener?.error(ErrorSeverity.fatal, SessionError(ErrorKind.unknown, "cannot connect to endpoint", error))
+                }
             }
             return nil
         }
@@ -245,7 +247,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         }
     }
     
-    func error(_ severity: ErrorSeverity, _ error: AudioPlayerError) {
+    func notify(_ severity: ErrorSeverity, _ error: AudioPlayerError) {
         let logMessage = "\(severity) \(error.localizedDescription)"
         DispatchQueue.global().async {
             self.playerListener?.error(severity, error)
