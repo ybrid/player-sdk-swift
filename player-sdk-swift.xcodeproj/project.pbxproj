@@ -412,8 +412,8 @@
 				17539E9C26286F98000FE902 /* YbridJsonResponse.swift */,
 				17539E81262720F5000FE902 /* JsonRequest.swift */,
 				1711D182263AB45400882D2B /* MetadataMappings.swift */,
-				17539E8A26272AC8000FE902 /* SessionError.swift */,
 				17F6A14E266F5B0100F48432 /* Bouquet.swift */,
+				17539E8A26272AC8000FE902 /* SessionError.swift */,
 			);
 			path = session;
 			sourceTree = "<group>";

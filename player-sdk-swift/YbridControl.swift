@@ -48,18 +48,19 @@ public protocol YbridControl : PlaybackControl {
     
     /// time shifting
     func wind(by:TimeInterval)
-    func windToLive(_ audioComplete: (()->())?)
+    func windToLive(_ audioComplete: AudioCompleteCallback)
     func wind(to:Date)
     func skipForward(_ type:ItemType?)
     func skipBackward(_ type:ItemType?)
     
     /// change content
-    func swapItem(_ audioComplete: (()->())?)
-    func swapService(to id:String, _ audioComplete: (()->())?)
+    func swapItem(_ audioComplete: AudioCompleteCallback)
+    func swapService(to id:String, _ audioComplete: AudioCompleteCallback)
     
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
 }
+public typealias AudioCompleteCallback = ((_ didChange:Bool) -> ())?
 
 public extension YbridControl {
     /// allow actions without audioComplete callback parameter
@@ -81,8 +82,8 @@ public protocol YbridControlListener : AudioPlayerListener {
 public extension AudioPlayer {
     static private let controllerQueue = DispatchQueue(label: "io.ybrid.audio.controller")
 
-    typealias PlaybackControllerCallback = (PlaybackControl) -> ()
-    typealias YbridControllerCallback = (YbridControl) -> ()
+    typealias PlaybackControlCallback = (PlaybackControl) -> ()
+    typealias YbridControlCallback = (YbridControl) -> ()
     
     // Create an audio control matching to the MediaEndpoint.
     //
@@ -93,8 +94,8 @@ public extension AudioPlayer {
     // as available.
     //
     static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
-            playbackControl: PlaybackControllerCallback? = nil,
-              ybridControl: YbridControllerCallback? = nil ) throws {
+            playbackControl: PlaybackControlCallback? = nil,
+              ybridControl: YbridControlCallback? = nil ) throws {
         
         let session = MediaSession(on: endpoint)
         do {
@@ -129,7 +130,7 @@ public extension AudioPlayer {
      You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
      */
     static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
-            control: PlaybackControllerCallback? = nil ) throws {
+            control: PlaybackControlCallback? = nil ) throws {
         try AudioPlayer.open(for: endpoint, listener: listener, playbackControl: control, ybridControl: control)
     }
 }
@@ -172,20 +173,16 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         return session.services ?? []
     }}
     
-    
     func wind(by:TimeInterval) {
         playerQueue.async {
             self.session.wind(by:by)
         }
     }
     
-    func windToLive( _ audioComplete: (()->())?) {
+    func windToLive( _ audioComplete: AudioCompleteCallback) {
         playerQueue.async {
-            if self.session.windToLive() {
-                self.changeover(audioComplete)
-            } else {
-                audioComplete?()
-            }
+            let changeover = self.newChangeOver(audioComplete)
+            changeover.takePlace(self.session.windToLive())
         }
     }
     
@@ -207,32 +204,52 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    public func swapItem(_ audioComplete: (()->())?) {
+    public func swapItem(_ audioComplete: AudioCompleteCallback) {
         playerQueue.async {
-            if self.session.swapItem() {
-                self.changeover(audioComplete)
-            } else {
-                audioComplete?()
-            }
+            let changeover = self.newChangeOver(audioComplete)
+            changeover.takePlace(self.session.swapItem())
         }
     }
-    public func swapService(to id:String, _ audioComplete: (()->())?) {
+    public func swapService(to id:String, _ audioComplete: AudioCompleteCallback) {
         playerQueue.async {
-            if self.session.swapService(id:id) {
-                self.changeover(audioComplete)
-            } else {
-                audioComplete?()
-            }
+            let changeover = self.newChangeOver(audioComplete)
+            changeover.takePlace(self.session.swapService(id:id))
         }
     }
     
-    private func changeover(_ audioComplete: (() -> ())? = nil) {
-        if let contentChangingIn = self.pipeline?.bufferSize {
-            self.playerQueue.asyncAfter(deadline: .now() + contentChangingIn) {
-                audioComplete?()
+    private func newChangeOver(_ audioComplete: AudioCompleteCallback) -> ChangeOver {
+        return ChangeOver(audioComplete, pipeline: pipeline)
+    }
+    
+    
+    
+    class ChangeOver {
+        var audioComplete: AudioCompleteCallback
+        let pipeline:AudioPipeline?
+        init(_ audioComplete: AudioCompleteCallback, pipeline: AudioPipeline?) {
+            self.audioComplete = audioComplete
+            self.pipeline = pipeline
+        }
+        
+        func takePlace(_ inProgress:Bool) {
+            if !inProgress {
+                DispatchQueue.global().async {
+                    self.audioComplete?(false)
+                }
+                return
             }
-        } else {
-            audioComplete?()
+            if let contentChangingIn = self.pipeline?.bufferSize {
+                DispatchQueue.global().asyncAfter(deadline: .now() + contentChangingIn) {
+                    self.audioComplete?(true)
+                }
+            } else {
+                DispatchQueue.global().async {
+                    self.audioComplete?(true)
+                }
+            }
         }
     }
 }
+
+
+

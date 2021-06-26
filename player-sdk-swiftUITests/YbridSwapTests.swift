@@ -141,8 +141,8 @@ class YbridSwapTests: XCTestCase {
                 print("\(swaps) swaps are left")
                     
                 var carriedOut = false
-                ybridControl.swapItem {
-                    carriedOut = true
+                    ybridControl.swapItem { (audioChanged) in
+                    carriedOut = audioChanged
                 }
                 _ = poller.wait(max: 10) {
                     carriedOut == true
@@ -192,8 +192,8 @@ class YbridSwapTests: XCTestCase {
                ybridControl: { [self] (ybridControl) in
 
                 var carriedOut = false
-                ybridControl.swapService(to: "ad-injection-demo") {
-                    carriedOut = true
+                ybridControl.swapService(to: "ad-injection-demo") { (audioChanged) in
+                    carriedOut = audioChanged
                 }
                 _ = poller.wait(max: 10) {
                     carriedOut == true
@@ -212,7 +212,7 @@ class YbridSwapTests: XCTestCase {
         print("services were \(services)")
     }
 
-    func test06_SwapService_BeforePlayCarriedOut_ButDoesNotTakeEffekt__NotYet() throws {
+    func test06_SwapService_BeforePlay_ChagedButDoesNotTakeEffekt__NotYet() throws {
         Logger.verbose = true
         XCTAssertEqual(0,ybridPlayerListener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
@@ -222,8 +222,8 @@ class YbridSwapTests: XCTestCase {
                ybridControl: { [self] (ybridControl) in
 
                 var carriedOut = false
-                ybridControl.swapService(to: "ad-injection-demo") {
-                    carriedOut = true
+                ybridControl.swapService(to: "ad-injection-demo") { (changed) in
+                    carriedOut = changed
                 }
                 _ = poller.wait(max: 10) {
                     carriedOut == true
@@ -303,8 +303,8 @@ class YbridSwapTests: XCTestCase {
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 var carriedOut = false
-                ybridControl.swapService(to: "ad-injection-demo") {
-                    carriedOut = true
+                ybridControl.swapService(to: "ad-injection-demo") { (changed) in
+                    carriedOut = changed
                 }
                 _ = poller.wait(max: 10) {
                     carriedOut == true
