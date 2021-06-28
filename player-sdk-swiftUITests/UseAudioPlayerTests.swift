@@ -146,7 +146,8 @@ class UseAudioPlayerTests: XCTestCase {
             XCTAssertTrue(error is SessionError, "AudioPlayerError of type SessionError expected. There is a problem establishing a session with the endpoint")
         }
         
-        /// AudioPlayerListener.error(...) recieves errors as well
+        /// AudioPlayerListener.error(...) recieves errors as well, asynchroinously
+        sleep(1)
         XCTAssertEqual(playerListener.errors.count, 1)
         guard let lastError = playerListener.errors.last else {
             XCTFail(); return
@@ -316,8 +317,8 @@ class UseAudioPlayerTests: XCTestCase {
     }
 
     /*
-     The YbridControlListener extends AudioPlayerListener.
-     The consumer is notified of ybrid states in the beginning of the session.
+     YbridControlListener extends AudioPlayerListener.
+     The listener is notified of ybrid states in the beginning of the session.
      The listeners methods are called when the specific state changes or
      when refresh() is called.
      */

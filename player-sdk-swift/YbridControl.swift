@@ -102,11 +102,15 @@ public extension AudioPlayer {
             try session.connect()
         } catch {
             if let audioDataError = error as? AudioPlayerError {
-                listener?.error(ErrorSeverity.fatal, audioDataError)
+                DispatchQueue.global().async {
+                    listener?.error(ErrorSeverity.fatal, audioDataError)
+                }
                 throw audioDataError
             } else {
                 let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                listener?.error(ErrorSeverity.fatal, sessionError )
+                DispatchQueue.global().async {
+                    listener?.error(ErrorSeverity.fatal, sessionError )
+                }
                 throw sessionError
             }
         }
@@ -140,13 +144,13 @@ public extension AudioPlayer {
 class YbridAudioPlayer : AudioPlayer, YbridControl {
     
     override init(session:MediaSession, listener:AudioPlayerListener?) {
-        if let ybridListener = listener as? YbridControlListener {
-            session.ybridListener = ybridListener
-        }
         super.init(session: session, listener: listener)
-        DispatchQueue.global().async {
-            session.ybridListener?.servicesChanged(self.services)
-            session.ybridListener?.swapsChanged(self.swapsLeft)
+        if let ybridListener = listener as? YbridControlListener {
+            DispatchQueue.global().async {
+                ybridListener.servicesChanged(self.services)
+                ybridListener.swapsChanged(self.swapsLeft)
+            }
+            session.ybridListener = ybridListener
         }
     }
 

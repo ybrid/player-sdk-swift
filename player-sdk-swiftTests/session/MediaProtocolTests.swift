@@ -29,33 +29,33 @@ class MediaProtocolTests: XCTestCase {
     
     let factory = MediaControlFactory()
     
-    func testFactoryGetVersion_YbridDemo() throws {
+    func testFactoryGetVersion_YbridDemo_AuddetectYbrid() throws {
         let version = try factory.getVersion("https://democast.ybrid.io/adaptive-demo")
         XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
-    func testFactoryGetVersion_YbridStageDemo() throws {
+    func testFactoryGetVersion_YbridStageDemo_AutodetectIcy() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(MediaProtocol.ybridV2, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testFactoryGetVersion_wrongUrl() throws {
+    func testFactoryGetVersion_wrongUrl_AutodetectIcy() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testFactoryGetVersion_UrlNotFound() throws {
+    func testFactoryGetVersion_UrlNotFound_AutodetectIcy() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/gibtsNicht")
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testFactoryGetVersion_Hr2() throws {
+    func testFactoryGetVersion_Hr2_AutodetectIcy() throws {
         let version = try factory.getVersion("https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
         XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     
-    func testFactoryGetVersion_BadUrl() throws {
+    func testFactoryGetVersion_BadUrl_ThrowsError() throws {
         do {
             _ = try factory.getVersion("no url")
         } catch {
@@ -66,7 +66,7 @@ class MediaProtocolTests: XCTestCase {
     }
     
     
-    func testFactoryGetVersion_OnDemand() throws {
+    func testFactoryGetVersion_OnDemand_AutodetectIcy() throws {
         let version = try factory.getVersion("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
         XCTAssertEqual(MediaProtocol.icy, version)
     }
@@ -90,7 +90,7 @@ class MediaProtocolTests: XCTestCase {
     }
 
     
-    func testDriver_YbridSwr3_MustBeForced() throws {
+    func testDriver_YbridSwr3_YbridV2MustBeForced() throws {
         let swr3Endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
         guard let player = AudioPlayer.openSync(for:swr3Endpoint, listener: nil) else {
             XCTFail("expected a player"); return
@@ -125,7 +125,7 @@ class MediaProtocolTests: XCTestCase {
     
     
     
-    func testDriver_Stage_Connect_Connect() throws {
+    func testDriver_Connect_Connect() throws {
         guard let player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }

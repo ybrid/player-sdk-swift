@@ -27,7 +27,7 @@ import XCTest
 
 class YbridSteelinessTests: XCTestCase {
     
-    let listener = MediaListener()
+    let listener = ErrorListener()
     func testSteelinessStage_InfoResponse_WithoutMillisHappen() throws {
         guard let player = AudioPlayer.openSync(for: ybridStageDemoEndpoint, listener: listener) else {
             XCTFail("player expected"); return
@@ -88,7 +88,7 @@ class YbridSteelinessTests: XCTestCase {
     
     func testPlaybackUriStatistic() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        let listener = MediaListener()
+        let listener = ErrorListener()
 
         var playbackUris:[String] = []
         for i in (1...50) {
@@ -129,7 +129,7 @@ class YbridSteelinessTests: XCTestCase {
    
     func testBaseURLsStatistic() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        let listener = MediaListener()
+        let listener = ErrorListener()
 
         var baseURLs:[URL] = []
         for i in 1...50 {
@@ -169,7 +169,7 @@ class YbridSteelinessTests: XCTestCase {
    
     func testReconnectSession_Swr3_InternallyFromEndpointUri() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        let listener = MediaListener()
+        let listener = ErrorListener()
 
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: listener,
              playbackControl: { (c) in
@@ -212,7 +212,7 @@ class YbridSteelinessTests: XCTestCase {
    
     func testReconnectSession_Demo_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        let listener = MediaListener()
+        let listener = ErrorListener()
 
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
              playbackControl: { (c) in
@@ -255,7 +255,7 @@ class YbridSteelinessTests: XCTestCase {
     
 
     
-    class MediaListener : AudioPlayerListener {
+    class ErrorListener : AudioPlayerListener {
         func stateChanged(_ state: PlaybackState) {}
         func metadataChanged(_ metadata: Metadata) {}
         func playingSince(_ seconds: TimeInterval?) {}

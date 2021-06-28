@@ -104,6 +104,7 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
+
         let playbackUri = player.session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         let metadata = player.session.fetchMetadataSync()
@@ -119,6 +120,7 @@ class MediaSessionTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for: endpoint, listener: listener) else {
             XCTFail("player expected"); return
         }
+        sleep(1) // the listener is notified asynchronously
         XCTAssertNotNil(player.session, "session expected")
         XCTAssertEqual(0,listener.errors.count)
 
@@ -128,7 +130,8 @@ class MediaSessionTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri:"https://blub")
         let player = AudioPlayer.openSync(for: endpoint, listener: listener)
         XCTAssertNil(player, "no player expected")
-
+        
+        sleep(1) // the listener is notified asynchronously
         XCTAssertEqual(1,listener.errors.count)
         let error = listener.errors[0]
         XCTAssertNotEqual(0,error.code)
