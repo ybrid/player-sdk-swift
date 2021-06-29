@@ -27,16 +27,15 @@ import XCTest
 
 class YbridActionTimingTests: XCTestCase {
     
-
+    var listener = TimingListener()
     override func setUpWithError() throws {
     }
-
     override func tearDownWithError() throws {
+        listener.cleanUp()
     }
 
     func test01_ReconnectSession_Demo_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        let listener = TimingListener()
 
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
              playbackControl: { (c) in
@@ -75,41 +74,74 @@ class YbridActionTimingTests: XCTestCase {
         }
     }
    
-    func test02_DemoSwapItem() throws {
+    func test02_SwapItemComplete_Demo() throws {
+        
         let swapTook = try playAndSwapItem(ybridDemoEndpoint)
         XCTAssertLessThan(swapTook, 4, "swapping item should take less than 4s, took \(swapTook.S)")
+        guard listener.errors.count == 0 else {
+            XCTFail("swapping item should work")
+            return
+        }
       }
    
-    func test02_AdDemoSwapItem() throws {
+    func test03_SwapItemComplete_AdDemo() throws {
         let swapTook = try playAndSwapItem(ybridAdDemoEndpoint)
         XCTAssertLessThan(swapTook, 1, "not swapping item should take less than 1s, took \(swapTook.S)")
+        guard listener.errors.count == 0 else {
+            XCTFail("not swapping item should work")
+            return
+        }
       }
     
-    func test04_DemoSwapService() throws {
+    func test04_SwapServiceComplete_Demo() throws {
         let swapTook = try playAndSwapService(ybridDemoEndpoint, to: "ad-injection-demo")
         XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
+        guard listener.errors.count == 0 else {
+            XCTFail("swapping service should work")
+            return
+        }
     }
     
-    func test05_Swr3SwapService() throws {
+    func test05_SwapServiceComplete_Swr3() throws {
         let swapTook = try playAndSwapService(ybridSwr3Endpoint, to: "swr-raka06")
         XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
+        guard listener.errors.count == 0 else {
+            XCTFail("swapping service should work")
+            return
+        }
     }
     
-    func test06_DemoSwapSwappedService_IcyTriggerInTime() throws {
+    
+    func test06_SwapToSelfComplete_Demo_IcyTriggerInTime() throws {
+        let swapTook = try playAndSwapService(ybridDemoEndpoint, to: "adaptive-demo")
+        XCTAssertLessThan(swapTook, 1, "not swapping service should take less than 1s, took \(swapTook.S)")
+        guard listener.errors.count == 0 else {
+            XCTFail("not swapping service should work")
+            return
+        }
+    }
+    
+    func test07_SwapSwappedServiceComplete_Demo_IcyTriggerInTime() throws {
         let swapTook = try playAndSwapSwappedService(ybridDemoEndpoint, first: "ad-injection-demo", second: "adaptive-demo")
         XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
     }
-    
-    func test07_AdDemoSwapSwappedService_IcyTriggerInTime() throws {
+
+    // there are ads where swap service is delayed until finished, for example
+    // "Moin, Gerd hier. Ich steh' grad hier mit meinem 40er-Tonner auf'm Rastplatz..."
+    func test08_SwapSwappedServiceComplete_AdDemo_IcyTriggerInTime() throws {
         let swapTook = try playAndSwapSwappedService(ybridAdDemoEndpoint, first: "adaptive-demo", second: "ad-injection-demo")
         XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
     }
     
-    func test08_Swr3SwapSwappedService_IcyTriggerTooLate() throws {
-        let swapTook = try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr-raka03")
+    func test09_SwapBackSwappedService_Swr3_IcyTriggerTooLate() throws {
+        let swapTook = try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr3-live")
         XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
     }
-    
+  
+    func test10_SwapSwappedService_Swr3_IcyTriggerTooLate() throws {
+        let swapTook = try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr-raka05")
+        XCTAssertLessThan(swapTook, 4, "swapping service should take less than 4s, took \(swapTook.S)")
+    }
     
     private func playAndSwapItem(_ endpoint:MediaEndpoint) throws -> TimeInterval {
         let semaphore = DispatchSemaphore(value: 0)
@@ -119,7 +151,7 @@ class YbridActionTimingTests: XCTestCase {
         var swapTriggeredBuffer:TimeInterval?
         var swapComplete:Date?
         
-        try AudioPlayer.open(for: endpoint, listener: nil,
+        try AudioPlayer.open(for: endpoint, listener: listener,
              playbackControl: { (ctrl) in semaphore.signal()
                 XCTFail(); return },
              ybridControl: { (ybridControl) in
@@ -132,9 +164,10 @@ class YbridActionTimingTests: XCTestCase {
                 swapTriggered = Date()
                 ybridControl.swapItem() { (changed) in
                     swapComplete = Date()
-                    print( "***** \(changed ? "":"not ")swapping item now *****")
+                    Logger.shared.info( "***** \(changed ? "":"not ")swapping item now *****")
                     sleep(2)
-                    
+                    ybridControl.stop()
+                    sleep(1)
                     ybridControl.close()
                     semaphore.signal()
                 }
@@ -153,7 +186,7 @@ class YbridActionTimingTests: XCTestCase {
             throw SessionError(ErrorKind.unknown, "swap or buffer duration missing")
         }
         let diff = swapTookS - bufferBefore
-        Logger.shared.notice("buffer before \(bufferBefore.S) trigger, swapTook \(swapTookS.S) -> diff \(diff.S)")
+        Logger.shared.debug("buffer before \(bufferBefore.S) trigger, swapTook \(swapTookS.S) -> diff \(diff.S)")
         return swapTookS
     }
     
@@ -164,8 +197,9 @@ class YbridActionTimingTests: XCTestCase {
         var swapTriggered:Date?
         var swapTriggeredBuffer:TimeInterval?
         var swapComplete:Date?
+        var swapped = false
         
-        try AudioPlayer.open(for: endpoint, listener: nil,
+        try AudioPlayer.open(for: endpoint, listener: listener,
              playbackControl: { (ctrl) in semaphore.signal()
                 XCTFail(); return },
              ybridControl: { (ybridControl) in
@@ -178,10 +212,12 @@ class YbridActionTimingTests: XCTestCase {
                 
                 swapTriggered = Date()
                 ybridControl.swapService(to: serviceId) { (changed) in
-                    XCTAssertTrue(changed, "should have changed service.")
+                    swapped = changed
                     swapComplete = Date()
-                    print( "***** \(changed ? "":"not ")swapping service now *****")
+                    Logger.shared.notice("***** \(changed ? "":"not ")swapping service now *****")
                     sleep(2)
+                    ybridControl.stop()
+                    sleep(1)
                     ybridControl.close()
                     semaphore.signal()
                 }
@@ -200,7 +236,7 @@ class YbridActionTimingTests: XCTestCase {
             throw SessionError(ErrorKind.unknown, "swap or buffer duration missing")
         }
         let diff = swapTookS - bufferBefore
-        Logger.shared.notice("buffer before \(bufferBefore.S) trigger, swapping took \(swapTookS.S) -> diff \(diff.S)")
+        Logger.shared.debug("buffer before \(bufferBefore.S) trigger, \(swapped ? "":"not ")swapping took \(swapTookS.S) -> diff \(diff.S)")
         return swapTookS
     }
     
@@ -225,7 +261,7 @@ class YbridActionTimingTests: XCTestCase {
                 
                 ybridControl.swapService(to: serviceId1) { (changed) in
                     XCTAssertTrue(changed, "should have changed service.")
-                    print( "***** \(changed ? "":"not ")swapping service now *****")
+                    Logger.shared.notice( "***** \(changed ? "":"not ")swapping service now *****")
                     sleep(2)
                     
                     
@@ -234,8 +270,10 @@ class YbridActionTimingTests: XCTestCase {
                     ybridControl.swapService(to: serviceId2) { (changed) in
                         XCTAssertTrue(changed, "should have changed service.")
                         swapComplete = Date()
-                        print( "***** \(changed ? "":"not ")swapping service now *****")
+                        Logger.shared.notice( "***** \(changed ? "":"not ")swapping service now *****")
                         sleep(2)
+                        ybridControl.stop()
+                        sleep(1)
                         ybridControl.close()
                         semaphore.signal()
                     }
@@ -258,12 +296,18 @@ class YbridActionTimingTests: XCTestCase {
             throw SessionError(ErrorKind.unknown, "swap or buffer duration missing")
         }
         let diff = swapTookS - bufferBefore
-        Logger.shared.notice("buffer before \(bufferBefore.S) trigger, swapping took \(swapTookS.S) -> diff \(diff.S)")
+        Logger.shared.debug("buffer before \(bufferBefore.S) trigger, swapping took \(swapTookS.S) -> diff \(diff.S)")
         return swapTookS
     }
 
  
     class TimingListener : AudioPlayerListener {
+        func cleanUp() {
+            buffers.removeAll()
+            errors.removeAll()
+        }
+        
+        
         var buffers:[TimeInterval] = []
         func stateChanged(_ state: PlaybackState) {}
         func metadataChanged(_ metadata: Metadata) {}
