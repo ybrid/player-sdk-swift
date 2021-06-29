@@ -42,6 +42,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var firstPCM = true
     var firstMetadata = true
     var stopping = false
+    var changeOver:AudioCompleteCallback? = nil { didSet {
+        metadataExtractor?.lastMetadataHash = nil
+    }}
 
     var icyFields:[String:String]? { didSet {
         Logger.loading.notice("icy fields \(icyFields ?? [:])")
@@ -50,8 +53,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var bufferSize:TimeInterval? { get {
         return buffer?.size
     }}
-    
-    private var lastMetadata:Metadata? = nil
 
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
@@ -214,14 +215,22 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
+        if let changeOverCallback = changeOver {
+            metadata.audioChanged = changeOverCallback
+            changeOver = nil
+        }
+        
         if firstMetadata {
             firstMetadata = false
+            var newMetadata = metadata
             metadataQueue.async {
                 if let metadata = self.session.fetchMetadataSync() {
-                    self.notifyMetadataChanged(metadata)
-                    return
+                    newMetadata = metadata
                 }
-                self.notifyMetadataChanged(metadata)
+                self.notifyMetadataChanged(newMetadata)
+                if let callback = newMetadata.audioChanged {
+                    callback(true)
+                }
             }
             return
         }
@@ -229,6 +238,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             let metadataId = session.maintainMetadata(metadata: metadata)
             metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
                 if let delayedMd = self.session.popMetadata(uuid: metadataId) {
+                    if let callback = delayedMd.audioChanged {
+                        callback(true)
+                    }
                     self.notifyMetadataChanged(delayedMd)
                 }
             }
