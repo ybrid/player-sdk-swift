@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		170CECB3268C47D900E09F99 /* YbridWindsTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB1268C47D900E09F99 /* YbridWindsTimingTests.swift */; };
+		170CECB4268C47D900E09F99 /* YbridWindsTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB1268C47D900E09F99 /* YbridWindsTimingTests.swift */; };
+		170CECB5268C47D900E09F99 /* YbridSwapsTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB2268C47D900E09F99 /* YbridSwapsTimingTests.swift */; };
+		170CECB6268C47D900E09F99 /* YbridSwapsTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB2268C47D900E09F99 /* YbridSwapsTimingTests.swift */; };
 		17109E1125F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
 		17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
 		17109E1325F8DF4C003DA621 /* DecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17109E1025F8DF4C003DA621 /* DecodingError.swift */; };
@@ -200,6 +204,8 @@
 		170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		170703E025D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		170CECB1268C47D900E09F99 /* YbridWindsTimingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YbridWindsTimingTests.swift; sourceTree = "<group>"; };
+		170CECB2268C47D900E09F99 /* YbridSwapsTimingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YbridSwapsTimingTests.swift; sourceTree = "<group>"; };
 		17109E1025F8DF4C003DA621 /* DecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodingError.swift; sourceTree = "<group>"; };
 		1711D182263AB45400882D2B /* MetadataMappings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataMappings.swift; sourceTree = "<group>"; };
 		171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapServiceResponse.json; sourceTree = "<group>"; };
@@ -538,6 +544,8 @@
 		1799DD8425D599190055C973 /* player-sdk-swiftUITests */ = {
 			isa = PBXGroup;
 			children = (
+				170CECB2268C47D900E09F99 /* YbridSwapsTimingTests.swift */,
+				170CECB1268C47D900E09F99 /* YbridWindsTimingTests.swift */,
 				1799DD8725D599190055C973 /* Info.plist */,
 				1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */,
 				17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */,
@@ -1089,9 +1097,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				17D45D7E2657180600983025 /* YbridTimeshiftTests.swift in Sources */,
+				170CECB4268C47D900E09F99 /* YbridWindsTimingTests.swift in Sources */,
 				171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 				17651DE82667EC59005D46BA /* YbridSwapTests.swift in Sources */,
+				170CECB6268C47D900E09F99 /* YbridSwapsTimingTests.swift in Sources */,
 				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
 				1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */,
 				17539EBF26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
@@ -1106,9 +1116,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				17D45D7D2657180600983025 /* YbridTimeshiftTests.swift in Sources */,
+				170CECB3268C47D900E09F99 /* YbridWindsTimingTests.swift in Sources */,
 				171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
 				17651DE72667EC59005D46BA /* YbridSwapTests.swift in Sources */,
+				170CECB5268C47D900E09F99 /* YbridSwapsTimingTests.swift in Sources */,
 				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
 				17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */,
 				17539EBE26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
