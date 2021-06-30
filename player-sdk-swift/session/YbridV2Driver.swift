@@ -147,7 +147,7 @@ class YbridV2Driver : MediaDriver {
     
     // MARK: winding
     
-    func wind(by:TimeInterval) {
+    func wind(by:TimeInterval) -> Bool {
         do {
             let millis = Int(by * 1000)
             let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
@@ -158,7 +158,9 @@ class YbridV2Driver : MediaDriver {
             }
         } catch {
             Logger.session.error(error.localizedDescription)
+            return false
         }
+        return true
     }
     
     func windToLive() -> Bool {
@@ -175,7 +177,7 @@ class YbridV2Driver : MediaDriver {
         return true
     }
     
-    func wind(to:Date) {
+    func wind(to:Date) -> Bool {
         do {
             let dateDouble = to.timeIntervalSince1970
             let tsString = String(Int64(dateDouble*1000))
@@ -187,10 +189,12 @@ class YbridV2Driver : MediaDriver {
             }
         } catch {
             Logger.session.error(error.localizedDescription)
+            return false
         }
+        return true
     }
     
-    func skipItem(_ forwards:Bool, _ type:ItemType?) {
+    func skipItem(_ forwards:Bool, _ type:ItemType?) -> Bool {
 
         let direction = forwards ? "forwards":"backwards"
         let ctrlPath = "ctrl/v2/playout/skip/" + direction
@@ -208,7 +212,9 @@ class YbridV2Driver : MediaDriver {
             }
         } catch {
             Logger.session.error(error.localizedDescription)
+            return false
         }
+        return true
     }
     
     // MARK: swapping item
@@ -321,7 +327,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let result:YbridSessionResponse = try jsonRequest(baseUrl: endpointUri, ctrlPath: ctrlPath, actionString: actionString)
 
-            Logger.session.debug(String(describing: result.__responseObject))
+            if Logger.verbose { Logger.session.debug(String(describing: result.__responseObject)) }
             return result.__responseObject
     
         } catch {

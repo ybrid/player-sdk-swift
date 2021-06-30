@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import XCTest
 import YbridPlayerSDK
 
 extension Logger {
@@ -112,4 +113,110 @@ class AbstractAudioPlayerListener : AudioPlayerListener {
     func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {}
 }
 
+class TimingListener : AudioPlayerListener {
+    func cleanUp() {
+        buffers.removeAll()
+        errors.removeAll()
+    }
+    
+    
+    var buffers:[TimeInterval] = []
+    func stateChanged(_ state: PlaybackState) {}
+    func metadataChanged(_ metadata: Metadata) {}
+    func playingSince(_ seconds: TimeInterval?) {}
+    func durationReadyToPlay(_ seconds: TimeInterval?) {}
+    func durationConnected(_ seconds: TimeInterval?) {}
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
+        if let current = currentSeconds {
+            buffers.append(current)
+        }
+    }
+    
+    var errors:[AudioPlayerError] = []
+    func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+        errors.append(exception)
+    }
+}
 
+class Poller {
+    func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) {
+        let took = wait(max: maxSeconds) {
+            return control.state == until
+        }
+        XCTAssertLessThanOrEqual(took, maxSeconds, "not \(until) within \(maxSeconds) s")
+    }
+
+    func wait(max maxSeconds:Int, until:() -> (Bool)) -> Int {
+        var seconds = 0
+        while !until() && seconds <= maxSeconds {
+            sleep(1)
+            seconds += 1
+        }
+        XCTAssertTrue(until(), "condition not satisfied within \(maxSeconds) s")
+        return seconds
+    }
+}
+
+class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
+    
+
+    func reset() {
+        offsets.removeAll()
+        errors.removeAll()
+        metadatas.removeAll()
+        services.removeAll()
+    }
+    
+    var metadatas:[Metadata] = []
+    var offsets:[TimeInterval] = []
+    var errors:[AudioPlayerError] = []
+    var services:[[Service]] = []
+    var swaps:[Int] = []
+    
+    
+    // the latest recieved value for offset
+    var offsetToLive:TimeInterval? { get {
+        return offsets.last
+    }}
+    
+    // the latest value for swapsLeft
+    var swapsLeft:Int? { get {
+        return swaps.last
+    }}
+    
+    
+    func isItem(_ type:ItemType) -> Bool {
+        if let currentType = metadatas.last?.current?.type {
+            return type == currentType
+        }
+        return false
+    }
+    
+    func offsetToLiveChanged(_ offset:TimeInterval?) {
+        guard let offset = offset else { XCTFail(); return }
+        Logger.testing.info("-- offset is \(offset.S)")
+        offsets.append(offset)
+    }
+
+    func servicesChanged(_ services: [Service]) {
+        Logger.testing.info("-- provided service ids are \(services.map{$0.identifier})")
+        self.services.append(services)
+    }
+    
+    func swapsChanged(_ swapsLeft: Int) {
+        Logger.testing.info("-- swaps left \(swapsLeft)")
+        swaps.append(swapsLeft)
+    }
+    
+    override func metadataChanged(_ metadata: Metadata) {
+        Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")
+        metadatas.append(metadata)
+
+    }
+
+    override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+        super.error(severity, exception)
+        errors.append(exception)
+    }
+
+}

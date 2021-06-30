@@ -30,10 +30,11 @@ class YbridTimeshiftTests: XCTestCase {
 
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
     let maxWindResponseS = 3
-    
     var player:YbridControl?
     let ybridPlayerListener = TestYbridPlayerListener()
     var semaphore:DispatchSemaphore?
+    
+    
     override func setUpWithError() throws {
         // don't log additional debug information in this tests
         Logger.verbose = false
@@ -310,66 +311,3 @@ class YbridTimeshiftTests: XCTestCase {
     }
 }
 
-class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
-    
-
-    func reset() {
-        offsets.removeAll()
-        errors.removeAll()
-        metadatas.removeAll()
-        services.removeAll()
-    }
-    
-    var metadatas:[Metadata] = []
-    var offsets:[TimeInterval] = []
-    var errors:[AudioPlayerError] = []
-    var services:[[Service]] = []
-    var swaps:[Int] = []
-    
-    
-    // the latest recieved value for offset
-    var offsetToLive:TimeInterval? { get {
-        return offsets.last
-    }}
-    
-    // the latest value for swapsLeft
-    var swapsLeft:Int? { get {
-        return swaps.last
-    }}
-    
-    
-    func isItem(_ type:ItemType) -> Bool {
-        if let currentType = metadatas.last?.current?.type {
-            return type == currentType
-        }
-        return false
-    }
-    
-    func offsetToLiveChanged(_ offset:TimeInterval?) {
-        guard let offset = offset else { XCTFail(); return }
-        Logger.testing.info("-- offset is \(offset.S)")
-        offsets.append(offset)
-    }
-
-    func servicesChanged(_ services: [Service]) {
-        Logger.testing.info("-- provided service ids are \(services.map{$0.identifier})")
-        self.services.append(services)
-    }
-    
-    func swapsChanged(_ swapsLeft: Int) {
-        Logger.testing.info("-- swaps left \(swapsLeft)")
-        self.swaps.append(swapsLeft)
-    }
-    
-    override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")
-        metadatas.append(metadata)
-
-    }
-
-    override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
-        super.error(severity, exception)
-        errors.append(exception)
-    }
-
-}

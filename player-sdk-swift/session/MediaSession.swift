@@ -111,20 +111,20 @@ public class MediaSession  {
         return metadataDict.pop(id:uuid)
     }
     
-    func wind(by:TimeInterval) {
-        v2Driver?.wind(by: by)
+    func wind(by:TimeInterval) -> Bool {
+        return v2Driver?.wind(by: by) ?? false
     }
     func windToLive() -> Bool {
         return v2Driver?.windToLive() ?? false
     }
-    func wind(to:Date) {
-        v2Driver?.wind(to:to)
+    func wind(to:Date) -> Bool {
+        return v2Driver?.wind(to:to) ?? false
     }
-    func skipForward(_ type:ItemType?) {
-        v2Driver?.skipItem(true, type)
+    func skipForward(_ type:ItemType?) -> Bool {
+        return v2Driver?.skipItem(true, type) ?? false
     }
-    func skipBackward(_ type:ItemType?) {
-        v2Driver?.skipItem(false, type)
+    func skipBackward(_ type:ItemType?) -> Bool {
+        return v2Driver?.skipItem(false, type) ?? false
     }
     
     func swapItem() -> Bool {

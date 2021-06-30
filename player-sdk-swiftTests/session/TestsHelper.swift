@@ -38,3 +38,21 @@ let opusDlfEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addr
 let opusCCEndpoint = MediaEndpoint(mediaUri: "http://theradio.cc:8000/trcc-stream.opus")
 let onDemandOpusEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/static/examples/ehren-paper_lights-96.opus")
 let onDemandMp3Endpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/music.mp3?raw=true")
+
+class ErrorListener : AudioPlayerListener {
+    func cleanUp() {
+        errors.removeAll()
+    }
+    
+    func stateChanged(_ state: PlaybackState) {}
+    func metadataChanged(_ metadata: Metadata) {}
+    func playingSince(_ seconds: TimeInterval?) {}
+    func durationReadyToPlay(_ seconds: TimeInterval?) {}
+    func durationConnected(_ seconds: TimeInterval?) {}
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {}
+    
+    var errors:[AudioPlayerError] = []
+    func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
+        errors.append(exception)
+    }
+}

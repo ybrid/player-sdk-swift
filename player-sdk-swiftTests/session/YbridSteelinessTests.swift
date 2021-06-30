@@ -251,17 +251,5 @@ class YbridSteelinessTests: XCTestCase {
         }
     }
    
-    class ErrorListener : AudioPlayerListener {
-        func stateChanged(_ state: PlaybackState) {}
-        func metadataChanged(_ metadata: Metadata) {}
-        func playingSince(_ seconds: TimeInterval?) {}
-        func durationReadyToPlay(_ seconds: TimeInterval?) {}
-        func durationConnected(_ seconds: TimeInterval?) {}
-        func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {}
-        
-        var errors:[AudioPlayerError] = []
-        func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
-            errors.append(exception)
-        }
-    }
+ 
 }
