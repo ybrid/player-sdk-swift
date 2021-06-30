@@ -337,7 +337,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let result:YbridSessionResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString)
 
-            Logger.session.debug(String(describing: result.__responseObject))
+            if Logger.verbose { Logger.session.debug(String(describing: result.__responseObject)) }
             return result.__responseObject
     
         } catch {
@@ -356,7 +356,7 @@ class YbridV2Driver : MediaDriver {
             let result:YbridWindResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let windedObject = result.__responseObject
-            Logger.session.debug(String(describing: windedObject))
+            if Logger.verbose { Logger.session.debug(String(describing: windedObject)) }
             return windedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
@@ -374,7 +374,7 @@ class YbridV2Driver : MediaDriver {
             let result:YbridSwapItemResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let swappedObject = result.__responseObject
-            Logger.session.debug(String(describing: swappedObject))
+            if Logger.verbose { Logger.session.debug(String(describing: swappedObject)) }
             return swappedObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
@@ -392,9 +392,13 @@ class YbridV2Driver : MediaDriver {
             let result:YbridSwapServiceResponse = try jsonRequest(baseUrl: baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
 
             let swappedObject = result.__responseObject
-            Logger.session.debug(String(describing: swappedObject))
+            if Logger.verbose { Logger.session.debug(String(describing: swappedObject)) }
             return swappedObject
         } catch {
+            if let sessionError = error as? SessionError {
+                super.notify(ErrorSeverity.fatal, sessionError)
+                throw sessionError
+            }
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
             super.notify(ErrorSeverity.fatal, cannot)
             throw cannot

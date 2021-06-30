@@ -127,6 +127,7 @@
 		1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */; };
 		1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
 		1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
+		17A6C1C4268AFFD700D401AE /* YbridActionTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A6C1C3268AFFD700D401AE /* YbridActionTimingTests.swift */; };
 		17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
 		17B54DD925F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
 		17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
@@ -271,6 +272,7 @@
 		1799DD8725D599190055C973 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevelopingPlayerTests.swift; sourceTree = "<group>"; };
 		1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITestsHelper.swift; sourceTree = "<group>"; };
+		17A6C1C3268AFFD700D401AE /* YbridActionTimingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YbridActionTimingTests.swift; sourceTree = "<group>"; };
 		17B54DD725F7B45800CDEBAD /* LoadingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingError.swift; sourceTree = "<group>"; };
 		17BB101A26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_2.mp3; sourceTree = "<group>"; };
 		17CBC8E625E2517F00B2F7E7 /* YbridPlayerSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YbridPlayerSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -570,6 +572,7 @@
 				17134568263015440054DB9D /* MediaSessionTests.swift */,
 				17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */,
 				17E9AB8E265547F9001ED9C8 /* YbridV2ResponseTests.swift */,
+				17A6C1C3268AFFD700D401AE /* YbridActionTimingTests.swift */,
 			);
 			path = session;
 			sourceTree = "<group>";
@@ -1062,6 +1065,7 @@
 				175AFB2A25FA428100005046 /* AudioPlayerError.swift in Sources */,
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
 				1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */,
+				17A6C1C4268AFFD700D401AE /* YbridActionTimingTests.swift in Sources */,
 				17539E4026257A9A000FE902 /* MediaEndpoint.swift in Sources */,
 				1799DCD025D566AF0055C973 /* PlayerContext.swift in Sources */,
 				1732222325F614BC00AEC833 /* Metadata.swift in Sources */,

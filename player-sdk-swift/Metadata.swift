@@ -91,6 +91,7 @@ class AbstractMetadata : Metadata {
     private var nextItem:Item?
     private var stationInfo: Station?
     private var delegate:AbstractMetadata?
+    var audioChanged:AudioCompleteCallback? = nil
     
     init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
         self.currentItem = current

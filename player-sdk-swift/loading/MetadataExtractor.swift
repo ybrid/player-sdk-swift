@@ -36,7 +36,7 @@ class MetadataExtractor {
 //    var totalBytesExtracted:UInt32 = 0
 //    var totalBytesAudio:UInt32 = 0
     weak var listener: MetadataListener?
-    private var lastMetadataHash: Data?
+    var lastMetadataHash: Data?
     
     init(bytesBetweenMetadata:Int, listener: MetadataListener) {
         self.intervalBytes = bytesBetweenMetadata
