@@ -43,12 +43,12 @@ class AbortBufferingTests: XCTestCase {
     func testAbortMp3_until200msAfterConnect_CleanedUp() throws {
         Logger.verbose = false
 
-        try executeYbrid(endpoint: ybridStageSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
+        try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
       }
 
-    func testAbortMp3_until500msAfterConnect_CleanedUp() throws {
+    func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
 
-        try executeYbrid(endpoint: ybridStageSwr3Endpoint, startInterval: 0.010, endInterval: 0.501, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
+        try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
     }
     
     func testAbortOpus_0until100msAfterConnect_CleanedUp() throws {

@@ -31,7 +31,6 @@ class YbridSwapItemTests: XCTestCase {
     static let maxAudioComplete:TimeInterval = 4.0
     var listener = TestYbridPlayerListener()
     let poller = Poller()
-    var actions:[ActionTrace] = []
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         semaphore = DispatchSemaphore(value: 0)
@@ -159,50 +158,44 @@ class YbridSwapItemTests: XCTestCase {
         XCTAssertTrue((2...3).contains(listener.metadatas.count), "should be 2 (3 if item changed) metadata changes, but were \(listener.metadatas.count)")
     }
 
-    func test05_SwapItemComplete_Demo() throws {
-        try playAndSwapItem(ybridDemoEndpoint)
-        let swapsTook = checkTraces(expectedActions: 1, expectedErrors: 0)
-        swapsTook.forEach{
-            let swapTook = $0; let maxSwap = YbridSwapItemTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping item should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
-    }
-   
-    func test06_SwapItemComplete_AdDemo() throws {
-        try playAndSwapItem(ybridAdDemoEndpoint)
-        let swapsTook = checkTraces(expectedActions: 1, expectedErrors: 1)
-        swapsTook.forEach{
-            let swapTook = $0; let maxNotSwap = 1.0
-            XCTAssertLessThan(swapTook, maxNotSwap, "swapping item should take less than \(maxNotSwap.S), took \(swapTook.S)")
-        }
+    // MARK: using audio complete
+    
+    func test11_SwapItemComplete_Demo() throws {
+        let actionTraces = try playAndSwapItem(ybridDemoEndpoint)
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
     }
     
-    private func playAndSwapItem(_ endpoint:MediaEndpoint) throws {
+    func test12_SwapItemComplete_AdDemo() throws {
+        let actionTraces = try playAndSwapItem(ybridAdDemoEndpoint)
+        checkErrors(expectedErrors: 1)
+        actionTraces.check(expectedActions: 1, maxDuration: 1.0)
+    }
+    
+    private func playAndSwapItem(_ endpoint:MediaEndpoint) throws -> ActionsTrace {
         
-        try playingYbridControl(endpoint) { [self] (ybridControl) in
+        let actions = ActionsTrace()
+        try playingYbridControl(endpoint) { (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
-            var trace1 = ActionTrace(triggered: Date())
+            let trace = actions.newTrace("swap item")
             ybridControl.swapItem() { (changed) in
-                trace1.completed = Date()
-                trace1.acted = changed
-                actions.append(trace1)
-                Logger.testing.info( "***** audio complete ***** \(changed ? "":"not ")swapping item")
+                trace.complete(changed)
+                Logger.testing.info( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
                 sleep(3)
                 
                 actionSemaphore.signal()
             }
             _ = actionSemaphore.wait(timeout: .distantFuture)
         }
+        return actions
     }
     
     
     // generic Control playing, executing actionSync and stopping control
     private func playingYbridControl(_ endpoint:MediaEndpoint, actionSync: @escaping (YbridControl)->() ) throws {
-        let playingSmaphore = DispatchSemaphore(value: 0)
-
         try AudioPlayer.open(for: endpoint, listener: listener,
-             playbackControl: { (ctrl) in playingSmaphore.signal()
+                             playbackControl: { (ctrl) in self.semaphore?.signal()
                 XCTFail(); return },
              ybridControl: { [self] (ybridControl) in
                 
@@ -214,40 +207,21 @@ class YbridSwapItemTests: XCTestCase {
                 ybridControl.stop()
                 sleep(2)
                 ybridControl.close()
-                playingSmaphore.signal()
+                self.semaphore?.signal()
              })
-        _ = playingSmaphore.wait(timeout: .distantFuture)
+        _ = self.semaphore?.wait(timeout: .distantFuture)
     }
     
-    struct ActionTrace {
-        var triggered:Date? = nil
-        var completed:Date? = nil
-        var acted:Bool = false
-    }
     
-    private func checkTraces(expectedActions:Int, expectedErrors:Int) -> [TimeInterval] {
+    private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {
             XCTFail("\(expectedErrors) errors expected, but were \(listener.errors.count)")
-            if let err =  listener.errors.first {
+            listener.errors.forEach { (err) in
                 let errMessage = err.localizedDescription
-                XCTFail("first error is \(errMessage)")
+                Logger.testing.error("-- error is \(errMessage)")
             }
-            return []
+            return
         }
-        
-        guard actions.count == expectedActions else {
-            XCTFail("expecting \(expectedActions) completed actions, but were \(actions.count)")
-            return []
-        }
-        
-        let actionsTook:[TimeInterval] = actions.filter{
-             return $0.triggered != nil && $0.completed != nil
-        }.map{
-            let actionTookS = $0.completed!.timeIntervalSince($0.triggered!)
-            Logger.testing.debug("\($0.acted ? "" : "not ")winding took \(actionTookS.S)")
-            return actionTookS
-        }
-        return actionsTook
     }
-
+    
 }

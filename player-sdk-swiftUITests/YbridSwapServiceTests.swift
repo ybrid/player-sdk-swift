@@ -31,7 +31,7 @@ class YbridSwapServiceTests: XCTestCase {
     static let maxAudioComplete:TimeInterval = 4.0
     var listener = TestYbridPlayerListener()
     let poller = Poller()
-    var actions:[ActionTrace] = []
+
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         semaphore = DispatchSemaphore(value: 0)
@@ -52,6 +52,7 @@ class YbridSwapServiceTests: XCTestCase {
                     semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
+        checkErrors(expectedErrors: 0)
         XCTAssertEqual(1,listener.services.count)
         XCTAssertEqual(2,listener.services[0].count)
         
@@ -79,6 +80,7 @@ class YbridSwapServiceTests: XCTestCase {
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
+        checkErrors(expectedErrors: 0)
         
         XCTAssertEqual(1,listener.services.count)
         XCTAssertEqual(2,listener.services[0].count)
@@ -119,6 +121,7 @@ class YbridSwapServiceTests: XCTestCase {
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
+        checkErrors(expectedErrors: 0)
         
         XCTAssertEqual(1,listener.services.count)
         XCTAssertEqual(2,listener.services[0].count)
@@ -156,6 +159,7 @@ class YbridSwapServiceTests: XCTestCase {
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
+        checkErrors(expectedErrors: 0)
         
         let services:[String] =
             listener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
@@ -200,6 +204,7 @@ class YbridSwapServiceTests: XCTestCase {
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
+        checkErrors(expectedErrors: 0)
         
         XCTAssertEqual(1,listener.services.count)
         XCTAssertEqual(2,listener.services[0].count)
@@ -212,111 +217,89 @@ class YbridSwapServiceTests: XCTestCase {
         XCTAssertEqual("ad-injection-demo",  listener.metadatas.last?.activeService?.identifier)
     }
     
+    // MARK: using audio complete
     
-    func test11_PlayDemo_AudioCallback_ok() throws {
-        _ = try playAndSwapService(ybridDemoEndpoint, to: "ad-injection-demo")
-        let swapsTook = checkTraces(expectedActions: 1, expectedErrors: 0)
-        swapsTook.forEach{
-            let swapTook = $0; let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+    func test11_PlayDemo_SwapComplete_ok() throws {
+        let actionTraces = try playAndSwapService(ybridDemoEndpoint, to: "ad-injection-demo")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 1, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
     
-    func test12_PlaySwr3_AudioCallback_ok() throws {
-        try playAndSwapService(ybridSwr3Endpoint, to: "swr-raka06")
-        let swapsTook = checkTraces(expectedActions: 1, expectedErrors: 0)
-        swapsTook.forEach{
-            let swapTook = $0; let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+    func test12_PlaySwr3_SwapComplete_ok() throws {
+        let actionTraces = try playAndSwapService(ybridSwr3Endpoint, to: "swr-raka06")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 1, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
     
-    func test13_SwapToSelfComplete_IcyTriggerOk() throws {
-        try playAndSwapService(ybridDemoEndpoint, to: "adaptive-demo")
-        let swapsTook = checkTraces(expectedActions: 1, expectedErrors: 1)
-        swapsTook.forEach{
-            let swapTook = $0; let maxNotSwap = 1.0
-            XCTAssertLessThan(swapTook, maxNotSwap, "swapping service should take less than \(maxNotSwap.S), took \(swapTook.S)")
-        }
+    func test13_SwapToSelfComplete_NoSwap() throws {
+        let actionTraces = try playAndSwapService(ybridDemoEndpoint, to: "adaptive-demo")
+        checkErrors(expectedErrors: 1)
+        actionTraces.check(expectedActions: 1, maxDuration: 1.0)
     }
     
     func test14_SwapSwappedServiceComplete_Demo_IcyTriggerInTime() throws {
-        try playAndSwapSwappedService(ybridDemoEndpoint, first: "ad-injection-demo", second: "adaptive-demo")
-        let swapsTook = checkTraces(expectedActions: 2, expectedErrors: 0)
-        swapsTook.forEach { (swapTook) in
-            let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+        let actionTraces = try playAndSwapSwappedService(ybridDemoEndpoint, first: "ad-injection-demo", second: "adaptive-demo")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
     
     // there are ads where swap service is delayed until finished, for example
     // "Moin, Gerd hier. Ich steh' mit meinem 40-Tonner auf'm Rastplatz..."
-    func test15_SwapSwappedServiceComplete_AdDemo_IcyTriggerInTime() throws {
-        try playAndSwapSwappedService(ybridAdDemoEndpoint, first: "adaptive-demo", second: "ad-injection-demo")
-        let swapsTook = checkTraces(expectedActions: 2, expectedErrors: 0)
-        swapsTook.forEach { (swapTook) in
-            let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+    func test15_SwapSwappedServiceComplete_AdDemo_LongTime() throws {
+        let actionTraces = try playAndSwapSwappedService(ybridAdDemoEndpoint, first: "adaptive-demo", second: "ad-injection-demo")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
     
-    func test16_SwapBackFromSwappedService_Swr3_IcyTriggerOk() throws {
-        try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr3-live")
-        let swapsTook = checkTraces(expectedActions: 2, expectedErrors: 0)
-        swapsTook.forEach { (swapTook) in
-            let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+    func test16_SwapBackFromSwappedService_Swr3_InTime() throws {
+        let actionTraces = try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr3-live")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
   
-    func test17_SwapSwappedService_Swr3_IcyTriggerTooLate() throws {
-        try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr-raka05")
-        let swapsTook = checkTraces(expectedActions: 2, expectedErrors: 0)
-        swapsTook.forEach { (swapTook) in
-            let maxSwap = YbridSwapServiceTests.maxAudioComplete
-            XCTAssertLessThan(swapTook, maxSwap, "swapping service should take less than \(maxSwap.S), took \(swapTook.S)")
-        }
+    func test17_SwapSwappedService_Swr3_TooLate() throws {
+        let actionTraces = try playAndSwapSwappedService(ybridSwr3Endpoint, first: "swr-raka09", second: "swr-raka05")
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
     
     
-    private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String) throws {
+    private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String) throws -> ActionsTrace {
         
-        try playingYbridControl(endpoint) { [self] (ybridControl) in
-           let actionSemaphore = DispatchSemaphore(value: 0)
-           
-           var trace1 = ActionTrace(triggered: Date())
+        let actions = ActionsTrace()
+        try playingYbridControl(endpoint) { (ybridControl) in
+            let actionSemaphore = DispatchSemaphore(value: 0)
+            
+            let trace = actions.newTrace("swap to \(serviceId)")
             ybridControl.swapService(to: serviceId) { (changed) in
-                trace1.completed = Date()
-                trace1.acted = changed
-                actions.append(trace1)
-                Logger.testing.notice("***** audio complete ***** \(changed ? "":"not ")swapping service")
+                trace.complete(changed)
+                Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
                 sleep(6)
-        
+                
                 actionSemaphore.signal()
             }
-           _ = actionSemaphore.wait(timeout: .distantFuture)
-       }
+            _ = actionSemaphore.wait(timeout: .distantFuture)
+        }
+        return actions
     }
 
 
-    private func playAndSwapSwappedService(_ endpoint:MediaEndpoint, first serviceId1:String, second serviceId2:String) throws {
-        try playingYbridControl(endpoint) { [self] (ybridControl) in
+    private func playAndSwapSwappedService(_ endpoint:MediaEndpoint, first serviceId1:String, second serviceId2:String) throws -> ActionsTrace {
+        
+        let actions = ActionsTrace()
+        try playingYbridControl(endpoint) { (ybridControl) in
            let actionSemaphore = DispatchSemaphore(value: 0)
            
-           var trace1 = ActionTrace(triggered: Date())
+            var trace = actions.newTrace("swap to \(serviceId1)")
             ybridControl.swapService(to: serviceId1) { (changed) in
-                trace1.completed = Date()
-                trace1.acted = changed
-                actions.append(trace1)
-                Logger.testing.notice( "***** audio complete ***** \(changed ? "":"not ")swapping service")
+                trace.complete(changed)
+                Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
                 sleep(2)
                 
-                var trace2 = ActionTrace(triggered: Date())
+                trace = actions.newTrace("swap to \(serviceId2)")
                     ybridControl.swapService(to: serviceId2) { (changed) in
-                        trace2.completed = Date()
-                        trace2.acted = changed
-                        actions.append(trace2)
-                        Logger.testing.notice( "***** audio complete ***** \(changed ? "":"not ")swapping service")
+                        trace.complete(changed)
+                        Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
                         sleep(2)
          
                         actionSemaphore.signal()
@@ -324,6 +307,7 @@ class YbridSwapServiceTests: XCTestCase {
             }
             _ = actionSemaphore.wait(timeout: .distantFuture)
         }
+        return actions
     }
     
     // generic Control playing, executing actionSync and stopping control
@@ -340,42 +324,22 @@ class YbridSwapServiceTests: XCTestCase {
                 actionSync(ybridControl)
                 
                 ybridControl.stop()
-                sleep(1)
+                poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)
                 ybridControl.close()
                 semaphore?.signal()
              })
         _ = semaphore?.wait(timeout: .distantFuture)
     }
     
-    struct ActionTrace {
-        var triggered:Date? = nil
-        var completed:Date? = nil
-        var acted:Bool = false
-    }
-    
-    private func checkTraces(expectedActions:Int, expectedErrors:Int) -> [TimeInterval] {
+    private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {
             XCTFail("\(expectedErrors) errors expected, but were \(listener.errors.count)")
             listener.errors.forEach { (err) in
                 let errMessage = err.localizedDescription
-                XCTFail("error is \(errMessage)")
+                Logger.testing.error("-- error is \(errMessage)")
             }
-            return []
+            return
         }
-        
-        guard actions.count == expectedActions else {
-            XCTFail("expecting \(expectedActions) completed actions, but were \(actions.count)")
-            return []
-        }
-        
-        let actionsTook:[TimeInterval] = actions.filter{
-             return $0.triggered != nil && $0.completed != nil
-        }.map{
-            let actionTookS = $0.completed!.timeIntervalSince($0.triggered!)
-            Logger.testing.debug("\($0.acted ? "" : "not ")winding took \(actionTookS.S)")
-            return actionTookS
-        }
-        return actionsTook
     }
 
 }

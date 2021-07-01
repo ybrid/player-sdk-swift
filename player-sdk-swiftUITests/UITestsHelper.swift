@@ -220,3 +220,69 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     }
 
 }
+
+
+class Trace {
+    let name:String
+    private var triggered:Date? = nil
+    private var completed:Date? = nil
+    var changed:Bool = false
+    var valid:Bool { get {
+        return triggered != nil && completed != nil
+    }}
+    var tookS:TimeInterval { get {
+        guard valid else {
+            return -1
+        }
+        return completed!.timeIntervalSince(triggered!)
+    }}
+    init(_ name:String) {
+        self.name = name
+        self.triggered = Date()
+    }
+    func complete(_ changed:Bool) {
+        self.completed = Date()
+        self.changed = changed
+    }
+}
+class ActionsTrace {
+    var actions:[Trace] = []
+    
+    init() {}
+    func reset() { actions.removeAll() }
+    func newTrace(_ name:String) -> Trace {
+        let trace = Trace(name)
+        actions.append(trace)
+        return trace
+    }
+    
+    func checkTraces(expectedActions:Int) -> [(String,TimeInterval)] {
+          
+        guard actions.count == expectedActions else {
+            XCTFail("expecting \(expectedActions) completed actions, but were \(actions.count)")
+            return []
+        }
+        
+        let actionsTook:[(String,TimeInterval)] = actions.filter{
+             return $0.valid
+        }.map{
+            let actionTookS = $0.tookS
+            Logger.testing.debug("\($0.changed ? "" : "not ")\($0.name) took \(actionTookS.S)")
+            return ($0.name,actionTookS)
+        }
+        return actionsTook
+    }
+
+    func check(expectedActions:Int, maxDuration:TimeInterval) {
+          
+        XCTAssertEqual(actions.count,expectedActions, "expecting \(expectedActions) completed actions, but were \(actions.count)")
+        
+        actions.filter{
+             return $0.valid
+        }.forEach{
+            Logger.testing.debug("\($0.changed ? "" : "not ")\($0.name) took \($0.tookS.S)")
+            XCTAssertLessThan($0.tookS, maxDuration, "\($0.name) should take less than \(maxDuration.S), took \($0.tookS.S)")
+        }
+    }
+
+}

@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		170CECB3268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB1268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift */; };
-		170CECB4268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECB1268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift */; };
 		170CECC4268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC5268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC7268CAC2900E09F99 /* YbridSwapServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */; };
@@ -205,7 +203,6 @@
 		170703D925D2F44400549B8A /* player-sdk-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "player-sdk-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		170703E025D2F44400549B8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1707040825D2F70000549B8A /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		170CECB1268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YbridTimeshiftAudioCallbackTests.swift; sourceTree = "<group>"; };
 		170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSwapItemTests.swift; sourceTree = "<group>"; };
 		170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSwapServiceTests.swift; sourceTree = "<group>"; };
 		17109E1025F8DF4C003DA621 /* DecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodingError.swift; sourceTree = "<group>"; };
@@ -558,7 +555,6 @@
 				170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */,
 				170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */,
 				17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */,
-				170CECB1268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift */,
 			);
 			path = "player-sdk-swiftUITests";
 			sourceTree = "<group>";
@@ -1102,7 +1098,6 @@
 			files = (
 				17D45D7E2657180600983025 /* YbridTimeshiftTests.swift in Sources */,
 				170CECC8268CAC2900E09F99 /* YbridSwapServiceTests.swift in Sources */,
-				170CECB4268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift in Sources */,
 				170CECC5268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */,
 				171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				17CD394625E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
@@ -1121,7 +1116,6 @@
 			files = (
 				17D45D7D2657180600983025 /* YbridTimeshiftTests.swift in Sources */,
 				170CECC7268CAC2900E09F99 /* YbridSwapServiceTests.swift in Sources */,
-				170CECB3268C47D900E09F99 /* YbridTimeshiftAudioCallbackTests.swift in Sources */,
 				170CECC4268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */,
 				171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */,
 				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
