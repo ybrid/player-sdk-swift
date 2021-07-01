@@ -294,7 +294,7 @@ class UseAudioPlayerTests: XCTestCase {
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
      YbridControl's methods can shift time and alter the streamed audio content.
      */
-    func test10_UseYbridControl() {
+    func test08_UseYbridControl() {
 
         do {
             try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() },
@@ -316,41 +316,7 @@ class UseAudioPlayerTests: XCTestCase {
         }
     }
 
-    /*
-     YbridControlListener extends AudioPlayerListener.
-     The listener is notified of ybrid states in the beginning of the session.
-     The listeners methods are called when the specific state changes or
-     when refresh() is called.
-     */
-    func test11_YbridControlListener_Refresh() {
-        let ybridPlayerListener = TestYbridPlayerListener()
-        do {
-            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener, playbackControl: { _ in XCTFail("ybridControl should be called back");                   self.semaphore?.signal() })  {
-                [self] (control) in
-               
-                sleep(1)
-                control.refresh()
-                
-                control.close()
-                sleep(1)
-                self.semaphore?.signal()
-            }
-        } catch {
-            XCTFail("no player. Something went wrong");
-            semaphore?.signal(); return
-        }
-        _ = semaphore?.wait(timeout: .distantFuture)
-
-        
-        XCTAssertEqual(2, ybridPlayerListener.services.count, "YbridControlListener.serviceChanged(...) should have been called twice, but was \(ybridPlayerListener.services.count)")
-        
-        XCTAssertTrue((2...3).contains(ybridPlayerListener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(2...3), but was \(ybridPlayerListener.offsets.count), \(ybridPlayerListener.offsets)")
-        
-        XCTAssertEqual(2, ybridPlayerListener.swaps.count, "YbridControlListener.swapsChanged(...) should have been called twice, but was \(ybridPlayerListener.swaps.count)")
-        
-        semaphore?.signal()
-    }
-
+ 
     
 }
 

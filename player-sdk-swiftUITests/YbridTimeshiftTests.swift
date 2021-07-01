@@ -46,18 +46,18 @@ class YbridTimeshiftTests: XCTestCase {
         print( "offsets were \(ybridPlayerListener.offsets)")
     }
     
-    func test01_NoInitialOffsetChange() throws {
+    func test01_InitialOffsetChange() throws {
 
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
 
-                sleep(1)
+//                sleep(1)
 
                 semaphore?.signal()
                })
         _ = semaphore?.wait(timeout: .distantFuture)
 
-        XCTAssertEqual(ybridPlayerListener.offsets.count, 0)
+        XCTAssertEqual(ybridPlayerListener.offsets.count, 1)
     }
     
     func test02_PlayOffsetChanges() throws {
@@ -321,7 +321,7 @@ class YbridTimeshiftTests: XCTestCase {
     private func playWindByWindToLive(_ endpoint:MediaEndpoint, windBy:TimeInterval) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+        TestYbridControl(endpoint, listener: ybridPlayerListener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             var trace = actions.newTrace("wind by \(windBy.S)")
@@ -347,7 +347,7 @@ class YbridTimeshiftTests: XCTestCase {
     private func playWindToLastFullHourWindForward(_ endpoint:MediaEndpoint, windBy:TimeInterval) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+        TestYbridControl(endpoint, listener: ybridPlayerListener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             let date = self.lastFullHour(secondsBefore:-4)
@@ -374,7 +374,7 @@ class YbridTimeshiftTests: XCTestCase {
   
     private func playSkipBackNewsSkipForward(_ endpoint:MediaEndpoint) throws -> ActionsTrace {
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+        TestYbridControl(endpoint, listener: ybridPlayerListener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             var trace = actions.newTrace("skip back to news")
@@ -397,28 +397,6 @@ class YbridTimeshiftTests: XCTestCase {
         return actions
     }
     
-    // generic Control playing, executing actionSync and stopping control
-    private func playingYbridControl(_ endpoint:MediaEndpoint, actionSync: @escaping (YbridControl)->() ) throws {
-        let playingSmaphore = DispatchSemaphore(value: 0)
-        let poller = Poller()
-        try AudioPlayer.open(for: endpoint, listener: ybridPlayerListener,
-             playbackControl: { (ctrl) in playingSmaphore.signal()
-                XCTFail(); return },
-             ybridControl: { (ybridControl) in
-                
-                ybridControl.play()
-                poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
-                
-                actionSync(ybridControl)
-                
-                ybridControl.stop()
-                poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)
-                ybridControl.close()
-                
-                playingSmaphore.signal()
-             })
-        _ = playingSmaphore.wait(timeout: .distantFuture)
-    }
     
     // MARK: helpers
  

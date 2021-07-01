@@ -45,6 +45,11 @@ class MediaDriver : MediaControl {
     }}
     
     var bouquet:Bouquet? { didSet {
+        if let services = bouquet?.services, services != oldValue?.services {
+            DispatchQueue.global().async {
+                self.listener?.servicesChanged(services)
+            }
+        }
 //        changed.insert(SubInfo.bouquet)
     }}
     
@@ -59,6 +64,7 @@ class MediaDriver : MediaControl {
         self.playbackUri = session.endpoint.uri
         self.endpointUri = URL(string: session.endpoint.uri)!
         self.baseUrl = endpointUri
+        self.listener = session.ybridListener
     }
     
     func connect() throws {}

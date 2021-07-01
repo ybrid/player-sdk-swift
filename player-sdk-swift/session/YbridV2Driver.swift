@@ -282,7 +282,6 @@ class YbridV2Driver : MediaDriver {
             playbackUri = playout.playbackURI
             baseUrl = playout.baseURL
             accept(offset: playout.offsetToLive)
-            //            updatePlayout(response.getRawPlayout());
         }
         
         ybridBouquet = response.bouquet

@@ -34,9 +34,7 @@ public class MediaSession  {
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
      
-    weak var ybridListener:YbridControlListener? { didSet {
-        mediaControl?.listener = ybridListener
-    }}
+    weak var ybridListener:YbridControlListener?
     
     public var mediaProtocol:MediaProtocol? { get {
         return mediaControl?.mediaProtocol

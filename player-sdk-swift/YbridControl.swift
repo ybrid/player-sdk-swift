@@ -104,6 +104,7 @@ public extension AudioPlayer {
               ybridControl: YbridControlCallback? = nil ) throws {
         
         let session = MediaSession(on: endpoint)
+        session.ybridListener = listener as? YbridControlListener
         do {
             try session.connect()
         } catch {
@@ -151,24 +152,23 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
 
     override init(session:MediaSession, listener:AudioPlayerListener?) {
         super.init(session: session, listener: listener)
-        if let ybridListener = listener as? YbridControlListener {
-            DispatchQueue.global().async {
-                ybridListener.servicesChanged(self.services)
-                ybridListener.swapsChanged(self.swapsLeft)
-            }
-            session.ybridListener = ybridListener
-        }
+//        if let ybridListener = session.ybridListener {
+//            DispatchQueue.global().async {
+//                ybridListener.servicesChanged(self.services)
+//                ybridListener.swapsChanged(self.swapsLeft)
+//            }
+//        }
     }
 
     func refresh() {
         if let ybridListener = super.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
-                ybridListener.offsetToLiveChanged(self.offsetToLiveS)
-                ybridListener.servicesChanged(self.services)
-                ybridListener.swapsChanged(self.swapsLeft)
+//                ybridListener.offsetToLiveChanged(self.offsetToLiveS)
                 if let metadata = self.session.fetchMetadataSync() {
                     ybridListener.metadataChanged(metadata)
                 }
+                ybridListener.servicesChanged(self.services)
+                ybridListener.swapsChanged(self.swapsLeft)
             }
         }
     }

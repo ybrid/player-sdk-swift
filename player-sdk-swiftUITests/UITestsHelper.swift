@@ -88,7 +88,7 @@ class AbstractAudioPlayerListener : AudioPlayerListener {
         Logger.testing.notice("-- player is \(state)")
     }
     func error(_ severity:ErrorSeverity, _ exception: AudioPlayerError) {
-        Logger.testing.notice("-- \(severity): \(exception.localizedDescription)")
+        Logger.testing.notice("-- error \(severity): \(exception.localizedDescription)")
     }
 
     func metadataChanged(_ metadata: Metadata) {}
@@ -159,12 +159,15 @@ class Poller {
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
     
-
+    let queue = DispatchQueue.init(label: "io.ybrid.tests.ui.listener")
+    
     func reset() {
-        offsets.removeAll()
-        errors.removeAll()
-        metadatas.removeAll()
-        services.removeAll()
+        queue.async { [self] in
+            offsets.removeAll()
+            errors.removeAll()
+            metadatas.removeAll()
+            services.removeAll()
+        }
     }
     
     var metadatas:[Metadata] = []
@@ -176,47 +179,62 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     
     // the latest recieved value for offset
     var offsetToLive:TimeInterval? { get {
-        return offsets.last
+        queue.sync {
+            return offsets.last
+        }
     }}
     
     // the latest value for swapsLeft
     var swapsLeft:Int? { get {
-        return swaps.last
+        queue.sync {
+            return swaps.last
+        }
     }}
     
     
     func isItem(_ type:ItemType) -> Bool {
-        if let currentType = metadatas.last?.current?.type {
-            return type == currentType
+        queue.sync {
+            if let currentType = metadatas.last?.current?.type {
+                return type == currentType
+            }
+            return false
         }
-        return false
     }
     
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
         Logger.testing.info("-- offset is \(offset.S)")
-        offsets.append(offset)
+        queue.async {
+            self.offsets.append(offset)
+        }
     }
 
     func servicesChanged(_ services: [Service]) {
         Logger.testing.info("-- provided service ids are \(services.map{$0.identifier})")
-        self.services.append(services)
+        queue.async {
+            self.services.append(services)
+        }
     }
     
     func swapsChanged(_ swapsLeft: Int) {
         Logger.testing.info("-- swaps left \(swapsLeft)")
-        swaps.append(swapsLeft)
+        queue.async {
+            self.swaps.append(swapsLeft)
+        }
     }
     
     override func metadataChanged(_ metadata: Metadata) {
         Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")
-        metadatas.append(metadata)
-
+        queue.async {
+            self.metadatas.append(metadata)
+        }
     }
 
     override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
         super.error(severity, exception)
-        errors.append(exception)
+        queue.async {
+            self.errors.append(exception)
+        }
     }
 
 }

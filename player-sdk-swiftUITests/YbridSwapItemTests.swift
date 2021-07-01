@@ -111,10 +111,10 @@ class YbridSwapItemTests: XCTestCase {
             listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
         
-        XCTAssertTrue((3...4).contains(listener.metadatas.count), "should be 3 (4 if item changed) metadata changes, but were \(listener.metadatas.count)")
+        XCTAssertTrue((3...5).contains(listener.metadatas.count), "should be 3 (5 if item changed) metadata changes, but were \(listener.metadatas.count)")
     }
     
-    func test03_SwapItem_AudioCompleteCallbackIsCalled() throws {
+    func test03_SwapItem_AudioCompleteCalled() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
@@ -175,7 +175,8 @@ class YbridSwapItemTests: XCTestCase {
     private func playAndSwapItem(_ endpoint:MediaEndpoint) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+     
+        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             let trace = actions.newTrace("swap item")
@@ -190,28 +191,6 @@ class YbridSwapItemTests: XCTestCase {
         }
         return actions
     }
-    
-    
-    // generic Control playing, executing actionSync and stopping control
-    private func playingYbridControl(_ endpoint:MediaEndpoint, actionSync: @escaping (YbridControl)->() ) throws {
-        try AudioPlayer.open(for: endpoint, listener: listener,
-                             playbackControl: { (ctrl) in self.semaphore?.signal()
-                XCTFail(); return },
-             ybridControl: { [self] (ybridControl) in
-                
-                ybridControl.play()
-                poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
-                
-                actionSync(ybridControl)
-                
-                ybridControl.stop()
-                sleep(2)
-                ybridControl.close()
-                self.semaphore?.signal()
-             })
-        _ = self.semaphore?.wait(timeout: .distantFuture)
-    }
-    
     
     private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {

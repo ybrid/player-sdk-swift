@@ -59,7 +59,7 @@ class YbridSwapServiceTests: XCTestCase {
         XCTAssertEqual(0,listener.metadatas.count)
     }
     
-    func test02_BeforePlay_AudioCallbackIsCalled() throws {
+    func test02_BeforePlay_AudioCallbackCalled() throws {
         Logger.verbose = true
         XCTAssertEqual(0,listener.services.count)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
@@ -248,7 +248,7 @@ class YbridSwapServiceTests: XCTestCase {
     func test15_SwapSwappedServiceComplete_AdDemo_LongTime() throws {
         let actionTraces = try playAndSwapSwappedService(ybridAdDemoEndpoint, first: "adaptive-demo", second: "ad-injection-demo")
         checkErrors(expectedErrors: 0)
-        actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
+        actionTraces.check(expectedActions: 2, maxDuration: 45.0)
     }
     
     func test16_SwapBackFromSwappedService_Swr3_InTime() throws {
@@ -267,7 +267,7 @@ class YbridSwapServiceTests: XCTestCase {
     private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             let trace = actions.newTrace("swap to \(serviceId)")
@@ -287,7 +287,7 @@ class YbridSwapServiceTests: XCTestCase {
     private func playAndSwapSwappedService(_ endpoint:MediaEndpoint, first serviceId1:String, second serviceId2:String) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
-        try playingYbridControl(endpoint) { (ybridControl) in
+        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
            let actionSemaphore = DispatchSemaphore(value: 0)
            
             var trace = actions.newTrace("swap to \(serviceId1)")
@@ -308,27 +308,6 @@ class YbridSwapServiceTests: XCTestCase {
             _ = actionSemaphore.wait(timeout: .distantFuture)
         }
         return actions
-    }
-    
-    // generic Control playing, executing actionSync and stopping control
-    private func playingYbridControl(_ endpoint:MediaEndpoint, actionSync: @escaping (YbridControl)->() ) throws {
-
-        try AudioPlayer.open(for: endpoint, listener: listener,
-             playbackControl: { (ctrl) in self.semaphore?.signal()
-                XCTFail(); return },
-             ybridControl: { [self] (ybridControl) in
-                
-                ybridControl.play()
-                poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
-                
-                actionSync(ybridControl)
-                
-                ybridControl.stop()
-                poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)
-                ybridControl.close()
-                semaphore?.signal()
-             })
-        _ = semaphore?.wait(timeout: .distantFuture)
     }
     
     private func checkErrors(expectedErrors:Int)  {

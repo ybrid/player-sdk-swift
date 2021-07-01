@@ -79,7 +79,7 @@ public struct Station {
     public var genre: String?
 }
 
-public struct Service {
+public struct Service : Equatable {
     public let identifier:String
     public var displayName:String?
     public var iconUri:String?
