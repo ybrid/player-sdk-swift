@@ -40,14 +40,13 @@ class YbridSwapItemTests: XCTestCase {
     }
     
     func test01_SwapsLeft_WithoutPlaying_0() throws {
-        Logger.verbose = true
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
                 },
                 ybridControl: { [self] (ybridControl) in
-                    sleep(1) // the listener is notified asynchronously
-                    XCTAssertEqual(0, listener.swapsLeft, "\(String(describing: listener.swapsLeft)) swaps are left.")
+
+                XCTAssertEqual(listener.swapsLeft, 0, "\(String(describing: listener.swapsLeft)) swaps are left.")
                     
                 semaphore?.signal()
                })
@@ -153,7 +152,7 @@ class YbridSwapItemTests: XCTestCase {
         
         let differentTitles = Set(titles)
         Logger.testing.info( "different titles were \(differentTitles)")
-        XCTAssertEqual(2, differentTitles.count)
+        XCTAssertEqual(differentTitles.count, 2)
         
         XCTAssertTrue((2...3).contains(listener.metadatas.count), "should be 2 (3 if item changed) metadata changes, but were \(listener.metadatas.count)")
     }

@@ -152,18 +152,11 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
 
     override init(session:MediaSession, listener:AudioPlayerListener?) {
         super.init(session: session, listener: listener)
-//        if let ybridListener = session.ybridListener {
-//            DispatchQueue.global().async {
-//                ybridListener.servicesChanged(self.services)
-//                ybridListener.swapsChanged(self.swapsLeft)
-//            }
-//        }
     }
 
     func refresh() {
         if let ybridListener = super.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
-//                ybridListener.offsetToLiveChanged(self.offsetToLiveS)
                 if let metadata = self.session.fetchMetadataSync() {
                     ybridListener.metadataChanged(metadata)
                 }

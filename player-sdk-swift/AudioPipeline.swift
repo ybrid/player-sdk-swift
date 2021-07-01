@@ -215,9 +215,18 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
+        let durationUntilPresenting = bufferSize
         if let changeOverCallback = changeOver {
-            metadata.audioChanged = changeOverCallback
             changeOver = nil
+            if let delayBy = durationUntilPresenting {
+                DispatchQueue.global().asyncAfter(deadline: .now() + delayBy) {
+                    changeOverCallback(true)
+                }
+            } else {
+                DispatchQueue.global().async {
+                    changeOverCallback(true)
+                }
+            }
         }
         
         if firstMetadata {
@@ -228,19 +237,13 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     newMetadata = metadata
                 }
                 self.notifyMetadataChanged(newMetadata)
-                if let callback = newMetadata.audioChanged {
-                    callback(true)
-                }
             }
             return
         }
-        if let timeToMetadataPlaying = buffer?.size {
+        if let delayBy = durationUntilPresenting {
             let metadataId = session.maintainMetadata(metadata: metadata)
-            metadataQueue.asyncAfter(deadline: .now() + timeToMetadataPlaying) {
+            metadataQueue.asyncAfter(deadline: .now() + delayBy) {
                 if let delayedMd = self.session.popMetadata(uuid: metadataId) {
-                    if let callback = delayedMd.audioChanged {
-                        callback(true)
-                    }
                     self.notifyMetadataChanged(delayedMd)
                 }
             }

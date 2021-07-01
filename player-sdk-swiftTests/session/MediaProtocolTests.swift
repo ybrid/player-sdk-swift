@@ -34,9 +34,9 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
-    func testFactoryGetVersion_YbridStageDemo_AutodetectIcy() throws {
+    func testFactoryGetVersion_YbridStageDemo_AutodetectYbrid() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(MediaProtocol.icy, version)
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
     func testFactoryGetVersion_wrongUrl_AutodetectIcy() throws {

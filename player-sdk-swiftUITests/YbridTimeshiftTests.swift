@@ -150,7 +150,7 @@ class YbridTimeshiftTests: XCTestCase {
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(2)
+
                 ybridControl.wind(by:-20.0)
                 wait(ybridPlayerListener, shifted: -20.0, maxSeconds: maxWindResponseS)
                 sleep(4)
