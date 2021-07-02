@@ -85,7 +85,7 @@ public class Logger {
         if #available(iOS 10, macOS 10.12, *) {
             logit(OSLogType.debug, message, fullSourcePath, functionWithParameters, line)
         } else {
-//            printit("DEBUG", message, fullSourcePath, functionWithParameters, line)
+            printit("DEBUG", message, fullSourcePath, functionWithParameters, line)
         }
     }
     
