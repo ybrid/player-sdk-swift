@@ -52,21 +52,22 @@ func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
 public protocol YbridControl : PlaybackControl {  
 
     /// time shifting
-    func wind(by:TimeInterval)
-    func wind(to:Date)
-    func windToLive(_ audioComplete: (()->())?)
-    func skipForward(_ type:ItemType?)
-    func skipBackward(_ type:ItemType?)
+    func wind(by:TimeInterval, _ audioComplete:AudioCompleteCallback?)
+    func wind(to:Date, _ audioComplete:AudioCompleteCallback?)
+    func windToLive(_ audioComplete:AudioCompleteCallback?)
+    func skipForward(_ type:ItemType?, _ audioComplete:AudioCompleteCallback?)
+    func skipBackward(_ type:ItemType?, _ audioComplete:AudioCompleteCallback?)
 
     /// change content
-    func swapItem(_ audioComplete: (()->())?)
-    func swapService(to id:String, _ audioComplete: (()->())?)
+    func swapItem(_ audioComplete:AudioCompleteCallback?)
+    func swapService(to id:String, _ audioComplete:AudioCompleteCallback?)
 
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh() 
 }
+public typealias AudioCompleteCallback = ((_ didChange:Bool) -> ())
 ```
-If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks on an action are called when the requested changeover is fullfilled. Use these callbacks to express the change in the user interface.
+If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks on an action are called when the requested changeover is fullfilled. If ```didChange == false``` the action won't change anything. Use these callbacks to express the change in the user interface.
 
 Implement YbridControlListener and pass it via the listener parameter of `AudioPlayer.open`. You will receive the following notifications on startup and when the value changes
 
