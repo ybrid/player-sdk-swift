@@ -72,7 +72,7 @@ class YbridSwapServiceTests: XCTestCase {
                 ybridControl.swapService(to: "ad-injection-demo") { (audioChanged) in
                     carriedOut = audioChanged
                 }
-                _ = poller.wait(max: 10) {
+                _ = poller.wait(max: 1) {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
@@ -103,7 +103,7 @@ class YbridSwapServiceTests: XCTestCase {
                 ybridControl.swapService(to: "ad-injection-demo") { (changed) in
                     carriedOut = changed
                 }
-                _ = poller.wait(max: 10) {
+                _ = poller.wait(max: 1) {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
@@ -147,7 +147,7 @@ class YbridSwapServiceTests: XCTestCase {
                 let mainService = listener.metadatas.last?.activeService
                 
                 ybridControl.swapService(to:"ad-injection-demo")
-                _ = poller.wait(max: 10) {
+                _ = poller.wait(max: Int(YbridSwapServiceTests.maxAudioComplete)) {
                     let serviceSwapped = listener.metadatas.last?.activeService
                     print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped?.identifier != mainService?.identifier
@@ -186,13 +186,13 @@ class YbridSwapServiceTests: XCTestCase {
                 ybridControl.swapService(to: "ad-injection-demo") { (changed) in
                     carriedOut = changed
                 }
-                _ = poller.wait(max: 10) {
+                _ = poller.wait(max: 1) {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
 
                 ybridControl.play()
-                _ = poller.wait(max: 10) {
+                _ = poller.wait(max: 8) {
                     let serviceSwapped = listener.metadatas.last?.activeService
                     print("service=\(String(describing: serviceSwapped))")
                     return serviceSwapped?.identifier == "ad-injection-demo"

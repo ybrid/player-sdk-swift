@@ -71,7 +71,8 @@ class YbridSwapItemTests: XCTestCase {
                 }
                     
                 ybridControl.play()
-                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
+                    poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
+                sleep(2)
                     
                 guard let swaps = listener.swapsLeft, swaps != 0 else {
                     XCTFail("currently no swaps left. Execute test later"); return
@@ -93,7 +94,8 @@ class YbridSwapItemTests: XCTestCase {
                     Logger.testing.info("title swapped =\(titleSwapped!)")
                     return titleMain != titleSwapped!
                 }
-                
+                sleep(2)
+                    
                 ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
                     guard let titleSwapped2 = listener.metadatas.last?.displayTitle else {
@@ -102,6 +104,7 @@ class YbridSwapItemTests: XCTestCase {
                     Logger.testing.info("title swapped =\(titleSwapped2)")
                     return titleSwapped2 != titleSwapped
                 }
+                sleep(2)
 
                })
         _ = semaphore?.wait(timeout: .distantFuture)
@@ -125,8 +128,8 @@ class YbridSwapItemTests: XCTestCase {
                     semaphore?.signal()
                 }
                 ybridControl.play()
-                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-              
+                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
+                    
                 guard let swaps = listener.swapsLeft, swaps != 0 else {
                     XCTFail("currently no swaps left. Execute test later")
                     return
@@ -141,7 +144,6 @@ class YbridSwapItemTests: XCTestCase {
                     carriedOut == true
                 }
                 XCTAssertTrue(carriedOut, "swap was not carried out")
-                sleep(2)
                     
                })
         _ = semaphore?.wait(timeout: .distantFuture)
@@ -177,12 +179,13 @@ class YbridSwapItemTests: XCTestCase {
      
         TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
             let actionSemaphore = DispatchSemaphore(value: 0)
+            sleep(2)
             
             let trace = actions.newTrace("swap item")
             ybridControl.swapItem() { (changed) in
                 trace.complete(changed)
                 Logger.testing.info( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
-                sleep(3)
+                sleep(2)
                 
                 actionSemaphore.signal()
             }

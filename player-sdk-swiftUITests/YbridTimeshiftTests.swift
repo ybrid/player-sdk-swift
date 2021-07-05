@@ -29,7 +29,7 @@ import YbridPlayerSDK
 class YbridTimeshiftTests: XCTestCase {
 
     static let maxWindComplete = 4.0
-    let maxWindResponseS = 3
+    let maxWindResponseS = 2
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
 
     let ybridPlayerListener = TestYbridPlayerListener()
@@ -51,7 +51,7 @@ class YbridTimeshiftTests: XCTestCase {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
 
-//                sleep(1)
+//                usleep(200_000)
 
                 semaphore?.signal()
                })
@@ -90,11 +90,11 @@ class YbridTimeshiftTests: XCTestCase {
                 sleep(2)
         
                 ybridControl.wind(by: -120.0)
-                wait(ybridPlayerListener, shifted: -120.0, maxSeconds: 4)
+                wait(ybridPlayerListener, shifted: -120.0, maxSeconds: maxWindResponseS)
                 sleep(4)
                 
                 ybridControl.wind(by: 60.0)
-                wait(ybridPlayerListener, shifted: -60.0, maxSeconds: 4)
+                wait(ybridPlayerListener, shifted: -60.0, maxSeconds: maxWindResponseS)
                 sleep(4)
                 
                 ybridControl.stop()
@@ -182,7 +182,7 @@ class YbridTimeshiftTests: XCTestCase {
         
                 let date = lastFullHour(secondsBefore:15)
                 ybridControl.wind(to:date)
-                wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: 6)
+                wait(ybridControl, type: ItemType.ADVERTISEMENT, maxSeconds: Int(YbridTimeshiftTests.maxWindComplete))
                 sleep(4)
 
                 ybridControl.stop()
@@ -203,11 +203,11 @@ class YbridTimeshiftTests: XCTestCase {
                 sleep(2)
         
                 ybridControl.skipBackward(ItemType.NEWS)
-                wait(ybridControl, type: ItemType.NEWS, maxSeconds: 4)
+                wait(ybridControl, type: ItemType.NEWS, maxSeconds: Int(YbridTimeshiftTests.maxWindComplete))
                 sleep(8)
   
                 ybridControl.skipForward(ItemType.MUSIC)
-                wait(ybridControl, type: ItemType.MUSIC, maxSeconds: 4)
+                wait(ybridControl, type: ItemType.MUSIC, maxSeconds: Int(YbridTimeshiftTests.maxWindComplete))
                 sleep(6)
                 
                 ybridControl.stop()
@@ -269,7 +269,7 @@ class YbridTimeshiftTests: XCTestCase {
         let took = wait(max: maxSeconds) {
             return ybridPlayerListener.isItem(type)
         }
-        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(ybridPlayerListener.metadatas.last?.current?.type), not \(type)")
+        XCTAssertLessThanOrEqual(took, maxSeconds, "item type is \(String(describing: ybridPlayerListener.metadatas.last?.current?.type)), not \(type)")
     }
     
     
