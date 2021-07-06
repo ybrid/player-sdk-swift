@@ -264,10 +264,11 @@ class Trace {
     }
 }
 class ActionsTrace {
-    var actions:[Trace] = []
+    private var actions:[Trace] = []
     
     init() {}
     func reset() { actions.removeAll() }
+    func append(_ trace:Trace) { actions.append(trace) }
     func newTrace(_ name:String) -> Trace {
         let trace = Trace(name)
         actions.append(trace)

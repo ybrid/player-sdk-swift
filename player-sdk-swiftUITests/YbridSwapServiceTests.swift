@@ -237,7 +237,13 @@ class YbridSwapServiceTests: XCTestCase {
         actionTraces.check(expectedActions: 1, maxDuration: 1.0)
     }
     
-    func test14_SwapSwappedServiceComplete_Demo_IcyTriggerInTime() throws {
+    func test14_SwapFromAd_NoSwap() throws {
+        let actionTraces = try playAndSwapService(ybridAdDemoEndpoint, to: "adaptive-demo", maxWait: 6.0)
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(expectedActions: 1, maxDuration: 7)
+    }
+    
+    func test15_SwapSwappedServiceComplete_Demo_IcyTriggerInTime() throws {
         let actionTraces = try playAndSwapSwappedService(ybridDemoEndpoint, first: "ad-injection-demo", second: "adaptive-demo")
         checkErrors(expectedErrors: 0)
         actionTraces.check(expectedActions: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
@@ -264,7 +270,7 @@ class YbridSwapServiceTests: XCTestCase {
     }
     
     
-    private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String) throws -> ActionsTrace {
+    private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String, maxWait:TimeInterval? = nil) throws -> ActionsTrace {
         
         let actions = ActionsTrace()
         TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
@@ -278,7 +284,11 @@ class YbridSwapServiceTests: XCTestCase {
                 
                 actionSemaphore.signal()
             }
-            _ = actionSemaphore.wait(timeout: .distantFuture)
+            if let maxWait = maxWait {
+                _ = actionSemaphore.wait(timeout: .now() + maxWait)
+            } else {
+                _ = actionSemaphore.wait(timeout: .distantFuture)
+            }
         }
         return actions
     }
