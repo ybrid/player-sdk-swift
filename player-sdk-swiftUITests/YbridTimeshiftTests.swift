@@ -328,8 +328,8 @@ class YbridTimeshiftTests: XCTestCase {
 
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridSwr3Endpoint, listener: ybridPlayerListener).playing{ [self] (ybrid) in
-            actionTraces.append(skip(-1, ItemType.NEWS, ybrid))
-            actionTraces.append(skip(+1, ItemType.MUSIC, ybrid))
+            actionTraces.append( skip(-1, ItemType.NEWS, ybrid) )
+            actionTraces.append( skip(+1, ItemType.MUSIC, ybrid) )
         }
 
         checkErrors(expectedErrors: 0)

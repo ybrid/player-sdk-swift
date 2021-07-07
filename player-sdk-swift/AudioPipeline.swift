@@ -142,21 +142,26 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func process(data: Data) {
 
-        _ = treatMetadata(data: data)
-
+        if let mdExtractor = metadataExtractor {
+            mdExtractor.portion(payload: data)
+            return
+        }
+        
+        audiodataReady(data)
     }
     
     func flushAudio() {
         Logger.decoding.debug()
+        if let mdExtractor = metadataExtractor {
+            mdExtractor.flush()
+        }
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
     }
 
     func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
-        changeOver = { (changed) in
-            audioComplete(changed)
-        }
+        changeOver = audioComplete
         metadataExtractor?.reset()
     }
     
@@ -171,7 +176,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     if !infinite { engine.canPause = true }
                     self.buffer = engine.start()
                     self.pipelineListener.ready(playback: engine)
-                    
                     
                     buffer?.onMetadataCue = { (metaCueId) in
                         if let metadata = self.session.popMetadata(uuid: metaCueId) {
@@ -216,10 +220,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func audiodataReady(_ data: Data) {
         
-        if Logger.verbose { Logger.loading.notice("audio data ready \(data.description)") }
-        
+        if Logger.verbose { Logger.loading.notice("audiodata ready \(data.description)") }
+
         let accuData = accumulate( data )
-        
+
         guard let audioData = accuData else {
             return
         }
@@ -230,7 +234,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func metadataReady(_ metadata: AbstractMetadata) {
         
-        if Logger.verbose { Logger.loading.notice("metadata data ready \(metadata.displayTitle ?? "(nil)")") }
+        if Logger.verbose { Logger.loading.notice("metadata ready \(metadata.displayTitle ?? "(nil)")") }
 
         if let broadcaster = icyFields?["icy-name"] {
             metadata.setBroadcaster(broadcaster)
@@ -266,16 +270,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
     
     // MARK: processing steps
-    
-    private func treatMetadata(data: Data) -> Data? {
-        guard let mdExtractor = metadataExtractor else {
-            return nil
-        }
-        let treatedData = mdExtractor.handle(payload: data)
-        if Logger.verbose { Logger.decoding.debug("\(data.count - treatedData.count) of \(data.count) bytes were extracted") }
-        
-        return treatedData
-    }
     
     private func accumulate(_ data:Data) -> Data? {
         guard let accu = accumulator else {

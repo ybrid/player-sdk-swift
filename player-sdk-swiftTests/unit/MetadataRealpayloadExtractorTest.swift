@@ -35,7 +35,14 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         return nil
     }
     class TestMetadataListener : MetadataListener {
+        func reset() {
+            datas.removeAll()
+            titles.removeAll()
+        }
+        
+        var datas:[Data] = []
         func audiodataReady(_ data: Data) {
+            datas.append(data)
         }
         
         var titles:[String] = []
@@ -50,29 +57,43 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         Logger.verbose = true
     }
     override func tearDownWithError() throws {
-        consumer.titles.removeAll()
+        consumer.reset()
     }
     
     func testRealMetadata_1() throws {
         let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
         XCTAssert( extractor.intervalBytes == 1024 )
         let input = try readDataFromFile("swr3recIncl1024MD_1")!
-        let audioContent = extractor.handle(payload: input)
-        XCTAssertGreaterThan(audioContent.count,  0, "\(audioContent.count) audio bytes")
+        extractor.portion(payload: input)
+        XCTAssertEqual(consumer.datas.count, 220)
+        extractor.flush()
         
+        XCTAssertEqual(consumer.datas.count, 221)
+
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Olivia Rodrigo - Good 4 U")}
+        
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(input.count - mdIndicatorBytes - 32*16 - 13*16, consumer.datas.map { $0.count }.reduce(0, +) ) 
+
     }
     
-    func testRealMetadata_WholePayload() throws {
+    func testRealMetadata_2_WholePayload() throws {
         let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
         XCTAssert( extractor.intervalBytes == 1024 )
         let input = try readDataFromFile("swr3recIncl1024MD_2")!
-        let audioContent = extractor.handle(payload: input)
-        XCTAssertGreaterThan(audioContent.count,  0, "\(audioContent.count) audio bytes")
+        extractor.portion(payload: input)
+        extractor.flush()
         
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        XCTAssertEqual(consumer.datas.count, 63)
+        
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        
+        XCTAssertEqual(input.count - mdIndicatorBytes - 31*16 - 13*16, consumer.datas.map { $0.count }.reduce(0, +) )
     }
     
     func testRealMetadata_Sliced1000_ok() throws {
@@ -84,20 +105,22 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         let slices = createChunks(forData: input, chunkSize: chunkSize)
         print("input of \(input.count) split into \(slices.count) of \(chunkSize)")
 
-        
-        var bytes = 0
         for slice in slices {
-           let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+           extractor.portion(payload: slice)
         }
-        
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
+        extractor.flush()
         
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        XCTAssertEqual(consumer.datas.count, 63)
+        
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        
+        XCTAssertEqual(input.count - mdIndicatorBytes - 31*16 - 13*16, consumer.datas.map { $0.count }.reduce(0, +) )
     }
     
-    func testRealMetadata_Sliced1000_until1stMetadata() throws {
+    func testRealMetadata_Sliced1000_until1stMetadata_flush() throws {
         let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
         XCTAssert( extractor.intervalBytes == 1024 )
  
@@ -107,17 +130,22 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         print("input of \(input.count) split into \(slices.count) of \(chunkSize)")
 
         let firstSlices = slices[0 ..<  2]
-        var bytes = 0
         for slice in firstSlices {
-           let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+            extractor.portion(payload: slice)
+            print("slice has \(slice.description) bytes")
         }
         
-        print("exctracted audio is \(bytes) bytes")
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
-        
+        XCTAssertEqual(consumer.datas.count, 1)
+        XCTAssertEqual(1024, consumer.datas.map { $0.count }.reduce(0, +))
         XCTAssertEqual(consumer.titles.count, 1)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        extractor.flush()
+        XCTAssertEqual(consumer.datas.count, 2)
+        
+        let mdIndicatorBytes = 2000 / 1024
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        XCTAssertEqual(2000 - mdIndicatorBytes - 31*16, consumer.datas.map { $0.count }.reduce(0, +))
     }
     
    
@@ -130,19 +158,20 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         let slices = createChunks(forData: input, chunkSize: chunkSize)
         print("input of \(input.count) split into \(slices.count) of \(chunkSize)")
         
-        var bytes = 0
         for slice in slices {
-           let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+            extractor.portion(payload: slice)
         }
-        
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
+        extractor.flush()
         
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        XCTAssertEqual(consumer.datas.count, 63)
+        
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        
+        XCTAssertEqual(input.count - mdIndicatorBytes - 31*16 - 13*16, consumer.datas.map { $0.count }.reduce(0, +) ) 
     }
-    
-    
     
     func testRealMetadata_Sliced500_FirstMd() throws {
         let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
@@ -154,17 +183,76 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         
         let firstSlices = slices[0 ..<  4]
         print("input of \(input.count) bytes, split into \(slices.count) of \(chunkSize) bytes, using \(firstSlices.count)")
-        var bytes = 0
+
         for slice in firstSlices {
-            let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+            extractor.portion(payload: slice)
         }
-        
-        print("exctracted audio is \(bytes) bytes")
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
+        extractor.flush()
+
         
         XCTAssertEqual(consumer.titles.count, 1)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        XCTAssertEqual(consumer.datas.count, 2)
+        
+        let mdIndicatorBytes = 2000 / 1024
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        XCTAssertEqual(2000 - mdIndicatorBytes - 31*16, consumer.datas.map { $0.count }.reduce(0, +))
+
+    }
+    
+    func testRealMetadata_Sliced500_FirstMdPlus() throws {
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
+        XCTAssert( extractor.intervalBytes == 1024 )
+ 
+        let input = try readDataFromFile("swr3recIncl1024MD_2")!
+        let chunkSize = 500
+        let slices = createChunks(forData: input, chunkSize: chunkSize)
+        
+        let firstSlices = slices[0 ..<  5]
+        print("input of \(input.count) bytes, split into \(slices.count) of \(chunkSize) bytes, using \(firstSlices.count)")
+
+        for slice in firstSlices {
+            extractor.portion(payload: slice)
+        }
+        extractor.flush()
+
+        
+        XCTAssertEqual(consumer.titles.count, 1)
+        consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        XCTAssertEqual(consumer.datas.count, 2)
+        
+        let mdIndicatorBytes = 2500 / 1024 - 1
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        XCTAssertEqual(2500 - mdIndicatorBytes - 31*16, consumer.datas.map { $0.count }.reduce(0, +))
+    }
+    
+    func testRealMetadata_Sliced500_FirstMdPlusPlus() throws {
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 1024, listener: consumer)
+        XCTAssert( extractor.intervalBytes == 1024 )
+ 
+        let input = try readDataFromFile("swr3recIncl1024MD_2")!
+        let chunkSize = 500
+        let slices = createChunks(forData: input, chunkSize: chunkSize)
+        
+        let firstSlices = slices[0 ..<  6]
+        print("input of \(input.count) bytes, split into \(slices.count) of \(chunkSize) bytes, using \(firstSlices.count)")
+
+        for slice in firstSlices {
+            extractor.portion(payload: slice)
+        }
+        extractor.flush()
+
+        
+        XCTAssertEqual(consumer.titles.count, 2)
+        consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        XCTAssertEqual(consumer.datas.count, 3)
+        
+        let mdIndicatorBytes = 3000 / 1024
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        XCTAssertEqual(3000 - mdIndicatorBytes - 31*16 - 13*16, consumer.datas.map { $0.count }.reduce(0, +))
     }
     
     func testRealMetadata_Sliced100() throws {
@@ -176,19 +264,22 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         let slices = createChunks(forData: input, chunkSize: chunkSize)
         print("input of \(input.count) split into \(slices.count) of \(chunkSize)")
         
-        var bytes = 0
         for slice in slices {
-           let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+           extractor.portion(payload: slice)
         }
-        
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
+        extractor.flush()
+
         
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        XCTAssertEqual(consumer.datas.count, 63)
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(mdIndicatorBytes, consumer.datas.count - 1)
+        XCTAssertEqual(input.count - mdIndicatorBytes - 1*(31*16) - 1*(13*16), consumer.datas.map { $0.count }.reduce(0, +))
     }
     
-    func createChunks(forData: Data, chunkSize:Int) -> [Data] {
+    private func createChunks(forData: Data, chunkSize:Int) -> [Data] {
 
         var chunks:[Data] = []
         forData.withUnsafeBytes { (u8Ptr: UnsafePointer<UInt8>) in
@@ -216,20 +307,20 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         let slices = createRandomChunks(forData: input, range)
         print("input of \(input.count) split into \(slices.count) slices of sizes \(range)")
         
-        var bytes = 0
         for slice in slices {
-           let audio = extractor.handle(payload: slice)
-            bytes += audio.count
+           extractor.portion(payload: slice)
         }
-        
-        XCTAssertGreaterThan(bytes,  0, "\(bytes) audio bytes")
+        extractor.flush()
         
         XCTAssertEqual(consumer.titles.count, 2)
         consumer.titles.forEach{ XCTAssertEqual( $0, "Eric Clapton - Layla")}
+        
+        let mdIndicatorBytes = input.count / 1024 - 1
+        XCTAssertEqual(input.count - mdIndicatorBytes - 1*(31*16) - 1*(13*16), consumer.datas.map { $0.count }.reduce(0, +))
     }
  
     
-    func createRandomChunks(forData: Data, _ range: ClosedRange<Int>) -> [Data] {
+    private func createRandomChunks(forData: Data, _ range: ClosedRange<Int>) -> [Data] {
 
         var chunks:[Data] = []
         forData.withUnsafeBytes { (u8Ptr: UnsafePointer<UInt8>) in

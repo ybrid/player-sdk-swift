@@ -245,6 +245,7 @@ class PlaybackBuffer {
         var cuePoint:UUID? = nil
         var cueAudioComplete:AudioCompleteCallback? = nil
     }
+    
     private class ChunkCache : ThreadsafeDequeue<Chunk> {
         
         init() {

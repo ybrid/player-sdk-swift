@@ -167,7 +167,7 @@ class UseAudioPlayerTests: XCTestCase {
      
      listener.error lets you see all errors, warnings and notifications
      */
-    func test04b_Error_NoAudioData() {
+    func test04b_Error_NoAudio() {
         
         let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
         
@@ -294,7 +294,7 @@ class UseAudioPlayerTests: XCTestCase {
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
      YbridControl's methods can shift time and alter the streamed audio content.
      
-     The AudioCompleteCallback is called when the conent change takes place.
+     The AudioCompleteCallback is called when the content change takes place.
      */
     func test08_UseYbridControl() {
 
