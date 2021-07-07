@@ -239,6 +239,63 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
 
 }
 
+class TestYbridControl {
+    
+    let poller = Poller()
+    let endpoint:MediaEndpoint
+    let listener:YbridControlListener
+    
+    init(_ endpoint:MediaEndpoint, listener:YbridControlListener) {
+        self.endpoint = endpoint
+        self.listener = listener
+    }
+    
+    func playing( action: @escaping (YbridControl)->() ) {
+        let semaphore = DispatchSemaphore(value: 0)
+        do {
+            try AudioPlayer.open(for: endpoint, listener: listener,
+                 playbackControl: { (ctrl) in semaphore.signal()
+                    XCTFail(); return },
+                 ybridControl: { [self] (ybridControl) in
+                    
+                    ybridControl.play()
+                    poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
+                    
+                    action(ybridControl)
+                    
+                    ybridControl.stop()
+                    poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)
+                    ybridControl.close()
+                    semaphore.signal()
+                 })
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore.signal(); return
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+    }
+    
+    func stopped( action: @escaping (YbridControl)->() ) {
+        let semaphore = DispatchSemaphore(value: 0)
+        do {
+            try AudioPlayer.open(for: endpoint, listener: listener,
+                 playbackControl: { (ctrl) in semaphore.signal()
+                    XCTFail(); return },
+                 ybridControl: { (ybridControl) in
+                    
+                    action(ybridControl)
+                    
+                    ybridControl.close()
+                    semaphore.signal()
+                 })
+        } catch {
+            XCTFail("no player. Something went wrong");
+            semaphore.signal(); return
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+    }
+}
+
 
 class Trace {
     let name:String
