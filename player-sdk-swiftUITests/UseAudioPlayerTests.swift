@@ -294,7 +294,7 @@ class UseAudioPlayerTests: XCTestCase {
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
      YbridControl's methods can shift time and alter the streamed audio content.
      
-     The AudioCompleteCallback is called when the conent change takes place.
+     The AudioCompleteCallback is called when the content change takes place.
      */
     func test08_UseYbridControl() {
 

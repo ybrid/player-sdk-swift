@@ -32,7 +32,7 @@ class YbridControlBasicTests: XCTestCase {
     var ybridControl:TestYbridControl?
     override func setUpWithError() throws {
         listener.reset()
-        ybridControl = TestYbridControl(ybridSwr3Endpoint, listener: listener)
+        ybridControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
         Logger.testing.debug("-- consumed offsets \(listener.offsets)")
@@ -67,7 +67,7 @@ class YbridControlBasicTests: XCTestCase {
     }
     
     /*
-     The listeners methods are called when the specific state changes or
+     The listener's methods are called when the specific state changes or
      when refresh() is called.
      */
     func test02_Stopped_Refresh() {
@@ -116,7 +116,7 @@ class YbridControlBasicTests: XCTestCase {
         let expectedRange = 2...5
         XCTAssertTrue(expectedRange.contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(expectedRange), but was \(listener.offsets.count), \(listener.offsets)")
         
-        XCTAssertEqual(2, listener.swaps.count, "YbridControlListener.swapsChanged(...) should have been called twice, but was \(listener.swaps.count)")
+        XCTAssertEqual(listener.swaps.count, 3,"YbridControlListener.swapsChanged(...) should have been called three times, but was \(listener.swaps.count)")
         
         XCTAssertGreaterThanOrEqual( listener.metadatas.count, 2, "YbridControlListener.metadataChanged(...) should be called at least twice, but was \(listener.metadatas.count)")
     }

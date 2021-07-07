@@ -181,48 +181,48 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.wind(by:by))
+            changeover.inProgress(self.session.wind(by:by))
         }
     }
     
     func windToLive( _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.windToLive())
+            changeover.inProgress(self.session.windToLive())
         }
     }
     
     func wind(to:Date, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.wind(to:to))
+            changeover.inProgress(self.session.wind(to:to))
         }
     }
 
     func skipForward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.skipForward(type))
+            changeover.inProgress(self.session.skipForward(type))
         }
     }
 
     func skipBackward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.skipBackward(type))
+            changeover.inProgress(self.session.skipBackward(type))
         }
     }
     
     public func swapItem(_ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.swapItem())
+            changeover.inProgress(self.session.swapItem())
         }
     }
     public func swapService(to id:String, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
             let changeover = self.newChangeOver(audioComplete)
-            changeover.takePlace(self.session.swapService(id:id))
+            changeover.inProgress(self.session.swapService(id:id))
         }
     }
     
@@ -245,7 +245,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             self.player = player
         }
         
-        func takePlace(_ inProgress:Bool) {
+        func inProgress(_ inProgress:Bool) {
             guard let audioComplete = audioComplete else {
                 return
             }
