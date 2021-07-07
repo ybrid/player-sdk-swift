@@ -39,7 +39,7 @@ class YbridSwapItemTests: XCTestCase {
         listener.reset()
     }
     
-    func test01_SwapsLeft_WithoutPlaying_0() throws {
+    func test01_stopped_SwapsLeft_0() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
@@ -58,7 +58,7 @@ class YbridSwapItemTests: XCTestCase {
     }
 
     
-    func test02_SwapItem_WhilePlaying() throws {
+    func test02_playing_SwapsLeft_SwapSwap() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
                 playbackControl: { [self] (control) in
                     XCTFail("ybridControl expected");semaphore?.signal()
@@ -71,13 +71,13 @@ class YbridSwapItemTests: XCTestCase {
                 }
                     
                 ybridControl.play()
-                    poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
+                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
                     
                 guard let swaps = listener.swapsLeft, swaps != 0 else {
                     XCTFail("currently no swaps left. Execute test later"); return
                 }
-                    Logger.testing.info("\(swaps) swaps are left")
+                Logger.testing.info("\(swaps) swaps are left")
                     
                 guard let titleMain = listener.metadatas.last?.displayTitle else {
                     XCTFail("must have recieved metadata"); return
@@ -85,7 +85,7 @@ class YbridSwapItemTests: XCTestCase {
                 Logger.testing.info("title main =\(titleMain)")
                 
                 var titleSwapped:String?
-                    ybridControl.swapItem()
+                ybridControl.swapItem()
                 _ = poller.wait(max: 10) {
                     guard let swapped = listener.metadatas.last?.displayTitle else {
                         return false
