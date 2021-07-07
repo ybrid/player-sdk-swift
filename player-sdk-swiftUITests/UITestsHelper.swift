@@ -292,16 +292,19 @@ class ActionsTrace {
         return actionsTook
     }
 
-    func check(expectedActions:Int, maxDuration:TimeInterval) {
+    func check(expectedActions:Int, mustBeCompleted:Bool = true, maxDuration:TimeInterval) {
           
         XCTAssertEqual(actions.count,expectedActions, "expecting \(expectedActions) completed actions, but were \(actions.count)")
         
         actions.filter{
+            if mustBeCompleted {
+                XCTAssertTrue($0.valid, "expected valid, but was \($0) ")
+            }
              return $0.valid
         }.forEach{
             Logger.testing.debug("\($0.changed ? "" : "not ")\($0.name) took \($0.tookS.S)")
             XCTAssertLessThan($0.tookS, maxDuration, "\($0.name) should take less than \(maxDuration.S), took \($0.tookS.S)")
         }
     }
-
+    
 }

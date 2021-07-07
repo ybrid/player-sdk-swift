@@ -304,7 +304,7 @@ class UseAudioPlayerTests: XCTestCase {
                 control.play()
                 sleep(2)
                 control.skipBackward(ItemType.NEWS)
-                sleep(8) /// listen to the news
+                sleep(10) /// listen to the news
                 
                 control.stop()
                 sleep(1)

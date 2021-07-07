@@ -32,11 +32,8 @@ class MetadataExtractor {
     let intervalBytes:Int
     fileprivate var nextMetadataAt:Int
     fileprivate var metadata:PayloadCollector? // = PayloadCollector("metadata")
-//    var totalBytesTreated:UInt32 = 0
-//    var totalBytesExtracted:UInt32 = 0
-//    var totalBytesAudio:UInt32 = 0
+    private var lastMetadataHash: Data?
     weak var listener: MetadataListener?
-    var lastMetadataHash: Data?
     
     init(bytesBetweenMetadata:Int, listener: MetadataListener) {
         self.intervalBytes = bytesBetweenMetadata
@@ -88,7 +85,6 @@ class MetadataExtractor {
     }
 
     func handle(payload: Data) -> Data {
-//        totalBytesTreated += UInt32(payload.count)
         let audio = PayloadCollector("audio")
         
         var index:Int = 0
@@ -119,7 +115,6 @@ class MetadataExtractor {
                 // begin with metadata
                 let mdLength: Int = Int(payload[index]) * 16
                 index += 1
-//                totalBytesExtracted += 1
                 if mdLength == 0 {
                     // empty metadata
                     nextMetadataAt = index + intervalBytes
@@ -153,12 +148,16 @@ class MetadataExtractor {
         if let md = metadata?.data, md.count > 0 {
             if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(md.count) bytes") }
         }
-//        totalBytesAudio += UInt32(audio.data.count)
         return audio.data
     }
     
+    func reset() {
+        if Logger.verbose { Logger.loading.debug("resetting icy metadata hash") }
+        lastMetadataHash = nil
+    }
+    
     fileprivate func extracted(_ metadata:PayloadCollector) {
-//        totalBytesExtracted += UInt32(metadata.data.count)
+        if Logger.verbose { Logger.loading.debug("extracted icy metadata \(metadata.data.description)") }
         let hashed = hash(data: metadata.data)
         guard hashed != lastMetadataHash else {
             return
@@ -172,7 +171,7 @@ class MetadataExtractor {
         listener?.metadataReady(icyMetadata)
     }
     
-    func hash(data : Data) -> Data {
+    fileprivate func hash(data : Data) -> Data {
         var hash = [UInt8](repeating: 0,  count: Int(CC_SHA256_DIGEST_LENGTH))
         data.withUnsafeBytes {
             _ = CC_SHA256($0.baseAddress, CC_LONG(data.count), &hash)

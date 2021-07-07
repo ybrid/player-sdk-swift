@@ -162,38 +162,48 @@ class YbridSwapItemTests: XCTestCase {
     // MARK: using audio complete
     
     func test11_SwapItemComplete_Demo() throws {
-        let actionTraces = try playAndSwapItem(ybridDemoEndpoint)
+        
+        let actionTraces = ActionsTrace()
+        TestYbridControl(ybridDemoEndpoint, listener: listener).playing{ [self] (ybrid) in
+            actionTraces.append( swapItem(ybrid) )
+        }
+        
         checkErrors(expectedErrors: 0)
         actionTraces.check(expectedActions: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
     }
     
     func test12_SwapItemComplete_AdDemo() throws {
-        let actionTraces = try playAndSwapItem(ybridAdDemoEndpoint)
+        
+        let actionTraces = ActionsTrace()
+        TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ [self] (ybrid) in
+            actionTraces.append( swapItem(ybrid) )
+        }
+        
         checkErrors(expectedErrors: 1)
         actionTraces.check(expectedActions: 1, maxDuration: 1.0)
     }
-    
-    private func playAndSwapItem(_ endpoint:MediaEndpoint) throws -> ActionsTrace {
-        
-        let actions = ActionsTrace()
-     
-        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
-            let actionSemaphore = DispatchSemaphore(value: 0)
-            sleep(2)
-            
-            let trace = actions.newTrace("swap item")
-            ybridControl.swapItem() { (changed) in
-                trace.complete(changed)
-                Logger.testing.info( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
-                sleep(2)
-                
-                actionSemaphore.signal()
-            }
-            _ = actionSemaphore.wait(timeout: .distantFuture)
+  
+    func swapItem( _ ybrid:YbridControl, maxWait:TimeInterval? = nil) -> (Trace) {
+        let mySema = DispatchSemaphore(value: 0)
+        let trace = Trace("swap item")
+        ybrid.swapItem() { (changed) in
+            self.actionComplete(changed, trace)
+            mySema.signal()
         }
-        return actions
+        if let maxWait = maxWait {
+            _ = mySema.wait(timeout: .now() + maxWait)
+        } else {
+            _ = mySema.wait(timeout: .distantFuture)
+        }
+        return trace
     }
     
+    private func actionComplete(_ changed:Bool,_ trace:Trace) {
+       trace.complete(changed)
+       Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+       sleep(3)
+   }
+
     private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {
             XCTFail("\(expectedErrors) errors expected, but were \(listener.errors.count)")

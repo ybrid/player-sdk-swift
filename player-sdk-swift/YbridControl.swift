@@ -240,18 +240,22 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
         
         func takePlace(_ inProgress:Bool) {
+            guard let audioComplete = audioComplete else {
+                return
+            }
+            
             if !inProgress {
                 DispatchQueue.global().async {
-                    self.audioComplete?(false)
+                    audioComplete(false)
                 }
                 return
             }
             
             if player.state == .buffering || player.state == .playing {
-                player.pipeline?.changeOver = audioComplete
+                player.pipeline?.changingOver( audioComplete )
             } else {
                 DispatchQueue.global().async {
-                    self.audioComplete?(true)
+                    audioComplete(true)
                 }
             }
         }

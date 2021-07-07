@@ -42,9 +42,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var firstPCM = true
     var firstMetadata = true
     var stopping = false
-    var changeOver:AudioCompleteCallback? = nil { didSet {
-        metadataExtractor?.lastMetadataHash = nil
-    }}
+    private var changeOver:AudioCompleteCallback? = nil
 
     var icyFields:[String:String]? { didSet {
         Logger.loading.notice("icy fields \(icyFields ?? [:])")
@@ -159,6 +157,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
     }
 
+    func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
+        changeOver = audioComplete
+        metadataExtractor?.reset()
+    }
     
     // MARK: decoder listener
     
