@@ -79,6 +79,7 @@ class PlaybackBuffer {
         return "buffer size \(total.S) ( caching \(caching.S), remainig \(remaining.S) )"
     } }
 
+    var onMetadataCue:((UUID)->())?
     
     init(scheduling:PlaybackScheduling, engine: PlaybackEngine) {
         self.cachedChunks = ChunkCache()
@@ -107,6 +108,21 @@ class PlaybackBuffer {
         if Logger.verbose { Logger.playing.debug("cached \(chunk.duration.S) --> \(bufferDescription)") }
         
         takeCare()
+    }
+    
+    let empty = AVAudioPCMBuffer()
+    func put(cuePoint:UUID) {
+        let chunk = Chunk(pcm: empty, duration: 0, cuePoint: cuePoint)
+        cachedChunks.put(chunk: chunk)
+        
+        if Logger.verbose { Logger.playing.debug("cached metadata cue point --> \(cuePoint)") }
+    }
+    
+    func put(_ cueAudioComplete: @escaping AudioCompleteCallback) {
+        let chunk = Chunk(pcm: empty, duration: 0, cueAudioComplete: cueAudioComplete)
+        cachedChunks.put(chunk: chunk)
+        
+        if Logger.verbose { Logger.playing.debug("cached complete cue point --> \(String(describing: cueAudioComplete))") }
     }
     
     func pause() {
@@ -192,6 +208,18 @@ class PlaybackBuffer {
         guard let takenChunk = cachedChunks.pop() else {
             return nil
         }
+        if let cue = takenChunk.cuePoint {
+            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
+                self.onMetadataCue?(cue)
+            }
+            return 0.0
+        }
+        if let complete = takenChunk.cueAudioComplete {
+            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
+                complete(true)
+            }
+            return 0.0
+        }
         self.scheduling.schedule(chunk: takenChunk)
         let scheduled = takenChunk.duration
         caching -= scheduled
@@ -214,6 +242,8 @@ class PlaybackBuffer {
     struct Chunk {
         let pcm:AVAudioPCMBuffer
         let duration:TimeInterval
+        var cuePoint:UUID? = nil
+        var cueAudioComplete:AudioCompleteCallback? = nil
     }
     private class ChunkCache : ThreadsafeDequeue<Chunk> {
         
@@ -235,6 +265,12 @@ class PlaybackBuffer {
 
         func clear() -> TimeInterval? {
             let cleared = duration
+            
+            super.all.forEach{ (chunk) in
+                if let complete = chunk.cueAudioComplete {
+                    complete(true)
+                }
+            }
             super.clear()
             guard cleared > 0.0 else { return nil }
             return cleared

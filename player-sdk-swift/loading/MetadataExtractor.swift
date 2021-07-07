@@ -30,8 +30,9 @@ import CommonCrypto
 class MetadataExtractor {
     
     let intervalBytes:Int
-    fileprivate var nextMetadataAt:Int
-    fileprivate var metadata:PayloadCollector? // = PayloadCollector("metadata")
+    private var audio = PayloadCollector("audio")
+    private var nextMetadataAt:Int
+    private var metadata:PayloadCollector? // = PayloadCollector("metadata")
     private var lastMetadataHash: Data?
     weak var listener: MetadataListener?
     
@@ -85,7 +86,6 @@ class MetadataExtractor {
     }
 
     func handle(payload: Data) -> Data {
-        let audio = PayloadCollector("audio")
         
         var index:Int = 0
         iteratePayload: repeat {
@@ -104,6 +104,8 @@ class MetadataExtractor {
                 // audio until metadata
                 if index < nextMetadataAt {
                     index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
+                    listener?.audiodataReady(audio.data)
+                    audio = PayloadCollector("audio")
                     continue iteratePayload
                 }
                 

@@ -293,6 +293,8 @@ class UseAudioPlayerTests: XCTestCase {
     /*
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
      YbridControl's methods can shift time and alter the streamed audio content.
+     
+     The AudioCompleteCallback is called when the conent change takes place.
      */
     func test08_UseYbridControl() {
 
@@ -303,7 +305,9 @@ class UseAudioPlayerTests: XCTestCase {
                
                 control.play()
                 sleep(2)
-                control.skipBackward(ItemType.NEWS)
+                control.skipBackward(ItemType.NEWS) { (didChange) in
+                    print("Now You listen to news. That's \(didChange).")
+                }
                 sleep(10) /// listen to the news
                 
                 control.stop()

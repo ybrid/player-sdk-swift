@@ -12,6 +12,9 @@ import XCTest
 class MetadataExtractorTests: XCTestCase {
  
     class TestMetadataListener : MetadataListener {
+        func audiodataReady(_ data: Data) {
+        }
+        
         var titles:[String] = []
         func metadataReady(_ metadata: AbstractMetadata) {
             if let title = metadata.displayTitle {

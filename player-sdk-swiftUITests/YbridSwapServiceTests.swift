@@ -257,10 +257,11 @@ class YbridSwapServiceTests: XCTestCase {
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ [self] (ybrid) in
             actionTraces.append( swapService(to: "adaptive-demo", ybrid, maxWait: 6.0) )
+            actionTraces.check(expectedActions: 1, mustBeCompleted:false, maxDuration: 2.0)
         }
 
         checkErrors(expectedErrors: 0)
-        actionTraces.check(expectedActions: 1, mustBeCompleted:false, maxDuration: 2.0)
+        actionTraces.check(expectedActions: 1, mustBeCompleted:true, maxDuration: 6.5)
     }
     
     func test15_SwapBackSwappedDemo_IcyTriggerInTime() throws {

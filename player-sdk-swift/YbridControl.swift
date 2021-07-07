@@ -235,7 +235,13 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         var audioComplete: AudioCompleteCallback?
         let player:AudioPlayer
         init(_ audioComplete: AudioCompleteCallback?, player:AudioPlayer) {
-            self.audioComplete = audioComplete
+            if let completeCallback = audioComplete {
+            self.audioComplete = { (changed) in
+                DispatchQueue.global().async {
+                    Logger.playing.debug("calling audio complete (didChange:\(changed))")
+                    completeCallback(changed)
+                }
+            }}
             self.player = player
         }
         
@@ -245,18 +251,14 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
             
             if !inProgress {
-                DispatchQueue.global().async {
-                    audioComplete(false)
-                }
+                audioComplete(false)
                 return
             }
             
             if player.state == .buffering || player.state == .playing {
                 player.pipeline?.changingOver( audioComplete )
             } else {
-                DispatchQueue.global().async {
-                    audioComplete(true)
-                }
+                audioComplete(true)
             }
         }
     }

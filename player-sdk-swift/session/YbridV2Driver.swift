@@ -400,10 +400,6 @@ class YbridV2Driver : MediaDriver {
             if Logger.verbose { Logger.session.debug(String(describing: swappedObject)) }
             return swappedObject
         } catch {
-            if let sessionError = error as? SessionError {
-                super.notify(ErrorSeverity.fatal, sessionError)
-                throw sessionError
-            }
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
             super.notify(ErrorSeverity.fatal, cannot)
             throw cannot
@@ -425,17 +421,9 @@ class YbridV2Driver : MediaDriver {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
         }
          
-        do {
-            guard let result = try JsonRequest(url: url).performPostSync(responseType: T.self) else {
-                let error = SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
-                super.notify(ErrorSeverity.fatal, error)
-                throw error
-            }
-            return result
-        } catch {
-            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
-            super.notify(ErrorSeverity.fatal, cannot)
-            throw cannot
+        guard let result = try JsonRequest(url: url).performPostSync(responseType: T.self) else {
+            throw SessionError(ErrorKind.invalidResponse, "no result for \(actionString)")
         }
+        return result
     }
 }

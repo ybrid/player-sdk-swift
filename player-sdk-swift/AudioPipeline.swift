@@ -32,6 +32,7 @@ protocol PipelineListener: class {
 
 protocol MetadataListener: class {
     func metadataReady(_ metadata: AbstractMetadata)
+    func audiodataReady(_ data:Data)
 }
 
 class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
@@ -68,6 +69,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
         self.session = session
+        
         /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackUri coming from the session.
         if let metadata = self.session.fetchMetadataSync() {
             self.notifyMetadataChanged(metadata)
@@ -82,6 +84,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func stopProcessing() {
         stopping = true
         decoder?.stopping = true
+        changeOver?(false)
+        changeOver = nil
     }
     
     func dispose() {
@@ -138,15 +142,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func process(data: Data) {
 
-        let treatedData = treatMetadata(data: data)
-        
-        let accuData = accumulate( treatedData ?? data )
-        
-        guard let audioData = accuData else {
-            return
-        }
-
-        self.decode(data: audioData)
+        _ = treatMetadata(data: data)
 
     }
     
@@ -158,7 +154,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
 
     func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
-        changeOver = audioComplete
+        changeOver = { (changed) in
+            audioComplete(changed)
+        }
         metadataExtractor?.reset()
     }
     
@@ -173,6 +171,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     if !infinite { engine.canPause = true }
                     self.buffer = engine.start()
                     self.pipelineListener.ready(playback: engine)
+                    
+                    
+                    buffer?.onMetadataCue = { (metaCueId) in
+                        if let metadata = self.session.popMetadata(uuid: metaCueId) {
+                            self.notifyMetadataChanged(metadata)
+                        }
+                    }
+
                 }
             }
             if resumed {
@@ -208,8 +214,24 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     // MARK: metadata listener
     
+    func audiodataReady(_ data: Data) {
+        
+        if Logger.verbose { Logger.loading.notice("audio data ready \(data.description)") }
+        
+        let accuData = accumulate( data )
+        
+        guard let audioData = accuData else {
+            return
+        }
+
+        self.decode(data: audioData)
+    }
+
+    
     func metadataReady(_ metadata: AbstractMetadata) {
         
+        if Logger.verbose { Logger.loading.notice("metadata data ready \(metadata.displayTitle ?? "(nil)")") }
+
         if let broadcaster = icyFields?["icy-name"] {
             metadata.setBroadcaster(broadcaster)
         }
@@ -220,14 +242,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         let durationUntilPresenting = bufferSize
         if let changeOverCallback = changeOver {
             changeOver = nil
-            if let delayBy = durationUntilPresenting {
-                DispatchQueue.global().asyncAfter(deadline: .now() + delayBy) {
-                    changeOverCallback(true)
-                }
+            if let _ = durationUntilPresenting {
+                buffer?.put(changeOverCallback)
             } else {
-                DispatchQueue.global().async {
-                    changeOverCallback(true)
-                }
+                changeOverCallback(true)
             }
         }
         
@@ -242,14 +260,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             }
             return
         }
-        if let delayBy = durationUntilPresenting {
-            let metadataId = session.maintainMetadata(metadata: metadata)
-            metadataQueue.asyncAfter(deadline: .now() + delayBy) {
-                if let delayedMd = self.session.popMetadata(uuid: metadataId) {
-                    self.notifyMetadataChanged(delayedMd)
-                }
-            }
-        }
+        
+        let metadataUuid = session.maintainMetadata(metadata: metadata)
+        buffer?.put(cuePoint: metadataUuid)
     }
     
     // MARK: processing steps
