@@ -144,8 +144,12 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func process(data: Data) {
 
-        _ = treatMetadata(data: data)
-
+        if let mdExtractor = metadataExtractor {
+            _ = mdExtractor.handle(payload: data)
+            return
+        }
+        
+        audiodataReady(data)
     }
     
     func flushAudio() {
@@ -156,9 +160,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
 
     func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
-        changeOver = { (changed) in
-            audioComplete(changed)
-        }
+        changeOver = audioComplete
         metadataExtractor?.reset()
     }
     
@@ -173,7 +175,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     if !infinite { engine.canPause = true }
                     self.buffer = engine.start()
                     self.pipelineListener.ready(playback: engine)
-                    
                     
                     buffer?.onMetadataCue = { (metaCueId) in
                         if let metadata = self.session.popMetadata(uuid: metaCueId) {
@@ -219,9 +220,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func audiodataReady(_ data: Data) {
         
         if Logger.verbose { Logger.loading.notice("audio data ready \(data.description)") }
-        
+
         let accuData = accumulate( data )
-        
+
         guard let audioData = accuData else {
             return
         }
