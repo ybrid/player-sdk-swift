@@ -64,6 +64,8 @@ class UseAudioPlayerTests: XCTestCase {
     Stop could need a second to clean up. Otherwise it may not sound nice.
     */
     func test01_PlaySomeSeconds() throws {
+        Logger.verbose = false
+        
         
         try AudioPlayer.open(for: myEndpoint, listener: nil) {
             (control) in

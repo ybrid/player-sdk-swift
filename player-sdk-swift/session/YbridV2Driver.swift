@@ -137,6 +137,34 @@ class YbridV2Driver : MediaDriver {
         }
     }
     
+    
+    
+    func showMeta(_ streamUrl:String) {
+        guard connected else {
+            Logger.session.error("no connected ybrid session")
+            return
+        }
+        Logger.session.debug("getting info about ybrid session")
+        
+        do {
+            guard let ctrlUrl = URL(string: streamUrl) else {
+                throw SessionError(ErrorKind.invalidUri, "cannot request \(streamUrl)")
+            }
+            
+            guard let showMetaObj:YbridShowMeta = try JsonRequest(url: ctrlUrl).performPostSync(responseType: YbridShowMeta.self) else {
+                throw SessionError(ErrorKind.invalidResponse, "no result for show meta")
+            }
+            Logger.session.debug("show-meta is \(showMetaObj)")
+            accecpt(showMeta: showMetaObj)
+            if !valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.session.error(error.localizedDescription)
+        }
+    }
+
+    
     /// visible for tests
     func reconnect() throws {
         Logger.session.info("reconnecting ybrid session")
@@ -293,6 +321,13 @@ class YbridV2Driver : MediaDriver {
 
         //                   if (session.getActiveWorkarounds().get(Workaround.WORKAROUND_BAD_PACKED_RESPONSE).toBool(false)) {
         //                       LOGGER.warning("Invalid response from server but ignored by enabled WORKAROUND_BAD_PACKED_RESPONSE");
+    }
+    
+    private func accecpt(showMeta:YbridShowMeta) {
+//        showMeta.currentBitRate
+        ybridMetadata = YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station)
+        accecpt(swapped:showMeta.swapInfo)
+//        showMeta.timeToNextItemMillis
     }
     
     private func accecpt(winded:YbridWindedObject) {

@@ -80,7 +80,18 @@ public class MediaSession  {
             media.info()
         }
     }
-     
+    
+    func fetchStreamUrl(_ streamUrl:String)  -> AbstractMetadata? {
+        if let media = v2Driver {
+            media.showMeta(streamUrl)
+            if let ybridData = media.ybridMetadata {
+                let metadata = YbridMetadata(ybridV2: ybridData)
+                metadata.currentService = mediaControl?.bouquet?.activeService
+                return metadata
+            }
+        }
+        return nil
+    }
     func fetchMetadataSync() -> AbstractMetadata? {
         if let media = v2Driver {
             media.info()

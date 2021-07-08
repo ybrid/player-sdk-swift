@@ -1,0 +1,30 @@
+{
+    "currentBitRate": 128000,
+    "currentItem": {
+        "artist": "Tone Loc",
+        "companions": [],
+        "description": "radiomax:SWR3-BAD-MAX:12927699",
+        "durationMillis": 248100,
+        "id": "playlist--swr3-radiomax-swr3-bad-max-12927699",
+        "title": "Funky cold Medina",
+        "type": "MUSIC"
+    },
+    "nextItem": {
+        "artist": "",
+        "companions": [],
+        "description": "",
+        "durationMillis": 97300,
+        "id": "playlist--swr3-radiomax-swr3-bad-max-12935477",
+        "title": "Gedanken: Dominik Frey, kath. „Namenstag“",
+        "type": "VOICE"
+    },
+    "station": {
+        "genre": "Pop Music",
+        "name": "SWR3"
+    },
+    "swapInfo": {
+        "nextSwapReturnsToMain": false,
+        "swapsLeft": 0
+    },
+    "timeToNextItemMillis": 100932
+}

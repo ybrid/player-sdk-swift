@@ -71,9 +71,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.session = session
         
         /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackUri coming from the session.
-        if let metadata = self.session.fetchMetadataSync() {
-            self.notifyMetadataChanged(metadata)
-        }
+//        metadataQueue.async {
+            if let metadata = self.session.fetchMetadataSync() {
+                self.notifyMetadataChanged(metadata)
+            }
+//        }
         PlayerContext.registerMemoryListener(listener: self)
     }
     
@@ -253,9 +255,16 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             firstMetadata = false
             var newMetadata = metadata
             metadataQueue.async {
-                if let metadata = self.session.fetchMetadataSync() {
-                    newMetadata = metadata
-                }
+//                if let streamUrl = (metadata as? IcyMetadata)?.streamUrl {
+//                    Logger.session.debug("StreamUrl = \(streamUrl)")
+//                    if let metadata = self.session.fetchStreamUrl(streamUrl) {
+//                        newMetadata = metadata
+//                    }
+//                } else {
+                    if let metadata = self.session.fetchMetadataSync() {
+                        newMetadata = metadata
+                    }
+//                }
                 self.notifyMetadataChanged(newMetadata)
             }
             return

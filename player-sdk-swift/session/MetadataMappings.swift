@@ -27,9 +27,13 @@ import Foundation
 
 
 class IcyMetadata : AbstractMetadata {
+    
+    var streamUrl:String?
+    
     init(icyData:[String:String]) {
         super.init(current: IcyMetadata.createItem(icyData),
                    station: IcyMetadata.createStation(icyData) )
+        streamUrl = icyData["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
     }
     
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"

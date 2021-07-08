@@ -1,0 +1,30 @@
+{
+    "currentBitRate": 112000,
+    "currentItem": {
+        "artist": "Air",
+        "companions": [],
+        "description": "",
+        "durationMillis": 268416,
+        "id": "148",
+        "title": "All I Need",
+        "type": "MUSIC"
+    },
+    "nextItem": {
+        "artist": "YbridÂ® Hybrid Dynamic Live Audio Technology",
+        "companions": [],
+        "description": "",
+        "durationMillis": 9912,
+        "id": "149",
+        "title": "Your Personal Audio Experience",
+        "type": "JINGLE"
+    },
+    "station": {
+        "genre": "",
+        "name": ""
+    },
+    "swapInfo": {
+        "nextSwapReturnsToMain": false,
+        "swapsLeft": -1
+    },
+    "timeToNextItemMillis": 247248
+}

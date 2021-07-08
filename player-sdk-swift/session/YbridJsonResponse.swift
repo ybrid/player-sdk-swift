@@ -80,6 +80,18 @@ struct YbridPlayout: Codable {
     let offsetToLive : Int // millis
 }
 
+
+struct YbridShowMeta : Codable, Equatable {
+    let currentBitRate: Int
+    let currentItem: YbridItem
+    let nextItem: YbridItem
+    let station: YbridStation
+    let swapInfo: YbridSwapInfo
+    let timeToNextItemMillis: Int
+}
+
+
+
 struct YbridV2Metadata : Codable, Equatable {
     static func == (lhs: YbridV2Metadata, rhs: YbridV2Metadata) -> Bool {
         return lhs.currentItem == rhs.currentItem &&
