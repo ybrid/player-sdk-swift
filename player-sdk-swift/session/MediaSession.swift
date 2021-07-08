@@ -61,6 +61,14 @@ public class MediaSession  {
     var offsetToLiveS: TimeInterval? { get {
         return v2Driver?.offsetToLiveS
     }}
+    var metadata: AbstractMetadata? { get {
+        if let ybridData = v2Driver?.ybridMetadata {
+            let metadata = YbridMetadata(ybridV2: ybridData)
+            metadata.currentService = mediaControl?.bouquet?.activeService
+            return metadata
+        }
+        return nil
+    }}
     
     init(on endpoint:MediaEndpoint) {
         self.endpoint = endpoint
@@ -84,22 +92,14 @@ public class MediaSession  {
     func fetchStreamUrl(_ streamUrl:String)  -> AbstractMetadata? {
         if let media = v2Driver {
             media.showMeta(streamUrl)
-            if let ybridData = media.ybridMetadata {
-                let metadata = YbridMetadata(ybridV2: ybridData)
-                metadata.currentService = mediaControl?.bouquet?.activeService
-                return metadata
-            }
+            return metadata
         }
         return nil
     }
     func fetchMetadataSync() -> AbstractMetadata? {
         if let media = v2Driver {
             media.info()
-            if let ybridData = media.ybridMetadata {
-                let metadata = YbridMetadata(ybridV2: ybridData)
-                metadata.currentService = mediaControl?.bouquet?.activeService
-                return metadata
-            }
+            return metadata
         }
         return nil
     }

@@ -336,7 +336,7 @@ class YbridTimeshiftTests: XCTestCase {
         actionTraces.check(expectedActions: 2, maxDuration: YbridTimeshiftTests.maxWindComplete)
     }
     
-    func test13b_SkipBack_Swr3() throws {
+    func test13b_SkipBackItem_Swr3() throws {
 
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridSwr3Endpoint, listener: ybridPlayerListener).playing{ [self] (ybrid) in

@@ -258,14 +258,11 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertNil(station, "This server does not support icy-fields")
     }
     
-     
-       
-    
-
     
     private func playCheckPlayingCheckStopPlayPlayingCheck(fistCheck: () -> (), secondCheck: () -> (), thirdCheck: () -> () ) {
         guard let player = player else { XCTFail("no player"); return }
         player.play()
+        usleep(10_000)  /// because the listener is notified asyncronously it *may* take some millis on old devices
         fistCheck()
         var seconds = wait(until: .playing, maxSeconds: 10)
         Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")

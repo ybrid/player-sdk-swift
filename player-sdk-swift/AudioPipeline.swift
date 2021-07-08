@@ -69,14 +69,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.pipelineListener = pipelineListener
         self.playerListener = playerListener
         self.session = session
-        
-        /// not calling asynchrounously: If the session needs to be reconnected, the audio data loader uses the updated playbackUri coming from the session.
-//        metadataQueue.async {
-            if let metadata = self.session.fetchMetadataSync() {
-                self.notifyMetadataChanged(metadata)
-            }
-//        }
         PlayerContext.registerMemoryListener(listener: self)
+        
+        if let metadata = session.metadata {
+            self.notifyMetadataChanged(metadata)
+        }
     }
     
     deinit {
@@ -222,8 +219,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func audiodataReady(_ data: Data) {
         
-        if Logger.verbose { Logger.loading.notice("audio data ready \(data.description)") }
-
         let accuData = accumulate( data )
 
         guard let audioData = accuData else {
@@ -236,7 +231,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func metadataReady(_ metadata: AbstractMetadata) {
         
-        if Logger.verbose { Logger.loading.notice("metadata ready \(metadata.displayTitle ?? "(nil)")") }
+        Logger.loading.debug("metadata \(metadata.displayTitle ?? "(no title)")")
 
         if let broadcaster = icyFields?["icy-name"] {
             metadata.setBroadcaster(broadcaster)
@@ -259,16 +254,16 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             firstMetadata = false
             var newMetadata = metadata
             metadataQueue.async {
-//                if let streamUrl = (metadata as? IcyMetadata)?.streamUrl {
-//                    Logger.session.debug("StreamUrl = \(streamUrl)")
-//                    if let metadata = self.session.fetchStreamUrl(streamUrl) {
-//                        newMetadata = metadata
-//                    }
-//                } else {
+                if let streamUrl = (metadata as? IcyMetadata)?.streamUrl {
+                    Logger.session.debug("StreamUrl = \(streamUrl)")
+                    if let metadata = self.session.fetchStreamUrl(streamUrl) {
+                        newMetadata = metadata
+                    }
+                } else {
                     if let metadata = self.session.fetchMetadataSync() {
                         newMetadata = metadata
                     }
-//                }
+                }
                 self.notifyMetadataChanged(newMetadata)
             }
             return

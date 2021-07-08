@@ -38,7 +38,7 @@ public class Bouquet {
             self.defaultService = services[mainServiceIndex]
         } else {
             let error = SessionError(.invalidBouquet, "missing primary service id")
-            Logger.session.error(error.localizedDescription)
+            Logger.session.notice(error.localizedDescription)
        }
         let activeServiceIndex = self.services.firstIndex { (service) in return service.identifier == bouquet.activeServiceId }
         guard let activeIndex = activeServiceIndex else {
