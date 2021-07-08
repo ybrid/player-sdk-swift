@@ -145,7 +145,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func process(data: Data) {
 
         if let mdExtractor = metadataExtractor {
-            _ = mdExtractor.handle(payload: data)
+            mdExtractor.portion(payload: data)
             return
         }
         
@@ -154,6 +154,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func flushAudio() {
         Logger.decoding.debug()
+        if let mdExtractor = metadataExtractor {
+            mdExtractor.flush()
+        }
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
@@ -233,7 +236,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func metadataReady(_ metadata: AbstractMetadata) {
         
-        if Logger.verbose { Logger.loading.notice("metadata data ready \(metadata.displayTitle ?? "(nil)")") }
+        if Logger.verbose { Logger.loading.notice("metadata ready \(metadata.displayTitle ?? "(nil)")") }
 
         if let broadcaster = icyFields?["icy-name"] {
             metadata.setBroadcaster(broadcaster)
@@ -276,16 +279,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
     
     // MARK: processing steps
-    
-    private func treatMetadata(data: Data) -> Data? {
-        guard let mdExtractor = metadataExtractor else {
-            return nil
-        }
-        let treatedData = mdExtractor.handle(payload: data)
-        if Logger.verbose { Logger.decoding.debug("\(data.count - treatedData.count) of \(data.count) bytes were extracted") }
-        
-        return treatedData
-    }
     
     private func accumulate(_ data:Data) -> Data? {
         guard let accu = accumulator else {

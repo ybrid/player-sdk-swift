@@ -169,7 +169,7 @@ class UseAudioPlayerTests: XCTestCase {
      
      listener.error lets you see all errors, warnings and notifications
      */
-    func test04b_Error_NoAudioData() {
+    func test04b_Error_NoAudio() {
         
         let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
         

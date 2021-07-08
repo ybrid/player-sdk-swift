@@ -85,7 +85,7 @@ class MetadataExtractor {
         }
     }
 
-    func handle(payload: Data) -> Data {
+    func portion(payload: Data) {
         
         var index:Int = 0
         iteratePayload: repeat {
@@ -150,12 +150,17 @@ class MetadataExtractor {
         if let md = metadata?.data, md.count > 0 {
             if Logger.verbose { Logger.loading.debug("finished audio with \(audio.data.count) bytes, metadata has \(md.count) bytes") }
         }
-        return audio.data
     }
     
     func reset() {
         if Logger.verbose { Logger.loading.debug("resetting icy metadata hash") }
         lastMetadataHash = nil
+    }
+    
+    func flush() {
+        Logger.loading.debug("flushing audio playload with \(audio.data.description)")
+        listener?.audiodataReady(audio.data)
+        audio = PayloadCollector("audio")
     }
     
     fileprivate func extracted(_ metadata:PayloadCollector) {
