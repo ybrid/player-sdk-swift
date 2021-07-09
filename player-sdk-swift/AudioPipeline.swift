@@ -240,37 +240,33 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
-        let durationUntilPresenting = bufferSize
-        if let changeOverCallback = changeOver {
+//        metadataQueue.async { [self] in
+        if firstMetadata {
+            firstMetadata = false
+            if let newMetadata = session.fetchMetadataSync(metadataIn: metadata) {
+                notifyMetadataChanged(newMetadata)
+            } else {
+                notifyMetadataChanged(metadata)
+            }
+        } else {
+            let metadataUuid = session.maintainMetadata(metadataIn: metadata)
+            buffer?.put(cuePoint: metadataUuid)
+        }
+//        }
+        
+        let canTriggerAudioComplete = (metadata as? IcyMetadata)?.streamUrl != nil
+        Logger.loading.notice("\(canTriggerAudioComplete ?"could":"can't") trigger audio complete")
+        
+        if canTriggerAudioComplete, let changeOverCallback = changeOver {
             changeOver = nil
-            if let _ = durationUntilPresenting {
+            if let _ = bufferSize {
                 buffer?.put(changeOverCallback)
             } else {
                 changeOverCallback(true)
             }
         }
         
-        if firstMetadata {
-            firstMetadata = false
-            var newMetadata = metadata
-            metadataQueue.async {
-                if let streamUrl = (metadata as? IcyMetadata)?.streamUrl {
-                    Logger.session.debug("StreamUrl = \(streamUrl)")
-                    if let metadata = self.session.fetchStreamUrl(streamUrl) {
-                        newMetadata = metadata
-                    }
-                } else {
-                    if let metadata = self.session.fetchMetadataSync() {
-                        newMetadata = metadata
-                    }
-                }
-                self.notifyMetadataChanged(newMetadata)
-            }
-            return
-        }
-        
-        let metadataUuid = session.maintainMetadata(metadata: metadata)
-        buffer?.put(cuePoint: metadataUuid)
+
     }
     
     // MARK: processing steps

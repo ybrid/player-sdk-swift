@@ -89,31 +89,21 @@ public class MediaSession  {
         }
     }
     
-    func fetchStreamUrl(_ streamUrl:String)  -> AbstractMetadata? {
+    func fetchMetadataSync(metadataIn: AbstractMetadata? = nil) -> AbstractMetadata? {
         if let media = v2Driver {
-            media.showMeta(streamUrl)
-            return metadata
-        }
-        return nil
-    }
-    func fetchMetadataSync() -> AbstractMetadata? {
-        if let media = v2Driver {
-            media.info()
-            return metadata
-        }
-        return nil
-    }
-    func maintainMetadata(metadata: AbstractMetadata) -> UUID {
-        if let media = v2Driver {
-            media.info()
-            if let ybridData = media.ybridMetadata {
-                let ybridMetadata = YbridMetadata(ybridV2: ybridData)
-                ybridMetadata.currentService = mediaControl?.bouquet?.activeService
-                metadata.delegate(with: ybridMetadata)
+            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
+                media.showMeta(streamUrl)
+            } else {
+                media.info()
             }
+            return metadata
         }
+        return nil
+    }
+    func maintainMetadata(metadataIn: AbstractMetadata) -> UUID {
+        let metadataOut = fetchMetadataSync(metadataIn: metadataIn)
         let uuid = UUID()
-        metadataDict.put(id: uuid, value: metadata)
+        metadataDict.put(id: uuid, value: metadataOut ?? metadataIn)
         return uuid
     }
     func popMetadata(uuid:UUID) -> AbstractMetadata? {

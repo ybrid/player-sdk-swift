@@ -122,34 +122,34 @@ class YbridSwapItemTests: XCTestCase {
                     XCTFail("ybridControl expected");semaphore?.signal()
                 },
                 ybridControl: { [self] (ybridControl) in
-                defer {
-                    ybridControl.stop()
-                    poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                    semaphore?.signal()
-                }
-                ybridControl.play()
-                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
+                    defer {
+                        ybridControl.stop()
+                        poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+                        semaphore?.signal()
+                    }
+                    ybridControl.play()
+                    poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
                     
-                guard let swaps = listener.swapsLeft, swaps != 0 else {
-                    XCTFail("currently no swaps left. Execute test later")
-                    return
-                }
-                Logger.testing.info("\(swaps) swaps are left")
+                    guard let swaps = listener.swapsLeft, swaps != 0 else {
+                        XCTFail("currently no swaps left. Execute test later")
+                        return
+                    }
+                    Logger.testing.info("\(swaps) swaps are left")
                     
-                var carriedOut = false
+                    var carriedOut = false
                     ybridControl.swapItem { (audioChanged) in
-                    carriedOut = audioChanged
+                        carriedOut = audioChanged
+                    }
+                    _ = poller.wait(max: 10) {
+                        carriedOut == true
+                    }
+                    XCTAssertTrue(carriedOut, "swap was not carried out")
                 }
-                _ = poller.wait(max: 10) {
-                    carriedOut == true
-                }
-                XCTAssertTrue(carriedOut, "swap was not carried out")
-                    
-               })
+        )
         _ = semaphore?.wait(timeout: .distantFuture)
+//        sleep(1)
         
-        let titles:[String] =
-        listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        let titles:[String] = listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
         
         let differentTitles = Set(titles)

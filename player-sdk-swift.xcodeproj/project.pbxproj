@@ -753,10 +753,14 @@
 					};
 					1796DCC425D5272C00B5439F = {
 						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1250;
 					};
 					1799DD8225D599190055C973 = {
 						CreatedOnToolsVersion = 12.4;
 						LastSwiftMigration = 1240;
+					};
+					17CBC8C725E2517F00B2F7E7 = {
+						LastSwiftMigration = 1250;
 					};
 				};
 			};

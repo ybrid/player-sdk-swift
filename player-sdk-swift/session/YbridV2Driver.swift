@@ -144,7 +144,7 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.session.debug("getting info about ybrid session")
+        Logger.session.debug("show metadata \(streamUrl)")
         
         do {
             guard let ctrlUrl = URL(string: streamUrl) else {
@@ -154,7 +154,7 @@ class YbridV2Driver : MediaDriver {
             guard let showMetaObj:YbridShowMeta = try JsonRequest(url: ctrlUrl).performPostSync(responseType: YbridShowMeta.self) else {
                 throw SessionError(ErrorKind.invalidResponse, "no result for show meta")
             }
-            Logger.session.debug("show-meta is \(showMetaObj)")
+//            Logger.session.debug("show-meta is \(showMetaObj)")
             accecpt(showMeta: showMetaObj)
             if !valid {
                 try reconnect()

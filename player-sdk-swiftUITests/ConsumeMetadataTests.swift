@@ -105,7 +105,9 @@ class ConsumeMetadataTests: XCTestCase {
         
         let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
-        currentItems.map{ $0.type }.forEach{ (type) in
+        currentItems.forEach{ (item) in
+            let type = item.type
+            print("\(item)")
             XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
         }
         
@@ -262,7 +264,7 @@ class ConsumeMetadataTests: XCTestCase {
     private func playCheckPlayingCheckStopPlayPlayingCheck(fistCheck: () -> (), secondCheck: () -> (), thirdCheck: () -> () ) {
         guard let player = player else { XCTFail("no player"); return }
         player.play()
-        usleep(10_000)  /// because the listener is notified asyncronously it *may* take some millis on old devices
+        usleep(20_000)  /// because the listener is notified asyncronously it *may* take some millis on old devices
         fistCheck()
         var seconds = wait(until: .playing, maxSeconds: 10)
         Logger.testing.debug("took \(seconds) second\(seconds == 1 ? "" : "s") until \(player.state)")
