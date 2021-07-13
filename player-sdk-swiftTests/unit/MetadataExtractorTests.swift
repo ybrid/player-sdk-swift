@@ -12,16 +12,16 @@ import XCTest
 class MetadataExtractorTests: XCTestCase {
  
     class TestMetadataListener : MetadataListener {
-        var datas:[Data] = []
-        func audiodataReady(_ data: Data) {
-            datas.append(data)
-        }
-        
         var titles:[String] = []
         func metadataReady(_ metadata: AbstractMetadata) {
             if let title = metadata.displayTitle {
                 titles.append(title)
             }
+        }
+        
+        var datas:[Data] = []
+        func audiodataReady(_ data: Data) {
+            datas.append(data)
         }
     }
     var consumer = TestMetadataListener()
@@ -32,30 +32,30 @@ class MetadataExtractorTests: XCTestCase {
     }
      
     func testInit() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 100, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 100)
         XCTAssert( extractor.intervalBytes == 100 )
     }
     
     func testEmptyData() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
         XCTAssert( extractor.intervalBytes == 0 )
         
         let input:Data = Data()
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 0)
         XCTAssertEqual(consumer.titles.count, 0)
     }
     
     func testEmptyMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
         XCTAssert( extractor.intervalBytes == 0 )
         
         var input:Data = Data()
         let content: [UInt8] = [0,0,0]
         input.append(contentsOf: content)
-        extractor.portion(payload: input)
-
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
+        
         XCTAssertEqual(consumer.datas.count, 0)
         XCTAssertEqual(consumer.titles.count, 0)
     }
@@ -72,10 +72,10 @@ class MetadataExtractorTests: XCTestCase {
     }
 
     func testSingleMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
         XCTAssert( extractor.intervalBytes == 0 )
         let input = createMetadataBlock(with: "StreamTitle=hallo")
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 0)
         XCTAssertEqual(consumer.titles.count, 1)
@@ -84,12 +84,12 @@ class MetadataExtractorTests: XCTestCase {
     }
     
     func testSingle16BytesMetadataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
         XCTAssert( extractor.intervalBytes == 0 )
         let input = createMetadataBlock(with: "StreamTitle=hell")
         XCTAssertEqual( 17, input.count )
         
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 0)
         XCTAssertEqual(consumer.titles.count, 1)
@@ -103,8 +103,8 @@ class MetadataExtractorTests: XCTestCase {
         input.append(createMetadataBlock(with: "StreamTitle=re"))
         input.append(createMetadataBlock(with: "StreamTitle=mi,fa,so,la"))
 
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 0, listener: consumer)
-        extractor.portion(payload: input)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 0)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 0)
         XCTAssertEqual( consumer.titles.count, 3 )
@@ -115,14 +115,14 @@ class MetadataExtractorTests: XCTestCase {
     
     
     func testAudiodataOnly() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 5, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 5)
         
         var input:Data = Data()
         let content: [UInt8] = [1,1,1]
         input.append(contentsOf: content)
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         XCTAssertEqual(consumer.datas.count, 0)
-        extractor.flush()
+        extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 1)
         XCTAssertEqual(consumer.titles.count, 0)
@@ -131,14 +131,14 @@ class MetadataExtractorTests: XCTestCase {
     }
 
     func testAudio0MetaAudio() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 5, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 5)
         
         var input:Data = Data()
         let content: [UInt8] = [1,1,1,1,1,0,1,1,1]
         input.append(contentsOf: content)
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         XCTAssertEqual(consumer.datas.count, 1)
-        extractor.flush()
+        extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 2)
         XCTAssertEqual(consumer.titles.count, 0)
@@ -147,7 +147,7 @@ class MetadataExtractorTests: XCTestCase {
     }
 
     func testAudioMeta() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 5, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 5)
         
         var input:Data = Data()
         let content: [UInt8] = [1,1,1,1,1]
@@ -155,9 +155,9 @@ class MetadataExtractorTests: XCTestCase {
         input.append(createMetadataBlock(with: "bla"))
         XCTAssertEqual(input.count, 5+17)
         
-        extractor.portion(payload: input)
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
         XCTAssertEqual(consumer.datas.count, 1)
-        extractor.flush()
+        extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 2)
         XCTAssertEqual(consumer.titles.count, 0)
@@ -166,7 +166,7 @@ class MetadataExtractorTests: XCTestCase {
     }
     
     func testAudioMetaAudio() throws {
-        let extractor = MetadataExtractor(bytesBetweenMetadata: 5, listener: consumer)
+        let extractor = MetadataExtractor(bytesBetweenMetadata: 5)
         
         var input:Data = Data()
         let content: [UInt8] = [1,1,1,1,1]
@@ -175,8 +175,8 @@ class MetadataExtractorTests: XCTestCase {
         input.append(contentsOf: content)
         XCTAssertEqual(input.count, 2*5+17)
         
-        extractor.portion(payload: input)
-        extractor.flush()
+        extractor.dispatch(payload: input, metadataReady: consumer.metadataReady, audiodataReady: consumer.audiodataReady)
+        extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 2)
         XCTAssertEqual(consumer.titles.count, 0)

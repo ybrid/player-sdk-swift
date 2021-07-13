@@ -164,7 +164,9 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         Logger.loading.debug("didReceive response for task \(dataTask.taskIdentifier)")
         if let started = sessionStarted {
-            pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
+            DispatchQueue.global().async {
+                self.pipeline.playerListener?.durationConnected(Date().timeIntervalSince(started))
+            }
         }
         completionHandler(Foundation.URLSession.ResponseDisposition.allow)
         

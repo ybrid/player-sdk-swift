@@ -34,12 +34,10 @@ class MetadataExtractor {
     private var nextMetadataAt:Int
     private var metadata:PayloadCollector? // = PayloadCollector("metadata")
     private var lastMetadataHash: Data?
-    weak var listener: MetadataListener?
     
-    init(bytesBetweenMetadata:Int, listener: MetadataListener) {
+    init(bytesBetweenMetadata:Int) {
         self.intervalBytes = bytesBetweenMetadata
         self.nextMetadataAt = bytesBetweenMetadata
-        self.listener = listener
     }
     
     deinit {
@@ -85,7 +83,8 @@ class MetadataExtractor {
         }
     }
 
-    func portion(payload: Data) {
+    
+    func dispatch(payload: Data, metadataReady: (AbstractMetadata) -> (), audiodataReady: (Data) -> () ) {
         
         var index:Int = 0
         iteratePayload: repeat {
@@ -104,7 +103,7 @@ class MetadataExtractor {
                 // audio until metadata
                 if index < nextMetadataAt {
                     index += audio.appendCount(of: payload, index: index, count: nextMetadataAt - index)
-                    listener?.audiodataReady(audio.data)
+                    audiodataReady(audio.data)
                     audio = PayloadCollector("audio")
                     continue iteratePayload
                 }
@@ -142,7 +141,9 @@ class MetadataExtractor {
             // metadata until audio
             index += metadata.appendCount(of: payload, index: index, count: outstanding)
             nextMetadataAt = index + intervalBytes
-            extracted(metadata)
+            if let icyMetadata = createMetadata(metadata) {
+                metadataReady(icyMetadata)
+            }
             self.metadata = nil
 
         } while (index <= payload.count)
@@ -152,30 +153,30 @@ class MetadataExtractor {
         }
     }
     
+    
     func reset() {
         if Logger.verbose { Logger.loading.debug("resetting icy metadata hash") }
         lastMetadataHash = nil
     }
     
-    func flush() {
+    func flush(_ audiodataReady:(Data) -> ()) {
         Logger.loading.debug("flushing audio playload with \(audio.data.description)")
-        listener?.audiodataReady(audio.data)
+        audiodataReady(audio.data)
         audio = PayloadCollector("audio")
     }
     
-    fileprivate func extracted(_ metadata:PayloadCollector) {
+    fileprivate func createMetadata(_ metadata:PayloadCollector) -> IcyMetadata? {
         if Logger.verbose { Logger.loading.debug("extracted icy metadata \(metadata.data.description)") }
         let hashed = hash(data: metadata.data)
         guard hashed != lastMetadataHash else {
-            return
+            return nil
         }
         lastMetadataHash = hashed
         let flatMd = String(decoding: metadata.data, as: UTF8.self)
         Logger.loading.debug("changed icy metadata string is \(flatMd)")
         let metaDict = parseMetadata(mdString: flatMd)
         if Logger.verbose { Logger.decoding.debug("extracted icy metadata is \(metaDict)") }
-        let icyMetadata = IcyMetadata(icyData: metaDict)
-        listener?.metadataReady(icyMetadata)
+        return IcyMetadata(icyData: metaDict)
     }
     
     fileprivate func hash(data : Data) -> Data {

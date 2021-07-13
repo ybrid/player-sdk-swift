@@ -32,7 +32,6 @@ protocol PipelineListener: class {
 
 protocol MetadataListener: class {
     func metadataReady(_ metadata: AbstractMetadata)
-    func audiodataReady(_ data:Data)
 }
 
 class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
@@ -108,7 +107,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     // MARK: setup pipeline
     
     func prepareMetadata(metadataInverallB: Int) {
-        self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB, listener: self)
+        self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB)
     }
         
     func prepareAudio(audioContentType: AudioFileTypeID) throws {
@@ -142,22 +141,25 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func process(data: Data) {
 
         if let mdExtractor = metadataExtractor {
-            mdExtractor.portion(payload: data)
+            mdExtractor.dispatch(payload: data, metadataReady: metadataReady, audiodataReady: audiodataReady)
             return
         }
         
         audiodataReady(data)
     }
+
     
     func flushAudio() {
         Logger.decoding.debug()
         if let mdExtractor = metadataExtractor {
-            mdExtractor.flush()
+            mdExtractor.flush(audiodataReady)
         }
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
     }
+    
+    
 
     func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
         changeOver = audioComplete
