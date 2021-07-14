@@ -160,23 +160,11 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 if let metadata = self.session.fetchMetadataSync() {
                     ybridListener.metadataChanged(metadata)
                 }
-                ybridListener.servicesChanged(self.services)
-                ybridListener.swapsChanged(self.swapsLeft)
+                ybridListener.servicesChanged(self.session.services ?? [])
+                ybridListener.swapsChanged(self.session.swaps ?? -1)
             }
         }
     }
-    
-    private var offsetToLiveS: TimeInterval { get {
-        return session.offsetToLiveS ?? 0.0
-    }}
-
-    private var swapsLeft: Int { get {
-        return session.swapsLeft ?? -1
-    }}
-
-    private var services: [Service] { get {
-        return session.services ?? []
-    }}
     
     func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
@@ -234,12 +222,19 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     class ChangeOver {
         var audioComplete: AudioCompleteCallback?
         let player:AudioPlayer
-        init(_ audioComplete: AudioCompleteCallback?, player:AudioPlayer) {
+        init(_ audioComplete: AudioCompleteCallback?, player:YbridAudioPlayer) {
             if let completeCallback = audioComplete {
             self.audioComplete = { (changed) in
                 DispatchQueue.global().async {
                     Logger.playing.debug("calling audio complete (didChange:\(changed))")
                     completeCallback(changed)
+                    
+//                    if let mediaCtrl = player.session.mediaControl, mediaCtrl.hasChanged(SubInfo.playout) == true {
+//                        if let ybridListener = player.playerListener as? YbridControlListener {
+//                            mediaCtrl.clearChanged(SubInfo.playout)
+//                            ybridListener.offsetToLiveChanged(player.session.offset)
+//                        }
+//                    }
                 }
             }}
             self.player = player

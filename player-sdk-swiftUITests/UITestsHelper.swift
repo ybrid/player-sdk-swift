@@ -254,8 +254,9 @@ class TestYbridControl {
         let semaphore = DispatchSemaphore(value: 0)
         do {
             try AudioPlayer.open(for: endpoint, listener: listener,
-                 playbackControl: { (ctrl) in semaphore.signal()
-                    XCTFail(); return },
+                 playbackControl: { (ctrl) in ctrl.close()
+                    XCTFail();
+                    semaphore.signal(); return },
                  ybridControl: { [self] (ybridControl) in
                     
                     ybridControl.play()

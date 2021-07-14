@@ -29,8 +29,16 @@ protocol MediaControl {
     var playbackUri: String { get }
     var connected: Bool { get }
     var mediaProtocol: MediaProtocol { get }
-//    func hasChanged(_ what: SubInfo) -> Bool
+    func hasChanged(_ what: SubInfo) -> Bool
 //    func clearChanged(_ what: SubInfo)
+}
+
+enum SubInfo {
+    case metadata
+    case bouquet
+    case playout
+//    case CAPABILITIES
+//    case VALIDITY
 }
 
 class MediaDriver : MediaControl {
@@ -46,18 +54,40 @@ class MediaDriver : MediaControl {
     
     var bouquet:Bouquet? { didSet {
         if let services = bouquet?.services, services != oldValue?.services {
+            changed.insert(SubInfo.bouquet)
             DispatchQueue.global().async {
                 self.listener?.servicesChanged(services)
+                self.changed.remove(SubInfo.bouquet)
             }
         }
-//        changed.insert(SubInfo.bouquet)
     }}
     
-//    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
-//    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
+    var metadata:AbstractMetadata? { didSet {
+        changed.insert(SubInfo.metadata)
+    }}
     
+    var swaps:Int? { didSet {
+        if let swaps = swaps {
+            DispatchQueue.global().async {
+                self.listener?.swapsChanged(swaps)
+            }
+        }
+    }}
     
-    weak var listener:YbridControlListener?
+    var offset:TimeInterval? { didSet {
+        if oldValue != offset {
+            changed.insert(SubInfo.playout)
+            DispatchQueue.global().async {
+                self.listener?.offsetToLiveChanged(self.offset)
+                self.changed.remove(SubInfo.playout)
+            }
+        }
+    }}
+    
+    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
+    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
+    
+    private weak var listener:YbridControlListener?
     
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
@@ -72,12 +102,12 @@ class MediaDriver : MediaControl {
     //    var playoutInfo: PlayoutInfo { get }
     //    var capabilities: CapabilitySet { get }
     
-//    func clearChanged(_ what: SubInfo) {
-//        changed.remove(what)
-//    }
-//    func hasChanged(_ what: SubInfo) -> Bool {
-//        return changed.contains(what)
-//    }
+    func clearChanged(_ what: SubInfo) {
+        changed.remove(what)
+    }
+    func hasChanged(_ what: SubInfo) -> Bool {
+        return changed.contains(what)
+    }
     
     //    func getBouquet() -> Bouquet
     //    @NotNull Service getCurrentService();

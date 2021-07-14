@@ -29,14 +29,6 @@
 
 import Foundation
 
-public enum SubInfo {
-    case metadata
-    case bouquet
-//    case PLAYOUT
-//    case CAPABILITIES
-//    case VALIDITY
-}
-
 public protocol Metadata {
     // fixed syntax containing TITLE and if available ARTIST
     // ALBUM (and version) if available in vorbis comments

@@ -47,27 +47,22 @@ public class MediaSession  {
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
         DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
     )
-     
-    private var v2Driver:YbridV2Driver? { get {
-        return mediaControl as? YbridV2Driver
-    }}
     
-    var swapsLeft: Int? { get {
-        return v2Driver?.swapsLeft
+    var swaps: Int? { get {
+        return mediaControl?.swaps
     }}
     var services: [Service]? { get {
         return mediaControl?.bouquet?.services
     }}
-    var offsetToLiveS: TimeInterval? { get {
-        return v2Driver?.offsetToLiveS
+    var offset: TimeInterval? { get {
+        return mediaControl?.offset
     }}
     var metadata: AbstractMetadata? { get {
-        if let ybridData = v2Driver?.ybridMetadata {
-            let metadata = YbridMetadata(ybridV2: ybridData)
-            metadata.currentService = mediaControl?.bouquet?.activeService
-            return metadata
-        }
-        return nil
+        return mediaControl?.metadata
+    }}
+    
+    private var v2Driver:YbridV2Driver? { get {
+       return mediaControl as? YbridV2Driver
     }}
     
     init(on endpoint:MediaEndpoint) {
@@ -96,7 +91,8 @@ public class MediaSession  {
             } else {
                 media.info()
             }
-            return metadata
+            mediaControl?.clearChanged(SubInfo.metadata)
+            return mediaControl?.metadata
         }
         return nil
     }

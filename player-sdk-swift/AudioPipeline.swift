@@ -257,7 +257,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
 //        }
         
         let canTriggerAudioComplete = (metadata as? IcyMetadata)?.streamUrl != nil
-        Logger.loading.notice("\(canTriggerAudioComplete ?"could":"can't") trigger audio complete")
+        Logger.loading.debug("\(canTriggerAudioComplete ?"could":"can't") trigger audio complete")
         
         if canTriggerAudioComplete, let changeOverCallback = changeOver {
             changeOver = nil

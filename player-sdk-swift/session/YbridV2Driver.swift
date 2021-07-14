@@ -36,15 +36,13 @@ class YbridV2Driver : MediaDriver {
         }
     }}
     
-    var offsetToLiveS:TimeInterval? { didSet {
+    private var offsetToLiveS:TimeInterval? { didSet {
         if oldValue != offsetToLiveS {
-            DispatchQueue.global().async {
-                super.listener?.offsetToLiveChanged(self.offsetToLiveS)
-            }
+            super.offset = offsetToLiveS
         }
     }}
     
-    var ybridBouquet:YbridBouquet? { didSet {
+    private var ybridBouquet:YbridBouquet? { didSet {
         if let ybridBouquet = ybridBouquet, ybridBouquet != oldValue {
             do {
                 if Logger.verbose == true {
@@ -59,7 +57,7 @@ class YbridV2Driver : MediaDriver {
         }
     }}
     
-    var ybridMetadata:YbridV2Metadata? { didSet {
+    private var ybridMetadata:YbridV2Metadata? { didSet {
         if let data = ybridMetadata, oldValue != ybridMetadata {
             if Logger.verbose == true {
                 do {
@@ -70,14 +68,15 @@ class YbridV2Driver : MediaDriver {
                     Logger.session.error("cannot log metadata")
                 }
             }
+            let ybridMD = YbridMetadata(ybridV2: data)
+            ybridMD.currentService = super.bouquet?.activeService
+            super.metadata = ybridMD
         }
     }}
     
-    var swapsLeft:Int? { didSet {
+    private var swapsLeft:Int? { didSet {
         if let swaps = swapsLeft, swaps != oldValue {
-            DispatchQueue.global().async {
-                super.listener?.swapsChanged(swaps)
-            }
+            super.swaps = swaps
         }
     }}
     
