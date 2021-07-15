@@ -70,9 +70,24 @@ public class MediaSession  {
     }
     
     func connect() throws {
-        let mediaControl = try factory.create(self)
-        self.mediaControl = mediaControl
-        try mediaControl.connect()
+        do {
+            let mediaControl = try factory.create(self)
+            self.mediaControl = mediaControl
+            try mediaControl.connect()
+        } catch {
+            if let playerError = error as? AudioPlayerError {
+                DispatchQueue.global().async {
+                    self.playerListener?.error(.fatal, playerError)
+                }
+                throw error
+            } else {
+                let playerError = SessionError(.unknown, "cannot connect to endpoint \(endpoint)", error)
+                DispatchQueue.global().async {
+                    self.playerListener?.error(.fatal, playerError)
+                }
+                throw playerError
+            }
+        }
     }
     func close() {
         self.mediaControl?.disconnect()

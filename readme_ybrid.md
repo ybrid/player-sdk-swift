@@ -65,9 +65,9 @@ public protocol YbridControl : PlaybackControl {
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh() 
 }
-public typealias AudioCompleteCallback = ((_ didChange:Bool) -> ())
+public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 ```
-If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks on an action are called when the requested changeover is fullfilled. If ```didChange == false``` the action won't change anything. Use these callbacks to express the change in the user interface.
+If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks on an action are called when the requested changeover is fullfilled. If ```success == false``` the action won't change anything. Use these callbacks to express the change in the user interface.
 
 Implement YbridControlListener and pass it via the listener parameter of `AudioPlayer.open`. You will receive the following notifications on startup and when the value changes
 

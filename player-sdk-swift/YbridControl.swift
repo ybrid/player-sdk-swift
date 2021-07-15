@@ -60,7 +60,7 @@ public protocol YbridControl : PlaybackControl {
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
 }
-public typealias AudioCompleteCallback = ((_ didChange:Bool) -> ())
+public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 
 public extension YbridControl {
     /// allow actions without default or audioComplete parameters
@@ -105,22 +105,7 @@ public extension AudioPlayer {
         
         let session = MediaSession(on: endpoint)
         session.playerListener = listener
-        do {
-            try session.connect()
-        } catch {
-            if let audioDataError = error as? AudioPlayerError {
-                DispatchQueue.global().async {
-                    listener?.error(ErrorSeverity.fatal, audioDataError)
-                }
-                throw audioDataError
-            } else {
-                let sessionError = SessionError(ErrorKind.unknown, "cannot connect to endpoint", error)
-                DispatchQueue.global().async {
-                    listener?.error(ErrorSeverity.fatal, sessionError )
-                }
-                throw sessionError
-            }
-        }
+        try session.connect()
         
         controllerQueue.async {
             switch session.mediaProtocol {

@@ -186,8 +186,8 @@ class YbridSwapItemTests: XCTestCase {
     func swapItem( _ ybrid:YbridControl, maxWait:TimeInterval? = nil) -> (Trace) {
         let mySema = DispatchSemaphore(value: 0)
         let trace = Trace("swap item")
-        ybrid.swapItem() { (changed) in
-            self.actionComplete(changed, trace)
+        ybrid.swapItem() { (success) in
+            self.actionComplete(success, trace)
             mySema.signal()
         }
         if let maxWait = maxWait {
@@ -198,9 +198,9 @@ class YbridSwapItemTests: XCTestCase {
         return trace
     }
     
-    private func actionComplete(_ changed:Bool,_ trace:Trace) {
-       trace.complete(changed)
-       Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+    private func actionComplete(_ success:Bool,_ trace:Trace) {
+       trace.complete(success)
+       Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
        sleep(3)
    }
 

@@ -139,6 +139,8 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     // listener - object to be called back from the player process
     init(session: MediaSession, listener: AudioPlayerListener?) {
         self.playerListener = listener
+        session.playerListener = listener
+        
         self.session = session
         PlayerContext.setupAudioSession()
     }

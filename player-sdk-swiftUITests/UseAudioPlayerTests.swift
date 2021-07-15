@@ -148,7 +148,7 @@ class UseAudioPlayerTests: XCTestCase {
             XCTAssertTrue(error is SessionError, "AudioPlayerError of type SessionError expected. There is a problem establishing a session with the endpoint")
         }
         
-        /// AudioPlayerListener.error(...) recieves errors as well, asynchroinously
+        /// AudioPlayerListener.error(...) recieves errors as well, asynchronously
         sleep(1)
         XCTAssertEqual(playerListener.errors.count, 1)
         guard let lastError = playerListener.errors.last else {
@@ -307,8 +307,8 @@ class UseAudioPlayerTests: XCTestCase {
                
                 control.play()
                 sleep(2)
-                control.skipBackward(ItemType.NEWS) { (didChange) in
-                    print("Now You listen to news. That's \(didChange).")
+                control.skipBackward(ItemType.NEWS) { (success) in
+                    print("Now You listen to news. That's \(success).")
                 }
                 sleep(10) /// listen to the news
                 

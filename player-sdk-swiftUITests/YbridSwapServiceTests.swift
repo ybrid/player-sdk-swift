@@ -100,8 +100,8 @@ class YbridSwapServiceTests: XCTestCase {
                ybridControl: { [self] (ybridControl) in
 
                 var carriedOut = false
-                ybridControl.swapService(to: "ad-injection-demo") { (changed) in
-                    carriedOut = changed
+                ybridControl.swapService(to: "ad-injection-demo") { (success) in
+                    carriedOut = success
                 }
                 _ = poller.wait(max: 1) {
                     carriedOut == true
@@ -183,8 +183,8 @@ class YbridSwapServiceTests: XCTestCase {
                 poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
                 
                 var carriedOut = false
-                ybridControl.swapService(to: "ad-injection-demo") { (changed) in
-                    carriedOut = changed
+                ybridControl.swapService(to: "ad-injection-demo") { (success) in
+                    carriedOut = success
                 }
                 _ = poller.wait(max: 1) {
                     carriedOut == true
@@ -305,8 +305,8 @@ class YbridSwapServiceTests: XCTestCase {
     private func swapService(to serviceId:String, _ ybrid:YbridControl, maxWait:TimeInterval? = nil) -> (Trace) {
         let mySema = DispatchSemaphore(value: 0)
         let trace = Trace("swap to \(serviceId)")
-        ybrid.swapService(to: serviceId) { (changed) in
-            self.actionComplete(changed, trace)
+        ybrid.swapService(to: serviceId) { (success) in
+            self.actionComplete(success, trace)
             mySema.signal()
         }
         if let maxWait = maxWait {
@@ -317,9 +317,9 @@ class YbridSwapServiceTests: XCTestCase {
         return trace
     }
     
-    private func actionComplete(_ changed:Bool,_ trace:Trace) {
-       trace.complete(changed)
-       Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+    private func actionComplete(_ success:Bool,_ trace:Trace) {
+       trace.complete(success)
+       Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
        sleep(3)
    }
     
@@ -330,9 +330,9 @@ class YbridSwapServiceTests: XCTestCase {
             let actionSemaphore = DispatchSemaphore(value: 0)
             
             let trace = actions.newTrace("swap to \(serviceId)")
-            ybridControl.swapService(to: serviceId) { (changed) in
-                trace.complete(changed)
-                Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+            ybridControl.swapService(to: serviceId) { (success) in
+                trace.complete(success)
+                Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
                 sleep(6)
                 
                 actionSemaphore.signal()
@@ -354,15 +354,15 @@ class YbridSwapServiceTests: XCTestCase {
            let actionSemaphore = DispatchSemaphore(value: 0)
            
             var trace = actions.newTrace("swap to \(serviceId1)")
-            ybridControl.swapService(to: serviceId1) { (changed) in
-                trace.complete(changed)
-                Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+            ybridControl.swapService(to: serviceId1) { (success) in
+                trace.complete(success)
+                Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
                 sleep(2)
                 
                 trace = actions.newTrace("swap to \(serviceId2)")
-                    ybridControl.swapService(to: serviceId2) { (changed) in
-                        trace.complete(changed)
-                        Logger.testing.notice( "***** audio complete ***** did \(changed ? "":"not ")\(trace.name)")
+                    ybridControl.swapService(to: serviceId2) { (success) in
+                        trace.complete(success)
+                        Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
                         sleep(2)
          
                         actionSemaphore.signal()
