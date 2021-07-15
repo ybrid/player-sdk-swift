@@ -70,6 +70,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.session = session
         PlayerContext.registerMemoryListener(listener: self)
         
+        session.refresh()
         session.notifyMetadata()
     }
     
@@ -97,9 +98,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         firstPCM = true
         firstMetadata = true
         resumed = true
-        metadataQueue.async {
-            self.session.refresh()
-        }
+        
+        session.refresh()
     }
     
     // MARK: setup pipeline

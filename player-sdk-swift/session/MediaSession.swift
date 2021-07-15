@@ -94,9 +94,7 @@ public class MediaSession  {
     }
     
     func refresh() {
-        if let media = v2Driver {
-            media.info()
-        }
+        v2Driver?.info()
     }
     
     func notifyMetadata() {
