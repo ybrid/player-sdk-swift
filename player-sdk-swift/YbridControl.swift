@@ -206,20 +206,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    private func notifyOffset(complete:Bool = true) {
-        guard let mediaCtrl = session.mediaControl,
-              let ybridListener = playerListener as? YbridControlListener else {
-            return
-        }
-        if mediaCtrl.hasChanged(SubInfo.playout) == true {
-            if complete { mediaCtrl.clearChanged(SubInfo.playout) }
-            DispatchQueue.global().async {
-                ybridListener.offsetToLiveChanged(mediaCtrl.offset)
-            }
-        }
-    }
-
-    
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, timeshift:Bool = true ) -> ChangeOver {
         if timeshift {
             let wrappedComplete:AudioCompleteCallback = { (success) in
@@ -227,10 +213,10 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
                 }
-                self.notifyOffset(complete:true)
+                self.session.notifyOffset(complete:true)
             }
             return ChangeOver(player: self,
-                              ctrlComplete: { self.notifyOffset(complete:false) },
+                              ctrlComplete: { self.session.notifyOffset(complete:false) },
                               audioComplete: wrappedComplete )
         } else {
             let wrappedComplete:AudioCompleteCallback = { (success) in

@@ -143,6 +143,17 @@ public class MediaSession  {
         return metadataIn
     }
     
+    func notifyOffset(complete:Bool) {
+        if mediaControl?.hasChanged(SubInfo.playout) == true,
+           let ybridListener = self.playerListener as? YbridControlListener {
+            DispatchQueue.global().async {
+                ybridListener.offsetToLiveChanged(self.offset)
+                if complete { self.mediaControl?.clearChanged(SubInfo.playout) }
+            }
+        }
+    }
+    
+    
     func wind(by:TimeInterval) -> Bool {
         return v2Driver?.wind(by: by) ?? false
     }
