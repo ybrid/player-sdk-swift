@@ -51,7 +51,7 @@ class YbridTimeshiftTests: XCTestCase {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
                ybridControl: { [self] (ybridControl) in
 
-//                usleep(200_000)
+                usleep(10_000)
 
                 semaphore?.signal()
                })

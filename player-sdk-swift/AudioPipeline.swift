@@ -70,9 +70,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.session = session
         PlayerContext.registerMemoryListener(listener: self)
         
-        if let metadata = session.metadata {
-            self.notifyMetadataChanged(metadata)
-        }
+        session.notifyMetadata()
     }
     
     deinit {
@@ -159,8 +157,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
     }
     
-    
-
     func changingOver(_ audioComplete:@escaping AudioCompleteCallback) {
         changeOver = audioComplete
         metadataExtractor?.reset()
@@ -179,9 +175,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     self.pipelineListener.ready(playback: engine)
                     
                     buffer?.onMetadataCue = { (metaCueId) in
-                        if let metadata = self.session.popMetadata(uuid: metaCueId) {
-                            self.notifyMetadataChanged(metadata)
-                        }
+                        self.session.notifyMetadata(uuid: metaCueId)
                     }
 
                 }
@@ -232,6 +226,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
 
     
     func metadataReady(_ metadata: AbstractMetadata) {
+        guard !self.stopping else {
+            Logger.decoding.debug("stopping pipeline, ignoring metadata")
+            return
+        }
         
         Logger.loading.debug("metadata \(metadata.displayTitle ?? "(no title)")")
 
@@ -245,11 +243,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
 //        metadataQueue.async { [self] in
         if firstMetadata {
             firstMetadata = false
-            if let newMetadata = session.fetchMetadataSync(metadataIn: metadata) {
-                notifyMetadataChanged(newMetadata)
-            } else {
-                notifyMetadataChanged(metadata)
-            }
+            session.notifyMetadataSync(metadata)
         } else {
             let metadataUuid = session.maintainMetadata(metadataIn: metadata)
             buffer?.put(cuePoint: metadataUuid)
@@ -267,8 +261,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                 changeOverCallback(true)
             }
         }
-        
-
     }
     
     // MARK: processing steps
@@ -309,19 +301,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
     }
     
-    fileprivate func notifyMetadataChanged(_ metadata:Metadata) {
-        guard !self.stopping else {
-            Logger.decoding.debug("stopping pipeline, ignoring metadata")
-            return
-        }
-        guard let _ = metadata.displayTitle else {
-            Logger.decoding.notice("no metadata to notifiy")
-            return
-        }
-        DispatchQueue.global().async {
-            self.playerListener?.metadataChanged(metadata)
-        }
-    }
     
     ///  delegate for visibility
     static func describeFormat(_ format: AVAudioFormat) -> String {

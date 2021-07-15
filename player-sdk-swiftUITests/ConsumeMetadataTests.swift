@@ -56,7 +56,10 @@ class ConsumeMetadataTests: XCTestCase {
         }
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        let metadata = consumer.metadatas[0]
+        guard let metadata = consumer.metadatas.first else {
+            XCTFail("metadatas[0] expected")
+            return
+        }
         guard let current = metadata.current else { XCTFail("current expected"); return }
         XCTAssertTrue(checkIsDemoItem(current))
         
@@ -148,10 +151,13 @@ class ConsumeMetadataTests: XCTestCase {
         currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
             XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
         }
+        guard let firstMetadata = consumer.metadatas.first else {
+            XCTFail("expected metadatas.first")
+            return
+        }
+        XCTAssertNil(firstMetadata.next, "icy usually doesn't include next item")
         
-        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
-        
-        guard let station = consumer.metadatas[0].station else {
+        guard let station = firstMetadata.station else {
             XCTFail("icy usually uses http-header 'icy-name'"); return
         }
         XCTAssertEqual("hr2", station.name)

@@ -77,10 +77,6 @@ class MediaDriver : MediaControl {
     var offset:TimeInterval? { didSet {
         if oldValue != offset {
             changed.insert(SubInfo.playout)
-            DispatchQueue.global().async {
-                self.listener?.offsetToLiveChanged(self.offset)
-                self.changed.remove(SubInfo.playout)
-            }
         }
     }}
     
@@ -94,7 +90,7 @@ class MediaDriver : MediaControl {
         self.playbackUri = session.endpoint.uri
         self.endpointUri = URL(string: session.endpoint.uri)!
         self.baseUrl = endpointUri
-        self.listener = session.ybridListener
+        self.listener = session.playerListener as? YbridControlListener
     }
     
     func connect() throws {}

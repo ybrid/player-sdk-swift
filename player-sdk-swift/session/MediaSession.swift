@@ -34,7 +34,7 @@ public class MediaSession  {
     let factory = MediaControlFactory()
     var mediaControl:MediaDriver?
      
-    weak var ybridListener:YbridControlListener?
+    weak var playerListener:AudioPlayerListener?
     
     public var mediaProtocol:MediaProtocol? { get {
         return mediaControl?.mediaProtocol
@@ -84,26 +84,48 @@ public class MediaSession  {
         }
     }
     
-    func fetchMetadataSync(metadataIn: AbstractMetadata? = nil) -> AbstractMetadata? {
+    func notifyMetadata() {
+        if let metadata = metadata {
+            DispatchQueue.global().async {
+                self.playerListener?.metadataChanged(metadata)
+            }
+        }
+    }
+    
+    func notifyMetadataSync(_ metadataIn:AbstractMetadata) {
+        let metadataOut = fetchMetadataSync(metadataIn: metadataIn)
+        DispatchQueue.global().async {
+            self.playerListener?.metadataChanged(metadataOut)
+            self.mediaControl?.clearChanged(SubInfo.metadata)
+        }
+    }
+    
+    func maintainMetadata(metadataIn: AbstractMetadata) -> UUID {
+        let metadataOut = fetchMetadataSync(metadataIn: metadataIn)
+        self.mediaControl?.clearChanged(SubInfo.metadata)
+        let uuid = UUID()
+        metadataDict.put(id: uuid, value: metadataOut)
+        return uuid
+    }
+
+    func notifyMetadata(uuid:UUID) {
+        if let metadata = metadataDict.pop(id:uuid) {
+            DispatchQueue.global().async {
+                self.playerListener?.metadataChanged(metadata)
+            }
+        }
+    }
+    
+    private func fetchMetadataSync(metadataIn: AbstractMetadata) -> AbstractMetadata {
         if let media = v2Driver {
             if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
                 media.showMeta(streamUrl)
             } else {
                 media.info()
             }
-            mediaControl?.clearChanged(SubInfo.metadata)
-            return mediaControl?.metadata
+            return mediaControl?.metadata ?? metadataIn
         }
-        return nil
-    }
-    func maintainMetadata(metadataIn: AbstractMetadata) -> UUID {
-        let metadataOut = fetchMetadataSync(metadataIn: metadataIn)
-        let uuid = UUID()
-        metadataDict.put(id: uuid, value: metadataOut ?? metadataIn)
-        return uuid
-    }
-    func popMetadata(uuid:UUID) -> AbstractMetadata? {
-        return metadataDict.pop(id:uuid)
+        return metadataIn
     }
     
     func wind(by:TimeInterval) -> Bool {

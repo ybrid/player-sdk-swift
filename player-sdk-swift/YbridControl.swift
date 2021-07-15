@@ -104,7 +104,7 @@ public extension AudioPlayer {
               ybridControl: YbridControlCallback? = nil ) throws {
         
         let session = MediaSession(on: endpoint)
-        session.ybridListener = listener as? YbridControlListener
+        session.playerListener = listener
         do {
             try session.connect()
         } catch {
@@ -152,51 +152,58 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
 
     override init(session:MediaSession, listener:AudioPlayerListener?) {
         super.init(session: session, listener: listener)
+        if let ybridListener = session.playerListener as? YbridControlListener {
+            DispatchQueue.global().async {
+                ybridListener.offsetToLiveChanged(session.offset)
+            }
+        }
     }
 
     func refresh() {
-        if let ybridListener = super.playerListener as? YbridControlListener {
-            DispatchQueue.global().async {
-                if let metadata = self.session.fetchMetadataSync() {
-                    ybridListener.metadataChanged(metadata)
-                }
+        DispatchQueue.global().async {
+            if let metadata = self.session.metadata {
+                super.playerListener?.metadataChanged(metadata)
+            }
+            if let ybridListener = super.playerListener as? YbridControlListener {
+                ybridListener.offsetToLiveChanged(self.session.offset)
                 ybridListener.servicesChanged(self.session.services ?? [])
                 ybridListener.swapsChanged(self.session.swaps ?? -1)
             }
         }
     }
     
+    
     func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete)
+            let changeover = self.newChangeOver(audioComplete, timeshift:true)
             changeover.inProgress(self.session.wind(by:by))
         }
     }
     
     func windToLive( _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete)
+            let changeover = self.newChangeOver(audioComplete, timeshift:true)
             changeover.inProgress(self.session.windToLive())
         }
     }
     
     func wind(to:Date, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete)
+            let changeover = self.newChangeOver(audioComplete, timeshift:true)
             changeover.inProgress(self.session.wind(to:to))
         }
     }
 
     func skipForward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete)
+            let changeover = self.newChangeOver(audioComplete, timeshift:true)
             changeover.inProgress(self.session.skipForward(type))
         }
     }
 
     func skipBackward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete)
+            let changeover = self.newChangeOver(audioComplete, timeshift:true)
             changeover.inProgress(self.session.skipBackward(type))
         }
     }
@@ -214,30 +221,54 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    private func newChangeOver(_ audioComplete: AudioCompleteCallback?) -> ChangeOver {
-        return ChangeOver(audioComplete, player: self)
+    private func notifyOffset(complete:Bool = true) {
+        guard let mediaCtrl = session.mediaControl,
+              let ybridListener = playerListener as? YbridControlListener else {
+            return
+        }
+        if mediaCtrl.hasChanged(SubInfo.playout) == true {
+            if complete { mediaCtrl.clearChanged(SubInfo.playout) }
+            DispatchQueue.global().async {
+                ybridListener.offsetToLiveChanged(mediaCtrl.offset)
+            }
+        }
+    }
+
+    
+    private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, timeshift:Bool = true ) -> ChangeOver {
+        if timeshift {
+            let wrappedComplete:AudioCompleteCallback = { (success) in
+                Logger.playing.debug("calling audio complete (success:\(success))")
+                DispatchQueue.global().async {
+                    userAudioComplete?(success)
+                }
+                self.notifyOffset(complete:true)
+            }
+            return ChangeOver(player: self,
+                              ctrlComplete: { self.notifyOffset(complete:false) },
+                              audioComplete: wrappedComplete )
+        } else {
+            let wrappedComplete:AudioCompleteCallback = { (success) in
+                Logger.playing.debug("calling audio complete (success:\(success))")
+                DispatchQueue.global().async {
+                    userAudioComplete?(success)
+                }
+            }
+            return ChangeOver(player: self, audioComplete: wrappedComplete)
+        }
     }
     
     
     class ChangeOver {
-        var audioComplete: AudioCompleteCallback?
+        
         let player:AudioPlayer
-        init(_ audioComplete: AudioCompleteCallback?, player:YbridAudioPlayer) {
-            if let completeCallback = audioComplete {
-            self.audioComplete = { (changed) in
-                DispatchQueue.global().async {
-                    Logger.playing.debug("calling audio complete (didChange:\(changed))")
-                    completeCallback(changed)
-                    
-//                    if let mediaCtrl = player.session.mediaControl, mediaCtrl.hasChanged(SubInfo.playout) == true {
-//                        if let ybridListener = player.playerListener as? YbridControlListener {
-//                            mediaCtrl.clearChanged(SubInfo.playout)
-//                            ybridListener.offsetToLiveChanged(player.session.offset)
-//                        }
-//                    }
-                }
-            }}
+        var ctrlComplete: (() -> ())?
+        var audioComplete: AudioCompleteCallback?
+        
+        init(player:YbridAudioPlayer, ctrlComplete: (()->())? = nil, audioComplete: AudioCompleteCallback? ) {
             self.player = player
+            self.ctrlComplete = ctrlComplete
+            self.audioComplete = audioComplete
         }
         
         func inProgress(_ inProgress:Bool) {
@@ -251,12 +282,14 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
             
             if player.state == .buffering || player.state == .playing {
+                ctrlComplete?()
                 player.pipeline?.changingOver( audioComplete )
             } else {
                 audioComplete(true)
             }
         }
     }
+
 }
 
 
