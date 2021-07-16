@@ -155,9 +155,6 @@ class YbridV2Driver : MediaDriver {
             }
 //            Logger.session.debug("show-meta is \(showMetaObj)")
             accecpt(showMeta: showMetaObj)
-            if !valid {
-                try reconnect()
-            }
         } catch {
             Logger.session.error(error.localizedDescription)
         }

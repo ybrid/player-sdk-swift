@@ -142,11 +142,11 @@ public class MediaSession  {
     }
     
     func notifyOffset(complete:Bool) {
-        if mediaControl?.hasChanged(SubInfo.playout) == true,
+        if mediaControl?.hasChanged(SubInfo.timeshift) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.offsetToLiveChanged(self.offset)
-                if complete { self.mediaControl?.clearChanged(SubInfo.playout) }
+                if complete { self.mediaControl?.clearChanged(SubInfo.timeshift) }
             }
         }
     }

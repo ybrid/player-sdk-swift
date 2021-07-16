@@ -30,8 +30,7 @@
 import Foundation
 
 public protocol Metadata {
-    // fixed syntax containing TITLE and if available ARTIST
-    // ALBUM (and version) if available in vorbis comments
+
     var displayTitle: String? { get }
     
     var station: Station? { get }

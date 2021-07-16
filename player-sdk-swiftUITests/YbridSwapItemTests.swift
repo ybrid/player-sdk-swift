@@ -137,8 +137,8 @@ class YbridSwapItemTests: XCTestCase {
                     Logger.testing.info("\(swaps) swaps are left")
                     
                     var carriedOut = false
-                    ybridControl.swapItem { (audioChanged) in
-                        carriedOut = audioChanged
+                    ybridControl.swapItem { (success) in
+                        carriedOut = success
                     }
                     _ = poller.wait(max: 10) {
                         carriedOut == true

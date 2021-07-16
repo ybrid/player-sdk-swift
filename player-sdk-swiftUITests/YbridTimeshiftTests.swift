@@ -49,6 +49,7 @@ class YbridTimeshiftTests: XCTestCase {
     func test01_InitialOffsetChange() throws {
 
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
+               playbackControl: failOnPlaybackControl,
                ybridControl: { [self] (ybridControl) in
 
                 usleep(10_000)
@@ -60,9 +61,15 @@ class YbridTimeshiftTests: XCTestCase {
         XCTAssertEqual(ybridPlayerListener.offsets.count, 1)
     }
     
+    private func failOnPlaybackControl(_ control:PlaybackControl) {
+        XCTFail("YbridControl expected, but was PlaybackControl")
+        semaphore?.signal()
+    }
+    
     func test02_PlayOffsetChanges() throws {
         
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
+               playbackControl: failOnPlaybackControl,
                ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
@@ -83,7 +90,8 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test03_WindBackward120_WindForward60() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -115,7 +123,8 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test04_Wind_Cannot() throws {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -146,7 +155,8 @@ class YbridTimeshiftTests: XCTestCase {
 
     func test05_WindToLive() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -174,7 +184,8 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test06_WindToDate_BeforeFullHourAdvertisement() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
@@ -196,8 +207,8 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test07_SkipBackwardNews_SkipForwardMusic() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
-                
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
                 sleep(2)
@@ -220,7 +231,8 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test08_SkipBackwardItem_LastItemAgain() throws {
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: ybridPlayerListener,
-               ybridControl: { [self] (ybridControl) in
+             playbackControl: failOnPlaybackControl,
+             ybridControl: { [self] (ybridControl) in
                 
                 ybridControl.play()
                 wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)

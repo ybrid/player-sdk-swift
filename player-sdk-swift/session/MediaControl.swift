@@ -35,8 +35,8 @@ protocol MediaControl {
 
 enum SubInfo {
     case metadata
+    case timeshift
     case bouquet
-    case playout
 //    case CAPABILITIES
 //    case VALIDITY
 }
@@ -76,7 +76,7 @@ class MediaDriver : MediaControl {
     
     var offset:TimeInterval? { didSet {
         if oldValue != offset {
-            changed.insert(SubInfo.playout)
+            changed.insert(SubInfo.timeshift)
         }
     }}
     
