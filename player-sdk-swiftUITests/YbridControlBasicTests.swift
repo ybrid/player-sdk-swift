@@ -54,7 +54,7 @@ class YbridControlBasicTests: XCTestCase {
         }
         
         ybridControl.stopped() { (ybridControl) in
-//            usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
+            usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         
         XCTAssertEqual(listener.services.count, 1, "YbridControlListener.serviceChanged(...) should have been called once, but was \(listener.services.count)")
@@ -113,10 +113,11 @@ class YbridControlBasicTests: XCTestCase {
         
         XCTAssertEqual(2, listener.services.count, "YbridControlListener.serviceChanged(...) should have been called twice, but was \(listener.services.count)")
         
-        let expectedRange = 2...5
-        XCTAssertTrue(expectedRange.contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(expectedRange), but was \(listener.offsets.count), \(listener.offsets)")
+        let expectedOffsets = 2...4
+        XCTAssertTrue(expectedOffsets.contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(expectedOffsets), but was \(listener.offsets.count), \(listener.offsets)")
         
-        XCTAssertEqual(listener.swaps.count, 3,"YbridControlListener.swapsChanged(...) should have been called three times, but was \(listener.swaps.count)")
+        let expectedSwapCalls = 2...3
+        XCTAssertTrue(expectedSwapCalls.contains(listener.swaps.count), "YbridControlListener.swapsChanged(...) should have been called \(expectedSwapCalls) times, but was \(listener.swaps.count)")
         
         XCTAssertGreaterThanOrEqual( listener.metadatas.count, 2, "YbridControlListener.metadataChanged(...) should be called at least twice, but was \(listener.metadatas.count)")
     }

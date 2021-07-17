@@ -306,7 +306,7 @@ class YbridSwapServiceTests: XCTestCase {
         let mySema = DispatchSemaphore(value: 0)
         let trace = Trace("swap to \(serviceId)")
         ybrid.swapService(to: serviceId) { (success) in
-            self.actionComplete(success, trace)
+            self.swapServiceComplete(success, trace)
             mySema.signal()
         }
         if let maxWait = maxWait {
@@ -317,61 +317,11 @@ class YbridSwapServiceTests: XCTestCase {
         return trace
     }
     
-    private func actionComplete(_ success:Bool,_ trace:Trace) {
+    private func swapServiceComplete(_ success:Bool,_ trace:Trace) {
        trace.complete(success)
        Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
        sleep(3)
    }
-    
-    private func playAndSwapService(_ endpoint:MediaEndpoint, to serviceId:String, maxWait:TimeInterval? = nil) throws -> ActionsTrace {
-        
-        let actions = ActionsTrace()
-        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
-            let actionSemaphore = DispatchSemaphore(value: 0)
-            
-            let trace = actions.newTrace("swap to \(serviceId)")
-            ybridControl.swapService(to: serviceId) { (success) in
-                trace.complete(success)
-                Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
-                sleep(6)
-                
-                actionSemaphore.signal()
-            }
-            if let maxWait = maxWait {
-                _ = actionSemaphore.wait(timeout: .now() + maxWait)
-            } else {
-                _ = actionSemaphore.wait(timeout: .distantFuture)
-            }
-        }
-        return actions
-    }
-
-
-    private func playAndSwapSwappedService(_ endpoint:MediaEndpoint, first serviceId1:String, second serviceId2:String) throws -> ActionsTrace {
-        
-        let actions = ActionsTrace()
-        TestYbridControl(endpoint, listener: listener).playing{ (ybridControl) in
-           let actionSemaphore = DispatchSemaphore(value: 0)
-           
-            var trace = actions.newTrace("swap to \(serviceId1)")
-            ybridControl.swapService(to: serviceId1) { (success) in
-                trace.complete(success)
-                Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
-                sleep(2)
-                
-                trace = actions.newTrace("swap to \(serviceId2)")
-                    ybridControl.swapService(to: serviceId2) { (success) in
-                        trace.complete(success)
-                        Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
-                        sleep(2)
-         
-                        actionSemaphore.signal()
-                    }
-            }
-            _ = actionSemaphore.wait(timeout: .distantFuture)
-        }
-        return actions
-    }
     
     private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {

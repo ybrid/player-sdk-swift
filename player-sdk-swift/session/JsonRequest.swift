@@ -119,7 +119,7 @@ class JsonRequest {
             }
             
             if let dataString = String(data: data, encoding: .utf8) {
-                Logger.session.debug("parsing \(dataString) into \(responseType)")
+                Logger.session.debug("parsing into \(responseType): \(dataString)")
             }
             
             do {
@@ -185,7 +185,7 @@ class JsonRequest {
             }
             
             if let dataString = String(data: data, encoding: .utf8) {
-                Logger.session.debug("parsing \(dataString) into \(responseType)")
+                Logger.session.debug("parsing into \(responseType): \(dataString)")
             }
             
             do {

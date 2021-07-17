@@ -137,11 +137,14 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
 
     override init(session:MediaSession, listener:AudioPlayerListener?) {
         super.init(session: session, listener: listener)
-        if let ybridListener = session.playerListener as? YbridControlListener {
-            DispatchQueue.global().async {
-                ybridListener.offsetToLiveChanged(session.offset)
-            }
-        }
+        session.notifyServices()
+        session.notifyOffset()
+        session.notifySwapsLeft()
+//        if let ybridListener = session.playerListener as? YbridControlListener {
+//            DispatchQueue.global().async {
+//                ybridListener.offsetToLiveChanged(session.offset)
+//            }
+//        }
     }
 
     func refresh() {
@@ -151,8 +154,8 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
             if let ybridListener = super.playerListener as? YbridControlListener {
                 ybridListener.offsetToLiveChanged(self.session.offset)
-                ybridListener.servicesChanged(self.session.services ?? [])
-                ybridListener.swapsChanged(self.session.swaps ?? -1)
+                ybridListener.servicesChanged(self.session.services)
+                ybridListener.swapsChanged(self.session.swaps)
             }
         }
     }
@@ -201,12 +204,11 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     }
     public func swapService(to id:String, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.metadata)
+            let changeover = self.newChangeOver(audioComplete, SubInfo.bouquet)
             changeover.inProgress(self.session.swapService(id:id))
         }
     }
         
-    
     
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, _ subtype:SubInfo ) -> ChangeOver {
         switch subtype {
@@ -223,7 +225,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                               audioComplete: wrappedComplete )
         case .metadata:
             let wrappedComplete:AudioCompleteCallback = { (success) in
-                Logger.playing.debug("swap complete (success:\(success))")
+                Logger.playing.debug("swap item complete (success:\(success))")
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
                 }
@@ -231,7 +233,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
         default:
             let wrappedComplete:AudioCompleteCallback = { (success) in
-                Logger.playing.debug("calling audio complete (success:\(success))")
+                Logger.playing.debug("\(subtype) change complete (success:\(success))")
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
                 }
@@ -240,7 +242,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
 
-    
     
     class ChangeOver {
         
@@ -268,7 +269,8 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             
             if player.state == .buffering || player.state == .playing {
                 ctrlComplete?()
-                player.pipeline?.changingOver( audioComplete, subInfo )
+                player.pipeline?.changeOverInProgress()
+                player.session.changingOver = self
             } else {
                 audioComplete(true)
             }

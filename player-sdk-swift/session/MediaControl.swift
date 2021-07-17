@@ -25,60 +25,31 @@
 
 import Foundation
 
-protocol MediaControl {
-    var playbackUri: String { get }
-    var connected: Bool { get }
-    var mediaProtocol: MediaProtocol { get }
-    func hasChanged(_ what: SubInfo) -> Bool
-//    func clearChanged(_ what: SubInfo)
-}
+//protocol MediaControl {
+////    var playbackUri: String { get }
+////    var connected: Bool { get }
+//    var mediaProtocol: MediaProtocol { get }
+//    func hasChanged(_ what: SubInfo) -> Bool
+////    func clearChanged(_ what: SubInfo)
+//}
 
-enum SubInfo {
+enum SubInfo : CaseIterable {
     case metadata
     case timeshift
     case bouquet
+    case playout
 //    case CAPABILITIES
 //    case VALIDITY
 }
 
-class MediaDriver : MediaControl {
+class MediaDriver /*: MediaControl*/ {
     
     let mediaProtocol:MediaProtocol
-    var endpointUri:URL
-    var baseUrl:URL
-    var playbackUri:String
     var valid:Bool = true //  { get }
     var connected:Bool = false { didSet {
         Logger.session.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
-    
-    var bouquet:Bouquet? { didSet {
-        if let services = bouquet?.services, services != oldValue?.services {
-            changed.insert(SubInfo.bouquet)
-            DispatchQueue.global().async {
-                self.listener?.servicesChanged(services)
-                self.changed.remove(SubInfo.bouquet)
-            }
-        }
-    }}
-    
-    var metadata:AbstractMetadata? { didSet {
-        changed.insert(SubInfo.metadata)
-    }}
-    
-    var swaps:Int? { didSet {
-        if let swaps = swaps {
-            DispatchQueue.global().async {
-                self.listener?.swapsChanged(swaps)
-            }
-        }
-    }}
-    
-    var offset:TimeInterval? { didSet {
-        if oldValue != offset {
-            changed.insert(SubInfo.timeshift)
-        }
-    }}
+    var state:MediaState
     
     let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
     static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
@@ -87,10 +58,8 @@ class MediaDriver : MediaControl {
     
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
-        self.playbackUri = session.endpoint.uri
-        self.endpointUri = URL(string: session.endpoint.uri)!
-        self.baseUrl = endpointUri
         self.listener = session.playerListener as? YbridControlListener
+        self.state = MediaState(session.endpoint)
     }
     
     func connect() throws {}
@@ -99,10 +68,10 @@ class MediaDriver : MediaControl {
     //    var capabilities: CapabilitySet { get }
     
     func clearChanged(_ what: SubInfo) {
-        changed.remove(what)
+        state.clearChanged(what)
     }
     func hasChanged(_ what: SubInfo) -> Bool {
-        return changed.contains(what)
+        return state.hasChanged(what)
     }
     
     //    func getBouquet() -> Bouquet

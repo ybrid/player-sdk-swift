@@ -42,8 +42,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var firstPCM = true
     var firstMetadata = true
     var stopping = false
-    private var changeOver:AudioCompleteCallback? = nil
-    private var changeOverType:SubInfo? = nil
 
     var icyFields:[String:String]? { didSet {
         Logger.loading.notice("icy fields \(icyFields ?? [:])")
@@ -82,8 +80,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func stopProcessing() {
         stopping = true
         decoder?.stopping = true
-        changeOver?(false)
-        changeOver = nil
+        session.changingOver?.audioComplete?(false)
+        session.changingOver = nil
     }
     
     func dispose() {
@@ -158,9 +156,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
     }
     
-    func changingOver(_ audioComplete:@escaping AudioCompleteCallback, _ subInfo:SubInfo) {
-        changeOver = audioComplete
-        changeOverType = subInfo
+    func changeOverInProgress() {
         metadataExtractor?.reset()
     }
     
@@ -241,6 +237,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         if let genre = icyFields?["icy-genre"] {
             metadata.setGenre(genre)
         }
+
         
         if firstMetadata {
             firstMetadata = false
@@ -250,51 +247,57 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             buffer?.put(cuePoint: metadataUuid)
         }
         
-        let canTriggerAudioComplete = (metadata as? IcyMetadata)?.streamUrl != nil
-        Logger.loading.debug("\(canTriggerAudioComplete ?"could":"can't") trigger audio complete")
-        
-
-        if canTriggerAudioComplete {
-            if let changeOverCallback = changeOver {
-                
-                if changeMatchesChangeOver() {
-                    changeOver = nil
-                    changeOverType = nil
-                    
-                    if let _ = bufferSize {
-                        buffer?.put(changeOverCallback)
-                    } else {
-                        changeOverCallback(true)
-                    }
-                }
-            }
+        if let completeCallback = triggerAudioComplete(metadata) {
             
-            // keeping values up to date
-            if SubInfo.timeshift == changeOverType {
-                session.notifyOffset(complete: true)
+            if let _ = bufferSize {
+                buffer?.put(completeCallback)
+            } else {
+                completeCallback(true)
             }
+
+            session.changingOver = nil
         }
+            
+        // keeping values up to date
+        session.notifySwapsLeft()
+        session.notifyOffset()
+//            session.notifyServices() /// not neccessary
+
+
     }
+
     
-    private func changeMatchesChangeOver() -> Bool {
+    private func triggerAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
         
-        guard let type = changeOverType, let media = session.mediaControl else {
-            return false // no change over in progress or no media to work with
+        guard let changeOver = session.changingOver,
+              let media = session.mediaControl else {
+            return nil // no change over in progress or no media to work on
         }
         
+        let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
+        Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
+        guard canTrigger else {
+            return nil
+        }
+        
+        let type = changeOver.subInfo
+        let changed = media.hasChanged(type)
+        // change of data matches type of ChangeOver
         switch type {
-        case .timeshift:
-            let changed = media.hasChanged(type)
-             Logger.session.notice("change over \(type), offset did \(changed ? "":"not ")change")
-             return changed
         case .metadata:
             Logger.session.notice("change over \(type) complete")
-            return true
+            return changeOver.audioComplete
+        case .timeshift:
+             Logger.session.notice("change over \(type), offset did \(changed ? "":"not ")change")
+             return changeOver.audioComplete
+        case .bouquet:
+            Logger.session.notice("change over \(type), active service did \(changed ? "":"not ")change")
+            return changeOver.audioComplete
         default:
             Logger.session.notice("change over \(type) unexpected")
-            return false
+            return nil
         }
-    }
+     }
     
     
     // MARK: processing steps

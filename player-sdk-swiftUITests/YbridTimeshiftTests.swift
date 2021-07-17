@@ -52,7 +52,7 @@ class YbridTimeshiftTests: XCTestCase {
                playbackControl: failOnPlaybackControl,
                ybridControl: { [self] (ybridControl) in
 
-                usleep(10_000)
+                usleep(20_000)
 
                 semaphore?.signal()
                })
@@ -440,7 +440,7 @@ class YbridTimeshiftTests: XCTestCase {
         let mySema = DispatchSemaphore(value: 0)
         let trace = Trace("wind by \(by.S)")
         ybrid.wind(by: by ) { (success) in
-            self.actionComplete(success, trace)
+            self.timeshiftComplete(success, trace)
             mySema.signal()
         }
         _ = mySema.wait(timeout: .distantFuture)
@@ -453,13 +453,13 @@ class YbridTimeshiftTests: XCTestCase {
         if let date = to {
             trace = Trace("wind to \(date)")
             ybrid.wind(to: date ) { (success) in
-                self.actionComplete(success, trace)
+                self.timeshiftComplete(success, trace)
                 mySema.signal()
             }
         } else {
             trace = Trace("wind live")
             ybrid.windToLive() { (success) in
-                self.actionComplete(success, trace)
+                self.timeshiftComplete(success, trace)
                 mySema.signal()
             }
         }
@@ -478,26 +478,26 @@ class YbridTimeshiftTests: XCTestCase {
             if let type = type {
                 trace = Trace("skip forward to \(type)")
                 ybrid.skipForward(type) { (success) in
-                    self.actionComplete(success, trace)
+                    self.timeshiftComplete(success, trace)
                     mySema.signal()
                 }
             } else {
                 trace = Trace("skip forward to item")
                 ybrid.skipForward() { (success) in
-                    self.actionComplete(success, trace)
+                    self.timeshiftComplete(success, trace)
                     mySema.signal()
                 }
         }} else {
             if let type = type {
                 trace = Trace("skip backward to \(type)")
                 ybrid.skipBackward(type) { (success) in
-                    self.actionComplete(success, trace)
+                    self.timeshiftComplete(success, trace)
                     mySema.signal()
                 }
             } else {
                 trace = Trace("skip backward to item")
                 ybrid.skipBackward() { (success) in
-                    self.actionComplete(success, trace)
+                    self.timeshiftComplete(success, trace)
                     mySema.signal()
                 }
         }}
@@ -505,7 +505,7 @@ class YbridTimeshiftTests: XCTestCase {
         return trace
     }
 
-    private func actionComplete(_ success:Bool,_ trace:Trace) {
+    private func timeshiftComplete(_ success:Bool,_ trace:Trace) {
        trace.complete(success)
        Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
        sleep(3)
