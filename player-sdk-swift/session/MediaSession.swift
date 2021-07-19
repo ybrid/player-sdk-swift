@@ -32,16 +32,16 @@ public class MediaSession  {
        
     let endpoint:MediaEndpoint
     let factory = MediaControlFactory()
-    var mediaControl:MediaDriver?
+    var driver:MediaDriver?
      
     weak var playerListener:AudioPlayerListener?
     
     public var mediaProtocol:MediaProtocol? { get {
-        return mediaControl?.mediaProtocol
+        return driver?.mediaProtocol
     }}
 
     public var playbackUri:String { get {
-        return mediaControl?.state.playbackUri ?? endpoint.uri
+        return driver?.state.playbackUri ?? endpoint.uri
     }}
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
@@ -49,20 +49,20 @@ public class MediaSession  {
     )
     
     var swaps: Int { get {
-        return mediaControl?.state.swaps ?? -1
+        return driver?.state.swaps ?? -1
     }}
     var services: [Service] { get {
-        return mediaControl?.state.bouquet?.services ?? []
+        return driver?.state.bouquet?.services ?? []
     }}
     var offset: TimeInterval? { get {
-        return mediaControl?.state.offset
+        return driver?.state.offset
     }}
     var metadata: AbstractMetadata? { get {
-        return mediaControl?.state.metadata
+        return driver?.state.metadata
     }}
     
     private var v2Driver:YbridV2Driver? { get {
-       return mediaControl as? YbridV2Driver
+       return driver as? YbridV2Driver
     }}
     
     init(on endpoint:MediaEndpoint) {
@@ -72,7 +72,7 @@ public class MediaSession  {
     func connect() throws {
         do {
             let mediaControl = try factory.create(self)
-            self.mediaControl = mediaControl
+            self.driver = mediaControl
             try mediaControl.connect()
         } catch {
             if let playerError = error as? AudioPlayerError {
@@ -90,22 +90,23 @@ public class MediaSession  {
         }
     }
     func close() {
-        self.mediaControl?.disconnect()
+        self.driver?.disconnect()
     }
     
     func refresh() {
         v2Driver?.info()
     }
     
-    var changingOver:YbridAudioPlayer.ChangeOver?
+    var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
+        Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
+    }}
     
     private func fetchMetadataSync(metadataIn: AbstractMetadata) -> AbstractMetadata {
         guard let media = v2Driver else {
             return metadataIn
         }
         
-        let timeshifting = changingOver?.subInfo == .timeshift
-        if timeshifting == true {
+        if .timeshift == changingOver?.subInfo {
             media.info()
         }
         else {
@@ -115,17 +116,15 @@ public class MediaSession  {
                 media.info()
             }
         }
-        return mediaControl?.state.metadata ?? metadataIn
+        return driver?.state.metadata ?? metadataIn
     }
 
-    
-    
     func notifyMetadata() {
-        if mediaControl?.hasChanged(SubInfo.metadata) == true,
+        if driver?.hasChanged(SubInfo.metadata) == true,
            let metadata = metadata {
             DispatchQueue.global().async {
                 self.playerListener?.metadataChanged(metadata)
-                self.mediaControl?.clearChanged(SubInfo.metadata)
+                self.driver?.clearChanged(SubInfo.metadata)
             }
         }
     }
@@ -134,7 +133,7 @@ public class MediaSession  {
         let metadataOut = fetchMetadataSync(metadataIn: metadataIn)
         DispatchQueue.global().async {
             self.playerListener?.metadataChanged(metadataOut)
-            self.mediaControl?.clearChanged(SubInfo.metadata)
+            self.driver?.clearChanged(SubInfo.metadata)
         }
     }
     
@@ -149,37 +148,37 @@ public class MediaSession  {
         if let metadata = metadataDict.pop(id:uuid) {
             DispatchQueue.global().async {
                 self.playerListener?.metadataChanged(metadata)
-                self.mediaControl?.clearChanged(SubInfo.metadata)
+                self.driver?.clearChanged(SubInfo.metadata)
             }
         }
     }
     
     
     func notifyOffset(complete:Bool = true) {
-        if mediaControl?.hasChanged(SubInfo.timeshift) == true,
+        if driver?.hasChanged(SubInfo.timeshift) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.offsetToLiveChanged(self.offset)
-                if complete { self.mediaControl?.clearChanged(SubInfo.timeshift) }
+                if complete { self.driver?.clearChanged(SubInfo.timeshift) }
             }
         }
     }
     
     func notifySwapsLeft() {
-        if mediaControl?.hasChanged(SubInfo.playout) == true,
+        if driver?.hasChanged(SubInfo.playout) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.swapsChanged(self.swaps)
-                self.mediaControl?.clearChanged(SubInfo.playout) }
+                self.driver?.clearChanged(SubInfo.playout) }
         }
     }
     
     func notifyServices() {
-        if mediaControl?.hasChanged(SubInfo.bouquet) == true,
+        if driver?.hasChanged(SubInfo.bouquet) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.servicesChanged(self.services)
-                self.mediaControl?.clearChanged(SubInfo.bouquet) }
+                self.driver?.clearChanged(SubInfo.bouquet) }
         }
     }
     

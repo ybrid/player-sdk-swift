@@ -69,8 +69,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.session = session
         PlayerContext.registerMemoryListener(listener: self)
         
-        session.refresh()
+        session.refresh() // reconnects if necessary
         session.notifyMetadata()
+        session.notifyOffset()
+        session.notifySwapsLeft()
     }
     
     deinit {
@@ -80,8 +82,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func stopProcessing() {
         stopping = true
         decoder?.stopping = true
-        session.changingOver?.audioComplete?(false)
-        session.changingOver = nil
+        if let audioComplete = session.changingOver?.audioComplete {
+            audioComplete(false)
+            session.changingOver = nil
+        }
     }
     
     func dispose() {
@@ -254,23 +258,20 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             } else {
                 completeCallback(true)
             }
-
-            session.changingOver = nil
+            self.session.changingOver = nil
         }
             
         // keeping values up to date
         session.notifySwapsLeft()
         session.notifyOffset()
 //            session.notifyServices() /// not neccessary
-
-
     }
 
     
     private func triggerAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
         
         guard let changeOver = session.changingOver,
-              let media = session.mediaControl else {
+              let media = session.driver else {
             return nil // no change over in progress or no media to work on
         }
         

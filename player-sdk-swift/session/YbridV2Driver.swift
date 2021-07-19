@@ -60,7 +60,7 @@ class YbridV2Driver : MediaDriver {
     }
     
     override func disconnect() {
-        if super.connected {
+        if !super.connected {
             return
         }
         Logger.session.info("closing ybrid session")

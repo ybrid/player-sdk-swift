@@ -21,9 +21,9 @@
 		17134569263015440054DB9D /* MediaSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17134568263015440054DB9D /* MediaSessionTests.swift */; };
 		171345B526306D780054DB9D /* ConsumeMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345B426306D780054DB9D /* ConsumeMetadataTests.swift */; };
 		171345B626306D780054DB9D /* ConsumeMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345B426306D780054DB9D /* ConsumeMetadataTests.swift */; };
-		171345C4263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
-		171345C5263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
-		171345C6263153500054DB9D /* MediaControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaControl.swift */; };
+		171345C4263153500054DB9D /* MediaDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaDriver.swift */; };
+		171345C5263153500054DB9D /* MediaDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaDriver.swift */; };
+		171345C6263153500054DB9D /* MediaDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171345C3263153500054DB9D /* MediaDriver.swift */; };
 		1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1714DA84263A0B7700DD17B8 /* MetadataTests.swift */; };
 		1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
@@ -218,7 +218,7 @@
 		171201B9266AE69900DB9463 /* ybridSwapServiceResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwapServiceResponse.json; sourceTree = "<group>"; };
 		17134568263015440054DB9D /* MediaSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSessionTests.swift; sourceTree = "<group>"; };
 		171345B426306D780054DB9D /* ConsumeMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeMetadataTests.swift; sourceTree = "<group>"; };
-		171345C3263153500054DB9D /* MediaControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControl.swift; sourceTree = "<group>"; };
+		171345C3263153500054DB9D /* MediaDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDriver.swift; sourceTree = "<group>"; };
 		1714DA84263A0B7700DD17B8 /* MetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataTests.swift; sourceTree = "<group>"; };
 		17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyseDataTests.swift; sourceTree = "<group>"; };
 		17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridWindBackResponse.json; sourceTree = "<group>"; };
@@ -424,7 +424,7 @@
 			children = (
 				17539E47262591C3000FE902 /* MediaSession.swift */,
 				17539E93262869E7000FE902 /* MediaControlFactory.swift */,
-				171345C3263153500054DB9D /* MediaControl.swift */,
+				171345C3263153500054DB9D /* MediaDriver.swift */,
 				17539E512626D2C6000FE902 /* YbridV2Driver.swift */,
 				177AF70826A1E65D0095BEA5 /* MediaState.swift */,
 				17D01BFB262F174D007B0A3C /* IcyDriver.swift */,
@@ -1033,7 +1033,7 @@
 				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
 				1799DCAB25D565DB0055C973 /* MpegData.swift in Sources */,
 				17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */,
-				171345C4263153500054DB9D /* MediaControl.swift in Sources */,
+				171345C4263153500054DB9D /* MediaDriver.swift in Sources */,
 				1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */,
 				1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */,
 				17539E522626D2C6000FE902 /* YbridV2Driver.swift in Sources */,
@@ -1099,7 +1099,7 @@
 				1799DCD425D566BB0055C973 /* MpegDecoder.swift in Sources */,
 				1711D184263AB45400882D2B /* MetadataMappings.swift in Sources */,
 				17D45D802659591F00983025 /* YbridSteelinessTests.swift in Sources */,
-				171345C5263153500054DB9D /* MediaControl.swift in Sources */,
+				171345C5263153500054DB9D /* MediaDriver.swift in Sources */,
 				1799DD3C25D580D40055C973 /* CustomErrorTests.swift in Sources */,
 				17F6A151266F789D00F48432 /* Bouquet.swift in Sources */,
 				1799DD3A25D580D40055C973 /* OpusMappingTests.swift in Sources */,
@@ -1179,7 +1179,7 @@
 				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
 				17CBC8D425E2517F00B2F7E7 /* MpegData.swift in Sources */,
 				17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */,
-				171345C6263153500054DB9D /* MediaControl.swift in Sources */,
+				171345C6263153500054DB9D /* MediaDriver.swift in Sources */,
 				17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */,
 				17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */,
 				17539E542626D2C6000FE902 /* YbridV2Driver.swift in Sources */,

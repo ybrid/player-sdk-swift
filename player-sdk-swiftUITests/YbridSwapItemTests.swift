@@ -167,7 +167,7 @@ class YbridSwapItemTests: XCTestCase {
         
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridDemoEndpoint, listener: listener).playing{ [self] (ybrid) in
-            actionTraces.append( swapItem(ybrid) )
+            actionTraces.append( swapItem(ybrid, maxWait: 15.0) )
         }
         checkErrors(expectedErrors: 0)
         actionTraces.check(expectedActions: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
@@ -177,7 +177,7 @@ class YbridSwapItemTests: XCTestCase {
         
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ [self] (ybrid) in
-            actionTraces.append( swapItem(ybrid) )
+            actionTraces.append( swapItem(ybrid, maxWait: 15.0) )
         }
         
         checkErrors(expectedErrors: 1)

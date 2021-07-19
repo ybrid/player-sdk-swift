@@ -25,15 +25,7 @@
 
 import Foundation
 
-//protocol MediaControl {
-////    var playbackUri: String { get }
-////    var connected: Bool { get }
-//    var mediaProtocol: MediaProtocol { get }
-//    func hasChanged(_ what: SubInfo) -> Bool
-////    func clearChanged(_ what: SubInfo)
-//}
-
-enum SubInfo : CaseIterable {
+enum SubInfo : String {
     case metadata
     case timeshift
     case bouquet
@@ -42,7 +34,7 @@ enum SubInfo : CaseIterable {
 //    case VALIDITY
 }
 
-class MediaDriver /*: MediaControl*/ {
+class MediaDriver {
     
     let mediaProtocol:MediaProtocol
     var valid:Bool = true //  { get }

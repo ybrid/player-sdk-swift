@@ -42,24 +42,24 @@ class YbridSpecialActionTests: XCTestCase {
                 return },
              ybridControl: { (ybridControl) in
                 if let ybrid = ybridControl as? YbridAudioPlayer {
-                    if let v2 = ybrid.session.mediaControl as? YbridV2Driver {
-                        print("base uri is \(v2.baseUrl)")
-                        let baseUrlOrig = v2.baseUrl
+                    if let driver = ybrid.session.driver as? YbridV2Driver {
+                        print("base uri is \(driver.state.baseUrl)")
+                        let baseUrlOrig = driver.state.baseUrl
                         
                         // forcing to reconnect
                         do {
-                            try v2.reconnect()
+                            try driver.reconnect()
                         } catch {
                             Logger.session.error(error.localizedDescription)
                             XCTFail("should work, but \(error.localizedDescription)")
                         }
-                        print("base uri is \(v2.baseUrl)")
-                        let baseUrlReconnected = v2.baseUrl
+                        print("base uri is \(driver.state.baseUrl)")
+                        let baseUrlReconnected = driver.state.baseUrl
                         XCTAssertEqual(baseUrlOrig, baseUrlReconnected)
  
                     
                         ybrid.play()
-                        print("base uri is \(v2.baseUrl)")
+                        print("base uri is \(driver.state.baseUrl)")
                     }
                 }
                 sleep(4)

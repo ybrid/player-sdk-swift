@@ -140,14 +140,10 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyServices()
         session.notifyOffset()
         session.notifySwapsLeft()
-//        if let ybridListener = session.playerListener as? YbridControlListener {
-//            DispatchQueue.global().async {
-//                ybridListener.offsetToLiveChanged(session.offset)
-//            }
-//        }
     }
 
     func refresh() {
+        
         DispatchQueue.global().async {
             if let metadata = self.session.metadata {
                 super.playerListener?.metadataChanged(metadata)
