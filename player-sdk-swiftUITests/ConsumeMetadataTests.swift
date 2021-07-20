@@ -317,21 +317,23 @@ class ConsumeMetadataTests: XCTestCase {
     class TestMetadataCallsConsumer : AbstractAudioPlayerListener {
         
         var metadatas:[Metadata] = []
-        
+        let queue = DispatchQueue(label: "io.ybrid.testing.metadata.calls")
         override func metadataChanged(_ metadata: Metadata) {
-            metadatas.append(metadata)
             Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
             XCTAssertNotNil(metadata.displayTitle)
+            queue.async {
+                self.metadatas.append(metadata)
+            }
         }
         
         func checkMetadataCalls(equal expectedCalls: Int) {
-            let calls = metadatas.count
+            let calls = queue.sync { metadatas.count }
             XCTAssertTrue( calls == expectedCalls,  "expected == \(expectedCalls) calls, but was \(calls)")
         }
         
         /// tolerating one more is necessary because metadata can change while testing
         func checkMetadataCalls(min expectedMinCalls: Int, tolerateMore:Int = 1) {
-            let calls = metadatas.count
+            let calls = queue.sync { metadatas.count }
             let expectedMaxCalls = expectedMinCalls + tolerateMore
             let range = (expectedMinCalls...expectedMaxCalls)
             XCTAssertTrue( range.contains(calls), "expected \(range) calls, but was \(calls)")

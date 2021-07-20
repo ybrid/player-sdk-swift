@@ -25,7 +25,7 @@
 
 import Foundation
 
-enum SubInfo : String {
+enum SubInfo : String, CaseIterable {
     case metadata
     case timeshift
     case bouquet
@@ -43,14 +43,14 @@ class MediaDriver {
     }}
     var state:MediaState
     
-    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
-    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
-    
-    private weak var listener:YbridControlListener?
+//    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
+//    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
+//    
+    private weak var listener:AudioPlayerListener?
     
     init(session:MediaSession, version:MediaProtocol) {
         self.mediaProtocol = version
-        self.listener = session.playerListener as? YbridControlListener
+        self.listener = session.playerListener
         self.state = MediaState(session.endpoint)
     }
     

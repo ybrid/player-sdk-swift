@@ -47,10 +47,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         Logger.loading.notice("icy fields \(icyFields ?? [:])")
     }}
 
-    var bufferSize:TimeInterval? { get {
-        return buffer?.size
-    }}
-
     private var metadataExtractor: MetadataExtractor?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
@@ -70,10 +66,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         PlayerContext.registerMemoryListener(listener: self)
         
         session.refresh() // reconnects if necessary
-        session.notifyMetadata()
-        session.notifyOffset()
-        session.notifySwapsLeft()
-    }
+        session.notifyChanged()
+     }
     
     deinit {
         Logger.decoding.debug()
@@ -103,6 +97,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         resumed = true
         
         session.refresh()
+        session.notifyChanged()
     }
     
     // MARK: setup pipeline
@@ -149,7 +144,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         audiodataReady(data)
     }
 
-    
     func flushAudio() {
         Logger.decoding.debug()
         if let mdExtractor = metadataExtractor {
@@ -241,39 +235,36 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         if let genre = icyFields?["icy-genre"] {
             metadata.setGenre(genre)
         }
-
         
-        if firstMetadata {
-            firstMetadata = false
-            session.notifyMetadataSync(metadata)
-        } else {
-            let metadataUuid = session.maintainMetadata(metadataIn: metadata)
-            buffer?.put(cuePoint: metadataUuid)
-        }
+        session.fetchMetadataSync(metadataIn: metadata)
         
-        if let completeCallback = triggerAudioComplete(metadata) {
-            
-            if let _ = bufferSize {
+        if let bufferSize = buffer?.size, bufferSize > 0.0 {
+          
+            if let completeCallback = triggeredAudioComplete(metadata) {
                 buffer?.put(completeCallback)
-            } else {
-                completeCallback(true)
+                self.session.changingOver = nil
             }
-            self.session.changingOver = nil
+            if let uuid = session.maintainMetadata() {
+                buffer?.put(cuePoint: uuid)
+            }
+            
+         } else {
+            
+            if let completeCallback = triggeredAudioComplete(metadata) {
+                    completeCallback(true)
+                self.session.changingOver = nil
+            }
+            
+            session.notifyChanged(SubInfo.metadata)
         }
             
         // keeping values up to date
-        session.notifySwapsLeft()
-        session.notifyOffset()
-//            session.notifyServices() /// not neccessary
+        session.notifyChanged(SubInfo.playout)
+        session.notifyChanged(SubInfo.timeshift)
+        session.notifyChanged(SubInfo.bouquet)
     }
-
     
-    private func triggerAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
-        
-        guard let changeOver = session.changingOver,
-              let media = session.driver else {
-            return nil // no change over in progress or no media to work on
-        }
+    private func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
         
         let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
         Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
@@ -281,23 +272,16 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return nil
         }
         
-        let type = changeOver.subInfo
-        let changed = media.hasChanged(type)
-        // change of data matches type of ChangeOver
-        switch type {
-        case .metadata:
-            Logger.session.notice("change over \(type) complete")
-            return changeOver.audioComplete
-        case .timeshift:
-             Logger.session.notice("change over \(type), offset did \(changed ? "":"not ")change")
-             return changeOver.audioComplete
-        case .bouquet:
-            Logger.session.notice("change over \(type), active service did \(changed ? "":"not ")change")
-            return changeOver.audioComplete
-        default:
-            Logger.session.notice("change over \(type) unexpected")
-            return nil
+        guard let changeOver = session.changingOver,
+              let media = session.driver else {
+            return nil // no change over in progress or no media
         }
+        
+        if let completeCallback = changeOver.matches(to: media.state) {
+            return completeCallback
+        }
+        
+        return nil
      }
     
     

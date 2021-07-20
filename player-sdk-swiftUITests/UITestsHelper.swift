@@ -41,23 +41,24 @@ extension TimeInterval {
     }
 }
 
-
-
-
-
-
 class TestAudioPlayerListener : AbstractAudioPlayerListener {
 
     func reset() {
-        metadatas.removeAll()
-        errors.removeAll()
+        queue.async {
+            self.metadatas.removeAll()
+            self.errors.removeAll()
+        }
     }
+    
+    let queue = DispatchQueue.init(label: "io.ybrid.testing.metatdatas")
     
     var metadatas:[Metadata] = []
     override func metadataChanged(_ metadata: Metadata) {
         super.metadataChanged(metadata)
         Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
-        metadatas.append(metadata)
+        queue.async {
+            self.metadatas.append(metadata)
+        }
     }
     
     var errors:[AudioPlayerError] = []
@@ -167,6 +168,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
             errors.removeAll()
             metadatas.removeAll()
             services.removeAll()
+            swaps.removeAll()
         }
     }
     
@@ -327,11 +329,6 @@ class ActionsTrace {
     init() {}
     func reset() { actions.removeAll() }
     func append(_ trace:Trace) { actions.append(trace) }
-//    func newTrace(_ name:String) -> Trace {
-//        let trace = Trace(name)
-//        actions.append(trace)
-//        return trace
-//    }
     
     func checkTraces(expectedActions:Int) -> [(String,TimeInterval)] {
           

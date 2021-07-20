@@ -74,10 +74,12 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     //
     // The matching MediaProtocol is detected and a session
     // to control content and metadata of the stream is established.
+    //
+    // listener - object to be called back from the player process
     @available(*, deprecated, message: "use asynchronous AudioPlayer.open instead")
     public static func openSync(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
         
-        let session = MediaSession(on: endpoint)
+        let session = MediaSession(on: endpoint, playerListener: listener)
         do {
             try session.connect()
         } catch {
@@ -93,9 +95,9 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
 
         switch session.mediaProtocol {
         case .plain, .icy:
-            return AudioPlayer(session: session, listener: listener)
+            return AudioPlayer(session: session)
         case .ybridV2:
-            return YbridAudioPlayer(session: session, listener: listener)
+            return YbridAudioPlayer(session: session)
         default:
             return nil
         }
@@ -136,11 +138,8 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     
     // get ready for playing audio. Supports codecs mp3, aac and opus.
     // session - the MediaSession connected to the MediaEndpoint. Supports icecast, plain http and ybrid
-    // listener - object to be called back from the player process
-    init(session: MediaSession, listener: AudioPlayerListener?) {
-        self.playerListener = listener
-        session.playerListener = listener
-        
+    init(session: MediaSession) {
+        self.playerListener = session.playerListener
         self.session = session
         PlayerContext.setupAudioSession()
     }

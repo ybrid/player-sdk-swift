@@ -39,8 +39,8 @@ class MediaSessionTests: XCTestCase {
 
     
     func testSession_YbridDemo() throws {
-        let session = MediaSession(on:ybridDemoEndpoint)
-        XCTAssertNil(session.playerListener)
+        let session = MediaSession(on:ybridDemoEndpoint, playerListener: listener)
+        XCTAssertNotNil(session.playerListener)
         let player = AudioPlayer(session: session, listener: listener)
         XCTAssertNotNil(session.playerListener)
         try session.connect()
@@ -48,12 +48,11 @@ class MediaSessionTests: XCTestCase {
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
         
-        session.notifyMetadata()
+        session.notifyChanged(SubInfo.metadata)
         usleep(10_000)
         guard let metadata = listener.metadatas.first else {
             XCTFail("metadata expected"); return
         }
-        
  
         print("running \(metadata.displayTitle ?? "(nil)")")
         XCTAssertNotNil(metadata)
@@ -67,14 +66,14 @@ class MediaSessionTests: XCTestCase {
 
     func testSession_YbridSwr3() throws {
 
-        let session = MediaSession(on: ybridSwr3Endpoint)
+        let session = MediaSession(on: ybridSwr3Endpoint, playerListener: listener)
         try session.connect()
         let player = AudioPlayer(session: session, listener: listener)
         let playbackUri = player.session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
         
-        session.notifyMetadata()
+        session.notifyChanged(SubInfo.metadata)
         usleep(10_000)
         guard let metadata = listener.metadatas.first else {
             XCTFail("metadata expected"); return
@@ -87,14 +86,14 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_IcySwr3() throws {
 
-        let session = MediaSession(on: icecastSwr3Endpoint)
+        let session = MediaSession(on: icecastSwr3Endpoint, playerListener: listener)
         try session.connect()
         let player = AudioPlayer(session: session, listener: listener)
         
         let playbackUri = player.session.playbackUri
         XCTAssertEqual(icecastSwr3Endpoint.uri, playbackUri)
         
-        session.notifyMetadata()
+        session.notifyChanged(SubInfo.metadata)
         usleep(10_000)
         let metadata = listener.metadatas.first
         XCTAssertNil(metadata, "no metadata expected")
@@ -103,13 +102,13 @@ class MediaSessionTests: XCTestCase {
     }
     
     func testSession_DlfOpus() throws {
-        let session = MediaSession(on: opusDlfEndpoint)
+        let session = MediaSession(on: opusDlfEndpoint, playerListener: listener)
         try session.connect()
         let player = AudioPlayer(session: session, listener: listener)
         let playbackUri = player.session.playbackUri
         XCTAssertEqual(opusDlfEndpoint.uri, playbackUri)
         
-        session.notifyMetadata()
+        session.notifyChanged(SubInfo.metadata)
         usleep(10_000) // the listener is notified asynchronously
         let metadata = listener.metadatas.first
         XCTAssertNil(metadata, "no metadata expected")
@@ -120,14 +119,14 @@ class MediaSessionTests: XCTestCase {
     func testSession_OnDemandSound() throws {
         let uri = "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true"
         let endpoint = MediaEndpoint(mediaUri:uri)
-        let session = MediaSession(on: endpoint)
+        let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
         let player = AudioPlayer(session: session, listener: listener)
 
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
         
-        session.notifyMetadata()
+        session.notifyChanged(SubInfo.metadata)
         usleep(10_000) // the listener is notified asynchronously
         let metadata = listener.metadatas.first
         XCTAssertNil(metadata, "no metadata expected")
@@ -138,7 +137,7 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_NoMediaUrl() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/xyzbnlabla")
-        let session = MediaSession(on: endpoint)
+        let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
         let player = AudioPlayer(session: session, listener: listener)
         usleep(10_000) // the listener is notified asynchronously
@@ -149,7 +148,7 @@ class MediaSessionTests: XCTestCase {
     
     func testSession_BadUrl() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://blub")
-        let session = MediaSession(on: endpoint)
+        let session = MediaSession(on: endpoint, playerListener: listener)
         session.playerListener = listener
         do {
         try session.connect()

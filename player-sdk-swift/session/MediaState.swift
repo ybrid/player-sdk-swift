@@ -39,7 +39,9 @@ class MediaState  {
     }}
     
     var metadata:AbstractMetadata? { didSet {
-        setChanged(SubInfo.metadata)
+        if let _ = metadata {
+            setChanged(SubInfo.metadata)
+        }
     }}
     
     var bouquet:Bouquet? { didSet {
@@ -63,8 +65,8 @@ class MediaState  {
         }
     }}
     
-    private let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
-    static let v2Queue = DispatchQueue(label: "io.ybrid.session.state.changes")
+    private let changed = ThreadsafeSet<SubInfo>(MediaState.stateQueue)
+    static let stateQueue = DispatchQueue(label: "io.ybrid.session.state.changes")
 
     
     init(_ endpoint:MediaEndpoint) {

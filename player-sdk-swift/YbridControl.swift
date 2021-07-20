@@ -99,32 +99,32 @@ public extension AudioPlayer {
     // One of the callback methods provides the specific controller as soon
     // as available.
     //
+    // listener - object to be called back from the player process
     static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
             playbackControl: PlaybackControlCallback? = nil,
               ybridControl: YbridControlCallback? = nil ) throws {
         
-        let session = MediaSession(on: endpoint)
-        session.playerListener = listener
+        let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
         
         controllerQueue.async {
             switch session.mediaProtocol {
             case .ybridV2:
-                let player = YbridAudioPlayer(session: session, listener: listener)
+                let player = YbridAudioPlayer(session: session)
                 ybridControl?(player)
             default:
-                let player = AudioPlayer(session: session, listener: listener)
+                let player = AudioPlayer(session: session)
                 playbackControl?(player)
             }
         }
     }
 
-    /*
-     This is a convenience method for tests. It provides a playback control
-     for all endpoints, regardless of the media protocol.
-     
-     You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
-     */
+    // This is a convenience method for tests. It provides a playback control
+    // for all endpoints, regardless of the media protocol.
+    //
+    // You recieve a PlaybackContol in all cases. You cannot use ybrid specific actions.
+    //
+    // listener - object to be called back from the player process
     static func open(for endpoint:MediaEndpoint, listener: AudioPlayerListener?,
             control: PlaybackControlCallback? = nil ) throws {
         try AudioPlayer.open(for: endpoint, listener: listener, playbackControl: control, ybridControl: control)
@@ -135,11 +135,11 @@ public extension AudioPlayer {
 
 class YbridAudioPlayer : AudioPlayer, YbridControl {
 
-    override init(session:MediaSession, listener:AudioPlayerListener?) {
-        super.init(session: session, listener: listener)
-        session.notifyServices()
-        session.notifyOffset()
-        session.notifySwapsLeft()
+    override init(session:MediaSession) {
+        super.init(session: session)
+        session.notifyChanged( SubInfo.bouquet )
+        session.notifyChanged( SubInfo.timeshift )
+        session.notifyChanged( SubInfo.playout )
     }
 
     func refresh() {
@@ -205,30 +205,47 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
         
+    // MARK: change over
     
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, _ subtype:SubInfo ) -> ChangeOver {
         switch subtype {
         case .timeshift:
             let wrappedComplete:AudioCompleteCallback = { (success) in
+                self.session.notifyChanged(SubInfo.timeshift)
+                
                 Logger.playing.debug("timeshift complete (success:\(success))")
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
                 }
-                self.session.notifyOffset(complete:true)
             }
             return ChangeOver(player: self, subtype,
-                              ctrlComplete: { self.session.notifyOffset(complete:false) },
+                              ctrlComplete: { self.session.notifyChanged(SubInfo.timeshift, clear: false) },
                               audioComplete: wrappedComplete )
         case .metadata:
             let wrappedComplete:AudioCompleteCallback = { (success) in
+                self.session.notifyChanged(SubInfo.metadata)
+                
                 Logger.playing.debug("swap item complete (success:\(success))")
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
                 }
             }
             return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
+        case .bouquet:
+            let wrappedComplete:AudioCompleteCallback = { (success) in
+                self.session.notifyChanged(SubInfo.bouquet)
+                
+                Logger.playing.debug("swap service complete (success:\(success))")
+                DispatchQueue.global().async {
+                    userAudioComplete?(success)
+                }
+            }
+            return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
+
         default:
             let wrappedComplete:AudioCompleteCallback = { (success) in
+                self.session.notifyChanged(subtype)
+                
                 Logger.playing.debug("\(subtype) change complete (success:\(success))")
                 DispatchQueue.global().async {
                     userAudioComplete?(success)
@@ -263,13 +280,33 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 return
             }
             
+            ctrlComplete?()
+            
             if player.state == .buffering || player.state == .playing {
-                ctrlComplete?()
-                player.pipeline?.changeOverInProgress()
                 player.session.changingOver = self
+                player.pipeline?.changeOverInProgress()
             } else {
                 audioComplete(true)
             }
+        }
+        
+        func matches(to state:MediaState) -> AudioCompleteCallback? {
+            let changed = state.hasChanged(subInfo)
+            switch subInfo {
+            case .metadata:
+                Logger.session.notice("change over \(subInfo), metadata did \(changed ? "":"not ")change")
+            case .timeshift:
+                 Logger.session.notice("change over \(subInfo), offset did \(changed ? "":"not ")change")
+            case .bouquet:
+                Logger.session.notice("change over \(subInfo), active service did \(changed ? "":"not ")change")
+            default:
+                Logger.session.error("change over \(subInfo) doesn't match to media state \(state)")
+            }  
+            
+            if changed {
+                return self.audioComplete
+            }
+            return nil
         }
     }
 
