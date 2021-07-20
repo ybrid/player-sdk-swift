@@ -33,16 +33,13 @@ class MediaSessionTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        
-        
     }
-
     
     func testSession_YbridDemo() throws {
         let session = MediaSession(on:ybridDemoEndpoint, playerListener: listener)
         XCTAssertNotNil(session.playerListener)
-        let player = AudioPlayer(session: session, listener: listener)
-        XCTAssertNotNil(session.playerListener)
+        let player = AudioPlayer(session: session)
+        XCTAssertNotNil(player.playerListener)
         try session.connect()
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
@@ -60,15 +57,12 @@ class MediaSessionTests: XCTestCase {
         XCTAssertEqual(0, listener.errors.count)
         player.close()
     }
-    
-    
-    
 
     func testSession_YbridSwr3() throws {
 
         let session = MediaSession(on: ybridSwr3Endpoint, playerListener: listener)
         try session.connect()
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
         let playbackUri = player.session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
@@ -88,7 +82,7 @@ class MediaSessionTests: XCTestCase {
 
         let session = MediaSession(on: icecastSwr3Endpoint, playerListener: listener)
         try session.connect()
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
         
         let playbackUri = player.session.playbackUri
         XCTAssertEqual(icecastSwr3Endpoint.uri, playbackUri)
@@ -104,7 +98,7 @@ class MediaSessionTests: XCTestCase {
     func testSession_DlfOpus() throws {
         let session = MediaSession(on: opusDlfEndpoint, playerListener: listener)
         try session.connect()
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
         let playbackUri = player.session.playbackUri
         XCTAssertEqual(opusDlfEndpoint.uri, playbackUri)
         
@@ -121,7 +115,7 @@ class MediaSessionTests: XCTestCase {
         let endpoint = MediaEndpoint(mediaUri:uri)
         let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
 
         let playbackUri = session.playbackUri
         XCTAssertEqual(uri, playbackUri)
@@ -134,16 +128,14 @@ class MediaSessionTests: XCTestCase {
         player.close()
     }
     
-    
     func testSession_NoMediaUrl() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/xyzbnlabla")
         let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
         usleep(10_000) // the listener is notified asynchronously
         XCTAssertNotNil(player.session, "session expected")
         XCTAssertEqual(0,listener.errors.count)
-
     }
     
     func testSession_BadUrl() throws {
@@ -156,7 +148,7 @@ class MediaSessionTests: XCTestCase {
         } catch {
             XCTAssertTrue( error is SessionError )
         }
-        let player = AudioPlayer(session: session, listener: listener)
+        let player = AudioPlayer(session: session)
         XCTAssertNotNil(player, "player expected")
 
         usleep(10_000) // the listener is notified asynchronously
@@ -164,10 +156,8 @@ class MediaSessionTests: XCTestCase {
             XCTFail(); return
         }
         XCTAssertEqual(1,listener.errors.count)
-
         XCTAssertNotEqual(0,error.code)
     }
-
     
     class MediaListener : AudioPlayerListener {
 
@@ -185,7 +175,6 @@ class MediaSessionTests: XCTestCase {
         func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
             errors.append(exception)
         }
-        
         
         func stateChanged(_ state: PlaybackState) {}
         func playingSince(_ seconds: TimeInterval?) {}
