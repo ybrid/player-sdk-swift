@@ -283,8 +283,8 @@ class YbridSwapServiceTests: XCTestCase {
         
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridSwr3Endpoint, listener: listener).playing{ (ybrid) in
-            actionTraces.append( swapServiceSynced(to: "swr-raka09", ybrid) )
-            actionTraces.append( swapServiceSynced(to: "swr3-live", ybrid) )
+            actionTraces.append( swapServiceSynced(to: "swr-raka09", ybrid, maxWait: 15.0) )
+            actionTraces.append( swapServiceSynced(to: "swr3-live", ybrid, maxWait: 15.0) )
         }
 
         checkErrors(expectedErrors: 0)
@@ -295,8 +295,8 @@ class YbridSwapServiceTests: XCTestCase {
         
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridSwr3Endpoint, listener: listener).playing{ (ybrid) in
-            actionTraces.append( swapServiceSynced(to: "swr-raka09", ybrid) )
-            actionTraces.append( swapServiceSynced(to: "swr-raka05", ybrid) )
+            actionTraces.append( swapServiceSynced(to: "swr-raka09", ybrid, maxWait: 15.0) )
+            actionTraces.append( swapServiceSynced(to: "swr-raka05", ybrid, maxWait: 20.0) )
         }
 
         checkErrors(expectedErrors: 0)

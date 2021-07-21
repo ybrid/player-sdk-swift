@@ -254,7 +254,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     completeCallback(true)
                 self.session.changingOver = nil
             }
-            
             session.notifyChanged(SubInfo.metadata)
         }
             
@@ -272,15 +271,13 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return nil
         }
         
-        guard let changeOver = session.changingOver,
-              let media = session.driver else {
-            return nil // no change over in progress or no media
-        }
-        
-        if let completeCallback = changeOver.matches(to: media.state) {
+        if let changeOver = session.changingOver,
+           let media = session.driver,
+           let completeCallback = changeOver.matches(to: media.state) {
             return completeCallback
         }
         
+        // no change over in progress or no media that matches
         return nil
      }
     
