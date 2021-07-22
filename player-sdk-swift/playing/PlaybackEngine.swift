@@ -66,7 +66,7 @@ class PlaybackEngine : Playback {
     
     
     func alterTarget(format: AVAudioFormat) {
-        Logger.playing.info("altering engine format to \(AudioData.describeAVFormat(format)) ")
+        Logger.playing.info("altering engine format to \(AudioData.describeAVFormat(format))")
         stopTimer()
         engine.stop()
         engine.disconnectNodeInput(playerNode)
@@ -77,6 +77,7 @@ class PlaybackEngine : Playback {
             playerNode.play()
         } catch {
             Logger.playing.error("failed to restart engine: \(error.localizedDescription)")
+            
         }
  
         self.sampleRate = format.sampleRate
@@ -85,7 +86,7 @@ class PlaybackEngine : Playback {
         playbackBuffer?.scheduling = scheduling
         
         startTimer()
-//        _ = start()
+
     }
     
     // MARK: playback

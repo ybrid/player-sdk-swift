@@ -29,25 +29,34 @@ protocol DecoderListener: MetadataListener {
     func onFormatChanged(_ srcFormat : AVAudioFormat)
     func pcmReady(pcmBuffer: AVAudioPCMBuffer)
 }
-
+typealias DecoderNotification = (ErrorSeverity, DecoderError)->()
 class AudioDecoder : AudioDataListener {
     
     let listener: DecoderListener
+    let notify: DecoderNotification?
     var pcmFormat: AVAudioFormat?
     
     var stopping = false
     
-    internal init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener) throws {
+    internal init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener, notify: DecoderNotification? = nil ) throws {
         self.listener = decodingListener
+        self.notify = notify
     }
 
     // MARK: audio data listener
 
     func onFormatChanged(_ srcFormat: AVAudioFormat) {
-//      todo
-//        try self.create(from: srcFormat)
-//        listener.onFormatChanged(tgtFormat)
-        listener.onFormatChanged(srcFormat)
+
+        do {
+            let pcmFormat = try self.create(from: srcFormat)
+            listener.onFormatChanged(pcmFormat)
+        } catch {
+            if let decoderError = error as? DecoderError {
+                notify?(ErrorSeverity.fatal, decoderError)
+            } else {
+                notify?(ErrorSeverity.fatal, DecoderError(ErrorKind.unknown, error))
+            }
+        }
     }
     
     func pcmReady(pcmBuffer: AVAudioPCMBuffer) {

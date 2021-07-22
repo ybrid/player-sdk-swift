@@ -116,10 +116,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             let ogg = try OggContainer()
             self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
         case kAudioFileMP3Type, kAudioFileMPEG4Type, kAudioFileAAC_ADTSType:
-            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
+            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
+                self.pipelineListener.notify(severity, error)
+            } )
         default:
             Logger.decoding.notice("trying MpegDecoder with file type \(AudioData.describeFileTypeId(audioContentType))")
-            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
+            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
+                self.pipelineListener.notify(severity, error)
+            })
         }
     }
     
@@ -163,35 +167,30 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     // MARK: decoder listener
     
-    func onFormatChanged(_ sourceFormat:AVAudioFormat) -> () {
+    func onFormatChanged(_ pcmTargetFormat:AVAudioFormat) -> () {
         
         do {
-            if let pcmTargetFormat = try decoder?.create(from: sourceFormat) {
-                if self.buffer == nil {
-                    let engine = PlaybackEngine(format: pcmTargetFormat, listener: playerListener )
-                    if !infinite { engine.canPause = true }
-                    self.buffer = engine.start()
-                    self.pipelineListener.ready(playback: engine)
-                    
-                    buffer?.onMetadataCue = { (metaCueId) in
-                        self.session.notifyMetadata(uuid: metaCueId)
-                    }
-                } else {
-                    buffer?.engine.alterTarget(format: pcmTargetFormat)
+            guard let buffer = self.buffer else {
+                /// called first time format is detected
+                let engine = PlaybackEngine(format: pcmTargetFormat, listener: playerListener )
+                if !infinite { engine.canPause = true }
+                self.buffer = engine.start()
+                self.pipelineListener.ready(playback: engine)
+                
+                buffer?.onMetadataCue = { (metaCueId) in
+                    self.session.notifyMetadata(uuid: metaCueId)
                 }
+                return
             }
-            if resumed {
-                buffer?.reset()
+                
+            if !resumed {
+                /// called next times when format change is detected
+                /// affects scheduler and connection to engine
+                buffer.engine.alterTarget(format: pcmTargetFormat)
+            } else {
+                buffer.reset()
                 resumed = false
             }
-        } catch {
-            Logger.decoding.error(error.localizedDescription)
-            if let audioDataError = error as? AudioPlayerError {
-                pipelineListener.notify(ErrorSeverity.fatal, audioDataError)
-            } else {
-                pipelineListener.notify(ErrorSeverity.fatal, AudioDataError(ErrorKind.unknown, "problem with audio format", error))
-            }
-            return
         }
     }
     
@@ -261,7 +260,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             session.notifyChanged(SubInfo.metadata)
         }
             
-        // keeping values up to date
+        /// keeping other values up to date
         session.notifyChanged(SubInfo.playout)
         session.notifyChanged(SubInfo.timeshift)
         session.notifyChanged(SubInfo.bouquet)

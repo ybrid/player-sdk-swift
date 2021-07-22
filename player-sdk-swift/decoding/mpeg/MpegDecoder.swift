@@ -30,8 +30,8 @@ class MpegDecoder : AudioDecoder {
     fileprivate var converter: AudioConverterRef? = nil
     var source: MpegData?
     
-    override init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener) throws {
-        try super.init(audioContentType: audioContentType, decodingListener: decodingListener)
+    override init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener, notify: DecoderNotification? ) throws {
+        try super.init(audioContentType: audioContentType, decodingListener: decodingListener, notify:notify )
         source = try MpegData(audioContentType: audioContentType, listener: self)
     }
     

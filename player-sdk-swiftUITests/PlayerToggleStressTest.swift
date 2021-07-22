@@ -115,7 +115,17 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         self.execute()
     }
 
-    
+    func test04_AACPlayStop() throws {
+        player = AudioPlayer.openSync(for: aacHEv2aachEndpoint, listener: self)
+        
+        stepDuration = 10
+        rangeFrom = 1 /// on first step
+        rangeTo = 3 /// on first step
+        restBetweenSteps = 5
+        stepsDecrease = 10
+        
+        self.execute()
+    }
     func execute() {
         if Thread.isMainThread{
             Logger.testing.debug("-- executing test in main thread")
