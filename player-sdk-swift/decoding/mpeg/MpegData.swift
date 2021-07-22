@@ -70,8 +70,10 @@ class MpegData : AudioData {
             var formatDescription = AudioStreamBasicDescription()
             readAudioProperty(property, &formatDescription)
             if let format = AVAudioFormat(streamDescription: &formatDescription) {
-                self.format = format
-                Logger.decoding.debug("kAudioFileStreamProperty_DataFormat used: \(format.debugDescription)")
+                if format.isBetter(than: self.format) {
+                    Logger.decoding.debug("kAudioFileStreamProperty_DataFormat using source format \(AudioData.describeAVFormat(format))")
+                    self.format = format
+                }
             }
         case kAudioFileStreamProperty_FileFormat:
             var value:UInt32 = 0
@@ -83,6 +85,33 @@ class MpegData : AudioData {
             let charCode = String(bytes: byteArray, encoding:  .ascii)
             Logger.decoding.debug("kAudioFileStreamProperty_FileFormat \(charCode ?? "(nothing)") unused")
             
+        case kAudioFileStreamProperty_FormatList:
+// @constant   kAudioFileStreamProperty_FormatList
+// In order to support formats such as AAC SBR where an encoded data stream can be decoded to
+//  multiple destination formats, this property returns an array of AudioFormatListItems
+// (see AudioFormat.h) of those formats.
+// The default behavior is to return the an AudioFormatListItem that has the same
+// AudioStreamBasicDescription that kAudioFileStreamProperty_DataFormat returns.
+            var formatDescriptions = [AudioStreamBasicDescription](repeating: AudioStreamBasicDescription(), count: 10)
+
+            readAudioPropertyArray(property, &formatDescriptions)
+
+            formatDescriptions
+                .forEach{ (desc) in
+                    var description = desc
+                    if let format = AVAudioFormat(streamDescription: &description ) {
+                        if format.isUsable {
+                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is \(AudioData.describeAVFormat(format))")
+                            if format.isBetter(than: self.format) {
+                                Logger.decoding.debug("kAudioFileStreamProperty_FormatList altering source format to \(AudioData.describeAVFormat(format))")
+                                self.format = format
+                            }
+                    }
+                } else {
+                    Logger.decoding.notice("kAudioFileStreamProperty_FormatList entry is not usable: \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
+                }
+            }
+
         default:
             Logger.decoding.debug("\(AudioData.describeProperty(property)) unused")
         }
@@ -121,6 +150,19 @@ class MpegData : AudioData {
             return
         }
         
+        guard AudioFileStreamGetProperty(id!, property, &propSize, &value) == noErr else {
+            Logger.decoding.error("failed to get value \(AudioData.describeProperty(property))")
+            return
+        }
+    }
+    
+    /// read a property
+    fileprivate func readAudioPropertyArray<T>(_ property: AudioFileStreamPropertyID, _ value: inout [T]) {
+        var propSize: UInt32 = 0
+        guard AudioFileStreamGetPropertyInfo(id!, property, &propSize, nil) == noErr else {
+            Logger.decoding.error("failed to get info for property \(AudioData.describeProperty(property))")
+            return
+        }
         guard AudioFileStreamGetProperty(id!, property, &propSize, &value) == noErr else {
             Logger.decoding.error("failed to get value \(AudioData.describeProperty(property))")
             return

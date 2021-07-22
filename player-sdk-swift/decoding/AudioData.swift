@@ -51,14 +51,48 @@ class AudioData {
         Logger.decoding.debug()
     }
     
+
+
+    
+    
     /// delegates for visibility
     static func describeFileTypeId(_ type: AudioFileTypeID) -> String { return describe(type: type ) }
-    static func describeFormatId(_ formatId: AudioFormatID) -> String { return describe(formatId: formatId ) }
+    static func describeFormatId(_ formatId: AudioFormatID, _ short:Bool) -> String { return describe(formatId: formatId ) }
     static func describeBitdepth(_ bitdepth: AVAudioCommonFormat?) -> String { return describe(bitdepth: bitdepth) }
-    static func describeProperty(_ property: AudioFileStreamPropertyID) -> String {
-        return describe(property)
-    }
+    static func describeProperty(_ property: AudioFileStreamPropertyID) -> String { return describe(property) }
+    static func describeAVFormat(_ avFormat: AVAudioFormat) -> String { return describe(format: avFormat) }
+
 }
+
+extension AVAudioFormat {
+    
+    static var formatIdRanking: [AudioFormatID]  { get {
+        return [
+                kAudioFormatMPEG4AAC, // 1999
+//                kAudioFormatMPEG4AAC_LD, // 2000
+//                kAudioFormatMPEG4AAC_ELD, // 2003
+//                kAudioFormatMPEG4AAC_ELD_SBR, // 2003
+                kAudioFormatMPEG4AAC_HE, // 2003
+                kAudioFormatMPEG4AAC_HE_V2 // 2006
+//                kAudioFormatMPEG4AAC_ELD_V2, // 2012
+        ]
+    }}
+    
+    func isBetter(than: AVAudioFormat? ) -> Bool {
+        guard let other = than else { return true }
+        if let myRank = AVAudioFormat.formatIdRanking.index(of: self.streamDescription.pointee.mFormatID),
+           let otherRank = AVAudioFormat.formatIdRanking.index(of: other.streamDescription.pointee.mFormatID),
+           myRank > otherRank {
+            return true
+        }
+        return false
+    }
+    
+    var isUsable:Bool { get {
+        return channelCount != 0 && sampleRate != 0.0
+    }}
+}
+
 
 // MARK: decriptions of constants
 
@@ -147,89 +181,90 @@ fileprivate func describe(_ property: AudioFileStreamPropertyID) -> String {
     }
 }
 
+
 /// all possible formatIds
-fileprivate func describe(formatId: AudioFormatID) -> String {
+fileprivate func describe(formatId: AudioFormatID, short:Bool = true) -> String {
     switch formatId {
     case kAudioFormatLinearPCM:
-        return "kAudioFormatLinearPCM"
+        return short ? "lpcm":"kAudioFormatLinearPCM"
     case kAudioFormatAC3:
-        return "kAudioFormatAC3"
+        return short ? "ac-3":"kAudioFormatAC3"
     case kAudioFormat60958AC3:
-        return "kAudioFormat60958AC3"
+        return short ? "cac3":"kAudioFormat60958AC3"
     case kAudioFormatAppleIMA4:
-        return "kAudioFormatAppleIMA4"
+        return short ? "ima4":"kAudioFormatAppleIMA4"
     case kAudioFormatMPEG4AAC:
-        return "kAudioFormatMPEG4AAC"
+        return short ? "aac ":"kAudioFormatMPEG4AAC"
     case kAudioFormatMPEG4CELP:
-        return "kAudioFormatMPEG4CELP"
+        return short ? "celp":"kAudioFormatMPEG4CELP"
     case kAudioFormatMPEG4HVXC:
-        return "kAudioFormatMPEG4HVXC"
+        return short ? "hvxc":"kAudioFormatMPEG4HVXC"
     case kAudioFormatMPEG4TwinVQ:
-        return "kAudioFormatMPEG4TwinVQ"
+        return short ?"twvq":"kAudioFormatMPEG4TwinVQ"
     case kAudioFormatMACE3:
-        return "kAudioFormatMACE3"
+        return short ?"MAC3":"kAudioFormatMACE3"
     case kAudioFormatMACE6:
-        return "kAudioFormatMACE6"
+        return short ?"MAC6":"kAudioFormatMACE6"
     case kAudioFormatULaw:
-        return "kAudioFormatULaw"
+        return short ?"ulaw":"kAudioFormatULaw"
     case kAudioFormatALaw:
-        return "kAudioFormatALaw"
+        return short ?"alaw":"kAudioFormatALaw"
     case kAudioFormatQDesign:
-        return "kAudioFormatQDesign"
+        return short ?"QDMC":"kAudioFormatQDesign"
     case kAudioFormatQDesign2:
-        return "kAudioFormatQDesign2"
+        return short ?"QDM2":"kAudioFormatQDesign2"
     case kAudioFormatQUALCOMM:
-        return "kAudioFormatQUALCOMM"
+        return short ?"Qclp":"kAudioFormatQUALCOMM"
     case kAudioFormatMPEGLayer1:
-        return "kAudioFormatMPEGLayer1"
+        return short ?".mp1":"kAudioFormatMPEGLayer1"
     case kAudioFormatMPEGLayer2:
-        return "kAudioFormatMPEGLayer2"
+        return short ?".mp2":"kAudioFormatMPEGLayer2"
     case kAudioFormatMPEGLayer3:
-        return "kAudioFormatMPEGLayer3"
+        return short ?".mp3":"kAudioFormatMPEGLayer3"
     case kAudioFormatTimeCode:
-        return "kAudioFormatTimeCode"
+        return short ?"time":"kAudioFormatTimeCode"
     case kAudioFormatMIDIStream:
-        return "kAudioFormatMIDIStream"
+        return short ?"midi":"kAudioFormatMIDIStream"
     case kAudioFormatParameterValueStream:
-        return "kAudioFormatParameterValueStream"
+        return short ?"apvs":"kAudioFormatParameterValueStream"
     case kAudioFormatAppleLossless:
-        return "kAudioFormatAppleLossless"
+        return short ?"alac":"kAudioFormatAppleLossless"
     case kAudioFormatMPEG4AAC_HE:
-        return "kAudioFormatMPEG4AAC_HE"
+        return short ?"acch":"MPEG-4 High Efficiency AAC audio object."
     case kAudioFormatMPEG4AAC_LD:
-        return "kAudioFormatMPEG4AAC_LD"
+        return short ?"aacl":"MPEG-4 AAC Low Delay audio object."
     case kAudioFormatMPEG4AAC_ELD:
-        return "kAudioFormatMPEG4AAC_ELD"
+        return short ?"aace":"MPEG-4 AAC Enhanced Low Delay audio object, has no flags. This is the formatID of the base layer without the SBR extension. See also kAudioFormatMPEG4AAC_ELD_SBR."
     case kAudioFormatMPEG4AAC_ELD_SBR:
-        return "kAudioFormatMPEG4AAC_ELD_SBR"
+        return short ?"aacf":"MPEG-4 AAC Enhanced Low Delay audio object with SBR extension layer."
     case kAudioFormatMPEG4AAC_ELD_V2:
-        return "kAudioFormatMPEG4AAC_ELD_V2"
+        return short ?"aacg":"MPEG-4 AAC Enhanced Low Delay Version 2 audio object."
     case kAudioFormatMPEG4AAC_HE_V2:
-        return "kAudioFormatMPEG4AAC_HE_V2"
+        return short ?"aacp":"MPEG-4 High Efficiency AAC Version 2 audio object."
     case kAudioFormatMPEG4AAC_Spatial:
-        return "kAudioFormatMPEG4AAC_Spatial"
+        return short ?"aacs":"MPEG-4 Spatial Audio audio object."
     case kAudioFormatMPEGD_USAC:
-        return "kAudioFormatMPEGD_USAC"
+        return short ?"kAudioFormatMPEGD_USAC":"kAudioFormatMPEGD_USAC"
     case kAudioFormatAMR:
-        return "kAudioFormatAMR"
+        return short ?"samr":"kAudioFormatAMR"
     case kAudioFormatAMR_WB:
-        return "kAudioFormatAMR_WB"
+        return short ?"sawb":"kAudioFormatAMR_WB"
     case kAudioFormatAudible:
-        return "kAudioFormatAudible"
+        return short ?"AUDB":"kAudioFormatAudible"
     case kAudioFormatiLBC:
-        return "kAudioFormatiLBC"
+        return short ?"ilbc":"kAudioFormatiLBC"
     case kAudioFormatDVIIntelIMA:
-        return "kAudioFormatDVIIntelIMA"
+        return short ?"0x6D730011":"kAudioFormatDVIIntelIMA"
     case kAudioFormatMicrosoftGSM:
-        return "kAudioFormatMicrosoftGSM"
+        return short ?"0x6D730031":"kAudioFormatMicrosoftGSM"
     case kAudioFormatAES3:
-        return "kAudioFormatAES3"
+        return short ?"aes3":"kAudioFormatAES3"
     case kAudioFormatEnhancedAC3:
-        return "kAudioFormatEnhancedAC3"
+        return short ?"ec-3":"kAudioFormatEnhancedAC3"
     case kAudioFormatFLAC:
-        return "kAudioFormatFLAC"
+        return short ?"flac":"kAudioFormatFLAC"
     case kAudioFormatOpus:
-        return "kAudioFormatOpus"
+        return short ?"opus":"kAudioFormatOpus"
     default:
         return String(format: "unknown audio format with id %i", formatId)
     }
@@ -245,6 +280,15 @@ fileprivate func describe(bitdepth commonFormat: AVAudioCommonFormat?) -> String
     case 2: return "pcmFloat64"
     case 3: return "pcmInt16"
     case 4: return "pcmInt32"
-    default: return String(format: "unknown bitdepth  with id %i", common.rawValue)
+    default: return String(format: "unknown bitdepth with id %i", common.rawValue)
     }
+}
+
+fileprivate func describe(format: AVAudioFormat?) -> String {
+    guard let fmt = format else {
+        return String(format:"(no format information)")
+    }
+    let desc = fmt.streamDescription.pointee
+    
+    return String(format: "audio %@ %d ch %.0f Hz %@ %@", AudioData.describeFormatId(desc.mFormatID, true) , desc.mChannelsPerFrame, desc.mSampleRate, AudioData.describeBitdepth(format?.commonFormat), fmt.isInterleaved ? "interleaved" : "non interleaved" )
 }

@@ -35,8 +35,8 @@ class UseAudioPlayerTests: XCTestCase {
 
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
-        /// log additional debug information in this tests
-        Logger.verbose = true
+        /// could log additional debug information in this tests
+//        Logger.verbose = true
         
         playerListener.reset()
         
@@ -64,9 +64,6 @@ class UseAudioPlayerTests: XCTestCase {
     Stop could need a second to clean up. Otherwise it may not sound nice.
     */
     func test01_PlaySomeSeconds() throws {
-        Logger.verbose = false
-        
-        
         try AudioPlayer.open(for: myEndpoint, listener: nil) {
             (control) in
             
@@ -324,6 +321,63 @@ class UseAudioPlayerTests: XCTestCase {
     }
 
  
+    /*
+     Audio codecs AAC are supported up to profile HE-AAC_v2.
+     */
+    func test09_PlayHEAACv2() {
+
+        let aacStream =
+//      "https://www2.iis.fraunhofer.de/AAC/xheDemo/Walking01_LN_xHE_024s_AACLC_320s.mp4" // AAC 44,1 kHz
+//      "https://www2.iis.fraunhofer.de/AAC/xheDemo/Rain01_LN_xHE_016s_AACLC_320s.mp4" // AAC 48 kHz
+
+
+        // @see https://www2.iis.fraunhofer.de/AAC/stereo.html
+        // tests for proper reproduction of the SBR portion of the HE-AAC bitstream and proper channel arrangement.
+        
+//      "https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot5Sig1.mp4" //  AOT 5, explicit signalling, backwards compatible -> HE-AAC, 'aach'
+       "https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig1.mp4" // AOT 29, explicit signalling, backwards compatible ->  HE-AAC_v2, 'aacp'
+//       "https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig2.mp4" // AOT 29, explicit signalling, not backwards compatible (MPEG hierarchical) ->  HE-AAC_v2, 'aacp'
+//       "https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig0.mp4" // AOT 29, implicit signalling -> HE-AAC_v2 not detected, using 'aac ' (playing without SBR), 1ch
+//        "https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot5SigusePS.mp4" // mixed signaling -> HE-AAC_v2 'aach', 1 ch
+        let aacEndpoint = MediaEndpoint(mediaUri: aacStream)
+        do {
+            try AudioPlayer.open(for: aacEndpoint, listener: nil) {
+                (control) in
+                
+                control.play()
+                sleep(6)
+                control.stop()
+                sleep(1) /// if not, the player listener may be gone to early to recieve the stop event
+                
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player control. Something went wrong");
+            self.semaphore?.signal(); return
+        }
+    }
+    
+    func test10_PlayWav() {
+        let wavStream = "https://www2.iis.fraunhofer.de/AAC/SBRtestStereo-441-16b.wav"
+
+        let aacEndpoint = MediaEndpoint(mediaUri: wavStream)
+        do {
+            try AudioPlayer.open(for: aacEndpoint, listener: playerListener) {
+                (control) in
+                
+                control.play()
+                sleep(6)
+                control.stop()
+                sleep(1) /// if not, the player listener may be gone to early to recieve the stop event
+                
+                self.semaphore?.signal()
+            }
+        } catch {
+            XCTFail("no player control. Something went wrong");
+            self.semaphore?.signal(); return
+        }
+    }
+    
     
 }
 

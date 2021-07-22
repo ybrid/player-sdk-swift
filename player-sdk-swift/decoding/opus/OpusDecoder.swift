@@ -77,8 +77,8 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
         self.skipper = FrameSkipper(bytesPerSample: OpusDecoder.bytesPerSample, audioBufferFactory: { (frames:Int) throws -> AVAudioPCMBuffer
             in return try self.prepareBuffer(frames: UInt32(frames))
         } )
-        Logger.decoding.info("source format \(AudioPipeline.describeFormat(sourceFormat))")
-        Logger.decoding.info("target format \(AudioPipeline.describeFormat(pcmFormat))")
+        Logger.decoding.info("source format \(AudioData.describeAVFormat(sourceFormat))")
+        Logger.decoding.info("target format \(AudioData.describeAVFormat(pcmFormat))")
         
         var result:opus_int32 = OPUS_OK
         decoder = opus_decoder_create(opus_int32(pcmFormat.sampleRate), opus_int32(sourceFormat.channelCount), &result)

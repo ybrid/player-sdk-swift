@@ -37,7 +37,7 @@ class PlaybackEngine : Playback {
 
     let engine:AVAudioEngine = AVAudioEngine() /// visible for unit testing
     let playerNode:AVAudioPlayerNode = AVAudioPlayerNode() /// visible for unit testing
-    let sampleRate:Double /// visible for unit testing
+    var sampleRate:Double /// visible for unit testing
     
     var timer:DispatchSourceTimer? /// visible for unit testing
     private let timerInterval = DispatchTimeInterval.milliseconds(200)
@@ -53,16 +53,39 @@ class PlaybackEngine : Playback {
         self.playerListener = listener
         self.engine.attach(self.playerNode)
         // an interleaved format leads to exception with code=-10868 --> kAudioUnitErr_FormatNotSupported
-        Logger.playing.debug("engine format is \(AudioPipeline.describeFormat(format)) ")
+        Logger.playing.debug("engine format is \(AudioData.describeAVFormat(format)) ")
         self.engine.connect(self.playerNode, to: self.engine.mainMixerNode, format: format)
         self.engine.prepare()
-        Logger.playing.debug("created with format \(AudioPipeline.describeFormat(format))")
     }
     
     deinit {
         Logger.playing.debug()
         self.engine.disconnectNodeInput(playerNode)
         self.engine.detach(playerNode)
+    }
+    
+    
+    func alterTarget(format: AVAudioFormat) {
+        Logger.playing.info("altering engine format to \(AudioData.describeAVFormat(format)) ")
+        stopTimer()
+        engine.stop()
+        engine.disconnectNodeInput(playerNode)
+
+        engine.connect(self.playerNode, to: self.engine.mainMixerNode, format: format)
+        do {
+            try engine.start()
+            playerNode.play()
+        } catch {
+            Logger.playing.error("failed to restart engine: \(error.localizedDescription)")
+        }
+ 
+        self.sampleRate = format.sampleRate
+        let scheduling = PlaybackScheduling(playerNode, sampleRate: sampleRate)
+        scheduling.reset()
+        playbackBuffer?.scheduling = scheduling
+        
+        startTimer()
+//        _ = start()
     }
     
     // MARK: playback
@@ -122,6 +145,7 @@ class PlaybackEngine : Playback {
         if Logger.verbose { Logger.playing.debug("volume=\(volume)") }
     }
 
+    
     // MARK: taking care of buffer
     private func startTimer() {
         let timer = DispatchSource.makeTimerSource()

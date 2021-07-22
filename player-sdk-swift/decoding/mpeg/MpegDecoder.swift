@@ -48,13 +48,14 @@ class MpegDecoder : AudioDecoder {
                 Logger.decoding.error("failed to dispose audio converter")
                 return
             }}
+        converter = nil
         cleanupConverterGarbage()
     }
     
     override func create(from sourceFormat:AVAudioFormat) throws -> AVAudioFormat {
         let targetFormat = calcPcmFormat(sourceFormat)
-        Logger.decoding.info("source format \(AudioPipeline.describeFormat(sourceFormat))")
-        Logger.decoding.info("target format \(AudioPipeline.describeFormat(targetFormat))")
+        Logger.decoding.info("source format \(AudioData.describeAVFormat(sourceFormat))")
+        Logger.decoding.info("target format \(AudioData.describeAVFormat(targetFormat))")
         if let converter = converter {
             if AudioConverterDispose(converter) != noErr {
                 Logger.decoding.error("failed to dispose audio converter")

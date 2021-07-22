@@ -40,7 +40,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var started = Date()
     var resumed = false
     var firstPCM = true
-    var firstMetadata = true
+//    var firstMetadata = true
     var stopping = false
 
     var icyFields:[String:String]? { didSet {
@@ -93,7 +93,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func reset() {
         started = Date()
         firstPCM = true
-        firstMetadata = true
+//        firstMetadata = true
         resumed = true
         
         session.refresh()
@@ -115,7 +115,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         case kAudioFormatOpus:
             let ogg = try OggContainer()
             self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
+        case kAudioFileMP3Type, kAudioFileMPEG4Type, kAudioFileAAC_ADTSType:
+            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
         default:
+            Logger.decoding.notice("trying MpegDecoder with file type \(AudioData.describeFileTypeId(audioContentType))")
             self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self)
         }
     }
@@ -173,7 +176,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                     buffer?.onMetadataCue = { (metaCueId) in
                         self.session.notifyMetadata(uuid: metaCueId)
                     }
-
+                } else {
+                    buffer?.engine.alterTarget(format: pcmTargetFormat)
                 }
             }
             if resumed {
@@ -319,19 +323,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             }
         }
     }
-    
-    
-    ///  delegate for visibility
-    static func describeFormat(_ format: AVAudioFormat) -> String {
-        return describe(format: format)
-    }
+
 }
 
-fileprivate func describe(format: AVAudioFormat?) -> String {
-    guard let fmt = format else {
-        return String(format:"(no format information)")
-    }
-    let desc = fmt.streamDescription.pointee
-    
-    return String(format: "audio %@ %d ch %.0f Hz %@ %@", AudioData.describeFormatId(desc.mFormatID) , desc.mChannelsPerFrame, desc.mSampleRate, AudioData.describeBitdepth(format?.commonFormat), fmt.isInterleaved ? "interleaved" : "non interleaved" )
-}

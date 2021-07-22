@@ -65,7 +65,7 @@ class PlaybackBuffer {
     }
     
     private let cachedChunks:ChunkCache
-    let scheduling:PlaybackScheduling /// visible for unit tests
+    var scheduling:PlaybackScheduling /// visible for unit tests
     
     weak var listener:BufferListener?
     let engine: PlaybackEngine

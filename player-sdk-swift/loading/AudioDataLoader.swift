@@ -253,12 +253,16 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     
     private func getAudioFileType(_ mimeType:String) -> AudioFileTypeID? {
         switch mimeType {
-        case "audio/mpeg":
+        case "audio/mpeg" :
             return kAudioFileMP3Type
         case "audio/aac", "audio/aacp":
             return kAudioFileAAC_ADTSType
+        case "video/mp4", "audio/mp4":
+            return kAudioFileMPEG4Type
         case "application/ogg", "audio/ogg":
             return kAudioFormatOpus
+        case "audio/x-wav":
+            return kAudioFileWAVEType
         default:
            return nil
         }
@@ -267,8 +271,12 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     private func getAudioFileType(filename:String) -> AudioFileTypeID? {
         let ext = (filename as NSString).pathExtension
         switch ext {
-        case "mp3": return kAudioFileMP3Type
-        case "opus": return kAudioFormatOpus
+        case "mp3":
+            return kAudioFileMP3Type
+        case "opus":
+            return kAudioFormatOpus
+        case "mp4", "m4a", "m4b", "m4p", "m4r", "m4v", "aac":
+            return kAudioFileMPEG4Type
         default:
             return nil
         }
@@ -276,11 +284,18 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
 
     
     // MARK: session runs
-    
+    var firstBytes = true
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         
         if Logger.verbose { Logger.loading.debug("recieved \(data.count) bytes, total \(dataTask.countOfBytesReceived)") }
         
+//        if firstBytes {
+//            firstBytes = false
+//            let asText = String(decoding: data, as: UTF8.self)
+//            Logger.loading.info("first bytes as string is '\(asText)'" )
+//        }
+//
+//
         pipeline.decodingQueue.async {
             self.pipeline.process(data: data)
         }

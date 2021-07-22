@@ -44,6 +44,9 @@ class AudioDecoder : AudioDataListener {
     // MARK: audio data listener
 
     func onFormatChanged(_ srcFormat: AVAudioFormat) {
+//      todo
+//        try self.create(from: srcFormat)
+//        listener.onFormatChanged(tgtFormat)
         listener.onFormatChanged(srcFormat)
     }
     
