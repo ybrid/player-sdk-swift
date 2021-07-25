@@ -165,6 +165,8 @@
 		17D45D7D2657180600983025 /* YbridTimeshiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */; };
 		17D45D7E2657180600983025 /* YbridTimeshiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */; };
 		17D45D802659591F00983025 /* YbridSteelinessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */; };
+		17D96D4526ADEEC800D25D93 /* TestYbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */; };
+		17D96D4626ADEEC800D25D93 /* TestYbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */; };
 		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		17E9AB842653A808001ED9C8 /* YbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB832653A808001ED9C8 /* YbridControl.swift */; };
@@ -290,6 +292,7 @@
 		17D01BFB262F174D007B0A3C /* IcyDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcyDriver.swift; sourceTree = "<group>"; };
 		17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridTimeshiftTests.swift; sourceTree = "<group>"; };
 		17D45D7F2659591F00983025 /* YbridSteelinessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSteelinessTests.swift; sourceTree = "<group>"; };
+		17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestYbridControl.swift; sourceTree = "<group>"; };
 		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
 		17E9AB832653A808001ED9C8 /* YbridControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridControl.swift; sourceTree = "<group>"; };
@@ -389,20 +392,20 @@
 		170703D225D2F44400549B8A /* player-sdk-swift */ = {
 			isa = PBXGroup;
 			children = (
+				17539E3E26257A9A000FE902 /* MediaEndpoint.swift */,
+				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
+				1799DC8D25D565A10055C973 /* Logger.swift */,
+				175AFB2825FA428100005046 /* AudioPlayerError.swift */,
+				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
+				1732222125F614BC00AEC833 /* Metadata.swift */,
+				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
+				17E9AB832653A808001ED9C8 /* YbridControl.swift */,
 				170703D425D2F44400549B8A /* Info.plist */,
 				175849E4264BB6500071FEE6 /* util */,
 				178F637F26824658007AB54B /* loading */,
 				178F6381268247E9007AB54B /* decoding */,
 				178F63802682469A007AB54B /* playing */,
 				17539E502626D108000FE902 /* session */,
-				17E9AB832653A808001ED9C8 /* YbridControl.swift */,
-				1799DC7C25D565970055C973 /* AudioPlayer.swift */,
-				1799DC8D25D565A10055C973 /* Logger.swift */,
-				175AFB2825FA428100005046 /* AudioPlayerError.swift */,
-				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
-				1799DC9D25D565BB0055C973 /* PlayerContext.swift */,
-				1732222125F614BC00AEC833 /* Metadata.swift */,
-				17539E3E26257A9A000FE902 /* MediaEndpoint.swift */,
 			);
 			path = "player-sdk-swift";
 			sourceTree = "<group>";
@@ -572,6 +575,7 @@
 				170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */,
 				170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */,
 				17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */,
+				17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */,
 			);
 			path = "player-sdk-swiftUITests";
 			sourceTree = "<group>";
@@ -1133,6 +1137,7 @@
 				17539EBF26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
 				1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */,
 				175849F4264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,
+				17D96D4626ADEEC800D25D93 /* TestYbridControl.swift in Sources */,
 				1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */,
 				176081E1268DA1D700E623E2 /* YbridControlBasicTests.swift in Sources */,
 			);
@@ -1152,6 +1157,7 @@
 				17539EBE26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
 				1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */,
 				175849F3264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,
+				17D96D4526ADEEC800D25D93 /* TestYbridControl.swift in Sources */,
 				17CD394525E8FCE10085B274 /* AbortBufferingTests.swift in Sources */,
 				176081E0268DA1D700E623E2 /* YbridControlBasicTests.swift in Sources */,
 			);

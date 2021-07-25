@@ -171,25 +171,28 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         do {
             guard let buffer = self.buffer else {
-                /// called first time format is detected
+                /// first time format is detected
                 let engine = PlaybackEngine(format: pcmTargetFormat, listener: playerListener )
                 if !infinite { engine.canPause = true }
-                self.buffer = engine.start()
-                self.pipelineListener.ready(playback: engine)
-                
-                buffer?.onMetadataCue = { (metaCueId) in
-                    self.session.notifyMetadata(uuid: metaCueId)
+                if let buffer = engine.start() {
+                    self.pipelineListener.ready(playback: engine)
+                    self.buffer = buffer
+                    
+                    buffer.onMetadataCue = { (metaCueId) in
+                        self.session.notifyMetadata(uuid: metaCueId)
+                    }
                 }
                 return
             }
                 
-            if !resumed {
-                /// called next times when format change is detected
-                /// affects scheduler and connection to engine
-                buffer.engine.alterTarget(format: pcmTargetFormat)
-            } else {
+            if resumed {
+                /// recoveried from network stall
                 buffer.reset()
                 resumed = false
+            } else {
+                /// subsequently when format change is detected
+                /// affects scheduler and connection to engine
+                buffer.engine.alterTarget(format: pcmTargetFormat)
             }
         }
     }

@@ -105,7 +105,7 @@ class YbridControlBasicTests: XCTestCase {
             return
         }
         
-        ybridControl.playing() { (ybridControl) in
+        ybridControl.playing() { (ybridControl, test) in
             
             ybridControl.refresh()
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis

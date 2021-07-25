@@ -166,26 +166,25 @@ class YbridSwapItemTests: XCTestCase {
     func test11_SwapItemComplete_Demo() throws {
         
         let actionTraces = ActionsTrace()
-        TestYbridControl(ybridDemoEndpoint, listener: listener).playing{ (ybrid) in
-            actionTraces.append( swapItemSynced(ybrid, maxWait: 8.0) )
+        TestYbridControl(ybridDemoEndpoint, listener: listener).playing{ (ybrid,test) in
+            actionTraces.append( test!.swapItemSynced(maxWait: 8.0) )
         }
         checkErrors(expectedErrors: 0)
-        actionTraces.check(expectedActions: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
+        actionTraces.check(confirm: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
     }
     
     func test12_SwapItemComplete_AdDemo() throws {
         
         let actionTraces = ActionsTrace()
-        TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ (ybrid) in
-            actionTraces.append( swapItemSynced(ybrid, maxWait: 8.0) )
+        TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ (ybrid,test) in
+            actionTraces.append( test!.swapItemSynced(maxWait: 8.0) )
         }
         
         checkErrors(expectedErrors: 1)
-        actionTraces.check(expectedActions: 1, maxDuration: 1.0)
+        actionTraces.check(confirm: 1, maxDuration: 1.0)
     }
   
-
-
+    
     private func checkErrors(expectedErrors:Int)  {
         guard listener.errors.count == expectedErrors else {
             XCTFail("\(expectedErrors) errors expected, but were \(listener.errors.count)")
@@ -199,23 +198,3 @@ class YbridSwapItemTests: XCTestCase {
     
 }
 
-fileprivate func swapItemSynced( _ ybrid:YbridControl, maxWait:TimeInterval? = nil) -> Trace {
-    let mySema = DispatchSemaphore(value: 0)
-    let trace = Trace("swap item")
-    ybrid.swapItem() { (success) in
-        swapItemComplete(success, trace)
-        mySema.signal()
-    }
-    if let maxWait = maxWait {
-        _ = mySema.wait(timeout: .now() + maxWait)
-    } else {
-        _ = mySema.wait(timeout: .distantFuture)
-    }
-    return trace
-}
-
-fileprivate func swapItemComplete(_ success:Bool,_ trace:Trace) {
-   trace.complete(success)
-   Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
-   sleep(3)
-}

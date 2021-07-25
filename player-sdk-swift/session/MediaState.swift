@@ -60,14 +60,13 @@ class MediaState  {
     }}
     
     var offset:TimeInterval? { didSet {
-        if oldValue != offset {
+        if let _ = offset {
             setChanged(SubInfo.timeshift)
         }
     }}
     
     private let changed = ThreadsafeSet<SubInfo>(MediaState.stateQueue)
     static let stateQueue = DispatchQueue(label: "io.ybrid.session.state.changes")
-
     
     init(_ endpoint:MediaEndpoint) {
         self.endpointUri = URL(string: endpoint.uri)!

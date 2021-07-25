@@ -203,6 +203,14 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         }
     }
     
+    func isItem(of types:[ItemType]) -> Bool {
+        queue.sync {
+            if let currentType = metadatas.last?.current?.type {
+                return types.contains(currentType)
+            }
+            return false
+        }
+    }
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
         Logger.testing.info("-- offset is \(offset.S)")
@@ -241,63 +249,6 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
 
 }
 
-class TestYbridControl {
-    
-    let poller = Poller()
-    let endpoint:MediaEndpoint
-    let listener:YbridControlListener
-    
-    init(_ endpoint:MediaEndpoint, listener:YbridControlListener) {
-        self.endpoint = endpoint
-        self.listener = listener
-    }
-    
-    func playing( action: @escaping (YbridControl)->() ) {
-        let semaphore = DispatchSemaphore(value: 0)
-        do {
-            try AudioPlayer.open(for: endpoint, listener: listener,
-                 playbackControl: { (ctrl) in ctrl.close()
-                    XCTFail();
-                    semaphore.signal(); return },
-                 ybridControl: { [self] (ybridControl) in
-                    
-                    ybridControl.play()
-                    poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
-                    
-                    action(ybridControl)
-                    
-                    ybridControl.stop()
-                    poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)
-                    ybridControl.close()
-                    semaphore.signal()
-                 })
-        } catch {
-            XCTFail("no player. Something went wrong");
-            semaphore.signal(); return
-        }
-        _ = semaphore.wait(timeout: .distantFuture)
-    }
-    
-    func stopped( action: @escaping (YbridControl)->() ) {
-        let semaphore = DispatchSemaphore(value: 0)
-        do {
-            try AudioPlayer.open(for: endpoint, listener: listener,
-                 playbackControl: { (ctrl) in semaphore.signal()
-                    XCTFail(); return },
-                 ybridControl: { (ybridControl) in
-                    
-                    action(ybridControl)
-                    
-                    ybridControl.close()
-                    semaphore.signal()
-                 })
-        } catch {
-            XCTFail("no player. Something went wrong");
-            semaphore.signal(); return
-        }
-        _ = semaphore.wait(timeout: .distantFuture)
-    }
-}
 
 
 class Trace {
@@ -347,9 +298,9 @@ class ActionsTrace {
         return actionsTook
     }
 
-    func check(expectedActions:Int, mustBeCompleted:Bool = true, maxDuration:TimeInterval) {
+    func check(confirm:Int, mustBeCompleted:Bool = true, maxDuration:TimeInterval) {
           
-        XCTAssertEqual(actions.count,expectedActions, "expecting \(expectedActions) completed actions, but were \(actions.count)")
+        XCTAssertEqual(actions.count,confirm, "expecting \(confirm) completed actions, but were \(actions.count)")
         
         actions.filter{
             if mustBeCompleted {
