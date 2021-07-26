@@ -1,5 +1,5 @@
 //
-// MpegData.swift
+// SystemAudioData.swift
 // player-sdk-swift
 //
 // Copyright (c) 2020 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -23,10 +23,13 @@
 // SOFTWARE.
 //
 
+//
+// Packaging of audio data supported by AudioFileStream-API of AudioToolbox on iOS and macOS.
+//
 
 import AVFoundation
 
-class MpegData : AudioData {
+class SystemAudioData : AudioData {
     
     var id:AudioFileStreamID? 
     
@@ -174,13 +177,13 @@ class MpegData : AudioData {
 // MARK: callbacks declared by AudioToolbox
 
 func audioPropertyCallback(_ context: UnsafeMutableRawPointer, _ id: AudioFileStreamID, _ property: AudioFileStreamPropertyID, _ flags: UnsafeMutablePointer<AudioFileStreamPropertyFlags>) {
-    let audioData = Unmanaged<MpegData>.fromOpaque(context).takeUnretainedValue()
+    let audioData = Unmanaged<SystemAudioData>.fromOpaque(context).takeUnretainedValue()
     audioData.parse(property: property)
 }
 
 /// for iOS 14,*
 func audioPacketCallback(_ context: UnsafeMutableRawPointer, _ byteCount: UInt32, _ packetCount: UInt32, _ data: UnsafeRawPointer, _ packetDescriptions: UnsafeMutablePointer<AudioStreamPacketDescription>?) {
-    let audioData = Unmanaged<MpegData>.fromOpaque(context).takeUnretainedValue()
+    let audioData = Unmanaged<SystemAudioData>.fromOpaque(context).takeUnretainedValue()
     if let descriptions = packetDescriptions {
         audioData.addPackets(data, byteCount, descriptions, packetCount)
     } else {

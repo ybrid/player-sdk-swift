@@ -116,12 +116,12 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             let ogg = try OggContainer()
             self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
         case kAudioFileMP3Type, kAudioFileMPEG4Type, kAudioFileAAC_ADTSType:
-            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
+            self.decoder = try SystemDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
                 self.pipelineListener.notify(severity, error)
             } )
         default:
-            Logger.decoding.notice("trying MpegDecoder with file type \(AudioData.describeFileTypeId(audioContentType))")
-            self.decoder = try MpegDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
+            Logger.decoding.notice("using DefaultDecoder with file type \(AudioData.describeFileTypeId(audioContentType))")
+            self.decoder = try SystemDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
                 self.pipelineListener.notify(severity, error)
             })
         }

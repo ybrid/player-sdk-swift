@@ -32,7 +32,7 @@ public class AudioDataError : AudioPlayerError {
         super.init(kind, nil)
     }
     
-    // used with mpeg
+    // used with system converter from os
     init(_ kind: ErrorKind, _ code: OSStatus) {
         super.init(kind, describe(osstatus: code))
         super.osstatus = code
@@ -52,7 +52,7 @@ public class DecoderError : AudioPlayerError {
             super.init(kind, nil)
             return
         }
-        super.init(kind, MpegDecoder.describeConverting(code))
+        super.init(kind, SystemDecoder.describeConverting(code))
         super.osstatus = code
     }
     init(_ kind:ErrorKind, _ message: String) {

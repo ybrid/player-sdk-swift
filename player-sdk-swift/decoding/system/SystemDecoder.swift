@@ -1,5 +1,5 @@
 //
-// MpegDecoder.swift
+// SystemDecoder.swift
 // player-sdk-swift
 //
 // Copyright (c) 2020 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -23,16 +23,20 @@
 // SOFTWARE.
 //
 
+//
+// Decoding of audio data supported from AudioConverter in CoreAudio, AudioToolbox and AudioCodecs on iOS and macOS.
+//
+
 import AVFoundation
 
-class MpegDecoder : AudioDecoder {
+class SystemDecoder : AudioDecoder {
     
     fileprivate var converter: AudioConverterRef? = nil
-    var source: MpegData?
+    var source: SystemAudioData?
     
     override init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener, notify: DecoderNotification? ) throws {
         try super.init(audioContentType: audioContentType, decodingListener: decodingListener, notify:notify )
-        source = try MpegData(audioContentType: audioContentType, listener: self)
+        source = try SystemAudioData(audioContentType: audioContentType, listener: self)
     }
     
     deinit {
@@ -116,12 +120,12 @@ class MpegDecoder : AudioDecoder {
         let buffer = try prepareBuffer(frames: pcmFrames)
         let context = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
         let status = AudioConverterFillComplexBuffer(converter!, convertPacketCallback, context, &buffer.frameLength, buffer.mutableAudioBufferList, nil)
-        if Logger.verbose { Logger.decoding.debug("has read \(buffer.frameLength) frames into buffer of capacity \(pcmFrames) -> '\(MpegDecoder.describeConverting(status))'") }
+        if Logger.verbose { Logger.decoding.debug("has read \(buffer.frameLength) frames into buffer of capacity \(pcmFrames) -> '\(SystemDecoder.describeConverting(status))'") }
         
         cleanupConverterGarbage()
         
         guard status == noErr || status == ConvertingEndOfData else {
-            Logger.decoding.error("AudioConverterFillComplexBuffer returned os status \(MpegDecoder.describeConverting(status))")
+            Logger.decoding.error("AudioConverterFillComplexBuffer returned os status \(SystemDecoder.describeConverting(status))")
             switch status {
             case ConvertingMissingSourceFormat:
                 throw DecoderError(.missingSourceFormat)
@@ -243,7 +247,7 @@ fileprivate func convertPacketCallback(_ converter: AudioConverterRef,
                            _ outBufferList: UnsafeMutablePointer<AudioBufferList>,
                            _ outPacketDescriptions: UnsafeMutablePointer<UnsafeMutablePointer<AudioStreamPacketDescription>?>?,
                            _ context: UnsafeMutableRawPointer?) -> OSStatus {
-    let converter = Unmanaged<MpegDecoder>.fromOpaque(context!).takeUnretainedValue()
+    let converter = Unmanaged<SystemDecoder>.fromOpaque(context!).takeUnretainedValue()
     return converter.convertPacket(&packetCount.pointee, &outBufferList.pointee, outPacketDescriptions)
 }
 
