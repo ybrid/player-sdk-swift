@@ -43,7 +43,7 @@ class AudioData {
     let listener:AudioDataListener
     typealias Package = (data:Data,description:AudioStreamPacketDescription?)
      
-    init(audioContentType: AudioFileTypeID, listener: AudioDataListener) throws {
+    init(listener: AudioDataListener) throws {
         self.listener = listener
     }
     

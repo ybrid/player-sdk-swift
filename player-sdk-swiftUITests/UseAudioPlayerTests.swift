@@ -183,6 +183,7 @@ class UseAudioPlayerTests: XCTestCase {
                 
                 XCTAssertEqual(playerListener.errors.count, 1)
                 guard let lastError = playerListener.errors.last else {
+                    XCTFail()
                     return
                 }
                 XCTAssertNotEqual(0, lastError.code) /// error occured
@@ -343,6 +344,7 @@ class UseAudioPlayerTests: XCTestCase {
             self.semaphore?.signal(); return
         }
         
+        sleep(2)
         XCTAssertEqual(playerListener.errors.count, 0)
         playerListener.errors.forEach{ (error) in
             XCTFail(error.message ?? error.localizedDescription)
@@ -368,6 +370,12 @@ class UseAudioPlayerTests: XCTestCase {
         } catch {
             XCTFail("no player control. Something went wrong");
             self.semaphore?.signal(); return
+        }
+        
+        sleep(2)
+        XCTAssertEqual(playerListener.errors.count, 0)
+        playerListener.errors.forEach{ (error) in
+            XCTFail(error.message ?? error.localizedDescription)
         }
     }
     

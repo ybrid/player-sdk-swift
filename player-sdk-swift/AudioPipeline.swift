@@ -106,27 +106,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.metadataExtractor = MetadataExtractor(bytesBetweenMetadata: metadataInverallB)
     }
         
-    func prepareAudio(audioContentType: AudioFileTypeID) throws {
-        
-        // deactivated until we destinguish between icecast and ybrid
-//        self.accumulator = DataAccumulator(type: audioContentType)
-        
-        switch audioContentType {
-        case kAudioFormatOpus:
-            let ogg = try OggContainer()
-            self.decoder = try OpusDecoder(container: ogg, decodingListener: self)
-        case kAudioFileMP3Type, kAudioFileMPEG4Type, kAudioFileAAC_ADTSType:
-            self.decoder = try SystemDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
-                self.pipelineListener.notify(severity, error)
-            } )
-        default:
-            Logger.decoding.notice("using DefaultDecoder with file type \(AudioData.describeFileTypeId(audioContentType))")
-            self.decoder = try SystemDecoder(audioContentType: audioContentType, decodingListener: self, notify: { (severity, error) in
-                self.pipelineListener.notify(severity, error)
-            })
-        }
+    func prepareDecoder(_ mimeType: String?, _ filename: String?) throws {
+        self.decoder = try AudioDecoder.factory(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
     }
-    
+
     func setInfinite(_ infinite: Bool) {
         self.infinite = infinite
     }

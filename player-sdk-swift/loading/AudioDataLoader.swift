@@ -185,7 +185,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
                 }
                 handleMetadata(icyMetadata)
             }
-            try handleMediaType(response.mimeType, response.suggestedFilename)
+            try pipeline.prepareDecoder(response.mimeType, response.suggestedFilename)
             handleMediaLength(response.expectedContentLength)
         } catch {
             if let playerError = error as? AudioPlayerError {
@@ -216,27 +216,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             pipeline.prepareMetadata(metadataInverallB: metadataEveryBytes)
         }
     }
-    
-    fileprivate func handleMediaType(_ mimeType: String?, _ filename: String?) throws {
-        guard let mimeType = mimeType else {
-            throw AudioDataError(.missingMimeType, "missing mimeType")
-        }
         
-        guard let type = getAudioFileType( mimeType ) else {
-            guard let name = filename else {
-                throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType) without filename")
-            }
-            guard let type = getAudioFileType(filename: name) else {
-                throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType) with filename \(name)")
-            }
-            Logger.loading.debug("mimeType \(mimeType) with filename \(name) resolved to \(AudioData.describeFileTypeId(type))")
-            try pipeline.prepareAudio(audioContentType: type)
-            return
-        }
-        Logger.loading.debug("mimeType \(mimeType) resolved to \(AudioData.describeFileTypeId(type))")
-        try pipeline.prepareAudio(audioContentType: type)
-    }
-    
     fileprivate func handleMediaLength(_ expectedLength: Int64) {
         Logger.loading.debug("expecting to recieve \(expectedLength == -1 ? "infinite" : String(expectedLength)) bytes")
         pipeline.setInfinite(expectedLength == -1)
@@ -250,39 +230,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         }).forEach({ result[String($0.0 as! NSString)]=String($0.1 as! NSString) })
         return result
     }
-    
-    private func getAudioFileType(_ mimeType:String) -> AudioFileTypeID? {
-        switch mimeType {
-        case "audio/mpeg" :
-            return kAudioFileMP3Type
-        case "audio/aac", "audio/aacp":
-            return kAudioFileAAC_ADTSType
-        case "video/mp4", "audio/mp4":
-            return kAudioFileMPEG4Type
-        case "application/ogg", "audio/ogg":
-            return kAudioFormatOpus
-        case "audio/x-wav":
-            return kAudioFileWAVEType
-        default:
-           return nil
-        }
-    }
-    
-    private func getAudioFileType(filename:String) -> AudioFileTypeID? {
-        let ext = (filename as NSString).pathExtension
-        switch ext {
-        case "mp3":
-            return kAudioFileMP3Type
-        case "opus":
-            return kAudioFormatOpus
-        case "mp4", "m4a", "m4b", "m4p", "m4r", "m4v", "aac":
-            return kAudioFileMPEG4Type
-        default:
-            return nil
-        }
-    }
-
-    
+        
     // MARK: session runs
     var firstBytes = true
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {

@@ -40,7 +40,7 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
     
     init(container: OggContainer, decodingListener: DecoderListener) throws {
         self.container = container
-        try super.init(audioContentType: kAudioFormatOpus, decodingListener: decodingListener)
+        try super.init(decodingListener: decodingListener)
         container.opusListener = self
    
         if let info = Bundle(identifier: OpusDecoder.opusBundleIdentifier)?.infoDictionary {

@@ -34,9 +34,9 @@ class SystemDecoder : AudioDecoder {
     fileprivate var converter: AudioConverterRef? = nil
     var source: SystemAudioData?
     
-    override init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener, notify: DecoderNotification? ) throws {
-        try super.init(audioContentType: audioContentType, decodingListener: decodingListener, notify:notify )
-        source = try SystemAudioData(audioContentType: audioContentType, listener: self)
+    override init(decodingListener: DecoderListener, notify: DecoderNotification? ) throws {
+        try super.init(decodingListener: decodingListener, notify:notify )
+        source = try SystemAudioData(listener: self)
     }
     
     deinit {

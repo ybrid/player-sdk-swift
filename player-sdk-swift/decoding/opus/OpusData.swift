@@ -50,7 +50,7 @@ class OpusData : AudioData {
     
     init(_ serial: Int32, opusListener: OpusDataListener) throws {
         self.opusListener = opusListener
-        try super.init(audioContentType: kAudioFormatOpus, listener: opusListener)
+        try super.init(listener: opusListener)
         self.serial = try bos(serial)
     }
     

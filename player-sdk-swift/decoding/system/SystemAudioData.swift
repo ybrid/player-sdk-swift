@@ -37,10 +37,10 @@ class SystemAudioData : AudioData {
         DispatchQueue(label: "io.ybrid.decoding.packages", qos: PlayerContext.processingPriority)
     )
     
-    override init(audioContentType: AudioFileTypeID, listener: AudioDataListener) throws {
-        try super.init(audioContentType: audioContentType, listener: listener)
+    override init(listener: AudioDataListener) throws {
+        try super.init(listener: listener)
         let context = unsafeBitCast(self, to: UnsafeMutablePointer<AudioData>.self)
-        let result = AudioFileStreamOpen(context, audioPropertyCallback, audioPacketCallback, audioContentType, &id)
+        let result = AudioFileStreamOpen(context, audioPropertyCallback, audioPacketCallback, 0, &id)
         guard result == noErr else {
             throw AudioDataError(.cannotOpenStream, result)
         }

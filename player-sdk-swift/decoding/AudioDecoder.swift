@@ -38,7 +38,61 @@ class AudioDecoder : AudioDataListener {
     
     var stopping = false
     
-    internal init(audioContentType: AudioFileTypeID, decodingListener: DecoderListener, notify: DecoderNotification? = nil ) throws {
+    
+    static func factory(_ mimeType: String?, _ filename: String?, listener: DecoderListener, notify: @escaping DecoderNotification) throws -> AudioDecoder {
+
+        guard let mimeType = mimeType else {
+            throw AudioDataError(.missingMimeType, "missing mimeType")
+        }
+    
+        if isOpusAudioFileType( mimeType )  {
+            Logger.loading.debug("mimeType \(mimeType) resolved to opus decoder")
+            return try AudioDecoder.createOpusDecoder(listener: listener)
+        }
+        if let name = filename {
+            if isOpusAudioFileType(filename: name) {
+                Logger.loading.debug("mimeType \(mimeType) with filename \(name) resolved to opus decoder")
+                return try AudioDecoder.createOpusDecoder(listener: listener)
+            }
+            if "txt" == (name as NSString).pathExtension { // todo throw excp in SystemDecoder
+                throw AudioDataError(.cannotProcessMimeType, "cannot process \(mimeType) with filename \(name)")
+            }
+        }
+        
+        Logger.loading.debug("mimeType \(mimeType) resolved to system audio decoder")
+        return try AudioDecoder.createSystemDecoder(listener: listener, notify: notify)
+    }
+
+    private static func isOpusAudioFileType(_ mimeType:String) -> Bool {
+        switch mimeType {
+        case "application/ogg", "audio/ogg":
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func isOpusAudioFileType(filename:String) -> Bool {
+        let ext = (filename as NSString).pathExtension
+        switch ext {
+        case "opus":
+            return true
+        default:
+            return false
+        }
+    }
+    
+    static func createOpusDecoder(listener: DecoderListener) throws -> AudioDecoder {
+        let ogg = try OggContainer()
+        return try OpusDecoder(container: ogg, decodingListener: listener)
+    }
+
+    static func createSystemDecoder(listener: DecoderListener, notify: @escaping DecoderNotification) throws -> AudioDecoder {
+        return try SystemDecoder(decodingListener: listener, notify: notify)
+    }
+
+    
+    internal init(decodingListener: DecoderListener, notify: DecoderNotification? = nil ) throws {
         self.listener = decodingListener
         self.notify = notify
     }
