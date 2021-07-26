@@ -73,7 +73,7 @@ class SystemAudioData : AudioData {
             var formatDescription = AudioStreamBasicDescription()
             readAudioProperty(property, &formatDescription)
             if let format = AVAudioFormat(streamDescription: &formatDescription) {
-                if format.isBetter(than: self.format) {
+                if format.isSuperior(to: self.format) {
                     Logger.decoding.debug("kAudioFileStreamProperty_DataFormat using source format \(AudioData.describeAVFormat(format))")
                     self.format = format
                 }
@@ -105,7 +105,7 @@ class SystemAudioData : AudioData {
                     if let format = AVAudioFormat(streamDescription: &description ) {
                         if format.isUsable {
                             Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is \(AudioData.describeAVFormat(format))")
-                            if format.isBetter(than: self.format) {
+                            if format.isSuperior(to: self.format) {
                                 Logger.decoding.debug("kAudioFileStreamProperty_FormatList altering source format to \(AudioData.describeAVFormat(format))")
                                 self.format = format
                             }

@@ -66,20 +66,11 @@ class AudioData {
 
 extension AVAudioFormat {
     
-    static var formatIdRanking: [AudioFormatID]  { get {
-        return [
-                kAudioFormatMPEG4AAC, // 1999
-//                kAudioFormatMPEG4AAC_LD, // 2000
-//                kAudioFormatMPEG4AAC_ELD, // 2003
-//                kAudioFormatMPEG4AAC_ELD_SBR, // 2003
-                kAudioFormatMPEG4AAC_HE, // 2003
-                kAudioFormatMPEG4AAC_HE_V2 // 2006
-//                kAudioFormatMPEG4AAC_ELD_V2, // 2012
-        ]
-    }}
-    
-    func isBetter(than: AVAudioFormat? ) -> Bool {
-        guard let other = than else { return true }
+    func isSuperior(to: AVAudioFormat?) -> Bool {
+        guard let other = to else { return true }
+        
+        if channelCount > other.channelCount { return true }
+        if sampleRate > other.sampleRate { return true }
         if let myRank = AVAudioFormat.formatIdRanking.index(of: self.streamDescription.pointee.mFormatID),
            let otherRank = AVAudioFormat.formatIdRanking.index(of: other.streamDescription.pointee.mFormatID),
            myRank > otherRank {
@@ -90,6 +81,18 @@ extension AVAudioFormat {
     
     var isUsable:Bool { get {
         return channelCount != 0 && sampleRate != 0.0
+    }}
+    
+    static var formatIdRanking: [AudioFormatID]  { get {
+        return [
+                kAudioFormatMPEG4AAC, // 1999
+//                kAudioFormatMPEG4AAC_LD, // 2000
+//                kAudioFormatMPEG4AAC_ELD, // 2003
+//                kAudioFormatMPEG4AAC_ELD_SBR, // 2003
+                kAudioFormatMPEG4AAC_HE, // 2003
+                kAudioFormatMPEG4AAC_HE_V2 // 2006
+//                kAudioFormatMPEG4AAC_ELD_V2, // 2012
+        ]
     }}
 }
 
