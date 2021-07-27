@@ -44,7 +44,8 @@ enum ErrorKind : ErrorCode {
     // audio data, reading http header
     case missingMimeType = 301
     case cannotProcessMimeType = 302
-
+    case cannotResolveDecoder = 303
+    
     // audio data, reading 
     case cannotOpenStream = 411
     case parsingFailed = 412
@@ -60,6 +61,7 @@ enum ErrorKind : ErrorCode {
     case failedConverting = 527
     case invalidData = 528
     case badData = 529
+    
     
     // api and session
     case invalidUri = 601

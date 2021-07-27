@@ -46,7 +46,7 @@ class TestYbridControl {
         do {
             try AudioPlayer.open(for: endpoint, listener: listener,
                  playbackControl: { (ctrl) in ctrl.close()
-                    XCTFail();
+                    XCTFail("YbridControl expected, but was PlaybackControl")
                     semaphore.signal(); return },
                  ybridControl: { [self] (ybridControl) in
                     self.ybrid = ybridControl

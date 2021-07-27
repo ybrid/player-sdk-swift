@@ -35,10 +35,9 @@ class YbridSwapServiceTests: XCTestCase {
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
         semaphore = DispatchSemaphore(value: 0)
-        Logger.verbose = false
-        listener = TestYbridPlayerListener()
     }
     override func tearDownWithError() throws {
+        listener.reset()
     }
     
     func test01_AvailableServices_BeforePlay() throws {
@@ -96,7 +95,7 @@ class YbridSwapServiceTests: XCTestCase {
         print("services were \(services)")
     }
     
-    func test03_BeforePlay_ChagedButDoesNotTakeEffekt__NotYet() throws {
+    func test03_BeforePlay_ChagedButDoesNotTakeEffekt__fails() throws {
         Logger.verbose = true
         XCTAssertEqual(listener.services.count, 0)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
@@ -129,7 +128,11 @@ class YbridSwapServiceTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
         checkErrors(expectedErrors: 0)
         
-        XCTAssertEqual(listener.services.count, 1)
+        let servicesCalls = listener.services.count
+        XCTAssertEqual(servicesCalls, 1)
+        guard servicesCalls > 0 else {
+            return
+        }
         XCTAssertEqual(listener.services[0].count, 2)
         
         let services:[String] =
@@ -297,7 +300,7 @@ class YbridSwapServiceTests: XCTestCase {
         actionTraces.check(confirm: 2, maxDuration: YbridSwapServiceTests.maxAudioComplete)
     }
   
-    func test17_SwapSwappedSwr3_TooLate() throws {
+    func test17_SwapSwappedSwr3__fails() throws {
         
         let actionTraces = ActionsTrace()
         TestYbridControl(ybridSwr3Endpoint, listener: listener).playing{ (ybrid,test) in

@@ -208,8 +208,9 @@ class JsonRequest {
             task.cancel()
         }
         
-        if apiError != nil {
-            throw apiError!
+        if let apiErr = apiError {
+            Logger.session.error("\(apiErr.localizedDescription)")
+            throw apiErr
         }
         
         return result
@@ -236,9 +237,7 @@ class JsonRequest {
         guard let length = response?.expectedContentLength, length > 0 else {
             return SessionError(ErrorKind.invalidData, "content length not > 0")
         }
-        
-
-        
+    
         let headers = httpResponse.allHeaderFields
         guard let type = headers["Content-Type"] as? String else {
             return SessionError(ErrorKind.invalidResponse,"missing Content-Type")

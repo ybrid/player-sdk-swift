@@ -37,10 +37,10 @@ class SystemAudioData : AudioData {
         DispatchQueue(label: "io.ybrid.decoding.packages", qos: PlayerContext.processingPriority)
     )
     
-    override init(listener: AudioDataListener) throws {
+    init(listener: AudioDataListener, hint:AudioFileTypeID?) throws {
         try super.init(listener: listener)
         let context = unsafeBitCast(self, to: UnsafeMutablePointer<AudioData>.self)
-        let result = AudioFileStreamOpen(context, audioPropertyCallback, audioPacketCallback, 0, &id)
+        let result = AudioFileStreamOpen(context, audioPropertyCallback, audioPacketCallback, hint ?? 0, &id)
         guard result == noErr else {
             throw AudioDataError(.cannotOpenStream, result)
         }
@@ -95,10 +95,14 @@ class SystemAudioData : AudioData {
 // (see AudioFormat.h) of those formats.
 // The default behavior is to return the an AudioFormatListItem that has the same
 // AudioStreamBasicDescription that kAudioFileStreamProperty_DataFormat returns.
-            var formatDescriptions = [AudioStreamBasicDescription](repeating: AudioStreamBasicDescription(), count: 10)
-
-            readAudioPropertyArray(property, &formatDescriptions)
-
+ 
+            let formatDescriptions:[AudioStreamBasicDescription]
+            do {
+                formatDescriptions = try readFormatList()
+            } catch {
+                Logger.decoding.error(error.localizedDescription)
+                return
+            }
             formatDescriptions
                 .forEach{ (desc) in
                     var description = desc
@@ -109,17 +113,46 @@ class SystemAudioData : AudioData {
                                 Logger.decoding.debug("kAudioFileStreamProperty_FormatList altering source format to \(AudioData.describeAVFormat(format))")
                                 self.format = format
                             }
+                        } else {
+                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is not usable: \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
+                        }
                     }
-                } else {
-                    Logger.decoding.notice("kAudioFileStreamProperty_FormatList entry is not usable: \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
-                }
             }
-
         default:
             Logger.decoding.debug("\(AudioData.describeProperty(property)) unused")
         }
     }
     
+    func readFormatList() throws -> [AudioStreamBasicDescription] {
+        
+        let size = MemoryLayout<AudioStreamBasicDescription>.size
+        var formatListSize = UInt32()
+        let result = AudioFileStreamGetPropertyInfo(id!, kAudioFileStreamProperty_FormatList, &formatListSize, nil)
+        if result != noErr {
+            throw AudioDataError(.parsingFailed, result, "unable to read info for kAudioFileStreamProperty_FormatList")
+        }
+        
+        let total =  Int(formatListSize)
+        let formatListData = UnsafeMutablePointer<AudioFormatListItem>.allocate(capacity: total)
+        defer { formatListData.deallocate(capacity: total) }
+        let error = AudioFileStreamGetProperty(id!, kAudioFileStreamProperty_FormatList, &formatListSize, formatListData)
+        
+        if error != noErr {
+            throw AudioDataError(.parsingFailed, error, "unable to read  kAudioFileStreamProperty_FormatList")
+        }
+        
+        var descriptions:[AudioStreamBasicDescription] = []
+        var i = 0
+        while i < total {
+            let pasbd = formatListData.advanced(by: i).pointee
+            descriptions.append(pasbd.mASBD)
+            let chLayoutTag = pasbd.mChannelLayoutTag
+            let nCh = AudioChannelLayoutTag_GetNumberOfChannels(chLayoutTag)
+            if Logger.verbose { Logger.decoding.debug("kAudioFileStreamProperty_FormatList ignoring info \(nCh) channel layout \(describe(chLayoutTag))") }
+            i += size
+        }
+        return descriptions
+    }
     
     /// used by audioPacketCallback
     fileprivate func addPackets(_ data: UnsafeRawPointer, _ byteCount: UInt32, _ packetDescriptions: UnsafePointer<AudioStreamPacketDescription>, _ packetCount: UInt32) {
@@ -158,19 +191,6 @@ class SystemAudioData : AudioData {
             return
         }
     }
-    
-    /// read a property
-    fileprivate func readAudioPropertyArray<T>(_ property: AudioFileStreamPropertyID, _ value: inout [T]) {
-        var propSize: UInt32 = 0
-        guard AudioFileStreamGetPropertyInfo(id!, property, &propSize, nil) == noErr else {
-            Logger.decoding.error("failed to get info for property \(AudioData.describeProperty(property))")
-            return
-        }
-        guard AudioFileStreamGetProperty(id!, property, &propSize, &value) == noErr else {
-            Logger.decoding.error("failed to get value \(AudioData.describeProperty(property))")
-            return
-        }
-    }
 }
 
 
@@ -189,5 +209,16 @@ func audioPacketCallback(_ context: UnsafeMutableRawPointer, _ byteCount: UInt32
     } else {
         /// not tested yet
         audioData.addPackets(data, byteCount, packetCount)
+    }
+}
+
+fileprivate func describe( _ channelLayout: AudioChannelLayoutTag) -> String {
+    switch channelLayout {
+    case kAudioChannelLayoutTag_Unknown: return "kAudioChannelLayoutTag_Unknown"
+    case kAudioChannelLayoutTag_Mono: return "kAudioChannelLayoutTag_Mono"
+    case kAudioChannelLayoutTag_Stereo: return "kAudioChannelLayoutTag_Stereo"
+
+    default:
+        return "channel layout with id " + String(channelLayout)
     }
 }

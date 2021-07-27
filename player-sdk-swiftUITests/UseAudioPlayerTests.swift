@@ -129,7 +129,7 @@ class UseAudioPlayerTests: XCTestCase {
      - an exception and
      - listener.error lets you see all errors, warnings and notifications
      */
-    func test04a_Error_NoPlayer() throws {
+    func test04_Error_NoPlayer() throws {
         defer { self.semaphore?.signal() }
         
         let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
@@ -166,7 +166,7 @@ class UseAudioPlayerTests: XCTestCase {
      
      listener.error lets you see all errors, warnings and notifications
      */
-    func test04b_Error_NoAudio() {
+    func test05_Error_NoAudio() {
         
         let badEndpoint = MediaEndpoint(mediaUri:  "https://cast.ybrid.io/bad/url")
         
@@ -187,7 +187,7 @@ class UseAudioPlayerTests: XCTestCase {
                     return
                 }
                 XCTAssertNotEqual(0, lastError.code) /// error occured
-                XCTAssertEqual(302, lastError.code) /// ErrorKind.cannotProcessMimeType
+                XCTAssertEqual(303, lastError.code) /// ErrorKind.cannotResolveDecoder
 
                 XCTAssertNil(lastError.osstatus)
             }
@@ -201,7 +201,7 @@ class UseAudioPlayerTests: XCTestCase {
     /*
      The audio codec opus is supported
      */
-    func test05_PlayOpus() {
+    func test06_PlayOpus() {
         let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
         
         do {
@@ -226,7 +226,7 @@ class UseAudioPlayerTests: XCTestCase {
      are identified as on demand files. They can be paused.
      Remember, all actions are asynchronous. So assertions in this test are delayed.
      */
-    func test06_OnDemandPlayPausePlayPauseStop() {
+    func test07_OnDemandPlayPausePlayPauseStop() {
         let onDemandEndpoint = MediaEndpoint(mediaUri:  "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
         do {
             try AudioPlayer.open(for: onDemandEndpoint, listener: playerListener) {
@@ -262,7 +262,7 @@ class UseAudioPlayerTests: XCTestCase {
      listener.metadataChanged is called when metadata changes. In the beginning of streaming
      there ist always a change compared to nothing.
      */
-    func test07_ListenToMetadata() {
+    func test08_ListenToMetadata() {
 
         do {
             try AudioPlayer.open(for: ybridSwr3Endpoint, listener: playerListener) {
@@ -296,7 +296,7 @@ class UseAudioPlayerTests: XCTestCase {
      
      The AudioCompleteCallback is called when the content change takes place.
      */
-    func test08_UseYbridControl() {
+    func test09_UseYbridControl() {
 
         do {
             try AudioPlayer.open(for: ybridSwr3Endpoint, listener: nil, playbackControl: { _ in XCTFail("ybridControl should be called back"); self.semaphore?.signal() },
@@ -324,9 +324,9 @@ class UseAudioPlayerTests: XCTestCase {
     /*
      Audio codecs AAC are supported up to profile HE-AAC_v2.
      
-     You should hear 4 different high frequencies.
+     Besides the first sine you should hear 4 different high frequencies.
      */
-    func test09_PlayHEAACv2() {
+    func test10_PlayHEAACv2() {
         
         do {
             try AudioPlayer.open(for: aacHEv2aacpEndpoint, listener: nil) {
@@ -355,9 +355,9 @@ class UseAudioPlayerTests: XCTestCase {
     func test10_PlayWav() {
         let wavStream = "https://www2.iis.fraunhofer.de/AAC/SBRtestStereo-441-16b.wav"
 
-        let aacEndpoint = MediaEndpoint(mediaUri: wavStream)
+        let wavEndpoint = MediaEndpoint(mediaUri: wavStream)
         do {
-            try AudioPlayer.open(for: aacEndpoint, listener: playerListener) {
+            try AudioPlayer.open(for: wavEndpoint, listener: playerListener) {
                 (control) in
                 
                 control.play()

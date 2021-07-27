@@ -33,11 +33,16 @@ public class AudioDataError : AudioPlayerError {
     }
     
     // used with system converter from os
-    init(_ kind: ErrorKind, _ code: OSStatus) {
-        super.init(kind, describe(osstatus: code))
+    init(_ kind: ErrorKind, _ code: OSStatus, _ message: String? = nil) {
+        if let msg = message {
+            super.init(kind, msg + ", \(describe(osstatus: code))")
+        } else {
+            super.init(kind, describe(osstatus: code))
+        }
         super.osstatus = code
     }
 
+    
     // used with opus
     init(_ kind: ErrorKind, _ message: String, _ cause: Error? = nil) {
         super.init(kind, message, cause)
@@ -62,6 +67,7 @@ public class DecoderError : AudioPlayerError {
         super.init(kind, nil, cause)
     }
 }
+
 
 
 fileprivate func describe(osstatus: OSStatus) -> String {

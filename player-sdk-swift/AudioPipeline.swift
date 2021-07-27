@@ -107,7 +107,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
         
     func prepareDecoder(_ mimeType: String?, _ filename: String?) throws {
-        self.decoder = try AudioDecoder.factory(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
+        self.decoder = try AudioDecoder.factory.createDecoder(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
     }
 
     func setInfinite(_ infinite: Bool) {
@@ -168,14 +168,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                 return
             }
                 
-            if resumed {
-                /// recoveried from network stall
-                buffer.reset()
-                resumed = false
-            } else {
-                /// subsequently when format change is detected
+            if !resumed {
+                /// subsequent format change is detected
                 /// affects scheduler and connection to engine
                 buffer.engine.alterTarget(format: pcmTargetFormat)
+            } else {
+                /// recovered from network stall
+                buffer.reset()
+                resumed = false
             }
         }
     }

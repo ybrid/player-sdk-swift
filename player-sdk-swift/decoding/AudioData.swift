@@ -72,9 +72,9 @@ extension AVAudioFormat {
         if channelCount > other.channelCount { return true }
         if sampleRate > other.sampleRate { return true }
         if let myRank = AVAudioFormat.formatIdRanking.index(of: self.streamDescription.pointee.mFormatID),
-           let otherRank = AVAudioFormat.formatIdRanking.index(of: other.streamDescription.pointee.mFormatID),
-           myRank > otherRank {
-            return true
+           let otherRank = AVAudioFormat.formatIdRanking.index(of: other.streamDescription.pointee.mFormatID)
+            {
+            return myRank > otherRank
         }
         return false
     }
@@ -233,7 +233,7 @@ fileprivate func describe(formatId: AudioFormatID, short:Bool = true) -> String 
     case kAudioFormatAppleLossless:
         return short ?"alac":"kAudioFormatAppleLossless"
     case kAudioFormatMPEG4AAC_HE:
-        return short ?"acch":"MPEG-4 High Efficiency AAC audio object."
+        return short ?"aach":"MPEG-4 High Efficiency AAC audio object."
     case kAudioFormatMPEG4AAC_LD:
         return short ?"aacl":"MPEG-4 AAC Low Delay audio object."
     case kAudioFormatMPEG4AAC_ELD:
@@ -295,3 +295,4 @@ fileprivate func describe(format: AVAudioFormat?) -> String {
     
     return String(format: "audio %@ %d ch %.0f Hz %@ %@", AudioData.describeFormatId(desc.mFormatID, true) , desc.mChannelsPerFrame, desc.mSampleRate, AudioData.describeBitdepth(format?.commonFormat), fmt.isInterleaved ? "interleaved" : "non interleaved" )
 }
+
