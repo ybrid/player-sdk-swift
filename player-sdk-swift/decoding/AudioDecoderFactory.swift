@@ -115,6 +115,9 @@ class AudioDecoderFactory {
     
     private func isOpusAudioFileType(filename:String) -> Bool {
         let ext = (filename as NSString).pathExtension
-        return "opus" == ext
+        switch ext {
+        case "opus": return true
+        default: return false
+        }
     }
 }

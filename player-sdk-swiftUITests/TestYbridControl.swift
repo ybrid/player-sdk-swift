@@ -107,6 +107,33 @@ class TestYbridControl {
         return trace
     }
     
+    func windSynced(to:Date?, maxWait:TimeInterval? = nil) -> (Trace) {
+        
+        let mySema = DispatchSemaphore(value: 0)
+        let trace:Trace
+        if let date = to {
+            trace = Trace("wind to \(date)")
+            guard let ybrid = ybrid else { return trace }
+            ybrid.wind(to: date ) { (success) in
+                self.timeshiftComplete(success, trace)
+                mySema.signal()
+            }
+        } else {
+            trace = Trace("wind live")
+            guard let ybrid = ybrid else { return trace }
+            ybrid.windToLive() { (success) in
+                self.timeshiftComplete(success, trace)
+                mySema.signal()
+            }
+        }
+        if let maxWait = maxWait {
+            _ = mySema.wait(timeout: .now() + maxWait)
+        } else {
+            _ = mySema.wait(timeout: .distantFuture)
+        }
+        return trace
+    }
+    
     func skipSynced(_ count:Int, to type:ItemType? = nil, maxWait:TimeInterval? = nil) -> Trace {
         guard count == 1 || count == -1 else {
             Logger.testing.error("-- skip \(count) not supported")
@@ -160,33 +187,6 @@ class TestYbridControl {
        sleep(3)
     }
     
-    
-    func windSynced(to:Date?, maxWait:TimeInterval? = nil) -> (Trace) {
-        
-        let mySema = DispatchSemaphore(value: 0)
-        let trace:Trace
-        if let date = to {
-            trace = Trace("wind to \(date)")
-            guard let ybrid = ybrid else { return trace }
-            ybrid.wind(to: date ) { (success) in
-                self.timeshiftComplete(success, trace)
-                mySema.signal()
-            }
-        } else {
-            trace = Trace("wind live")
-            guard let ybrid = ybrid else { return trace }
-            ybrid.windToLive() { (success) in
-                self.timeshiftComplete(success, trace)
-                mySema.signal()
-            }
-        }
-        if let maxWait = maxWait {
-            _ = mySema.wait(timeout: .now() + maxWait)
-        } else {
-            _ = mySema.wait(timeout: .distantFuture)
-        }
-        return trace
-    }
     
     // MARK: swap service
     

@@ -40,9 +40,11 @@ let onDemandOpusEndpoint = MediaEndpoint(mediaUri: "https://opus-codec.org/stati
 let onDemandMp3Endpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/music.mp3?raw=true")
 
 
+// MARK: AAC Testfiles
+
 let aac441Endpoint = MediaEndpoint(mediaUri:    "https://www2.iis.fraunhofer.de/AAC/xheDemo/Walking01_LN_xHE_024s_AACLC_320s.mp4") // AAC 44,1 kHz
 let aac480Endpoint = MediaEndpoint(mediaUri:     "https://www2.iis.fraunhofer.de/AAC/xheDemo/Rain01_LN_xHE_016s_AACLC_320s.mp4") // AAC 48 kHz
-
+///Users/florian/github/test-files/aac-audio/frauenhofer-testfiles/sqam50_LN_xHE_024s_AACLC_320s.mp4
 
 //
 // @see https://www2.iis.fraunhofer.de/AAC/stereo.html
@@ -51,9 +53,9 @@ let aac480Endpoint = MediaEndpoint(mediaUri:     "https://www2.iis.fraunhofer.de
 //  AOT 5, explicit signalling, backwards compatible -> HE-AAC, 'aach'
 let aacHEEndpoint =  MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot5Sig1.mp4")
 // AOT 29, explicit signalling, backwards compatible ->  HE-AAC_v2, 'aacp'
-let aacHEv2aachEndpoint = MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig1.mp4")
+let aacHEv2Endpoint = MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig1.mp4")
 // AOT 29, explicit signalling, not backwards compatible (MPEG hierarchical) ->  HE-AAC_v2, 'aacp'
-let aacHEv2aacpEndpoint = MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig2.mp4")
+let aacHEv2notBackwardsCompatibleEndpoint = MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig2.mp4")
 // AOT 29, implicit signalling -> HE-AAC_v2 not detected, using 'aac ' (playing without SBR), 1ch
 let aacNoSBREndpoint = MediaEndpoint(mediaUri:"https://www2.iis.fraunhofer.de/AAC/SBRtestStereoAot29Sig0.mp4")
 // mixed signaling -> HE-AAC_v2 'aach', 1 ch

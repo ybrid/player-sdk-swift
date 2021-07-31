@@ -114,7 +114,7 @@ class SystemAudioData : AudioData {
                                 self.format = format
                             }
                         } else {
-                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is not usable: \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
+                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList ignoring entry  \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
                         }
                     }
             }

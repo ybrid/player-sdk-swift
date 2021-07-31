@@ -329,7 +329,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test10_PlayHEAACv2() {
         
         do {
-            try AudioPlayer.open(for: aacHEv2aacpEndpoint, listener: nil) {
+            try AudioPlayer.open(for: aacHEv2Endpoint, listener: nil) {
                 (control) in
                 
                 control.play()

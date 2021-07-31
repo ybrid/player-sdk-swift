@@ -116,7 +116,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
     }
 
     func test04_AACPlayStop() throws {
-        player = AudioPlayer.openSync(for: aacHEv2aachEndpoint, listener: self)
+        player = AudioPlayer.openSync(for: aacHEv2Endpoint, listener: self)
         
         stepDuration = 10
         rangeFrom = 1 /// on first step
