@@ -41,7 +41,7 @@ class TestYbridControl {
         self.listener = listener
     }
     
-    func playing( action: @escaping (YbridControl, TestYbridControl?)->() ) {
+    func playing( action: @escaping (YbridControl)->() ) {
         let semaphore = DispatchSemaphore(value: 0)
         do {
             try AudioPlayer.open(for: endpoint, listener: listener,
@@ -54,7 +54,7 @@ class TestYbridControl {
                     ybridControl.play()
                     poller.wait(ybridControl, until:PlaybackState.playing, maxSeconds:10)
                     
-                    action(ybridControl, self)
+                    action(ybridControl)
                     
                     ybridControl.stop()
                     poller.wait(ybridControl, until:PlaybackState.stopped, maxSeconds:2)

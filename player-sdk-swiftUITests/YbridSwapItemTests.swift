@@ -30,27 +30,24 @@ class YbridSwapItemTests: XCTestCase {
 
     static let maxAudioComplete:TimeInterval = 4.0
     var listener = TestYbridPlayerListener()
+    var testControl:TestYbridControl?
     let poller = Poller()
-    var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
-        semaphore = DispatchSemaphore(value: 0)
+        testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
         listener.reset()
     }
     
     func test01_stopped_SwapsLeft_0() throws {
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
-                playbackControl: { [self] (control) in
-                    XCTFail("ybridControl expected");semaphore?.signal()
-                },
-                ybridControl: { [self] (ybridControl) in
-
-                usleep(10_000)
-                    
-                semaphore?.signal()
-               })
-        _ = semaphore?.wait(timeout: .distantFuture)
+        
+        guard let test = testControl else {
+            XCTFail("cannot use ybrid test control."); return
+        }
+        
+        test.stopped() { (ybridControl) in
+            usleep(10_000)
+        }
         
         XCTAssertEqual(listener.swapsLeft, 0, "\(String(describing: listener.swapsLeft)) swaps are left.")
         
@@ -61,55 +58,44 @@ class YbridSwapItemTests: XCTestCase {
 
     
     func test02_playing_SwapsLeft_SwapSwap() throws {
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
-                playbackControl: { [self] (control) in
-                    XCTFail("ybridControl expected");semaphore?.signal()
-                },
-                ybridControl: { [self] (ybridControl) in
-                defer {
-                    ybridControl.stop()
-                    poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                    semaphore?.signal()
+        guard let test = testControl else {
+            XCTFail("cannot use ybrid test control."); return
+        }
+        
+        test.playing() { [self] (ybridControl) in
+            
+            guard let swaps = listener.swapsLeft, swaps != 0 else {
+                XCTFail("currently no swaps left. Execute test later"); return
+            }
+            Logger.testing.info("\(swaps) swaps are left")
+            
+            guard let titleMain = listener.metadatas.last?.displayTitle else {
+                XCTFail("must have recieved metadata"); return
+            }
+            Logger.testing.info("title main =\(titleMain)")
+            
+            var titleSwapped:String?
+            ybridControl.swapItem()
+            _ = poller.wait(max: 10) {
+                guard let swapped = listener.metadatas.last?.displayTitle else {
+                    return false
                 }
-                    
-                ybridControl.play()
-                poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: 10)
-                sleep(2)
-                    
-                guard let swaps = listener.swapsLeft, swaps != 0 else {
-                    XCTFail("currently no swaps left. Execute test later"); return
+                titleSwapped = swapped
+                Logger.testing.info("title swapped =\(titleSwapped!)")
+                return titleMain != titleSwapped!
+            }
+            sleep(2)
+            
+            ybridControl.swapItem()
+            _ = poller.wait(max: 10) {
+                guard let titleSwapped2 = listener.metadatas.last?.displayTitle else {
+                    return false
                 }
-                Logger.testing.info("\(swaps) swaps are left")
-                    
-                guard let titleMain = listener.metadatas.last?.displayTitle else {
-                    XCTFail("must have recieved metadata"); return
-                }
-                Logger.testing.info("title main =\(titleMain)")
-                
-                var titleSwapped:String?
-                ybridControl.swapItem()
-                _ = poller.wait(max: 10) {
-                    guard let swapped = listener.metadatas.last?.displayTitle else {
-                        return false
-                    }
-                    titleSwapped = swapped
-                    Logger.testing.info("title swapped =\(titleSwapped!)")
-                    return titleMain != titleSwapped!
-                }
-                sleep(2)
-                    
-                ybridControl.swapItem()
-                _ = poller.wait(max: 10) {
-                    guard let titleSwapped2 = listener.metadatas.last?.displayTitle else {
-                        return false
-                    }
-                    Logger.testing.info("title swapped =\(titleSwapped2)")
-                    return titleSwapped2 != titleSwapped
-                }
-                sleep(2)
-
-               })
-        _ = semaphore?.wait(timeout: .distantFuture)
+                Logger.testing.info("title swapped =\(titleSwapped2)")
+                return titleSwapped2 != titleSwapped
+            }
+            sleep(2)
+        }
         
         let titles:[String] =
             listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
@@ -119,37 +105,26 @@ class YbridSwapItemTests: XCTestCase {
     }
     
     func test03_SwapItem_AudioCompleteCalled() throws {
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
-                playbackControl: { [self] (control) in
-                    XCTFail("ybridControl expected");semaphore?.signal()
-                },
-                ybridControl: { [self] (ybridControl) in
-                    defer {
-                        ybridControl.stop()
-                        poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
-                        semaphore?.signal()
-                    }
-                    ybridControl.play()
-                    poller.wait(ybridControl, until: PlaybackState.playing, maxSeconds: Int(YbridSwapItemTests.maxAudioComplete))
-                    
-                    guard let swaps = listener.swapsLeft, swaps != 0 else {
-                        XCTFail("currently no swaps left. Execute test later")
-                        return
-                    }
-                    Logger.testing.info("\(swaps) swaps are left")
-                    
-                    var carriedOut = false
-                    ybridControl.swapItem { (success) in
-                        carriedOut = success
-                    }
-                    _ = poller.wait(max: 10) {
-                        carriedOut == true
-                    }
-                    XCTAssertTrue(carriedOut, "swap was not carried out")
-                }
-        )
-        _ = semaphore?.wait(timeout: .distantFuture)
-//        sleep(1)
+        guard let test = testControl else {
+            XCTFail("cannot use ybrid test control."); return
+        }
+        
+        test.playing() { [self] (ybridControl) in
+            guard let swaps = listener.swapsLeft, swaps != 0 else {
+                XCTFail("currently no swaps left. Execute test later")
+                return
+            }
+            Logger.testing.info("\(swaps) swaps are left")
+            
+            var carriedOut = false
+            ybridControl.swapItem { (success) in
+                carriedOut = success
+            }
+            _ = poller.wait(max: 10) {
+                carriedOut == true
+            }
+            XCTAssertTrue(carriedOut, "swap was not carried out")
+        }
         
         let titles:[String] = listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
@@ -166,8 +141,8 @@ class YbridSwapItemTests: XCTestCase {
     func test11_SwapItemComplete_Demo() throws {
         
         let actionTraces = ActionsTrace()
-        TestYbridControl(ybridDemoEndpoint, listener: listener).playing{ (ybrid,test) in
-            actionTraces.append( test!.swapItemSynced(maxWait: 8.0) )
+        testControl!.playing{ [self] (ybrid) in
+            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
         }
         checkErrors(expectedErrors: 0)
         actionTraces.check(confirm: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
@@ -176,8 +151,8 @@ class YbridSwapItemTests: XCTestCase {
     func test12_SwapItemComplete_AdDemo() throws {
         
         let actionTraces = ActionsTrace()
-        TestYbridControl(ybridAdDemoEndpoint, listener: listener).playing{ (ybrid,test) in
-            actionTraces.append( test!.swapItemSynced(maxWait: 8.0) )
+        testControl!.playing{ [self] (ybrid) in
+            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
         }
         
         checkErrors(expectedErrors: 1)
