@@ -208,15 +208,20 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
     // MARK: change over
     
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, _ subtype:SubInfo ) -> ChangeOver {
+        
+        let audioComplete:AudioCompleteCallback? = { (success) in
+            DispatchQueue.global().async {
+                userAudioComplete?(success)
+            }
+        }
+        
         switch subtype {
         case .timeshift:
             let wrappedComplete:AudioCompleteCallback = { (success) in
                 self.session.notifyChanged(SubInfo.timeshift)
                 
                 Logger.playing.debug("timeshift complete (success:\(success))")
-                DispatchQueue.global().async {
-                    userAudioComplete?(success)
-                }
+                audioComplete?(success)
             }
             return ChangeOver(player: self, subtype,
                               ctrlComplete: { self.session.notifyChanged(SubInfo.timeshift, clear: false) },
@@ -226,9 +231,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 self.session.notifyChanged(SubInfo.metadata)
                 
                 Logger.playing.debug("swap item complete (success:\(success))")
-                DispatchQueue.global().async {
-                    userAudioComplete?(success)
-                }
+                audioComplete?(success)
             }
             return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
         case .bouquet:
@@ -236,9 +239,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 self.session.notifyChanged(SubInfo.bouquet)
                 
                 Logger.playing.debug("swap service complete (success:\(success))")
-                DispatchQueue.global().async {
-                    userAudioComplete?(success)
-                }
+                audioComplete?(success)
             }
             return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
 
@@ -247,9 +248,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 self.session.notifyChanged(subtype)
                 
                 Logger.playing.debug("\(subtype) change complete (success:\(success))")
-                DispatchQueue.global().async {
-                    userAudioComplete?(success)
-                }
+                audioComplete?(success)
             }
             return ChangeOver(player: self, subtype, audioComplete: wrappedComplete)
         }

@@ -288,7 +288,6 @@ class UseAudioPlayerTests: XCTestCase {
             semaphore?.signal(); return
         }
     }
-
     
     /*
      Use an endpoint that supports ybridV2 and implement the ybridControl callback.
@@ -330,12 +329,17 @@ class UseAudioPlayerTests: XCTestCase {
         
         do {
             try AudioPlayer.open(for: aacHEv2Endpoint, listener: nil) {
-                (control) in
+                [self] (control) in
                 
                 control.play()
                 sleep(6)
                 control.stop()
                 sleep(1)
+                
+                XCTAssertEqual(playerListener.errors.count, 0)
+                playerListener.errors.forEach{ (error) in
+                    XCTFail(error.message ?? error.localizedDescription)
+                }
                 
                 self.semaphore?.signal()
             }
@@ -343,27 +347,28 @@ class UseAudioPlayerTests: XCTestCase {
             XCTFail("no player control. Something went wrong");
             self.semaphore?.signal(); return
         }
-        
-        sleep(2)
-        XCTAssertEqual(playerListener.errors.count, 0)
-        playerListener.errors.forEach{ (error) in
-            XCTFail(error.message ?? error.localizedDescription)
-        }
-        
     }
     
-    func test10_PlayWav() {
-        let wavStream = "https://www2.iis.fraunhofer.de/AAC/SBRtestStereo-441-16b.wav"
+    /**
+     FLAC with pink noise.
+     */
+    func test10_PlayFlac() {
+        let falcStream = "https://www.24bit96.com/downloads/24bit96_Pink-Noise_24_44.flac"
 
-        let wavEndpoint = MediaEndpoint(mediaUri: wavStream)
+        let wavEndpoint = MediaEndpoint(mediaUri: falcStream)
         do {
             try AudioPlayer.open(for: wavEndpoint, listener: playerListener) {
-                (control) in
+                [self] (control) in
                 
                 control.play()
                 sleep(6)
                 control.stop()
                 sleep(1)
+                
+                XCTAssertEqual(playerListener.errors.count, 0)
+                playerListener.errors.forEach{ (error) in
+                    XCTFail(error.message ?? error.localizedDescription)
+                }
                 
                 self.semaphore?.signal()
             }
@@ -371,14 +376,7 @@ class UseAudioPlayerTests: XCTestCase {
             XCTFail("no player control. Something went wrong");
             self.semaphore?.signal(); return
         }
-        
-        sleep(2)
-        XCTAssertEqual(playerListener.errors.count, 0)
-        playerListener.errors.forEach{ (error) in
-            XCTFail(error.message ?? error.localizedDescription)
-        }
     }
-    
     
 }
 
