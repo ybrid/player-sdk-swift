@@ -265,7 +265,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test08_ListenToMetadata() {
 
         do {
-            try AudioPlayer.open(for: ybridSwr3Endpoint, listener: playerListener) {
+            try AudioPlayer.open(for: myEndpoint, listener: playerListener) {
                 [self] (control) in
                 
                 control.play()
@@ -353,11 +353,9 @@ class UseAudioPlayerTests: XCTestCase {
      FLAC with pink noise.
      */
     func test10_PlayFlac() {
-        let falcStream = "https://www.24bit96.com/downloads/24bit96_Pink-Noise_24_44.flac"
-
-        let wavEndpoint = MediaEndpoint(mediaUri: falcStream)
+        
         do {
-            try AudioPlayer.open(for: wavEndpoint, listener: playerListener) {
+            try AudioPlayer.open(for: flacOnDemandEndpoint, listener: playerListener) {
                 [self] (control) in
                 
                 control.play()
