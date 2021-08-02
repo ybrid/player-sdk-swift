@@ -59,11 +59,18 @@ class MediaState  {
         }
     }}
     
+    var maxBitrate:Int32? { didSet {
+        if let bitrate = maxBitrate, bitrate != oldValue {
+            setChanged(SubInfo.playout)
+        }
+    }}
+    
     var offset:TimeInterval? { didSet {
         if let _ = offset {
             setChanged(SubInfo.timeshift)
         }
     }}
+
     
     private let changed = ThreadsafeSet<SubInfo>(MediaState.stateQueue)
     static let stateQueue = DispatchQueue(label: "io.ybrid.session.state.changes")

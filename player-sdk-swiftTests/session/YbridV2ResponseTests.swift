@@ -201,6 +201,20 @@ class YbridResponseTests : XCTestCase {
         XCTAssertEqual(2, bouquet.availableServices.count)
     }
     
+    func testYbridBitrateResponse() throws {
+        guard let jsonData = try readJsonFromFile("ybridBitrateResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridBitrateResponse.self, from: jsonData)
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+        let rate = ybrid.__responseObject.maxBitRate
+        
+        XCTAssertNotNil(rate)
+        XCTAssertEqual(rate, 32000)
+    }
+    
     
     
 }

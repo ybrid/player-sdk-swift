@@ -59,6 +59,11 @@ struct YbridSwapServiceResponse : Decodable {
     let __responseObject: YbridBouquetObject
 }
 
+struct YbridBitrateResponse : Decodable {
+    let __responseHeader: YbridInfo
+    let __responseObject: YbridBitRate
+}
+
 struct YbridSessionObject: Codable {
     let duration: Int
 //    let id: String? // deprecated
@@ -74,15 +79,18 @@ struct YbridSessionObject: Codable {
 struct YbridPlayout: Codable {
     let baseURL: URL
     let playbackURI: String
-    let currentBitRate: Int // -1
+    let currentBitRate: Int32 // -1
     let host: String // "edge01-stagecast.ybrid.io"
-    let maxBitRate: Int // -1
+    let maxBitRate: Int32 // -1
     let offsetToLive : Int // millis
 }
 
+struct YbridBitRate: Codable {
+    let maxBitRate: Int32 // -1
+}
 
 struct YbridShowMeta : Codable, Equatable {
-    let currentBitRate: Int
+    let currentBitRate: Int32
     let currentItem: YbridItem
     let nextItem: YbridItem
     let station: YbridStation

@@ -29,10 +29,10 @@ import YbridPlayerSDK
 class YbridControlBasicTests: XCTestCase {
 
     let listener = TestYbridPlayerListener()
-    var ybridControl:TestYbridControl?
+    var testYbridControl:TestYbridControl?
     override func setUpWithError() throws {
         listener.reset()
-        ybridControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        testYbridControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
         Logger.testing.debug("-- consumed offsets \(listener.offsets)")
@@ -48,7 +48,7 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test01_Stopped() {
         
-        guard let ybridControl = ybridControl else {
+        guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
             return
         }
@@ -72,7 +72,7 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test02_Stopped_Refresh() {
         
-        guard let ybridControl = ybridControl else {
+        guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
             return
         }
@@ -100,7 +100,7 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test03_Playing_Refresh() throws {
         
-        guard let ybridControl = ybridControl else {
+        guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
             return
         }
@@ -122,5 +122,51 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertGreaterThanOrEqual( listener.metadatas.count, 2, "YbridControlListener.metadataChanged(...) should be called at least twice, but was \(listener.metadatas.count)")
     }
 
+    
+    /*
+
+     */
+    let bitrates = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 ]
+    func test04_ChangeBitrates_All() throws {
+        
+        guard let test = testYbridControl else {
+            XCTFail("cannot use ybrid test control.")
+            return
+        }
+        var adoptedRates:[Int32] = []
+        test.playing() { (ybrid) in
+            
+            self.bitrates.forEach{
+                let kbps = Int32($0)*1000
+                ybrid.changeBitrate(to:kbps)
+                
+                usleep(800_000)
+                XCTAssertEqual(kbps, ybrid.maxBitrate)
+                if kbps == ybrid.maxBitrate {
+                    adoptedRates.append(kbps)
+                }
+            }
+        }
+        Logger.testing.info("adopted bit rates are \(adoptedRates)")
+    }
+
+    
+    func test04_ChangeBitrates_nextRates() throws {
+        
+        guard let test = testYbridControl else {
+            XCTFail("cannot use ybrid test control.")
+            return
+        }
+        test.playing() { (ybrid) in
+            
+            ybrid.changeBitrate(to:31_000)
+            usleep(800_000)
+            XCTAssertEqual(32_000, ybrid.maxBitrate)
+            
+            ybrid.changeBitrate(to:57_000)
+            usleep(800_000)
+            XCTAssertEqual(56_000, ybrid.maxBitrate)
+        }
+    }
 }
 

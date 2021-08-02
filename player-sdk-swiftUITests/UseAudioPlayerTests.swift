@@ -352,7 +352,7 @@ class UseAudioPlayerTests: XCTestCase {
     /**
      FLAC with pink noise.
      */
-    func test10_PlayFlac() {
+    func test11_PlayFlac() {
         
         do {
             try AudioPlayer.open(for: flacOnDemandEndpoint, listener: playerListener) {
@@ -375,6 +375,6 @@ class UseAudioPlayerTests: XCTestCase {
             self.semaphore?.signal(); return
         }
     }
-    
+
 }
 

@@ -57,6 +57,10 @@ public protocol YbridControl : PlaybackControl {
     func swapItem(_ audioComplete: AudioCompleteCallback?)
     func swapService(to id:String, _ audioComplete: AudioCompleteCallback?)
     
+    /// change audio quality
+    func changeBitrate(to:Int32)
+    var maxBitrate:Int32 { get }
+    
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
 }
@@ -142,6 +146,10 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyChanged( SubInfo.playout )
     }
 
+    public var maxBitrate: Int32 { get {
+        return session.bitrate
+    }}
+    
     func refresh() {
         
         DispatchQueue.global().async {
@@ -205,6 +213,12 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
         
+    public func changeBitrate(to:Int32) {
+        playerQueue.async {
+            self.session.changeBitrate(to: to)
+        }
+    }
+    
     // MARK: change over
     
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, _ subtype:SubInfo ) -> ChangeOver {

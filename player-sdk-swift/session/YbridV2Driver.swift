@@ -125,6 +125,30 @@ class YbridV2Driver : MediaDriver {
         super.connected = true
     }
     
+    // MARK: bit rate
+    
+    func maxBitrate(bitPerSecond:Int32) {
+        guard super.connected else {
+            Logger.session.error("no connected ybrid session")
+            return
+        }
+        Logger.session.debug("setting max bit rate ybrid session")
+        
+        do {
+            let bitRate = URLQueryItem(name: "value", value: "\(bitPerSecond)")
+            let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "set bit rate", queryParam: bitRate)
+            accept(bitrate: bitrateObj.maxBitRate)
+            if !super.valid {
+                try reconnect()
+            }
+        } catch {
+            Logger.session.error(error.localizedDescription)
+        }
+    }
+    
+    
+    
+    
     // MARK: winding
     
     func wind(by:TimeInterval) -> Bool {
@@ -241,7 +265,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let serviceQuery = URLQueryItem(name: "service-id", value: id)
             let swappedObj = try swapServiceRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
-            accecpt(ybridBouquet: swappedObj.bouquet)
+            accept(ybridBouquet: swappedObj.bouquet)
             if !super.valid {
                 try reconnect()
             }
@@ -263,9 +287,10 @@ class YbridV2Driver : MediaDriver {
             state.playbackUri = playout.playbackURI
             state.baseUrl = playout.baseURL
             accept(offset: playout.offsetToLive)
+            accept(bitrate: playout.maxBitRate)
         }
         if let ybridBouquet = response.bouquet {
-            accecpt(ybridBouquet: ybridBouquet)
+            accept(ybridBouquet: ybridBouquet)
         }
         if let metadata = response.metadata {
             accept(newMetadata: metadata) // Metadata must be accepted after bouquet
@@ -276,7 +301,7 @@ class YbridV2Driver : MediaDriver {
     }
     
     private func accept(showMeta:YbridShowMeta) {
-//        showMeta.currentBitRate
+        accept(bitrate: showMeta.currentBitRate)
         accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
         accept(swapped:showMeta.swapInfo)
 //        showMeta.timeToNextItemMillis
@@ -315,7 +340,7 @@ class YbridV2Driver : MediaDriver {
         state.swaps = swapped.swapsLeft
     }
     
-    private func accecpt(ybridBouquet:YbridBouquet) {
+    private func accept(ybridBouquet:YbridBouquet) {
         do {
             if Logger.verbose == true {
                 let bouquetData = try encoder.encode(ybridBouquet)
@@ -327,9 +352,11 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error(error.localizedDescription)
         }
     }
-    
     func accept(offset: Int) {
         state.offset = Double(offset) / 1000
+    }
+    func accept(bitrate: Int32) {
+        state.maxBitrate = bitrate
     }
     
     // MARK: all requests
@@ -412,6 +439,24 @@ class YbridV2Driver : MediaDriver {
             let swappedObject = result.__responseObject
             if Logger.verbose { Logger.session.debug(String(describing: swappedObject)) }
             return swappedObject
+        } catch {
+            let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
+            notify(ErrorSeverity.fatal, cannot)
+            throw cannot
+        }
+    }
+
+    private func changeBitrateRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridBitRate {
+        guard super.connected else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        }
+        Logger.session.info(actionString)
+        do {
+            let result:YbridBitrateResponse = try jsonRequest(baseUrl: state.baseUrl, ctrlPath: ctrlPath, actionString: actionString, queryParam: queryParam)
+
+            let birateObject = result.__responseObject
+            if Logger.verbose { Logger.session.debug(String(describing: birateObject)) }
+            return birateObject
         } catch {
             let cannot = SessionError(ErrorKind.invalidResponse, "cannot \(actionString)", error)
             notify(ErrorSeverity.fatal, cannot)

@@ -1,0 +1,15 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-08-02T13:18:31.276Z"
+    },
+    "__responseObject": {
+        "maxBitRate": 32000
+    }
+}

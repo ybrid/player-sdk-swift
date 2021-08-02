@@ -89,6 +89,18 @@ class TestYbridControl {
         _ = semaphore.wait(timeout: .distantFuture)
     }
     
+//    // MARK: bit rate
+//    func setBitrate(to:UInt32) -> (Trace) {
+//        let mySema = DispatchSemaphore(value: 0)
+//        let trace = Trace("set bitrate to \(to)")
+//        guard let ybrid = ybrid else { return trace }
+//        ybrid.changeBitrate(to: to) 
+//        mySema.signal()
+//        _ = mySema.wait(timeout: .distantFuture)
+//        return trace
+//    }
+//    
+    
     // MARK: timeshift
     
     func windSynced(by:TimeInterval, maxWait:TimeInterval? = nil) -> (Trace) {
