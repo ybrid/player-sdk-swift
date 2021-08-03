@@ -65,10 +65,12 @@ public protocol YbridControl : PlaybackControl {
 }
 public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 
-public enum BitRate {
-    case low
-    case mid
-    case high
+// selectable maximum bit rates
+public enum BitRate : Int32, CaseIterable {
+    /// demo app is currently making use of order and values of this enum
+    case low = 32_000
+    case mid = 128_000
+    case high = 160_000
 }
 
 public extension YbridControl {
@@ -152,15 +154,9 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyChanged( SubInfo.playout )
     }
     
-    static private let maxBitRates: [BitRate:Int32] =
-        [.low:32_000, .mid:80_000, .high:160_000]
     public func maxBitRate(to:BitRate) {
         playerQueue.async {
-            guard let bitRate = YbridAudioPlayer.maxBitRates[to] else {
-                Logger.shared.error("cannot change max bit rate to \(to)")
-                return
-            }
-            self.session.maxBitRate(to: bitRate)
+            self.session.maxBitRate(to: to.rawValue)
         }
     }
     

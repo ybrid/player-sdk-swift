@@ -286,6 +286,7 @@ class YbridV2Driver : MediaDriver {
         if let playout = response.playout {
             state.playbackUri = playout.playbackURI
             state.baseUrl = playout.baseURL
+            // 2021-08-04 not using playout.currentBitRate yet
             accept(offset: playout.offsetToLive)
             accept(bitrate: playout.maxBitRate)
         }
@@ -301,7 +302,7 @@ class YbridV2Driver : MediaDriver {
     }
     
     private func accept(showMeta:YbridShowMeta) {
-//        accept(bitrate: showMeta.currentBitRate) // 2021-08-03
+        // 2021-08-03 not using showMeta.currentBitRate yet
         accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
         accept(swapped:showMeta.swapInfo)
 //        showMeta.timeToNextItemMillis
