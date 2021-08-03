@@ -39,6 +39,7 @@ class YbridControlBasicTests: XCTestCase {
         let servicesIds = listener.services.map{$0.map{(service) in return service.identifier}}
         Logger.testing.debug("-- consumed services \(servicesIds)")
         Logger.testing.debug("-- consumed swaps \(listener.swaps)")
+        Logger.testing.info("-- consumed max bit rates \(listener.bitrates)")
         Logger.testing.debug("-- consumed metadata \(listener.metadatas.count)")
     }
     
@@ -143,21 +144,22 @@ class YbridControlBasicTests: XCTestCase {
         }
         test.stopped() { (ybrid) in
 
-            XCTAssertEqual(-1, ybrid.bitRate)
+            XCTAssertNil(self.listener.maxBitRate)
             
             ybrid.maxBitRate(to:.low)
             sleep(1)
-            XCTAssertEqual(32_000, ybrid.bitRate)
+            XCTAssertEqual(32_000, self.listener.maxBitRate)
             
             ybrid.play()
             sleep(4)
-            XCTAssertEqual(32_000, ybrid.bitRate)
+            XCTAssertEqual(32_000, self.listener.maxBitRate)
             
             sleep(4)
             
             ybrid.stop()
             sleep(1)
         }
+
     }
     
 
@@ -170,19 +172,19 @@ class YbridControlBasicTests: XCTestCase {
         test.playing() { (ybrid) in
             
             sleep(1)
-            XCTAssertEqual(-1, ybrid.bitRate)
+            XCTAssertEqual(-1, self.listener.maxBitRate)
             
             ybrid.maxBitRate(to:.low)
             sleep(1)
-            XCTAssertEqual(32_000, ybrid.bitRate)
+            XCTAssertEqual(32_000, self.listener.maxBitRate)
             
             ybrid.maxBitRate(to:.mid)
             sleep(1)
-            XCTAssertEqual(80_000, ybrid.bitRate)
+            XCTAssertEqual(80_000, self.listener.maxBitRate)
             
             ybrid.maxBitRate(to:.high)
             sleep(1)
-            XCTAssertEqual(160_000, ybrid.bitRate)
+            XCTAssertEqual(160_000, self.listener.maxBitRate)
             
             sleep(4)
         }

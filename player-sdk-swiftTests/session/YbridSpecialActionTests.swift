@@ -75,7 +75,7 @@ class YbridSpecialActionTests: XCTestCase {
     }
     
     func test02_ChangeBitrates_All__lt32gt160fail() throws {
-        let bitrates = [8, 16, 32, 40, 48, 56, 64, 80, 96, 112,
+        let bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112,
                         128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
         
         let semaphore = DispatchSemaphore(value: 0)
@@ -94,8 +94,8 @@ class YbridSpecialActionTests: XCTestCase {
                     let kbps = Int32($0)*1000
                     ybrid.session.maxBitRate(to:kbps)
                     sleep(1)
-                    XCTAssertEqual(kbps, ybrid.bitRate)
-                    if kbps == ybrid.bitRate {
+                    XCTAssertEqual(kbps, ybrid.session.maxBitRate)
+                    if kbps == ybrid.session.maxBitRate {
                         adoptedRates.append(kbps)
                     }
                 }
@@ -127,23 +127,23 @@ class YbridSpecialActionTests: XCTestCase {
                 
                 ybrid.session.maxBitRate(to:77)
                 sleep(1)
-                XCTAssertEqual(32_000, ybrid.bitRate)
+                XCTAssertEqual(32_000, ybrid.session.maxBitRate)
                 
                 ybrid.session.maxBitRate(to:31_000)
                 sleep(1)
-                XCTAssertEqual(32_000, ybrid.bitRate)
+                XCTAssertEqual(32_000, ybrid.session.maxBitRate)
                 
                 ybrid.session.maxBitRate(to:57_000)
                 sleep(1)
-                XCTAssertEqual(56_000, ybrid.bitRate)
+                XCTAssertEqual(56_000, ybrid.session.maxBitRate)
                 
                 ybrid.session.maxBitRate(to:191_999)
                 sleep(1)
-                XCTAssertEqual(160_000, ybrid.bitRate)
+                XCTAssertEqual(160_000, ybrid.session.maxBitRate)
                 
                 ybrid.session.maxBitRate(to:390291781)
                 sleep(1)
-                XCTAssertEqual(-1, ybrid.bitRate)
+                XCTAssertEqual(-1, ybrid.session.maxBitRate)
                 
                 ybridControl.close()
                 sleep(1)

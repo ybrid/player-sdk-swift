@@ -101,8 +101,9 @@ public class MediaSession  {
         v2Driver?.info()
     }
     
-    func maxBitRate(to:Int32) {
-        v2Driver?.maxBitRate(bitPerSecond: to)
+    func maxBitRate(to bps:Int32) {
+        v2Driver?.maxBitRate(bitPerSecond: bps)
+        notifyChangedPlayout()
     }
     
     var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
@@ -155,7 +156,7 @@ public class MediaSession  {
             switch $0 {
             case .metadata: notifyChangedMetadata()
             case .timeshift: notifyChangedOffset(clear: clear)
-            case .playout: notifyChangedSwapsLeft()
+            case .playout: notifyChangedPlayout()
             case .bouquet: notifyChangedServices()
             }
         }
@@ -181,11 +182,12 @@ public class MediaSession  {
         }
     }
     
-    private func notifyChangedSwapsLeft() {
+    private func notifyChangedPlayout() {
         if driver?.hasChanged(SubInfo.playout) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.swapsChanged(self.swaps)
+                ybridListener.bitRateChanged(self.maxBitRate)
                 self.driver?.clearChanged(SubInfo.playout) }
         }
     }

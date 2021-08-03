@@ -159,6 +159,7 @@ class Poller {
 }
 
 class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
+
     
     let queue = DispatchQueue.init(label: "io.ybrid.tests.ui.listener")
     
@@ -169,6 +170,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
             metadatas.removeAll()
             services.removeAll()
             swaps.removeAll()
+            bitrates.removeAll()
         }
     }
     
@@ -177,6 +179,7 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
     var errors:[AudioPlayerError] = []
     var services:[[Service]] = []
     var swaps:[Int] = []
+    var bitrates:[Int32] = []
     
     
     // the latest recieved value for offset
@@ -193,6 +196,12 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         }
     }}
     
+    // the latest value for max bit rate
+    var maxBitRate:Int32? { get {
+        queue.sync {
+            return bitrates.last
+        }
+    }}
     
     func isItem(_ type:ItemType) -> Bool {
         queue.sync {
@@ -230,6 +239,13 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
         Logger.testing.info("-- swaps left \(swapsLeft)")
         queue.async {
             self.swaps.append(swapsLeft)
+        }
+    }
+    
+    func bitRateChanged(_ maxBitRate: Int32) {
+        Logger.testing.info("-- max bit rate \(maxBitRate)")
+        queue.async {
+            self.bitrates.append(maxBitRate)
         }
     }
     

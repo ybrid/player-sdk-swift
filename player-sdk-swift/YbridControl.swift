@@ -57,10 +57,8 @@ public protocol YbridControl : PlaybackControl {
     func swapItem(_ audioComplete: AudioCompleteCallback?)
     func swapService(to id:String, _ audioComplete: AudioCompleteCallback?)
     
-    /// set max audio quality
+    /// change audio quality
     func maxBitRate(to:BitRate)
-    /// get current max bit rate
-    var bitRate:Int32 { get }
     
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
@@ -92,6 +90,7 @@ public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
     func servicesChanged(_ services:[Service])
     func swapsChanged(_ swapsLeft:Int)
+    func bitRateChanged(_ maxBitRate:Int32)
 }
 
 // MARK: open
@@ -152,10 +151,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyChanged( SubInfo.timeshift )
         session.notifyChanged( SubInfo.playout )
     }
-
-    public var bitRate: Int32 { get {
-        return session.maxBitRate
-    }}
     
     static private let maxBitRates: [BitRate:Int32] =
         [.low:32_000, .mid:80_000, .high:160_000]
@@ -179,6 +174,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 ybridListener.offsetToLiveChanged(self.session.offset)
                 ybridListener.servicesChanged(self.session.services)
                 ybridListener.swapsChanged(self.session.swaps)
+                ybridListener.bitRateChanged(self.session.maxBitRate)
             }
         }
     }
