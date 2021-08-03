@@ -46,7 +46,7 @@ class YbridControlBasicTests: XCTestCase {
     /*
      The listener is notified of ybrid states in the beginning of the session.
      */
-    func test01_Stopped() {
+    func test01_stopped() {
         
         guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
@@ -57,7 +57,7 @@ class YbridControlBasicTests: XCTestCase {
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         
-        XCTAssertEqual(listener.services.count, 1, "YbridControlListener.serviceChanged(...) should have been called once, but was \(listener.services.count)")
+        XCTAssertEqual(listener.services.count, 0, "YbridControlListener.serviceChanged(...) should not be called with adaptive demo, but was \(listener.services.count)")
         
         XCTAssertGreaterThanOrEqual(listener.offsets.count, 1, "YbridControlListener.offsetToLiveChanged(...) should have been called at least once, but was \(listener.offsets.count), \(listener.offsets)")
         
@@ -70,7 +70,7 @@ class YbridControlBasicTests: XCTestCase {
      The listener's methods are called when the specific state changes or
      when refresh() is called.
      */
-    func test02_Stopped_Refresh() {
+    func test02_stopped_Refresh() {
         
         guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
@@ -83,7 +83,13 @@ class YbridControlBasicTests: XCTestCase {
             usleep(20_000) /// because the listener is notified asyncronously it *may* take some millis on old devices
         }
         
-        XCTAssertEqual(listener.services.count, 2, "YbridControlListener.serviceChanged(...) should have been called twice, but was \(listener.services.count)")
+        XCTAssertEqual(listener.services.count, 1, "YbridControlListener.serviceChanged(...) should have been called on refresh, but was \(listener.services.count)")
+        
+        if let services = listener.services.first  {
+            XCTAssertEqual(services.count, 0)
+        } else {
+            XCTFail()
+        }
         
         XCTAssertTrue((1...3).contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(2...3), but was \(listener.offsets.count), \(listener.offsets)")
         
@@ -98,7 +104,7 @@ class YbridControlBasicTests: XCTestCase {
      The listeners methods are called when the specific state changes or
      when refresh() is called.
      */
-    func test03_Playing_Refresh() throws {
+    func test03_playing_Refresh() throws {
         
         guard let ybridControl = testYbridControl else {
             XCTFail("cannot use ybrid control.")
@@ -111,7 +117,13 @@ class YbridControlBasicTests: XCTestCase {
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         
-        XCTAssertEqual(2, listener.services.count, "YbridControlListener.serviceChanged(...) should have been called twice, but was \(listener.services.count)")
+        XCTAssertEqual(listener.services.count, 1, "YbridControlListener.serviceChanged(...) should have been called on refresh, but was \(listener.services.count)")
+        
+        if let services = listener.services.first  {
+            XCTAssertEqual(services.count, 0)
+        } else {
+            XCTFail()
+        }
         
         let expectedOffsets = 2...4
         XCTAssertTrue(expectedOffsets.contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(expectedOffsets), but was \(listener.offsets.count), \(listener.offsets)")
@@ -123,35 +135,33 @@ class YbridControlBasicTests: XCTestCase {
     }
 
     
-    /*
-
-     */
-    let bitrates = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 ]
-    func test04_ChangeBitrates_All() throws {
+    func test04_stopped_ChangeBitRate_TakesEffekt() throws {
         
         guard let test = testYbridControl else {
             XCTFail("cannot use ybrid test control.")
             return
         }
-        var adoptedRates:[Int32] = []
-        test.playing() { (ybrid) in
+        test.stopped() { (ybrid) in
+
+            XCTAssertEqual(-1, ybrid.bitRate)
             
-            self.bitrates.forEach{
-                let kbps = Int32($0)*1000
-                ybrid.changeBitrate(to:kbps)
-                
-                usleep(800_000)
-                XCTAssertEqual(kbps, ybrid.maxBitrate)
-                if kbps == ybrid.maxBitrate {
-                    adoptedRates.append(kbps)
-                }
-            }
+            ybrid.maxBitRate(to:.low)
+            sleep(1)
+            XCTAssertEqual(32_000, ybrid.bitRate)
+            
+            ybrid.play()
+            sleep(4)
+            XCTAssertEqual(32_000, ybrid.bitRate)
+            
+            sleep(4)
+            
+            ybrid.stop()
+            sleep(1)
         }
-        Logger.testing.info("adopted bit rates are \(adoptedRates)")
     }
-
     
-    func test04_ChangeBitrates_nextRates() throws {
+
+    func test05_playing_ChangeBitRate() throws {
         
         guard let test = testYbridControl else {
             XCTFail("cannot use ybrid test control.")
@@ -159,13 +169,22 @@ class YbridControlBasicTests: XCTestCase {
         }
         test.playing() { (ybrid) in
             
-            ybrid.changeBitrate(to:31_000)
-            usleep(800_000)
-            XCTAssertEqual(32_000, ybrid.maxBitrate)
+            sleep(1)
+            XCTAssertEqual(-1, ybrid.bitRate)
             
-            ybrid.changeBitrate(to:57_000)
-            usleep(800_000)
-            XCTAssertEqual(56_000, ybrid.maxBitrate)
+            ybrid.maxBitRate(to:.low)
+            sleep(1)
+            XCTAssertEqual(32_000, ybrid.bitRate)
+            
+            ybrid.maxBitRate(to:.mid)
+            sleep(1)
+            XCTAssertEqual(80_000, ybrid.bitRate)
+            
+            ybrid.maxBitRate(to:.high)
+            sleep(1)
+            XCTAssertEqual(160_000, ybrid.bitRate)
+            
+            sleep(4)
         }
     }
 }

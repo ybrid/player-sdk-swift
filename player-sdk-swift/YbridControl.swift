@@ -57,14 +57,21 @@ public protocol YbridControl : PlaybackControl {
     func swapItem(_ audioComplete: AudioCompleteCallback?)
     func swapService(to id:String, _ audioComplete: AudioCompleteCallback?)
     
-    /// change audio quality
-    func changeBitrate(to:Int32)
-    var maxBitrate:Int32 { get }
+    /// set max audio quality
+    func maxBitRate(to:BitRate)
+    /// get current max bit rate
+    var bitRate:Int32 { get }
     
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
 }
 public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
+
+public enum BitRate {
+    case low
+    case mid
+    case high
+}
 
 public extension YbridControl {
     /// allow actions without default or audioComplete parameters
@@ -146,9 +153,21 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyChanged( SubInfo.playout )
     }
 
-    public var maxBitrate: Int32 { get {
-        return session.bitrate
+    public var bitRate: Int32 { get {
+        return session.maxBitRate
     }}
+    
+    static private let maxBitRates: [BitRate:Int32] =
+        [.low:32_000, .mid:80_000, .high:160_000]
+    public func maxBitRate(to:BitRate) {
+        playerQueue.async {
+            guard let bitRate = YbridAudioPlayer.maxBitRates[to] else {
+                Logger.shared.error("cannot change max bit rate to \(to)")
+                return
+            }
+            self.session.maxBitRate(to: bitRate)
+        }
+    }
     
     func refresh() {
         
@@ -163,7 +182,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
             }
         }
     }
-    
     
     func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) {
         playerQueue.async {
@@ -213,12 +231,6 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
         
-    public func changeBitrate(to:Int32) {
-        playerQueue.async {
-            self.session.changeBitrate(to: to)
-        }
-    }
-    
     // MARK: change over
     
     private func newChangeOver(_ userAudioComplete: AudioCompleteCallback?, _ subtype:SubInfo ) -> ChangeOver {

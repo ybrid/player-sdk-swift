@@ -34,7 +34,7 @@ class YbridSpecialActionTests: XCTestCase {
         listener.cleanUp()
     }
 
-    func test01_ReconnectSession_Demo_ok() throws {
+    func test01_ReconnectSession_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
 
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
@@ -73,6 +73,92 @@ class YbridSpecialActionTests: XCTestCase {
             return
         }
     }
+    
+    func test02_ChangeBitrates_All__lt32gt160fail() throws {
+        let bitrates = [8, 16, 32, 40, 48, 56, 64, 80, 96, 112,
+                        128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        var adoptedRates:[Int32] = []
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
+             playbackControl: { (c) in
+                return },
+             ybridControl: { (ybridControl) in
+                guard let ybrid = ybridControl as? YbridAudioPlayer else {
+                    XCTFail(); semaphore.signal(); return
+                }
+                ybrid.play()
+                sleep(4)
+                
+                bitrates.forEach{
+                    let kbps = Int32($0)*1000
+                    ybrid.session.maxBitRate(to:kbps)
+                    sleep(1)
+                    XCTAssertEqual(kbps, ybrid.bitRate)
+                    if kbps == ybrid.bitRate {
+                        adoptedRates.append(kbps)
+                    }
+                }
+                
+                ybridControl.close()
+                sleep(1)
+                semaphore.signal()
+             })
+        _ = semaphore.wait(timeout: .distantFuture)
+        let errCount = listener.errors.count
+        guard errCount == 0 else {
+            XCTFail("recreating session should work")
+            return
+        }
+        print("adopted bit rates are \(adoptedRates)")
+    }
+
+    func test03_ChangeBitrateVague_ok() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
+             playbackControl: { (c) in
+                return },
+             ybridControl: { (ybridControl) in
+                guard let ybrid = ybridControl as? YbridAudioPlayer else {
+                    XCTFail(); semaphore.signal(); return
+                }
+                ybrid.play()
+                sleep(4)
+                
+                ybrid.session.maxBitRate(to:77)
+                sleep(1)
+                XCTAssertEqual(32_000, ybrid.bitRate)
+                
+                ybrid.session.maxBitRate(to:31_000)
+                sleep(1)
+                XCTAssertEqual(32_000, ybrid.bitRate)
+                
+                ybrid.session.maxBitRate(to:57_000)
+                sleep(1)
+                XCTAssertEqual(56_000, ybrid.bitRate)
+                
+                ybrid.session.maxBitRate(to:191_999)
+                sleep(1)
+                XCTAssertEqual(160_000, ybrid.bitRate)
+                
+                ybrid.session.maxBitRate(to:390291781)
+                sleep(1)
+                XCTAssertEqual(-1, ybrid.bitRate)
+                
+                ybridControl.close()
+                sleep(1)
+                semaphore.signal()
+             })
+        _ = semaphore.wait(timeout: .distantFuture)
+        let errCount = listener.errors.count
+        guard errCount == 0 else {
+            XCTFail("recreating session should work")
+            return
+        }
+    }
+    
+
+    
     
 }
 

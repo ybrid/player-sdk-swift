@@ -138,7 +138,7 @@ class YbridSwapItemTests: XCTestCase {
 
     // MARK: using audio complete
     
-    func test11_SwapItemComplete_Demo() throws {
+    func test11_SwapItem_complete() throws {
         
         let actionTraces = ActionsTrace()
         testControl!.playing{ [self] (ybrid) in
@@ -148,10 +148,23 @@ class YbridSwapItemTests: XCTestCase {
         actionTraces.check(confirm: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
     }
     
-    func test12_SwapItemComplete_AdDemo() throws {
+    func test12_SwapItem_3Times() throws {
         
         let actionTraces = ActionsTrace()
         testControl!.playing{ [self] (ybrid) in
+            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        }
+        checkErrors(expectedErrors: 0)
+        actionTraces.check(confirm: 3, maxDuration: YbridSwapItemTests.maxAudioComplete)
+    }
+    
+    func test13_SwapItemFromAd_() throws {
+        let test = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
+        
+        let actionTraces = ActionsTrace()
+        test.playing{ [self] (ybrid) in
             actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
         }
         

@@ -59,11 +59,18 @@ class MediaState  {
         }
     }}
     
-    var maxBitrate:Int32? { didSet {
-        if let bitrate = maxBitrate, bitrate != oldValue {
-            setChanged(SubInfo.playout)
+    var maxBitRate:Int32? {
+        willSet {
+            if newValue == -1 {
+                return
+            }
         }
-    }}
+        didSet {
+            if let bitrate = maxBitRate, bitrate != oldValue {
+                setChanged(SubInfo.playout)
+            }
+        }
+    }
     
     var offset:TimeInterval? { didSet {
         if let _ = offset {

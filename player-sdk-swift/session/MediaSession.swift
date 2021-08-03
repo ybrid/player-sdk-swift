@@ -51,8 +51,8 @@ public class MediaSession  {
     var swaps: Int { get {
         return driver?.state.swaps ?? -1
     }}
-    var bitrate: Int32 { get {
-        return driver?.state.maxBitrate ?? -1
+    var maxBitRate: Int32 { get {
+        return driver?.state.maxBitRate ?? -1
     }}
     var services: [Service] { get {
         return driver?.state.bouquet?.services ?? []
@@ -101,8 +101,8 @@ public class MediaSession  {
         v2Driver?.info()
     }
     
-    func changeBitrate(to:Int32) {
-        v2Driver?.maxBitrate(bitPerSecond: to)
+    func maxBitRate(to:Int32) {
+        v2Driver?.maxBitRate(bitPerSecond: to)
     }
     
     var changingOver:YbridAudioPlayer.ChangeOver? { didSet {

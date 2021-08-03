@@ -202,8 +202,8 @@ class UseAudioPlayerTests: XCTestCase {
      The audio codec opus is supported
      */
     func test06_PlayOpus() {
-        let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        
+//        let opusEndpoint = MediaEndpoint(mediaUri: "https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        let opusEndpoint = MediaEndpoint(mediaUri: "file:///Users/florian/Music/audioTests/OGG-OPUS/sample_opus.opus")
         do {
             try AudioPlayer.open(for: opusEndpoint, listener: playerListener) {
                 (control) in

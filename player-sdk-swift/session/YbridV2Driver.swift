@@ -127,7 +127,7 @@ class YbridV2Driver : MediaDriver {
     
     // MARK: bit rate
     
-    func maxBitrate(bitPerSecond:Int32) {
+    func maxBitRate(bitPerSecond:Int32) {
         guard super.connected else {
             Logger.session.error("no connected ybrid session")
             return
@@ -301,7 +301,7 @@ class YbridV2Driver : MediaDriver {
     }
     
     private func accept(showMeta:YbridShowMeta) {
-        accept(bitrate: showMeta.currentBitRate)
+//        accept(bitrate: showMeta.currentBitRate) // 2021-08-03
         accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
         accept(swapped:showMeta.swapInfo)
 //        showMeta.timeToNextItemMillis
@@ -356,7 +356,7 @@ class YbridV2Driver : MediaDriver {
         state.offset = Double(offset) / 1000
     }
     func accept(bitrate: Int32) {
-        state.maxBitrate = bitrate
+        state.maxBitRate = bitrate
     }
     
     // MARK: all requests
