@@ -54,21 +54,22 @@ let flacOnDemandEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/tes
 
 // MARK: AAC test endpoints
 
-let aac441Endpoint = MediaEndpoint(mediaUri:    "https://www2.iis.fraunhofer.de/AAC/xheDemo/Walking01_LN_xHE_024s_AACLC_320s.mp4") // AAC 44,1 kHz
-let aac480Endpoint = MediaEndpoint(mediaUri:     "https://www2.iis.fraunhofer.de/AAC/xheDemo/Rain01_LN_xHE_016s_AACLC_320s.mp4") // AAC 48 kHz
-///Users/florian/github/test-files/aac-audio/frauenhofer-testfiles/sqam50_LN_xHE_024s_AACLC_320s.mp4
+
+let aac48kHzEndpoint = MediaEndpoint(mediaUri:     "https://www2.iis.fraunhofer.de/AAC/xheDemo/Rain01_LN_xHE_016s_AACLC_320s.mp4") // AAC 48 kHz
+
+
 
 //
 // @see https://www2.iis.fraunhofer.de/AAC/stereo.html
 // tests for proper reproduction of the SBR portion of the HE-AAC bitstream and proper channel arrangement.
 
 //  AOT 5, explicit signalling, backwards compatible -> HE-AAC, 'aach'
-let aacHEEndpoint =  MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/frauenhofer-testfiles/SBRtestStereoAot5Sig1.mp4?raw=true")
+let aacHEEndpoint =  MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/SBRtestStereoAot5Sig1.mp4?raw=true")
 // AOT 29, explicit signalling, backwards compatible ->  HE-AAC_v2, 'aacp'
-let aacHEv2Endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/frauenhofer-testfiles/SBRtestStereoAot29Sig1.mp4?raw=true")
+let aacHEv2Endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/SBRtestStereoAot29Sig1.mp4?raw=true")
 // AOT 29, explicit signalling, not backwards compatible (MPEG hierarchical) ->  HE-AAC_v2, 'aacp'
-let aacHEv2notBackwardsCompatibleEndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/frauenhofer-testfiles/SBRtestStereoAot29Sig2.mp4?raw=true")
+let aacHEv2notBackwardsCompatibleEndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/SBRtestStereoAot29Sig2.mp4?raw=true")
 // AOT 29, implicit signalling -> HE-AAC_v2 not detected, using 'aac ' (playing without SBR), 1ch
-let aacNoSBREndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/frauenhofer-testfiles/SBRtestStereoAot29Sig0.mp4?raw=true")
+let aacNoSBREndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/SBRtestStereoAot29Sig0.mp4?raw=true")
 // mixed signaling -> HE-AAC_v2 'aach', 1 ch
-let aacMixed1ChEndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/frauenhofer-testfiles/SBRtestStereoAot5SigusePS.mp4?raw=true")
+let aacMixed1ChEndpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/SBRtestStereoAot5SigusePS.mp4?raw=true")

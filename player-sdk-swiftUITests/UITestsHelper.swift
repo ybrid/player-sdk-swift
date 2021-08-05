@@ -140,6 +140,14 @@ class TimingListener : AudioPlayerListener {
 }
 
 class Poller {
+    func wait(_ control:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
+        let took = wait(max: maxSeconds) {
+            return control.state == until
+        }
+        XCTAssertLessThanOrEqual(took, maxSeconds, "not \(until) within \(maxSeconds) s")
+    }
+    
+    
     func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) {
         let took = wait(max: maxSeconds) {
             return control.state == until

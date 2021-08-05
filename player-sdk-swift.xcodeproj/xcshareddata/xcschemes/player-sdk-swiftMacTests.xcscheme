@@ -42,6 +42,9 @@
                   Identifier = "AbortBufferingTests">
                </Test>
                <Test
+                  Identifier = "AudioCodecsTests">
+               </Test>
+               <Test
                   Identifier = "PlayerToggleStressTest">
                </Test>
                <Test
