@@ -180,7 +180,7 @@ class YbridControlBasicTests: XCTestCase {
             
             ybrid.maxBitRate(to:.mid)
             sleep(1)
-            XCTAssertEqual(80_000, self.listener.maxBitRate)
+            XCTAssertEqual(128_000, self.listener.maxBitRate)
             
             ybrid.maxBitRate(to:.high)
             sleep(1)
