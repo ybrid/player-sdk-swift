@@ -62,6 +62,9 @@ public protocol YbridControl : PlaybackControl {
     func swapItem(_ audioComplete:AudioCompleteCallback?)
     func swapService(to id:String, _ audioComplete:AudioCompleteCallback?)
 
+    /// limit bit rate for content
+    func maxBitRate(to:Int32)
+
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh() 
 }
@@ -76,6 +79,7 @@ public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
     func swapsChanged(_ swapsLeft:Int)
     func servicesChanged(_ services:[Service])
+    func bitRateChanged(_ maxBitRate:Int32)
 }
 ```
 
