@@ -163,10 +163,7 @@ class YbridSpecialActionTests: XCTestCase {
             XCTFail("recreating session should work")
             return
         }
-    }
-    
-
-    
+    }    
     
 }
 

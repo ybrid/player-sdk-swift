@@ -136,7 +136,7 @@ class YbridControlBasicTests: XCTestCase {
     }
 
     
-    func test04_stopped_ChangeBitRate_TakesEffekt() throws {
+    func test04_stopped_maxBitRate_TakesEffekt() throws {
         
         guard let test = testYbridControl else {
             XCTFail("cannot use ybrid test control.")
@@ -146,7 +146,7 @@ class YbridControlBasicTests: XCTestCase {
 
             XCTAssertNil(self.listener.maxBitRate)
             
-            ybrid.maxBitRate(to:.low)
+            ybrid.maxBitRate(to: 32_000)
             sleep(1)
             XCTAssertEqual(32_000, self.listener.maxBitRate)
             
@@ -174,17 +174,17 @@ class YbridControlBasicTests: XCTestCase {
             sleep(1)
             XCTAssertEqual(-1, self.listener.maxBitRate)
             
-            ybrid.maxBitRate(to:.low)
+            ybrid.maxBitRate(to:32_000)
             sleep(1)
             XCTAssertEqual(32_000, self.listener.maxBitRate)
             
-            ybrid.maxBitRate(to:.mid)
+            ybrid.maxBitRate(to:128_000)
             sleep(1)
             XCTAssertEqual(128_000, self.listener.maxBitRate)
             
-            ybrid.maxBitRate(to:.high)
+            ybrid.maxBitRate(to:192_000)
             sleep(1)
-            XCTAssertEqual(160_000, self.listener.maxBitRate)
+            XCTAssertEqual(192_000, self.listener.maxBitRate)
             
             sleep(4)
         }

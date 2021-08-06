@@ -132,11 +132,11 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.session.debug("setting max bit rate ybrid session")
+        Logger.session.debug("request max bit-rate to \(bitPerSecond)")
         
         do {
             let bitRate = URLQueryItem(name: "value", value: "\(bitPerSecond)")
-            let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "set bit rate", queryParam: bitRate)
+            let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "limit bit-rate to \(bitPerSecond)", queryParam: bitRate)
             accept(bitrate: bitrateObj.maxBitRate)
             if !super.valid {
                 try reconnect()
