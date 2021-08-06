@@ -45,56 +45,60 @@ class AudioCodecsTests: XCTestCase {
      
      */
     func test21_playingSpeechMale_HEAACv1_XHEAAC() {
-        _ = TestControl(aacHEv1Endpoint)
+        _ = TestControl(heaac24kbps_SpeechMale)
             .playing(6)
             .checkErrors(expected: 0)
             
-            .select(aacXHEv1Endpoint)
+            .select(xheaac24kbps_SpeechMale)
             .playing(6)
             .checkErrors(expected: 0)
     }
     
     func test22_playingMusic_24kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(aacMusic24kbpsHE)
+        _ = TestControl(heaac24kbps_music)
             .playing(6)
             .checkErrors(expected: 0)
 
-            .select(aacMusic24kbpsXHE)
+            .select(xheaac24kbps_music)
             .playing(6)
             .checkErrors(expected: 0)
     }
     
     func test22_playingMusic_48kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(aacMusic48kbpsHE)
+        _ = TestControl(heaac48kbps_music)
             .playing(12)
             .checkErrors(expected: 0)
 
-            .select(aacMusic48kbpsXHE)
+            .select(xheaac48kbps_music)
             .playing(12)
             .checkErrors(expected: 0)
     }
     
     func test23_playingMusic_128kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(aacMusic128kbpsHE)
+        _ = TestControl(heaac128kbps_music)
             .playing(18)
             .checkErrors(expected: 0)
         
-            .select(aacMusic128kbpsXHE)
+            .select(xheaac128kbps_music)
             .playing(18)
             .checkErrors(expected: 0)
     }
 }
 
+// @see https://www2.iis.fraunhofer.de/AAC/stereo.html
 let gitTestfilesAacUrl = "https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/"
-let aacHEv1Endpoint = MediaEndpoint( mediaUri:  gitTestfilesAacUrl + "sqam50_LN_HEAACv1_024s_AACLC_320s.mp4?raw=true" )
-let aacXHEv1Endpoint = MediaEndpoint( mediaUri: gitTestfilesAacUrl + "sqam50_LN_xHE_024s_AACLC_320s.mp4?raw=true")
 
-let aacMusic24kbpsHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_024s_AACLC_320s.mp4?raw=true")
-let aacMusic24kbpsXHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_024s_AACLC_320s.mp4?raw=true")
-let aacMusic48kbpsHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_AACLC_048s_AACLC_320s.mp4?raw=true")
-let aacMusic48kbpsXHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_xHE_048s_AACLC_320s.mp4?raw=true")
-let aacMusic128kbpsHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_128s_AACLC_320s.mp4?raw=true")
-let aacMusic128kbpsXHE = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_128s_AACLC_320s.mp4?raw=true")
+
+// @see https://www2.iis.fraunhofer.de/AAC/xhe-aac-compare-tab.html
+let heaac24kbps_SpeechMale = MediaEndpoint( mediaUri:  gitTestfilesAacUrl + "sqam50_LN_HEAACv1_024s_AACLC_320s.mp4?raw=true" )
+let xheaac24kbps_SpeechMale = MediaEndpoint( mediaUri: gitTestfilesAacUrl + "sqam50_LN_xHE_024s_AACLC_320s.mp4?raw=true")
+
+let heaac24kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_024s_AACLC_320s.mp4?raw=true")
+let xheaac24kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_024s_AACLC_320s.mp4?raw=true")
+let heaac48kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_AACLC_048s_AACLC_320s.mp4?raw=true")
+let xheaac48kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_xHE_048s_AACLC_320s.mp4?raw=true")
+let heaac128kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_128s_AACLC_320s.mp4?raw=true")
+let xheaac128kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_128s_AACLC_320s.mp4?raw=true")
 
 
 class TestControl {
@@ -103,9 +107,9 @@ class TestControl {
     let poller = Poller()
     
     let ctrlListener:TestAudioPlayerListener
-    init(_ endpoint:MediaEndpoint, listener:TestAudioPlayerListener? = nil) {
+    init(_ endpoint:MediaEndpoint, external:TestAudioPlayerListener? = nil) {
         self.endpoint = endpoint
-        self.ctrlListener = listener ?? TestAudioPlayerListener()
+        self.ctrlListener = external ?? TestAudioPlayerListener()
     }
     
     func playing(_ seconds:UInt32? = nil , action: ((PlaybackControl)->())? = nil) -> TestControl {

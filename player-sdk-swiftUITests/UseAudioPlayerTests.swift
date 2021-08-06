@@ -40,7 +40,8 @@ class UseAudioPlayerTests: XCTestCase {
         
         playerListener.reset()
         
-        /// recieving a player control is asynchrounous. So ending tests need to be synchronihzes manually.
+        /// The developer recieves a player's control in a callback method.
+        /// Each test case runs until semaphore is signalled.
         semaphore = DispatchSemaphore(value: 0)
     }
     override func tearDownWithError() throws {
@@ -77,10 +78,10 @@ class UseAudioPlayerTests: XCTestCase {
     }
 
     /*
-     Let the player play your radio and ensure expected playback states.
+     Play radio and ensure expected playback states.
 
      Connecting and setting up depends on the infrastructure.
-     In this test we assume it takes no longer than 3 seconds.
+     In this test we assume it takes no longer than 5 seconds.
      */
     func test02_PlayerStates() throws {
         
@@ -88,12 +89,15 @@ class UseAudioPlayerTests: XCTestCase {
             (control) in
  
             XCTAssertEqual(control.state, PlaybackState.stopped)
+            
             control.play()
             XCTAssertEqual(control.state, PlaybackState.buffering)
+            
             sleep(5)
             XCTAssertEqual(control.state, PlaybackState.playing)
             control.stop()
             XCTAssertEqual(control.state, PlaybackState.playing)
+            
             sleep(1)
             XCTAssertEqual(control.state, PlaybackState.stopped)
             
@@ -102,10 +106,10 @@ class UseAudioPlayerTests: XCTestCase {
     }
 
     /*
-     Use your audio player listener to be called back.
-     Filter console output by '-- ' and watch.
+     Use AudioPlayerListener to be called back.
+     Watch console output filtered by '-- '.
 
-     Make sure the listener stays alive until it recieves stateChanged to '.stopped'.
+     Make sure the listener stays alive until the state is changed to '.stopped'.
      */
     func test03_ListenToPlayer() throws {
         
@@ -156,8 +160,6 @@ class UseAudioPlayerTests: XCTestCase {
         
         XCTAssertEqual(603, lastError.code) /// ErrorKind.serverError
         XCTAssertEqual(-1003, lastError.osstatus) /// host not found
-        
-        
     }
 
     /*
@@ -289,10 +291,14 @@ class UseAudioPlayerTests: XCTestCase {
     }
     
     /*
-     Use an endpoint that supports ybridV2 and implement the ybridControl callback.
-     YbridControl's methods can shift time and alter the streamed audio content.
+     Make use of ybrid actions.
      
-     The AudioCompleteCallback is called when the content change takes place.
+     Use an endpoint that supports ybridV2 and implement ybridControl.
+     It's the 2nd callback parameter of AudioPlayer.open().
+     
+     YbridControls can shift time and alter the streamed audio content.
+     
+     After a ybrid actions has taken place, the deleoper's definition of audioComplete is called.
      */
     func test09_UseYbridControl() {
 
@@ -303,6 +309,7 @@ class UseAudioPlayerTests: XCTestCase {
                
                 control.play()
                 sleep(2)
+                
                 control.skipBackward(ItemType.NEWS) { (success) in
                     print("Now You listen to news. That's \(success).")
                     XCTAssertTrue(success)
@@ -320,7 +327,7 @@ class UseAudioPlayerTests: XCTestCase {
     }
 
     /*
-     Audio codecs AAC are supported up to profile HE-AAC_v2.
+     Audio codecs AAC are supported, here of profile HE-AAC_v2.
      
      Besides the first sine you should hear 4 different high frequencies.
      */

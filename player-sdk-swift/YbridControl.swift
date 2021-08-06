@@ -57,8 +57,8 @@ public protocol YbridControl : PlaybackControl {
     func swapItem(_ audioComplete: AudioCompleteCallback?)
     func swapService(to id:String, _ audioComplete: AudioCompleteCallback?)
     
-    /// change audio quality
-    func maxBitRate(to:BitRate)
+    /// limit bit rate of audio content
+    func maxBitRate(to:Int32)
     
     /// refresh all states, all methods of the YbridControlListener are called
     func refresh()
@@ -66,12 +66,16 @@ public protocol YbridControl : PlaybackControl {
 public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 
 // selectable maximum bit rates
-public enum BitRate : Int32, CaseIterable {
-    /// demo app is currently making use of order and values of this enum
-    case low = 32_000
-    case mid = 128_000
-    case high = 160_000
-}
+//public enum BitRate : Int32, CaseIterable {
+//    /// demo app is currently making use of order and values of this enum
+//    case low = 32_000
+//    case mid = 128_000
+//    case high = 192_000
+//}
+
+// selectable maximum bit rates in kbps
+/// demo app is currently making use of order
+public let supportedBitRates:[Int32] = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
 
 public extension YbridControl {
     /// allow actions without default or audioComplete parameters
@@ -154,9 +158,9 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         session.notifyChanged( SubInfo.playout )
     }
     
-    public func maxBitRate(to:BitRate) {
+    public func maxBitRate(to maxRate:Int32) {
         playerQueue.async {
-            self.session.maxBitRate(to: to.rawValue)
+            self.session.maxBitRate(to: maxRate * 1000)
         }
     }
     
