@@ -140,36 +140,33 @@ class YbridSwapItemTests: XCTestCase {
     
     func test11_SwapItem_complete() throws {
         let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
-        let actionTraces = ActionsTrace()
         testControl.playing{ (_) in
-            actionTraces.append( testControl.swapItemSynced(maxWait: 8.0) )
+            testControl.swapItemSynced(maxWait: 8.0)
         }
         testControl.checkErrors(expected: 0)
-        actionTraces.check(confirm: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
+        .checkAllActions(confirm: 1, withinS: YbridSwapItemTests.maxAudioComplete)
     }
     
     func test12_SwapItem_3Times() throws {
-        
-        let actionTraces = ActionsTrace()
-        testControl!.playing{ [self] (ybrid) in
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        testControl.playing{ (_) in
+            testControl.swapItemSynced(maxWait: 8.0)
+            testControl.swapItemSynced(maxWait: 8.0)
+            testControl.swapItemSynced(maxWait: 8.0)
         }
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 3, maxDuration: YbridSwapItemTests.maxAudioComplete)
+        testControl.checkErrors(expected: 0)
+            .checkAllActions(confirm: 3, withinS: YbridSwapItemTests.maxAudioComplete)
     }
     
-    func test13_SwapItemFromAd_fails() throws {
-        let test = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
+    func test13_SwapItemFromAd_doesntSwap() throws {
+        let testControl = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
         
-        let actionTraces = ActionsTrace()
-        test.playing{ [self] (ybrid) in
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        testControl.playing{ (ybrid) in
+            testControl.swapItemSynced(maxWait: 8.0)
         }
         
-        test.checkErrors(expected: 1)
-        actionTraces.check(confirm: 1, maxDuration: 1.0)
+        testControl.checkErrors(expected: 1)
+            .checkAllActions(confirm: 1, withinS: 1.0)
     }
   
     

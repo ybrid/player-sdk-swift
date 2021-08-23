@@ -90,8 +90,8 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     func test04_Wind_Cannot() throws {
-        let testDemo = TestYbridControl(ybridDemoEndpoint, listener: ybridPlayerListener)
-        testDemo.playing{ [self] (ybrid) in
+        let testAdDemo = TestYbridControl(ybridAdDemoEndpoint, listener: ybridPlayerListener)
+        testAdDemo.playing{ [self] (ybrid) in
             
             ybrid.wind(by: -120.0)
             sleep(maxWindCompleteS)
@@ -209,70 +209,67 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
-        let actionTraces = ActionsTrace()
         test.playing{ (ybrid) in
-            actionTraces.append( test.windSynced(by:-300) )
-            actionTraces.append( test.windSynced(to:nil) )
+            test.windSynced(by:-300)
+            test.windSynced(to:nil)
         }
 
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 2, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 2, withinS: maxWindComplete)
     }
     
     func test12_WindToWindForward__failsOften() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
-        
-        let actionTraces = ActionsTrace()
+
         test.playing{ (ybrid) in
             let date = self.lastFullHour(secondsBefore:-4)
-            actionTraces.append( test.windSynced(to:date) )
-            actionTraces.append( test.windSynced(by:30, maxWait: 15.0) )
+            test.windSynced(to:date)
+            test.windSynced(by:30, maxWait: 15.0)
         }
 
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 2, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 2, withinS: maxWindComplete)
     }
     
     func test13_SkipBackNewsSkipMusic_ok() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
-        let actionTraces = ActionsTrace()
+
         test.playing{ (ybrid) in
-            actionTraces.append( test.skipSynced(-1, to:ItemType.NEWS) )
-            actionTraces.append( test.skipSynced(+1, to:ItemType.MUSIC) )
+            test.skipSynced(-1, to:ItemType.NEWS)
+            test.skipSynced(+1, to:ItemType.MUSIC)
         }
 
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 2, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 2, withinS: maxWindComplete)
     }
     
     func test14_SkipBackItem__failsSometimes() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
-        let actionTraces = ActionsTrace()
+
         test.playing{ (ybrid) in
-            actionTraces.append( test.skipSynced(-1, to:nil, maxWait: 15.0) )
+            test.skipSynced(-1, to:nil, maxWait: 15.0)
         }
 
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 1, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 1, withinS: maxWindComplete)
     }
     
     func test15_windLiveWhenLive__fails() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
-        let traces = ActionsTrace()
         test.playing{ (ybrid) in
-            traces.append( test.windSynced(to:nil, maxWait: 15.0) )
+            test.windSynced(to:nil, maxWait: 15.0)
         }
 
-        checkErrors(expectedErrors: 0)
-        traces.check(confirm: 1, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 1, withinS: maxWindComplete)
     }
     
     func test16_SkipBackwardItem_LastItemAgain__failsOften() throws {
@@ -280,32 +277,31 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
-        let traces = ActionsTrace()
         test.playing{ [self] (ybrid) in
             
-            let typeBegin = ybridPlayerListener.metadatas.last?.current?.type
+            let typeBegin = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBegin)
             Logger.testing.notice("-- playing \(typeBegin ?? ItemType.UNKNOWN)")
             
             
-            traces.append( test.skipSynced(-1, to: nil, maxWait: 15.0) )
+            test.skipSynced(-1, to: nil, maxWait: 15.0)
             
-            let typeBack1 = ybridPlayerListener.metadatas.last?.current?.type
+            let typeBack1 = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBack1)
             Logger.testing.notice("-- playing \(typeBack1 ?? ItemType.UNKNOWN)")
   
             
-            traces.append( test.skipSynced( -1, to: nil, maxWait: 15.0) )
+            test.skipSynced( -1, to: nil, maxWait: 15.0)
             
-            let typeBack2 = ybridPlayerListener.metadatas.last?.current?.type
+            let typeBack2 = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBack2)
             Logger.testing.notice("-- playing \(typeBack2 ?? ItemType.UNKNOWN)")
 
             XCTAssertEqual(typeBack1, typeBack2)
         }
 
-        checkErrors(expectedErrors: 0)
-        traces.check(confirm: 2, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 2, withinS: maxWindComplete)
     }
     
     func test21_windBack10Times() throws {
@@ -313,22 +309,21 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
-        let traces = ActionsTrace()
         test.playing{ (ybrid) in
-            traces.append( test.windSynced(by:-201) )
-            traces.append( test.windSynced(by:-202) )
-            traces.append( test.windSynced(by:-203) )
-            traces.append( test.windSynced(by:-204) )
-            traces.append( test.windSynced(by:-205) )
-            traces.append( test.windSynced(by:-206) )
-            traces.append( test.windSynced(by:-207) )
-            traces.append( test.windSynced(by:-208) )
-            traces.append( test.windSynced(by:-209) )
-            traces.append( test.windSynced(by:-210) )
+            test.windSynced(by:-201)
+            test.windSynced(by:-202)
+            test.windSynced(by:-203)
+            test.windSynced(by:-204)
+            test.windSynced(by:-205)
+            test.windSynced(by:-206)
+            test.windSynced(by:-207)
+            test.windSynced(by:-208)
+            test.windSynced(by:-209)
+            test.windSynced(by:-210)
         }
 
-        checkErrors(expectedErrors: 0)
-        traces.check(confirm: 10, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 10, withinS: maxWindComplete)
     }
 
     func test22_windForward10Times() throws {
@@ -336,23 +331,23 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
-        let traces = ActionsTrace()
         test.playing{ (ybrid) in
-            traces.append( test.windSynced(by:-3600) )
-            traces.append( test.windSynced(by:101) )
-            traces.append( test.windSynced(by:102) )
-            traces.append( test.windSynced(by:103) )
-            traces.append( test.windSynced(by:104) )
-            traces.append( test.windSynced(by:105) )
-            traces.append( test.windSynced(by:106) )
-            traces.append( test.windSynced(by:107) )
-            traces.append( test.windSynced(by:108) )
-            traces.append( test.windSynced(by:109) )
-            traces.append( test.windSynced(by:110) )
+            test.windSynced(by:-3600)
+            test.windSynced(by:101)
+            test.windSynced(by:102)
+            test.windSynced(by:103)
+            test.windSynced(by:104)
+            test.windSynced(by:105)
+            test.windSynced(by:106)
+            test.windSynced(by:107)
+            test.windSynced(by:108)
+            test.windSynced(by:109)
+            test.windSynced(by:110)
         }
 
-        checkErrors(expectedErrors: 0)
-        traces.check(confirm: 11, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 11, withinS: maxWindComplete)
+
     }
     
     func test23_skip5Back5Forward() throws {
@@ -360,23 +355,22 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
-        let traces = ActionsTrace()
         test.playing{ (ybrid) in
-            traces.append( test.windSynced(by:-3600) )
-            traces.append( test.skipSynced(-1, to:nil) )
-            traces.append( test.skipSynced(-1, to:nil) )
-            traces.append( test.skipSynced(-1, to:nil) )
-            traces.append( test.skipSynced(-1, to:nil) )
-            traces.append( test.skipSynced(-1, to:nil) )
-            traces.append( test.skipSynced(+1, to:nil) )
-            traces.append( test.skipSynced(+1, to:nil) )
-            traces.append( test.skipSynced(+1, to:nil) )
-            traces.append( test.skipSynced(+1, to:nil) )
-            traces.append( test.skipSynced(+1, to:nil) )
+            test.windSynced(by:-3600)
+            test.skipSynced(-1, to:nil)
+            test.skipSynced(-1, to:nil)
+            test.skipSynced(-1, to:nil)
+            test.skipSynced(-1, to:nil)
+            test.skipSynced(-1, to:nil)
+            test.skipSynced(+1, to:nil)
+            test.skipSynced(+1, to:nil)
+            test.skipSynced(+1, to:nil)
+            test.skipSynced(+1, to:nil)
+            test.skipSynced(+1, to:nil)
         }
         
-        checkErrors(expectedErrors: 0)
-        traces.check(confirm: 11, maxDuration: maxWindComplete)
+        test.checkErrors(expected: 0)
+            .checkAllActions(confirm: 11, withinS: maxWindComplete)
     }
 
 

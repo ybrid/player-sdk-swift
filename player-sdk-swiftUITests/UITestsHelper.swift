@@ -64,9 +64,12 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var errors:[AudioPlayerError] = []
     override func error(_ severity:ErrorSeverity, _ error: AudioPlayerError) {
         super.error(severity, error)
-        errors.append(error)
+        queue.async {
+            self.errors.append(error)
+        }
     }
-
+    
+    
     override func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
@@ -263,14 +266,6 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
             self.metadatas.append(metadata)
         }
     }
-
-    override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
-        super.error(severity, exception)
-        queue.async {
-            self.errors.append(exception)
-        }
-    }
-
 }
 
 
