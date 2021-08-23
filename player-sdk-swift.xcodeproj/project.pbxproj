@@ -139,6 +139,7 @@
 		1799DD4125D580D40055C973 /* PlaybackSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD3925D580D40055C973 /* PlaybackSchedulingTests.swift */; };
 		1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
 		1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
+		179C892326D38489009B600C /* ybridSwr3InvalidResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 179C892226D38489009B600C /* ybridSwr3InvalidResponse.json */; };
 		17A6C1C4268AFFD700D401AE /* YbridSpecialActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A6C1C3268AFFD700D401AE /* YbridSpecialActionTests.swift */; };
 		17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
 		17B54DD925F7B45800CDEBAD /* LoadingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B54DD725F7B45800CDEBAD /* LoadingError.swift */; };
@@ -293,6 +294,7 @@
 		1799DD8725D599190055C973 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevelopingPlayerTests.swift; sourceTree = "<group>"; };
 		1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITestsHelper.swift; sourceTree = "<group>"; };
+		179C892226D38489009B600C /* ybridSwr3InvalidResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSwr3InvalidResponse.json; sourceTree = "<group>"; };
 		17A6C1C3268AFFD700D401AE /* YbridSpecialActionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YbridSpecialActionTests.swift; sourceTree = "<group>"; };
 		17B54DD725F7B45800CDEBAD /* LoadingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingError.swift; sourceTree = "<group>"; };
 		17BB101A26831D3F003247F7 /* swr3recIncl1024MD_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = swr3recIncl1024MD_2.mp3; sourceTree = "<group>"; };
@@ -470,6 +472,7 @@
 		17651DEB266856F9005D46BA /* res */ = {
 			isa = PBXGroup;
 			children = (
+				179C892226D38489009B600C /* ybridSwr3InvalidResponse.json */,
 				1765781126B829A000D7F465 /* ybridBitrateResponse.json */,
 				177727372696E60600D0A67B /* ybridStreamUrlMetadataSwr3.json */,
 				177727332696E13200D0A67B /* ybridStreamUrlMetadata2.json */,
@@ -833,6 +836,7 @@
 				171201BA266AE69900DB9463 /* ybridSwapServiceResponse.json in Resources */,
 				17E9AB8D2655467D001ED9C8 /* ybridResponseNoMilliseconds.json in Resources */,
 				1765781226B829A000D7F465 /* ybridBitrateResponse.json in Resources */,
+				179C892326D38489009B600C /* ybridSwr3InvalidResponse.json in Resources */,
 				17651DED2668577A005D46BA /* ybridBouquetResponse.json in Resources */,
 				17E9AB9E26554B6C001ED9C8 /* ybridResponseMilliseconds.json in Resources */,
 				17268BE8265E8EF800E2F8E3 /* ybridDateDecodingNanos.json in Resources */,

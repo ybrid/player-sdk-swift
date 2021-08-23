@@ -157,7 +157,7 @@ struct YbridBouquetObject : Codable, Equatable {
 }
 
 struct YbridService : Codable, Equatable {
-    let iconURL: String
+    var iconURL: String? = nil
     var displayName: String? = nil
     let id: String
 }
