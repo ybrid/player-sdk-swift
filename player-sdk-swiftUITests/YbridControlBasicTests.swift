@@ -29,10 +29,8 @@ import YbridPlayerSDK
 class YbridControlBasicTests: XCTestCase {
 
     let listener = TestYbridPlayerListener()
-    var testYbridControl:TestYbridControl?
     override func setUpWithError() throws {
         listener.reset()
-        testYbridControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
         Logger.testing.debug("-- consumed offsets \(listener.offsets)")
@@ -49,12 +47,8 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test01_stopped() {
         
-        guard let ybridControl = testYbridControl else {
-            XCTFail("cannot use ybrid control.")
-            return
-        }
-        
-        ybridControl.stopped() { (ybridControl) in
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        test.stopped() { (ybrid) in
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         
@@ -73,14 +67,9 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test02_stopped_Refresh() {
         
-        guard let ybridControl = testYbridControl else {
-            XCTFail("cannot use ybrid control.")
-            return
-        }
-        
-        ybridControl.stopped() { (ybridControl) in
-            
-            ybridControl.refresh()
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        test.stopped() { (ybrid:YbridControl) in
+            ybrid.refresh()
             usleep(20_000) /// because the listener is notified asyncronously it *may* take some millis on old devices
         }
         
@@ -107,14 +96,10 @@ class YbridControlBasicTests: XCTestCase {
      */
     func test03_playing_Refresh() throws {
         
-        guard let ybridControl = testYbridControl else {
-            XCTFail("cannot use ybrid control.")
-            return
-        }
-        
-        ybridControl.playing() { (ybridControl) in
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        test.playing() { (ybrid:YbridControl) in
             
-            ybridControl.refresh()
+            ybrid.refresh()
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         
@@ -138,11 +123,8 @@ class YbridControlBasicTests: XCTestCase {
     
     func test04_stopped_maxBitRate_TakesEffekt() throws {
         
-        guard let test = testYbridControl else {
-            XCTFail("cannot use ybrid test control.")
-            return
-        }
-        test.stopped() { (ybrid) in
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        test.stopped() { (ybrid:YbridControl) in
 
             XCTAssertNil(self.listener.maxBitRate)
             
@@ -165,10 +147,7 @@ class YbridControlBasicTests: XCTestCase {
 
     func test05_playing_ChangeBitRate() throws {
         
-        guard let test = testYbridControl else {
-            XCTFail("cannot use ybrid test control.")
-            return
-        }
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.playing() { (ybrid) in
             
             sleep(1)

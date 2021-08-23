@@ -215,7 +215,27 @@ class YbridResponseTests : XCTestCase {
         XCTAssertEqual(rate, 32000)
     }
     
+    // MARK: test productive responses
     
+    func testYbridV2Swr3Json_Standard() throws {
+        guard let jsonData = try readJsonFromFile("ybridSwr3InvalidResponse") else {
+            XCTFail(); return
+        }
+        
+        let ybrid = try decoder.decode(YbridSessionResponse.self, from: jsonData )
+        XCTAssertNotNil(ybrid)
+        print(ybrid)
+        
+        let timestamp = ybrid.__responseHeader.timestamp
+        XCTAssertNotNil(timestamp)
+        
+        let currentItem = ybrid.__responseObject.metadata?.currentItem
+        XCTAssertNotNil(currentItem)
+        XCTAssertNotNil(currentItem?.artist)
+        
+        // not in info or session response
+        XCTAssertNil(currentItem?.classifiedType)
+    }
     
 }
 

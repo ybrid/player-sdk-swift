@@ -49,10 +49,10 @@ class YbridSwapItemTests: XCTestCase {
             usleep(10_000)
         }
         
-        XCTAssertEqual(listener.swapsLeft, 0, "\(String(describing: listener.swapsLeft)) swaps are left.")
+        XCTAssertEqual(test.listener.swapsLeft, 0, "\(String(describing: test.listener.swapsLeft)) swaps are left.")
         
         let titles:[String] =
-            listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+            test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
     }
 
@@ -64,12 +64,12 @@ class YbridSwapItemTests: XCTestCase {
         
         test.playing() { [self] (ybridControl) in
             
-            guard let swaps = listener.swapsLeft, swaps != 0 else {
+            guard let swaps = test.listener.swapsLeft, swaps != 0 else {
                 XCTFail("currently no swaps left. Execute test later"); return
             }
             Logger.testing.info("\(swaps) swaps are left")
             
-            guard let titleMain = listener.metadatas.last?.displayTitle else {
+            guard let titleMain = test.listener.metadatas.last?.displayTitle else {
                 XCTFail("must have recieved metadata"); return
             }
             Logger.testing.info("title main =\(titleMain)")
@@ -77,7 +77,7 @@ class YbridSwapItemTests: XCTestCase {
             var titleSwapped:String?
             ybridControl.swapItem()
             _ = poller.wait(max: 10) {
-                guard let swapped = listener.metadatas.last?.displayTitle else {
+                guard let swapped = test.listener.metadatas.last?.displayTitle else {
                     return false
                 }
                 titleSwapped = swapped
@@ -88,7 +88,7 @@ class YbridSwapItemTests: XCTestCase {
             
             ybridControl.swapItem()
             _ = poller.wait(max: 10) {
-                guard let titleSwapped2 = listener.metadatas.last?.displayTitle else {
+                guard let titleSwapped2 = test.listener.metadatas.last?.displayTitle else {
                     return false
                 }
                 Logger.testing.info("title swapped =\(titleSwapped2)")
@@ -98,10 +98,10 @@ class YbridSwapItemTests: XCTestCase {
         }
         
         let titles:[String] =
-            listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+            test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
         
-        XCTAssertTrue((3...5).contains(listener.metadatas.count), "should be 3 (5 if item changed) metadata changes, but were \(listener.metadatas.count)")
+        XCTAssertTrue((3...5).contains(test.listener.metadatas.count), "should be 3 (5 if item changed) metadata changes, but were \(test.listener.metadatas.count)")
     }
     
     func test03_SwapItem_AudioCompleteCalled() throws {
@@ -110,7 +110,7 @@ class YbridSwapItemTests: XCTestCase {
         }
         
         test.playing() { [self] (ybridControl) in
-            guard let swaps = listener.swapsLeft, swaps != 0 else {
+            guard let swaps = test.listener.swapsLeft, swaps != 0 else {
                 XCTFail("currently no swaps left. Execute test later")
                 return
             }
@@ -126,50 +126,47 @@ class YbridSwapItemTests: XCTestCase {
             XCTAssertTrue(carriedOut, "swap was not carried out")
         }
         
-        let titles:[String] = listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        let titles:[String] = test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
         Logger.testing.info( "titles were \(titles)")
         
         let differentTitles = Set(titles)
         Logger.testing.info( "different titles were \(differentTitles)")
         XCTAssertEqual(differentTitles.count, 2)
         
-        XCTAssertTrue((2...3).contains(listener.metadatas.count), "should be 2 (3 if item changed) metadata changes, but were \(listener.metadatas.count)")
+        XCTAssertTrue((2...3).contains(test.listener.metadatas.count), "should be 2 (3 if item changed) metadata changes, but were \(listener.metadatas.count)")
     }
 
     // MARK: using audio complete
     
     func test11_SwapItem_complete() throws {
-        
-        let actionTraces = ActionsTrace()
-        testControl!.playing{ [self] (ybrid) in
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        testControl.playing{ (_) in
+            testControl.swapItemSynced(maxWait: 8.0)
         }
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 1, maxDuration: YbridSwapItemTests.maxAudioComplete)
+        testControl.checkErrors(expected: 0)
+        .checkAllActions(confirm: 1, withinS: YbridSwapItemTests.maxAudioComplete)
     }
     
     func test12_SwapItem_3Times() throws {
-        
-        let actionTraces = ActionsTrace()
-        testControl!.playing{ [self] (ybrid) in
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        testControl.playing{ (_) in
+            testControl.swapItemSynced(maxWait: 8.0)
+            testControl.swapItemSynced(maxWait: 8.0)
+            testControl.swapItemSynced(maxWait: 8.0)
         }
-        checkErrors(expectedErrors: 0)
-        actionTraces.check(confirm: 3, maxDuration: YbridSwapItemTests.maxAudioComplete)
+        testControl.checkErrors(expected: 0)
+            .checkAllActions(confirm: 3, withinS: YbridSwapItemTests.maxAudioComplete)
     }
     
-    func test13_SwapItemFromAd_() throws {
-        let test = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
+    func test13_SwapItemFromAd_doesntSwap() throws {
+        let testControl = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
         
-        let actionTraces = ActionsTrace()
-        test.playing{ [self] (ybrid) in
-            actionTraces.append( testControl!.swapItemSynced(maxWait: 8.0) )
+        testControl.playing{ (ybrid) in
+            testControl.swapItemSynced(maxWait: 8.0)
         }
         
-        checkErrors(expectedErrors: 1)
-        actionTraces.check(confirm: 1, maxDuration: 1.0)
+        testControl.checkErrors(expected: 1)
+            .checkAllActions(confirm: 1, withinS: 1.0)
     }
   
     

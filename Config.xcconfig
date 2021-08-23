@@ -29,7 +29,7 @@
 #include "Pods/Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.release.xcconfig"
 
 // Product Version, PLEASE CHANGE HERE to affect all targets
-MARKETING_VERSION = 0.12.2
+MARKETING_VERSION = 0.12.3
 // Build number, PLEASE CHANGE HERE to affect all targets
 CURRENT_PROJECT_VERSION = 39
  

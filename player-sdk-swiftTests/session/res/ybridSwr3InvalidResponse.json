@@ -1,0 +1,90 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-08-23T07:19:41.342Z"
+    },
+    "__responseObject": {
+        "bouquet": {
+            "activeServiceId": "swr3-live",
+            "availableServices": [
+                {
+                    "iconURL": "https://www.swr.de/unternehmen/kommunikation/service/SWR3-Logos%2C1560344662150%2Clogos-swr3-100~_v-16x9@2dS_-6be50a9c75559ca1aaf1d0b25bae287afdcd877a.png",
+                    "displayName": "SWR3 Live",
+                    "id": "swr3-live"
+                },
+                {
+                    "displayName": "SWR3 Specials",
+                    "id": "swr-raka09"
+                },
+                {
+                    "displayName": "SWR3 Mottotage",
+                    "id": "swr-raka08"
+                },
+                {
+                    "displayName": "SWR3 Rock",
+                    "id": "swr-raka05"
+                },
+                {
+                    "displayName": "SWR3 Party",
+                    "id": "swr-raka06"
+                },
+                {
+                    "displayName": "SWR3 Lyrix",
+                    "id": "swr-raka03"
+                },
+                {
+                    "id": "fallback"
+                }
+            ],
+            "bouquetId": "swr3",
+            "primaryServiceId": "swr3-live"
+        },
+        "duration": 0,
+        "id": "5a99f1ba-4954-4313-8d27-8b7130a715d3",
+        "metadata": {
+            "currentItem": {
+                "artist": "Post Malone",
+                "companions": [],
+                "description": "radiomax:SWR3-BAD-MAX:13083835",
+                "durationMillis": 195100,
+                "id": "playlist--swr3-radiomax-swr3-bad-max-13083835",
+                "title": "Circles",
+                "type": "MUSIC"
+            },
+            "nextItem": {
+                "artist": "The Pointer Sisters",
+                "companions": [],
+                "description": "",
+                "durationMillis": 236700,
+                "id": "playlist--swr3-radiomax-swr3-bad-max-13083836",
+                "title": "Jump (for my love)",
+                "type": "MUSIC"
+            },
+            "station": {
+                "genre": "Pop Music",
+                "name": "SWR3"
+            }
+        },
+        "playout": {
+            "baseURL": "https://swr-ybrid-edge-2204-fra-ts-cdn.cast.addradio.de/swr/swr3/ybrid",
+            "playbackURI": "icyxs://swr-ybrid-edge-2204-fra-ts-cdn.cast.addradio.de:443/swr/swr3/ybrid?session-id=5a99f1ba-4954-4313-8d27-8b7130a715d3",
+            "currentBitRate": -1,
+            "host": "swr-ybrid-edge-2204-fra-ts-cdn.cast.addradio.de",
+            "maxBitRate": -1,
+            "offsetToLive": -505
+        },
+        "sessionId": "5a99f1ba-4954-4313-8d27-8b7130a715d3",
+        "startDate": "2021-08-23T07:19:41.342Z",
+        "swapInfo": {
+            "nextSwapReturnsToMain": false,
+            "swapsLeft": 0
+        },
+        "valid": true
+    }
+}

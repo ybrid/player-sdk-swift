@@ -64,9 +64,12 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var errors:[AudioPlayerError] = []
     override func error(_ severity:ErrorSeverity, _ error: AudioPlayerError) {
         super.error(severity, error)
-        errors.append(error)
+        queue.async {
+            self.errors.append(error)
+        }
     }
-
+    
+    
     override func playingSince(_ seconds: TimeInterval?) {
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
@@ -166,25 +169,25 @@ class Poller {
     }
 }
 
-class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListener {
+class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
 
     
-    let queue = DispatchQueue.init(label: "io.ybrid.tests.ui.listener")
+//    let queue = DispatchQueue.init(label: "io.ybrid.tests.ui.listener")
     
-    func reset() {
+    override func reset() {
         queue.async { [self] in
             offsets.removeAll()
-            errors.removeAll()
-            metadatas.removeAll()
+//            errors.removeAll()
+//            metadatas.removeAll()
             services.removeAll()
             swaps.removeAll()
             bitrates.removeAll()
         }
     }
     
-    var metadatas:[Metadata] = []
+//    var metadatas:[Metadata] = []
     var offsets:[TimeInterval] = []
-    var errors:[AudioPlayerError] = []
+//    var errors:[AudioPlayerError] = []
     var services:[[Service]] = []
     var swaps:[Int] = []
     var bitrates:[Int32] = []
@@ -263,14 +266,6 @@ class TestYbridPlayerListener : AbstractAudioPlayerListener, YbridControlListene
             self.metadatas.append(metadata)
         }
     }
-
-    override func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
-        super.error(severity, exception)
-        queue.async {
-            self.errors.append(exception)
-        }
-    }
-
 }
 
 
