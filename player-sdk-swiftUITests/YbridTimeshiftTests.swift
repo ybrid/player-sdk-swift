@@ -57,7 +57,7 @@ class YbridTimeshiftTests: XCTestCase {
         testControl!.stopped{ [self] (ybrid) in
             
             ybrid.play()
-            wait(ybrid, until: PlaybackState.playing, maxSeconds: 10)
+            wait(testControl!.ctrl!, until: PlaybackState.playing, maxSeconds: 10)
             sleep(2)
             ybrid.stop()
             wait(ybrid, until: PlaybackState.stopped, maxSeconds: 2)
@@ -177,7 +177,7 @@ class YbridTimeshiftTests: XCTestCase {
         XCTAssertLessThanOrEqual(took, roundedUp, "item type is \(String(describing: ybridPlayerListener.metadatas.last?.current?.type)), not in \(types)")
     }
         
-    private func wait(_ control:YbridControl, until:PlaybackState, maxSeconds:Int) {
+    private func wait(_ control:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
         let took = wait(max: maxSeconds) {
             return control.state == until
         }

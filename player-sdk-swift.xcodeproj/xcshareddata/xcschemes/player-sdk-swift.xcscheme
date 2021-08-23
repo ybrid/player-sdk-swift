@@ -42,6 +42,15 @@
                   Identifier = "AnalyseDataTests">
                </Test>
                <Test
+                  Identifier = "ThreadsafeDequeueTests">
+               </Test>
+               <Test
+                  Identifier = "ThreadsafeDictionaryTests">
+               </Test>
+               <Test
+                  Identifier = "ThreadsafeSetTests">
+               </Test>
+               <Test
                   Identifier = "YbridSteelinessTests">
                </Test>
             </SkippedTests>
