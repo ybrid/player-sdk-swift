@@ -229,7 +229,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         if let bufferSize = buffer?.size, bufferSize > 0.0 {
           
-            if let completeCallback = triggeredAudioComplete(metadata) {
+            if let completeCallback = triggersAudioComplete(metadata) {
                 buffer?.put(completeCallback)
                 self.session.changingOver = nil
             }
@@ -239,7 +239,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             
          } else {
             
-            if let completeCallback = triggeredAudioComplete(metadata) {
+            if let completeCallback = triggersAudioComplete(metadata) {
                     completeCallback(true)
                 self.session.changingOver = nil
             }
@@ -252,7 +252,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         session.notifyChanged(SubInfo.bouquet)
     }
     
-    private func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+    private func triggersAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+        
+        guard let changeOver = session.changingOver else {
+            return nil
+        }
         
         let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
         Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
@@ -260,8 +264,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return nil
         }
         
-        if let changeOver = session.changingOver,
-           let media = session.driver,
+        if let media = session.driver,
            let completeCallback = changeOver.matches(to: media.state) {
             return completeCallback
         }

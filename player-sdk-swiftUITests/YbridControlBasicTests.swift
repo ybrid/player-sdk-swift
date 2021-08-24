@@ -33,12 +33,12 @@ class YbridControlBasicTests: XCTestCase {
         listener.reset()
     }
     override func tearDownWithError() throws {
-        Logger.testing.debug("-- consumed offsets \(listener.offsets)")
+        Logger.testing.info("-- consumed offsets \(listener.offsets)")
         let servicesIds = listener.services.map{$0.map{(service) in return service.identifier}}
-        Logger.testing.debug("-- consumed services \(servicesIds)")
-        Logger.testing.debug("-- consumed swaps \(listener.swaps)")
+        Logger.testing.info("-- consumed services \(servicesIds)")
+        Logger.testing.info("-- consumed swaps \(listener.swaps)")
         Logger.testing.info("-- consumed max bit rates \(listener.bitrates)")
-        Logger.testing.debug("-- consumed metadata \(listener.metadatas.count)")
+        Logger.testing.info("-- consumed metadata \(listener.metadatas.count)")
     }
     
     
@@ -65,11 +65,11 @@ class YbridControlBasicTests: XCTestCase {
      The listener's methods are called when the specific state changes or
      when refresh() is called.
      */
-    func test02_stopped_Refresh() {
+    func test02_stopped_Select() {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.stopped() { (ybrid:YbridControl) in
-            ybrid.refresh()
+            ybrid.select()
             usleep(20_000) /// because the listener is notified asyncronously it *may* take some millis on old devices
         }
         
@@ -94,12 +94,12 @@ class YbridControlBasicTests: XCTestCase {
      The listeners methods are called when the specific state changes or
      when refresh() is called.
      */
-    func test03_playing_Refresh() throws {
+    func test03_playing_Select() throws {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.playing() { (ybrid:YbridControl) in
             
-            ybrid.refresh()
+            ybrid.select()
             usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
         }
         

@@ -131,8 +131,9 @@ class SystemDecoder : AudioDecoder {
                 throw DecoderError(.missingSourceFormat)
             case ConvertingMissingDataSource:
                 throw DecoderError(.missingDataSource)
+            // see https://developer.apple.com/documentation/audiotoolbox/audio_codec/1494076-audio_codec_errors
             case kAudioCodecBadDataError:
-                throw DecoderError(.badData )
+                throw DecoderError(.badData)
             default:
                 throw DecoderError(.failedConverting, status)
             }

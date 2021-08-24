@@ -192,12 +192,12 @@ class YbridSwapServiceTests: XCTestCase {
     
    
     func test11_Play_SwapComplete_ok() throws {
-       let test = TestYbridControl(ybridSwr3Endpoint)
-        test.playing{ [self] (ybrid) in
+        let test = TestYbridControl(ybridSwr3Endpoint)
+        test.playing{ (ybrid) in
             test.swapServiceSynced(to: "swr-raka06")
         }
         
-        _ = test.checkErrors(expected: 0)
+        test.checkErrors(expected: 0)
             .checkAllActions(confirm: 1, withinS: YbridSwapServiceTests.maxAudioComplete)
     }
     

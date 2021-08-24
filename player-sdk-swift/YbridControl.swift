@@ -61,7 +61,7 @@ public protocol YbridControl : PlaybackControl {
     func maxBitRate(to:Int32)
     
     /// refresh all states, all methods of the YbridControlListener are called
-    func refresh()
+    func select()
 }
 public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 
@@ -156,7 +156,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
-    func refresh() {
+    func select() {
         
         DispatchQueue.global().async {
             if let metadata = self.session.metadata {
