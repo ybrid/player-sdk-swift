@@ -59,13 +59,46 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertEqual(listener.swaps.count, 1, "YbridControlListener.swapsChanged(...) should have been called once, but was \(listener.swaps.count)")
 
         XCTAssertEqual(listener.metadatas.count, 0, "YbridControlListener.metadataChanged(...) should not be called, but was \(listener.metadatas.count)")
+        
+        XCTAssertEqual(listener.bitrates.count, 1, "YbridControlListener.bitrateChanged(...) should be called, but was \(listener.bitrates.count)")
+        
+        XCTAssertEqual(listener.currentBitRate, -1)
+        XCTAssertEqual(listener.maxBitRate, -1)
+    }
+    
+    /*
+     The listener is notified of ybrid states in the beginning of the session.
+     And most states are set on play.
+     */
+    func test02_playing() throws {
+        
+        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        test.playing() { (ybrid:YbridControl) in
+            usleep(10_000) /// because the listener notifies asyncronously it *may* take some millis
+        }
+        
+        XCTAssertEqual(listener.services.count, 0, "YbridControlListener.serviceChanged(...) should not have been called, but was called \(listener.services.count) times")
+        
+        let expectedOffsets = 2...4
+        XCTAssertTrue(expectedOffsets.contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(expectedOffsets), but was \(listener.offsets.count), \(listener.offsets)")
+        
+        let expectedSwapCalls = 2...3
+        XCTAssertTrue(expectedSwapCalls.contains(listener.swaps.count), "YbridControlListener.swapsChanged(...) should have been called \(expectedSwapCalls) times, but was \(listener.swaps.count)")
+        
+        XCTAssertGreaterThanOrEqual( listener.metadatas.count, 2, "YbridControlListener.metadataChanged(...) should be called at least twice, but was \(listener.metadatas.count)")
+        
+        XCTAssertEqual(listener.bitrates.count, 2, "YbridControlListener.bitrateChanged(...) should be called twice, but was \(listener.bitrates.count) times")
+        
+        XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0 , 8000)
+        XCTAssertEqual(listener.maxBitRate, -1)
+
     }
     
     /*
      The listener's methods are called when the specific state changes or
-     when refresh() is called.
+     when select() is called.
      */
-    func test02_stopped_Select() {
+    func test03_stopped_Select() {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.stopped() { (ybrid:YbridControl) in
@@ -78,7 +111,7 @@ class YbridControlBasicTests: XCTestCase {
         if let services = listener.services.first  {
             XCTAssertEqual(services.count, 0)
         } else {
-            XCTFail()
+            XCTFail("YbridControlListener.serviceChanged(...) called \(listener.services.count) times")
         }
         
         XCTAssertTrue((1...3).contains(listener.offsets.count), "YbridControlListener.offsetToLiveChanged(...) should have been called \(2...3), but was \(listener.offsets.count), \(listener.offsets)")
@@ -86,15 +119,21 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertEqual(listener.swaps.count, 2,"YbridControlListener.swapsChanged(...) should have been called twice, but was \(listener.swaps.count)")
 
         XCTAssertEqual(listener.metadatas.count, 1, "YbridControlListener.metadataChanged(...) should not be called once, but was \(listener.metadatas.count)")
+        
+        XCTAssertEqual(listener.bitrates.count, 2, "YbridControlListener.bitrateChanged(...) should be called twice, but was \(listener.bitrates.count)")
+        
+        XCTAssertEqual(listener.currentBitRate, -1)
+        XCTAssertEqual(listener.maxBitRate, -1)
     }
 
     
+ 
     /*
      The listener is notified of ybrid states in the beginning of the session.
      The listeners methods are called when the specific state changes or
-     when refresh() is called.
+     when select() is called.
      */
-    func test03_playing_Select() throws {
+    func test04_playing_Select() throws {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.playing() { (ybrid:YbridControl) in
@@ -108,7 +147,7 @@ class YbridControlBasicTests: XCTestCase {
         if let services = listener.services.first  {
             XCTAssertEqual(services.count, 0)
         } else {
-            XCTFail()
+            XCTFail("YbridControlListener.serviceChanged(...) called \(listener.services.count) times")
         }
         
         let expectedOffsets = 2...4
@@ -118,8 +157,12 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertTrue(expectedSwapCalls.contains(listener.swaps.count), "YbridControlListener.swapsChanged(...) should have been called \(expectedSwapCalls) times, but was \(listener.swaps.count)")
         
         XCTAssertGreaterThanOrEqual( listener.metadatas.count, 2, "YbridControlListener.metadataChanged(...) should be called at least twice, but was \(listener.metadatas.count)")
+        
+        XCTAssertEqual(listener.bitrates.count, 3, "YbridControlListener.bitrateChanged(...) should be called three times, but was \(listener.bitrates.count)")
+        
+        XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0 , 8000)
+        XCTAssertEqual(listener.maxBitRate, -1)
     }
-
     
     func test04_stopped_maxBitRate_TakesEffekt() throws {
         

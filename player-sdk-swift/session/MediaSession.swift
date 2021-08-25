@@ -54,6 +54,9 @@ public class MediaSession  {
     var maxBitRate: Int32 { get {
         return driver?.state.maxBitRate ?? -1
     }}
+    var currentBitRate: Int32? { get {
+        return driver?.state.currentBitRate
+    }}
     var services: [Service] { get {
         return driver?.state.bouquet?.services ?? []
     }}
@@ -102,7 +105,7 @@ public class MediaSession  {
     }
     
     func maxBitRate(to bps:Int32) {
-        v2Driver?.maxBitRate(bitPerSecond: bps)
+        v2Driver?.limitBitRate(maxBps: bps)
         notifyChangedPlayout()
     }
     
@@ -187,7 +190,7 @@ public class MediaSession  {
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.swapsChanged(self.swaps)
-                ybridListener.bitRateChanged(self.maxBitRate)
+                ybridListener.bitRateChanged(currentBitsPerSecond: self.currentBitRate, self.maxBitRate)
                 self.driver?.clearChanged(SubInfo.playout) }
         }
     }

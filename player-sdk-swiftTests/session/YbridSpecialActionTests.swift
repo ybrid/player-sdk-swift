@@ -73,8 +73,9 @@ class YbridSpecialActionTests: XCTestCase {
             return
         }
     }
+
     
-    func test02_ChangeBitrates_AllMp3Supported() throws {
+    func test02_limitBitrates_AllMp3Supported() throws {
         let bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112,
                         128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
         
@@ -113,7 +114,7 @@ class YbridSpecialActionTests: XCTestCase {
         print("adopted bit rates are \(adoptedRates)")
     }
 
-    func test03_ChangeBitrateVague_ok() throws {
+    func test03_limitBitrateVague_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
              playbackControl: { (c) in

@@ -170,47 +170,42 @@ class Poller {
 }
 
 class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
-
-    
-//    let queue = DispatchQueue.init(label: "io.ybrid.tests.ui.listener")
     
     override func reset() {
         queue.async { [self] in
             offsets.removeAll()
-//            errors.removeAll()
-//            metadatas.removeAll()
             services.removeAll()
             swaps.removeAll()
             bitrates.removeAll()
         }
     }
     
-//    var metadatas:[Metadata] = []
     var offsets:[TimeInterval] = []
-//    var errors:[AudioPlayerError] = []
     var services:[[Service]] = []
     var swaps:[Int] = []
-    var bitrates:[Int32] = []
+    var bitrates:[(current:Int32?,max:Int32?)] = []
     
     
-    // the latest recieved value for offset
+    // getting the latest recieved values for ...
+    
     var offsetToLive:TimeInterval? { get {
         queue.sync {
             return offsets.last
         }
     }}
-    
-    // the latest value for swapsLeft
     var swapsLeft:Int? { get {
         queue.sync {
             return swaps.last
         }
     }}
-    
-    // the latest value for max bit rate
     var maxBitRate:Int32? { get {
         queue.sync {
-            return bitrates.last
+            return bitrates.last?.max
+        }
+    }}
+    var currentBitRate:Int32? { get {
+        queue.sync {
+            return bitrates.last?.current
         }
     }}
     
@@ -231,6 +226,8 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
             return false
         }
     }
+    
+    
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
         Logger.testing.info("-- offset is \(offset.S)")
@@ -253,10 +250,10 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
         }
     }
     
-    func bitRateChanged(_ maxBitRate: Int32) {
-        Logger.testing.info("-- max bit rate \(maxBitRate)")
+    func bitRateChanged(currentBitsPerSecond: Int32?, _ maxBitRate: Int32) {
+        Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitRate)")
         queue.async {
-            self.bitrates.append(maxBitRate)
+            self.bitrates.append((currentBitsPerSecond,maxBitRate))
         }
     }
     

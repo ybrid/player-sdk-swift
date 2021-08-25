@@ -72,6 +72,19 @@ class MediaState  {
         }
     }
     
+    var currentBitRate:Int32? {
+        willSet {
+            if newValue == -1 {
+                return
+            }
+        }
+        didSet {
+            if let bitrate = currentBitRate, bitrate != oldValue {
+                setChanged(SubInfo.playout)
+            }
+        }
+    }
+    
     var offset:TimeInterval? { didSet {
         if let _ = offset {
             setChanged(SubInfo.timeshift)

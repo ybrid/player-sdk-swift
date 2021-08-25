@@ -127,17 +127,17 @@ class YbridV2Driver : MediaDriver {
     
     // MARK: bit rate
     
-    func maxBitRate(bitPerSecond:Int32) {
+    func limitBitRate(maxBps:Int32) {
         guard super.connected else {
             Logger.session.error("no connected ybrid session")
             return
         }
-        Logger.session.debug("request max bit-rate to \(bitPerSecond)")
+        Logger.session.debug("request max bit-rate to \(maxBps)")
         
         do {
-            let bitRate = URLQueryItem(name: "value", value: "\(bitPerSecond)")
-            let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "limit bit-rate to \(bitPerSecond)", queryParam: bitRate)
-            accept(bitrate: bitrateObj.maxBitRate)
+            let bitRate = URLQueryItem(name: "value", value: "\(maxBps)")
+            let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "limit bit-rate to \(maxBps)", queryParam: bitRate)
+            accept(maxBitrate: bitrateObj.maxBitRate)
             if !super.valid {
                 try reconnect()
             }
@@ -286,9 +286,9 @@ class YbridV2Driver : MediaDriver {
         if let playout = response.playout {
             state.playbackUri = playout.playbackURI
             state.baseUrl = playout.baseURL
-            // 2021-08-04 not using playout.currentBitRate yet
             accept(offset: playout.offsetToLive)
-            accept(bitrate: playout.maxBitRate)
+            accept(currentBitRate: playout.currentBitRate)
+            accept(maxBitrate: playout.maxBitRate)
         }
         if let ybridBouquet = response.bouquet {
             accept(ybridBouquet: ybridBouquet)
@@ -302,10 +302,10 @@ class YbridV2Driver : MediaDriver {
     }
     
     private func accept(showMeta:YbridShowMeta) {
-        // 2021-08-03 not using showMeta.currentBitRate yet
         accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
         accept(swapped:showMeta.swapInfo)
-//        showMeta.timeToNextItemMillis
+        accept(currentBitRate: showMeta.currentBitRate)
+        // 2021-08-25 not using showMeta.timeToNextItemMillis
     }
     
     private func accept(winded:YbridWindedObject) {
@@ -356,8 +356,11 @@ class YbridV2Driver : MediaDriver {
     func accept(offset: Int) {
         state.offset = Double(offset) / 1000
     }
-    func accept(bitrate: Int32) {
-        state.maxBitRate = bitrate
+    func accept(maxBitrate: Int32) {
+        state.maxBitRate = maxBitrate
+    }
+    func accept(currentBitRate: Int32) {
+        state.currentBitRate = currentBitRate
     }
     
     // MARK: all requests
