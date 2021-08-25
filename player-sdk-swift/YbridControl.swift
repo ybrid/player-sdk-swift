@@ -88,7 +88,7 @@ public protocol YbridControlListener : AudioPlayerListener {
     func offsetToLiveChanged(_ offset:TimeInterval?)
     func servicesChanged(_ services:[Service])
     func swapsChanged(_ swapsLeft:Int)
-    func bitRateChanged(currentBitsPerSecond:Int32?,  _ maxBitRate:Int32)
+    func bitRateChanged(currentBitsPerSecond:Int32?,  maxBitsPerSecond:Int32?)
 }
 
 // MARK: open
@@ -165,7 +165,7 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
                 ybridListener.offsetToLiveChanged(self.session.offset)
                 ybridListener.servicesChanged(self.session.services)
                 ybridListener.swapsChanged(self.session.swaps)
-                ybridListener.bitRateChanged(currentBitsPerSecond: self.session.currentBitRate, self.session.maxBitRate)
+                ybridListener.bitRateChanged(currentBitsPerSecond: self.session.currentBitRate, maxBitsPerSecond: self.session.maxBitRate)
             }
         }
     }

@@ -117,7 +117,7 @@ class YbridSpecialActionTests: XCTestCase {
     func test03_limitBitrateVague_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
-             playbackControl: { (c) in
+             playbackControl: { (_) in
                 return },
              ybridControl: { (ybridControl) in
                 guard let ybrid = ybridControl as? YbridAudioPlayer else {

@@ -60,11 +60,6 @@ class MediaState  {
     }}
     
     var maxBitRate:Int32? {
-        willSet {
-            if newValue == -1 {
-                return
-            }
-        }
         didSet {
             if let bitrate = maxBitRate, bitrate != oldValue {
                 setChanged(SubInfo.playout)
@@ -73,11 +68,6 @@ class MediaState  {
     }
     
     var currentBitRate:Int32? {
-        willSet {
-            if newValue == -1 {
-                return
-            }
-        }
         didSet {
             if let bitrate = currentBitRate, bitrate != oldValue {
                 setChanged(SubInfo.playout)

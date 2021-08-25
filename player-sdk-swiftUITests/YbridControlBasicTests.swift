@@ -62,8 +62,8 @@ class YbridControlBasicTests: XCTestCase {
         
         XCTAssertEqual(listener.bitrates.count, 1, "YbridControlListener.bitrateChanged(...) should be called, but was \(listener.bitrates.count)")
         
-        XCTAssertEqual(listener.currentBitRate, -1)
-        XCTAssertEqual(listener.maxBitRate, -1)
+        XCTAssertNil(listener.currentBitRate)
+        XCTAssertNil(listener.maxBitRate)
     }
     
     /*
@@ -90,7 +90,7 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertEqual(listener.bitrates.count, 2, "YbridControlListener.bitrateChanged(...) should be called twice, but was \(listener.bitrates.count) times")
         
         XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0 , 8000)
-        XCTAssertEqual(listener.maxBitRate, -1)
+        XCTAssertNil(listener.maxBitRate)
 
     }
     
@@ -122,8 +122,8 @@ class YbridControlBasicTests: XCTestCase {
         
         XCTAssertEqual(listener.bitrates.count, 2, "YbridControlListener.bitrateChanged(...) should be called twice, but was \(listener.bitrates.count)")
         
-        XCTAssertEqual(listener.currentBitRate, -1)
-        XCTAssertEqual(listener.maxBitRate, -1)
+        XCTAssertNil(listener.currentBitRate)
+        XCTAssertNil(listener.maxBitRate)
     }
 
     
@@ -160,8 +160,8 @@ class YbridControlBasicTests: XCTestCase {
         
         XCTAssertEqual(listener.bitrates.count, 3, "YbridControlListener.bitrateChanged(...) should be called three times, but was \(listener.bitrates.count)")
         
-        XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0 , 8000)
-        XCTAssertEqual(listener.maxBitRate, -1)
+        XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0, 8000)
+        XCTAssertNil(listener.maxBitRate)
     }
     
     func test04_stopped_maxBitRate_TakesEffekt() throws {
@@ -170,14 +170,17 @@ class YbridControlBasicTests: XCTestCase {
         test.stopped() { (ybrid:YbridControl) in
 
             XCTAssertNil(self.listener.maxBitRate)
+            XCTAssertNil(self.listener.currentBitRate)
             
             ybrid.maxBitRate(to: 32_000)
             sleep(1)
-            XCTAssertEqual(32_000, self.listener.maxBitRate)
+            XCTAssertEqual(self.listener.maxBitRate, 32_000)
+            XCTAssertNil(self.listener.currentBitRate)
             
             ybrid.play()
             sleep(4)
-            XCTAssertEqual(32_000, self.listener.maxBitRate)
+            XCTAssertEqual(self.listener.maxBitRate, 32_000)
+            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
             
             sleep(4)
             
@@ -194,19 +197,23 @@ class YbridControlBasicTests: XCTestCase {
         test.playing() { (ybrid) in
             
             sleep(1)
-            XCTAssertEqual(-1, self.listener.maxBitRate)
+            XCTAssertNil(self.listener.maxBitRate)
+            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 8_000)
             
             ybrid.maxBitRate(to:32_000)
             sleep(1)
-            XCTAssertEqual(32_000, self.listener.maxBitRate)
-            
+            XCTAssertEqual(self.listener.maxBitRate, 32_000)
+            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
+                                        
             ybrid.maxBitRate(to:128_000)
             sleep(1)
-            XCTAssertEqual(128_000, self.listener.maxBitRate)
+            XCTAssertEqual(self.listener.maxBitRate, 128_000)
+            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
             
             ybrid.maxBitRate(to:192_000)
             sleep(1)
-            XCTAssertEqual(192_000, self.listener.maxBitRate)
+            XCTAssertEqual(self.listener.maxBitRate, 192_000)
+            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
             
             sleep(4)
         }

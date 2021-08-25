@@ -250,10 +250,10 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
         }
     }
     
-    func bitRateChanged(currentBitsPerSecond: Int32?, _ maxBitRate: Int32) {
-        Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitRate)")
+    func bitRateChanged(currentBitsPerSecond: Int32?, maxBitsPerSecond: Int32?) {
+        Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitsPerSecond ?? -1)")
         queue.async {
-            self.bitrates.append((currentBitsPerSecond,maxBitRate))
+            self.bitrates.append((currentBitsPerSecond,maxBitsPerSecond))
         }
     }
     

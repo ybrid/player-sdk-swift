@@ -51,8 +51,8 @@ public class MediaSession  {
     var swaps: Int { get {
         return driver?.state.swaps ?? -1
     }}
-    var maxBitRate: Int32 { get {
-        return driver?.state.maxBitRate ?? -1
+    var maxBitRate: Int32? { get {
+        return driver?.state.maxBitRate
     }}
     var currentBitRate: Int32? { get {
         return driver?.state.currentBitRate
@@ -190,7 +190,7 @@ public class MediaSession  {
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
                 ybridListener.swapsChanged(self.swaps)
-                ybridListener.bitRateChanged(currentBitsPerSecond: self.currentBitRate, self.maxBitRate)
+                ybridListener.bitRateChanged(currentBitsPerSecond: self.currentBitRate, maxBitsPerSecond: self.maxBitRate)
                 self.driver?.clearChanged(SubInfo.playout) }
         }
     }

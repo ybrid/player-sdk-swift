@@ -357,10 +357,14 @@ class YbridV2Driver : MediaDriver {
         state.offset = Double(offset) / 1000
     }
     func accept(maxBitrate: Int32) {
-        state.maxBitRate = maxBitrate
+        if maxBitrate != -1 {
+            state.maxBitRate = maxBitrate
+        }
     }
     func accept(currentBitRate: Int32) {
-        state.currentBitRate = currentBitRate
+        if currentBitRate != -1 {
+            state.currentBitRate = currentBitRate
+        }
     }
     
     // MARK: all requests
