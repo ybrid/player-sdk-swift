@@ -119,7 +119,10 @@ class SystemDecoder : AudioDecoder {
         
         let buffer = try prepareBuffer(frames: pcmFrames)
         let context = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
-        let status = AudioConverterFillComplexBuffer(converter!, convertPacketCallback, context, &buffer.frameLength, buffer.mutableAudioBufferList, nil)
+        guard let converter = converter else {
+            return buffer
+        }
+        let status = AudioConverterFillComplexBuffer(converter, convertPacketCallback, context, &buffer.frameLength, buffer.mutableAudioBufferList, nil)
         if Logger.verbose { Logger.decoding.debug("has read \(buffer.frameLength) frames into buffer of capacity \(pcmFrames) -> '\(SystemDecoder.describeConverting(status))'") }
         
         cleanupConverterGarbage()

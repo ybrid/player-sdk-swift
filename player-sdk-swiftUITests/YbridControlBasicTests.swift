@@ -98,7 +98,7 @@ class YbridControlBasicTests: XCTestCase {
      The listener's methods are called when the specific state changes or
      when select() is called.
      */
-    func test03_stopped_Select() {
+    func test03_select_stopped() {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.stopped() { (ybrid:YbridControl) in
@@ -133,7 +133,7 @@ class YbridControlBasicTests: XCTestCase {
      The listeners methods are called when the specific state changes or
      when select() is called.
      */
-    func test04_playing_Select() throws {
+    func test04_select_playing() throws {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.playing() { (ybrid:YbridControl) in
@@ -164,7 +164,7 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertNil(listener.maxBitRate)
     }
     
-    func test04_stopped_maxBitRate_TakesEffekt() throws {
+    func test05_maxBitRate_stopped_TakesEffekt() throws {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.stopped() { (ybrid:YbridControl) in
@@ -191,7 +191,7 @@ class YbridControlBasicTests: XCTestCase {
     }
     
 
-    func test05_playing_ChangeBitRate() throws {
+    func test06_maxBitRate_playing() throws {
         
         let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
         test.playing() { (ybrid) in
