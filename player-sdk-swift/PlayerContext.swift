@@ -61,9 +61,14 @@ public class PlayerContext {
             Logger.playing.debug("available catergories \(avs.availableCategories)")
             Logger.playing.debug("available modes \(avs.availableModes)")
             
+            #if SWIFT_PACKAGE
+            try avs.setCategory(AVAudioSession.Category.playback, options: [])
+            try avs.setMode(AVAudioSession.Mode.default)
+            #else
             // swift 4
             try avs.setCategory(AVAudioSessionCategoryPlayback, with: [])
             try avs.setMode(AVAudioSessionModeDefault)
+            #endif
             
             Logger.playing.debug("current category \(avs.category)")
             Logger.playing.debug("current mode \(avs.mode)")
@@ -78,8 +83,12 @@ public class PlayerContext {
         }
         
         do {
+            #if SWIFT_PACKAGE
+            try avs.setActive(true, options: .notifyOthersOnDeactivation)
+            #else
             // swift 4
             try avs.setActive(true, with: .notifyOthersOnDeactivation)
+            #endif
         } catch {
             Logger.playing.error("Failed to activate AVAudioSession, cause \(error.localizedDescription)")
         }

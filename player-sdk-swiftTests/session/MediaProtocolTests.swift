@@ -24,19 +24,20 @@
 //
 
 import XCTest
+@testable import YbridPlayerSDK
 
 class MediaProtocolTests: XCTestCase {
     
     let factory = MediaControlFactory()
     
-    func testFactoryGetVersion_YbridDemo_AuddetectYbrid() throws {
+    func testFactoryGetVersion_YbridDemo_AutodetectYbrid() throws {
         let version = try factory.getVersion("https://democast.ybrid.io/adaptive-demo")
         XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
-    func testFactoryGetVersion_YbridStageDemo_AutodetectYbrid() throws {
+    func testFactoryGetVersion_YbridStageDemo_NoAutodetectYbrid() throws {
         let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(MediaProtocol.ybridV2, version)
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
     func testFactoryGetVersion_wrongUrl_AutodetectIcy() throws {
@@ -90,9 +91,10 @@ class MediaProtocolTests: XCTestCase {
     }
 
     
-    func testDriver_YbridSwr3_YbridV2MustBeForced() throws {
-        let swr3Endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid")
-        guard let player = AudioPlayer.openSync(for:swr3Endpoint, listener: nil) else {
+    func testDriver_YbridStageDemo_YbridV2MustBeForced() throws {
+        var endpoint = ybridStageDemoEndpoint
+        
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let driver = player.session.driver as? IcyDriver else {
@@ -103,8 +105,8 @@ class MediaProtocolTests: XCTestCase {
         
         player.close()
         
-        let forcedSwr3Endpoint = swr3Endpoint.forceProtocol(.ybridV2)
-        guard let player = AudioPlayer.openSync(for: forcedSwr3Endpoint, listener: nil) else {
+        endpoint = endpoint.forceProtocol(.ybridV2)
+        guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let controller = player.session.driver as? YbridV2Driver else {
@@ -112,8 +114,7 @@ class MediaProtocolTests: XCTestCase {
         }
         XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
         XCTAssertTrue(controller.connected)
-        
-        
+                
         XCTAssertNotNil(controller.state.playbackUri)
         XCTAssertTrue(controller.state.playbackUri.starts(with: "icyx"))
         XCTAssertTrue(controller.state.playbackUri.contains("edge"))

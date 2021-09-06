@@ -72,7 +72,7 @@ class UseAudioPlayerTests: XCTestCase {
             sleep(6)
             control.stop() /// If the process is killed without stop()
             sleep(1) /// or immediately after stop you may hear crackling.
-            
+
             self.semaphore?.signal() /// allow tear down to end test
         }
     }

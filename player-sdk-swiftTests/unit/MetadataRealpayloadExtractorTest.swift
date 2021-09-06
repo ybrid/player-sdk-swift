@@ -24,16 +24,30 @@
 //
 
 import XCTest
+@testable import YbridPlayerSDK
 
 class MetadataRealpayloadExtractorTest: XCTestCase {
     
+#if SWIFT_PACKAGE
+    private func readDataFromFile(_ filename:String) throws -> Data? {
+        guard let res = Bundle.module.path(forResource: filename, ofType: "mp3") else {
+            return nil
+        }
+        let url = NSURL.fileURL(withPath: res)
+        return try Data(contentsOf: url)
+    }
+#else
     private func readDataFromFile(_ filename:String) throws -> Data? {
         let bundle = Bundle(for: type(of: self))
-        if let url = bundle.url(forResource: filename, withExtension: "mp3") {
-            return try Data(contentsOf: url)
+        if let url = bundle.url(forResource: filename, withExtension: "mp3")
+        {
+            let jsonData = try Data(contentsOf: url)
+            return jsonData
         }
         return nil
     }
+#endif
+    
     class TestMetadataListener : MetadataListener {
         func reset() {
             datas.removeAll()

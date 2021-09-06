@@ -37,12 +37,17 @@ class DevelopingPlayerTests: XCTestCase {
     }
     
     func test02_PlayerBundle() {
-        guard let version = checkBundle(id: "io.ybrid.player-sdk-swift", expectedName: "YbridPlayerSDK") else {
+        #if SWIFT_PACKAGE
+        XCTFail("I don't know yet, how to get bundle id of target YbridPlayerSDK")
+        #else
+        let name = "io.ybrid.player-sdk-swift"
+        guard let version = checkBundle(id: name, expectedName: "YbridPlayerSDK") else {
             XCTFail("version of bundle 'io.ybrid.player-sdk-swift' expected")
             return
         }
         XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
-//        XCTAssertTrue(version.starts(with: "1."))
+        XCTAssertTrue(version.starts(with: "0."))
+        #endif
     }
 
     func test03_VersionString() {

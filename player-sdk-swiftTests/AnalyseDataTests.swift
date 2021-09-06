@@ -24,6 +24,7 @@
 //
 
 import XCTest
+@testable import YbridPlayerSDK
 
 class AnalyseDataTests: XCTestCase {
 

@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import YbridPlayerSDK
+@testable import YbridPlayerSDK
 
 let ybridDemoEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
 let ybridStageDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")

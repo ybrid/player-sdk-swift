@@ -24,6 +24,7 @@
 //
 
 import XCTest
+@testable import YbridPlayerSDK
 
 class YbridResponseTests : XCTestCase {
 
@@ -32,16 +33,26 @@ class YbridResponseTests : XCTestCase {
         self.decoder.dateDecodingStrategy = JSONDecoder.DateDecodingStrategy.flexMillisIso8601
     }
 
-    private func readJsonFromFile(_ filename:String) throws -> Data? {
-        let bundle = Bundle(for: type(of: self))
-        if let url = bundle.url(forResource: filename, withExtension: "json")
-        {
-            let jsonData = try Data(contentsOf: url)
-            return jsonData
+    #if SWIFT_PACKAGE
+        private func readJsonFromFile(_ filename:String) throws -> Data? {
+            guard let res = Bundle.module.path(forResource: filename, ofType: "json") else {
+                return nil
+            }
+            let url = NSURL.fileURL(withPath: res)
+            return try Data(contentsOf: url)
         }
-        return nil
-    }
-    
+    #else
+        private func readJsonFromFile(_ filename:String) throws -> Data? {
+            let bundle = Bundle(for: type(of: self))
+            if let url = bundle.url(forResource: filename, withExtension: "json")
+            {
+                let jsonData = try Data(contentsOf: url)
+                return jsonData
+            }
+            return nil
+        }
+    #endif
+
     func testYbridV2DecodeJson_Standard() throws {
         guard let jsonData = try readJsonFromFile("ybridSessionCreated") else {
             XCTFail(); return
