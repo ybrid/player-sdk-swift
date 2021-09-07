@@ -28,11 +28,14 @@
 
 #include "Pods/Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.release.xcconfig"
 
+
 // Product Version, PLEASE CHANGE HERE to affect all targets
 MARKETING_VERSION = 0.12.4
 // Build number, PLEASE CHANGE HERE to affect all targets
-CURRENT_PROJECT_VERSION = 41
- 
+CURRENT_PROJECT_VERSION = 42
+// Product name, PLEASE CHANGE HERE to affect all targets
+PRODUCT_NAME = YbridPlayerSDK
+
 // Architectures
 ARCHS = arm64 armv7 x86_64 x86_64h i386
 EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64

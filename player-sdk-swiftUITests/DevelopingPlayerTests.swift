@@ -36,24 +36,42 @@ class DevelopingPlayerTests: XCTestCase {
         XCTAssertFalse(Logger.verbose)
     }
     
-    func test02_PlayerBundle() {
-        #if SWIFT_PACKAGE
-        XCTFail("I don't know yet, how to get bundle id of target YbridPlayerSDK")
-        #else
-        let name = "io.ybrid.player-sdk-swift"
-        guard let version = checkBundle(id: name, expectedName: "YbridPlayerSDK") else {
-            XCTFail("version of bundle 'io.ybrid.player-sdk-swift' expected")
+    func test03_BundleName() {
+        guard let name = AudioPlayer.configuration.bundleName else {
+            XCTFail("no AudioPlayer.bundleName")
             return
         }
+        Logger.testing.notice("-- AudioPlayer.bundleName=\(name)")
+        XCTAssertEqual("YbridPlayerSDK", name)
+    }
+    
+    func test04_BundleVersion() {
+        guard let version = AudioPlayer.configuration.bundleVersion else {
+            XCTFail("no AudioPlayer.bundleVersion")
+            return
+        }
+        Logger.testing.notice("-- AudioPlayer.bundleVersion=\(version)")
         XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
         XCTAssertTrue(version.starts(with: "0."))
-        #endif
     }
-
-    func test03_VersionString() {
+    
+    func test05_BundleBuildNumber() {
+        guard let build = AudioPlayer.configuration.bundleBuildNumber else {
+            XCTFail("no AudioPlayer.bundleBuildNumber")
+            return
+        }
+        Logger.testing.notice("-- AudioPlayer.bundleBuildNumber=\(build)")
+        guard let number = Int(build) else {
+            XCTFail("cannot convert \(build) to Int")
+            return
+        }
+        XCTAssertGreaterThan(number, 0)
+    }
+    
+    func test06_VersionString() {
         Logger.verbose = false
         let versionString = AudioPlayer.versionString
-        Logger.testing.notice("-- \(versionString)")
+        Logger.testing.info("-- \(versionString)")
         XCTAssert(versionString.contains("YbridPlayerSDK"), "should contain YbridPlayerSDK")
     }
     
@@ -88,7 +106,7 @@ class DevelopingPlayerTests: XCTestCase {
     }
     
       
-    func test04_OpusBundleInfo() throws {
+    func test10_OpusBundleInfo() throws {
         guard let version = checkBundle(id: "io.ybrid.opus-swift", expectedName: "YbridOpus") else {
             XCTFail("version of bundle 'io.ybrid.opus-swift' expected")
             return
@@ -97,20 +115,20 @@ class DevelopingPlayerTests: XCTestCase {
         XCTAssertTrue(version.starts(with: "0."))
     }
     
-    func test05_YbridOpusAvailable() {
+    func test11_YbridOpusAvailable() {
         let versionString = String(cString: opus_get_version_string())
         print("-- opus_get_version_string() returns '\(versionString)\'")
         XCTAssertTrue(versionString.hasPrefix("libopus 1.3.1"))
     }
     
-    func test06_OggBundleInfo() throws {
+    func test20_OggBundleInfo() throws {
         guard let version = checkBundle(id: "io.ybrid.ogg-swift", expectedName: "YbridOgg") else {
             XCTFail("version of bundle 'io.ybrid.ogg-swift' expected"); return
         }
         XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
     }
     
-    func test07_YbridOggAvailable() {
+    func test21_YbridOggAvailable() {
         var oggSyncState = ogg_sync_state()
         print("-- ogg_sync_state() is '\(oggSyncState)\'")
         XCTAssertNotNil(oggSyncState)

@@ -35,8 +35,10 @@ let package = Package(
             name: "YbridPlayerSDK",
             dependencies: [ "YbridOpus", "YbridOgg" ],
             path: "./player-sdk-swift",
-            exclude: ["Info.plist"]
+            exclude: ["Info.plist"],
+            resources: [.process("PlayerConfiguration.txt")]
             ),
+        
         .testTarget(
             name: "player-sdk-swiftTests",
             dependencies: [ "YbridPlayerSDK", "YbridOpus", "YbridOgg" ],
@@ -52,3 +54,4 @@ let package = Package(
             ),
     ]
 )
+

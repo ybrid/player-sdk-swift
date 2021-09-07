@@ -1,0 +1,12 @@
+#
+# Configure values of Swift Package here
+#
+
+# Value of AudioPlayer.configuration.bundleName
+PRODUCT_NAME = YbridPlayerSDK
+
+# Value of AudioPlayer.configuration.bundleVersion
+MARKETING_VERSION = 0.13.0
+
+# Value of AudioPlayer.configuration.bundleBuildNumber
+CURRENT_PROJECT_VERSION = 42

@@ -55,17 +55,17 @@ public enum PlaybackState {
 
 public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
 
-    public static var versionString:String {
-        get {
-            let bundleId = "io.ybrid.player-sdk-swift"
-            guard let info = Bundle(identifier: bundleId)?.infoDictionary else {
-                Logger.shared.error("bundle \(bundleId) not found")
-                return "bundle \(bundleId) not found"
-            }
-            Logger.shared.debug("bundle \(bundleId) info \(info)")
-            let version = info["CFBundleShortVersionString"] ?? "(unknown)"
-            let name = info["CFBundleName"] ?? "(unknown)"
-            let build = info["CFBundleVersion"]  ?? "(unknown)"
+    static let bundleId = "io.ybrid.player-sdk-swift"
+    #if SWIFT_PACKAGE
+    public static let configuration = PlayerConfiguration(resource: "PlayerConfiguration", withExtension: "txt")
+    #else
+    public static let configuration = PlayerConfiguration(bundleId: bundleId)
+    #endif
+    
+    public static var versionString:String { get {
+        let name = AudioPlayer.configuration.bundleName ?? "(unknown)"
+            let version = AudioPlayer.configuration.bundleVersion ?? "(unknown)"
+            let build = AudioPlayer.configuration.bundleBuildNumber ?? "(unknown)"
             return "\(name) version \(version) (build \(build))"
         }
     }
