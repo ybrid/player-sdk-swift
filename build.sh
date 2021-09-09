@@ -100,7 +100,11 @@ cmd="$cmd -output $xcFramework"
 #echo $cmd
 $cmd
 
-echo "generating $xcFramework.zip including LICENSE file..."
-cp LICENSE $xcFramework
-zip -q -r -y $xcFramework.zip $xcFramework
-echo "done."
+# zip -r -y does not generate the expected result.
+# Currently I have to compress manually on my macOS.
+#
+# echo "generating $xcFramework.zip including LICENSE file..."
+# cp LICENSE $xcFramework
+# zip -q -r -y $xcFramework.zip $xcFramework
+
+echo "$0 done."

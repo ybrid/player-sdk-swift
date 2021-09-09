@@ -92,7 +92,26 @@ target 'app-example-ios' do
   pod 'YbridPlayerSDK'
 end
 ```
+## If you use Swift Package Management
+The Package.swift using the YbridPlayerSDK Package should look like
+```swift 
+  ...
+  dependencies: [
+    .package(
+        name: "YbridOpus",
+        url: "git@github.com:ybrid/opus-swift.git",
+        from: "0.8.0"),
+    .package(
+        name: "YbridOgg",
+        url: "git@github.com:ybrid/ogg-swift.git",
+        from: "0.8.0"),
 
+    .package(
+        name: "YbridPlayerSDK",
+        url: "git@github.com:ybrid/player-sdk-swift.git",
+        from: "0.13.0"),
+  ...
+```
 #### If you don't use CocoaPods
 
 If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release 1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases) 2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  

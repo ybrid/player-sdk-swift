@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "YbridOpus",
+        "repositoryURL": "git@github.com:ybrid/opus-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "92e76803ce7efc8e8903433cfd5f7f68938534ba",
+          "version": "0.8.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

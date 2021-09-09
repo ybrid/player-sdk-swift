@@ -30,7 +30,7 @@
 
 
 // Product Version, PLEASE CHANGE HERE to affect all targets
-MARKETING_VERSION = 0.12.4
+MARKETING_VERSION = 0.13.0
 // Build number, PLEASE CHANGE HERE to affect all targets
 CURRENT_PROJECT_VERSION = 42
 // Product name, PLEASE CHANGE HERE to affect all targets
