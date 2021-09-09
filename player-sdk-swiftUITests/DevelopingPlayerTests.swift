@@ -36,73 +36,40 @@ class DevelopingPlayerTests: XCTestCase {
         XCTAssertFalse(Logger.verbose)
     }
     
-    func test03_BundleName() {
-        guard let name = AudioPlayer.configuration.bundleName else {
-            XCTFail("no AudioPlayer.bundleName")
+    func test03_PlayerName() {
+        guard let name = AudioPlayer.productName else {
+            XCTFail("no AudioPlayer.productName")
             return
         }
-        Logger.testing.notice("-- AudioPlayer.bundleName=\(name)")
+        Logger.testing.notice("-- AudioPlayer.productName=\(name)")
         XCTAssertEqual("YbridPlayerSDK", name)
     }
     
-    func test04_BundleVersion() {
-        guard let version = AudioPlayer.configuration.bundleVersion else {
-            XCTFail("no AudioPlayer.bundleVersion")
+    func test04_PlayerVersion() {
+        guard let version = AudioPlayer.productVersion else {
+            XCTFail("no AudioPlayer.productVersion")
             return
         }
-        Logger.testing.notice("-- AudioPlayer.bundleVersion=\(version)")
+        Logger.testing.notice("-- AudioPlayer.productVersion=\(version)")
         XCTAssertTrue(isVersionNumber(version), "\(version) is no version number")
         XCTAssertTrue(version.starts(with: "0."))
     }
+    private func isVersionNumber(_ version:String) -> Bool {
+        let pattern = "(\\d+)\\.(\\d+)\\.(\\d+)"
+        return version.range(of: pattern, options: .regularExpression) != nil
+    }
     
-    func test05_BundleBuildNumber() {
-        guard let build = AudioPlayer.configuration.bundleBuildNumber else {
-            XCTFail("no AudioPlayer.bundleBuildNumber")
+    func test05_PayerBuildNumber() {
+        guard let build = AudioPlayer.productBuildNumber else {
+            XCTFail("no AudioPlayer.productBuildNumber")
             return
         }
-        Logger.testing.notice("-- AudioPlayer.bundleBuildNumber=\(build)")
+        Logger.testing.notice("-- AudioPlayer.productBuildNumber=\(build)")
         guard let number = Int(build) else {
             XCTFail("cannot convert \(build) to Int")
             return
         }
         XCTAssertGreaterThan(number, 0)
-    }
-    
-    func test06_VersionString() {
-        Logger.verbose = false
-        let versionString = AudioPlayer.versionString
-        Logger.testing.info("-- \(versionString)")
-        XCTAssert(versionString.contains("YbridPlayerSDK"), "should contain YbridPlayerSDK")
-    }
-    
-     private func checkBundle(id:String, expectedName:String) -> String? {
-        guard let bundle = Bundle(identifier: id) else {
-            XCTFail("no bundle identifier '\(id)' found")
-            return nil
-        }
-        guard let info = bundle.infoDictionary else {
-            XCTFail("no infoDictionary on bundle '\(id)' found")
-            return nil
-        }
-        print("-- infoDictionary is '\(info)'")
-        
-        let version = info["CFBundleShortVersionString"] as! String
-        XCTAssertNotNil(version)
-
-        let name = info["CFBundleName"] as! String
-        XCTAssertEqual(expectedName, name)
-        let copyright = info["NSHumanReadableCopyright"] as! String
-        XCTAssertTrue(copyright.contains("nacamar"))
-        
-        let build = info["CFBundleVersion"] as! String
-        print("-- version of \(name) is \(version) (build \(build))")
-        
-        return version
-    }
-    
-    private func isVersionNumber(_ version:String) -> Bool {
-        let pattern = "(\\d+)\\.(\\d+)\\.(\\d+)"
-        return version.range(of: pattern, options: .regularExpression) != nil
     }
     
       
@@ -139,4 +106,30 @@ class DevelopingPlayerTests: XCTestCase {
         XCTAssertEqual(0, oggSyncState.returned)
     }
 
+    private func checkBundle(id:String, expectedName:String) -> String? {
+       guard let bundle = Bundle(identifier: id) else {
+           XCTFail("no bundle identifier '\(id)' found")
+           return nil
+       }
+       guard let info = bundle.infoDictionary else {
+           XCTFail("no infoDictionary on bundle '\(id)' found")
+           return nil
+       }
+       print("-- infoDictionary is '\(info)'")
+       
+       let version = info["CFBundleShortVersionString"] as! String
+       XCTAssertNotNil(version)
+
+       let name = info["CFBundleName"] as! String
+       XCTAssertEqual(expectedName, name)
+       let copyright = info["NSHumanReadableCopyright"] as! String
+       XCTAssertTrue(copyright.contains("nacamar"))
+       
+       let build = info["CFBundleVersion"] as! String
+       print("-- version of \(name) is \(version) (build \(build))")
+       
+       return version
+   }
+
+    
 }

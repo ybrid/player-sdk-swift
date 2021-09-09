@@ -64,8 +64,8 @@
 		17539E9F26286F98000FE902 /* YbridJsonResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E9C26286F98000FE902 /* YbridJsonResponse.swift */; };
 		17539EBE26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* ContolMatchesProtocolTests.swift */; };
 		17539EBF26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539EBD26287B6D000FE902 /* ContolMatchesProtocolTests.swift */; };
-		1758476926E8ACED002C729D /* PlayerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1758476826E8ACED002C729D /* PlayerConfiguration.swift */; };
-		1758476A26E8ACED002C729D /* PlayerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1758476826E8ACED002C729D /* PlayerConfiguration.swift */; };
+		1758476926E8ACED002C729D /* PlayerPackaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1758476826E8ACED002C729D /* PlayerPackaging.swift */; };
+		1758476A26E8ACED002C729D /* PlayerPackaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1758476826E8ACED002C729D /* PlayerPackaging.swift */; };
 		175849DF264A5D6E0071FEE6 /* PlayerContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */; };
 		175849E6264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */; };
 		175849E7264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */; };
@@ -247,7 +247,7 @@
 		17539E93262869E7000FE902 /* MediaControlFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlFactory.swift; sourceTree = "<group>"; };
 		17539E9C26286F98000FE902 /* YbridJsonResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridJsonResponse.swift; sourceTree = "<group>"; };
 		17539EBD26287B6D000FE902 /* ContolMatchesProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContolMatchesProtocolTests.swift; sourceTree = "<group>"; };
-		1758476826E8ACED002C729D /* PlayerConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerConfiguration.swift; sourceTree = "<group>"; };
+		1758476826E8ACED002C729D /* PlayerPackaging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerPackaging.swift; sourceTree = "<group>"; };
 		175849DE264A5D6E0071FEE6 /* PlayerContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerContextTests.swift; sourceTree = "<group>"; };
 		175849E5264BB6760071FEE6 /* ThreadsafeCollections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsafeCollections.swift; sourceTree = "<group>"; };
 		175849EA264BB6C00071FEE6 /* ThreadsafeDequeueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadsafeDequeueTests.swift; sourceTree = "<group>"; };
@@ -414,7 +414,7 @@
 				1732222125F614BC00AEC833 /* Metadata.swift */,
 				1799DC7B25D565970055C973 /* AudioPipeline.swift */,
 				17E9AB832653A808001ED9C8 /* YbridControl.swift */,
-				1758476826E8ACED002C729D /* PlayerConfiguration.swift */,
+				1758476826E8ACED002C729D /* PlayerPackaging.swift */,
 				170703D425D2F44400549B8A /* Info.plist */,
 				175849E4264BB6500071FEE6 /* util */,
 				178F637F26824658007AB54B /* loading */,
@@ -1055,7 +1055,7 @@
 				1732222225F614BC00AEC833 /* Metadata.swift in Sources */,
 				1799DC8125D565970055C973 /* AudioPipeline.swift in Sources */,
 				177AF70926A1E65D0095BEA5 /* MediaState.swift in Sources */,
-				1758476926E8ACED002C729D /* PlayerConfiguration.swift in Sources */,
+				1758476926E8ACED002C729D /* PlayerPackaging.swift in Sources */,
 				17D01BFC262F174D007B0A3C /* IcyDriver.swift in Sources */,
 				1799DC9925D565B30055C973 /* PlaybackEngine.swift in Sources */,
 				1799DC9E25D565BB0055C973 /* PlayerContext.swift in Sources */,
@@ -1208,7 +1208,7 @@
 				1732222425F614BC00AEC833 /* Metadata.swift in Sources */,
 				17CBC8CE25E2517F00B2F7E7 /* AudioPipeline.swift in Sources */,
 				177AF70A26A1E65D0095BEA5 /* MediaState.swift in Sources */,
-				1758476A26E8ACED002C729D /* PlayerConfiguration.swift in Sources */,
+				1758476A26E8ACED002C729D /* PlayerPackaging.swift in Sources */,
 				17D01BFE262F174D007B0A3C /* IcyDriver.swift in Sources */,
 				17CBC8CF25E2517F00B2F7E7 /* PlaybackEngine.swift in Sources */,
 				17CBC8D025E2517F00B2F7E7 /* PlayerContext.swift in Sources */,

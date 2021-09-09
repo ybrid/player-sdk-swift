@@ -55,20 +55,10 @@ public enum PlaybackState {
 
 public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
 
-    static let bundleId = "io.ybrid.player-sdk-swift"
-    #if SWIFT_PACKAGE
-    public static let configuration = PlayerConfiguration(resource: "PlayerConfiguration", withExtension: "txt")
-    #else
-    public static let configuration = PlayerConfiguration(bundleId: bundleId)
-    #endif
-    
-    public static var versionString:String { get {
-        let name = AudioPlayer.configuration.bundleName ?? "(unknown)"
-            let version = AudioPlayer.configuration.bundleVersion ?? "(unknown)"
-            let build = AudioPlayer.configuration.bundleBuildNumber ?? "(unknown)"
-            return "\(name) version \(version) (build \(build))"
-        }
-    }
+    static let packaging = PlayerPackaging()
+    public static var productName:String? { get { return AudioPlayer.packaging.name }}
+    public static var productVersion:String? { get { return AudioPlayer.packaging.version }}
+    public static var productBuildNumber:String? { get { return AudioPlayer.packaging.buildNumber }}
     
     // Create an AudioPlayer for a MediaEndpoint.
     //

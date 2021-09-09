@@ -36,7 +36,7 @@ let package = Package(
             dependencies: [ "YbridOpus", "YbridOgg" ],
             path: "./player-sdk-swift",
             exclude: ["Info.plist"],
-            resources: [.process("PlayerConfiguration.txt")]
+            resources: [.process("PlayerPackaging.txt")]
             ),
         
         .testTarget(

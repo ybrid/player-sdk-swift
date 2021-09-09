@@ -26,32 +26,25 @@
 import Foundation
 
 
-#if !SWIFT_PACKAGE
-extension Bundle {
-    public static var module:Bundle { Bundle(identifier: AudioPlayer.bundleId)! }
-}
-#endif
-
-public class PlayerConfiguration {
+class PlayerPackaging {
     
-    var infoDict:[String:Any]?
-    var envDict:[String:String]?
-    var configsDict:[String:String]?
+    static let bundleId = "io.ybrid.player-sdk-swift"
+    private var infoDict:[String:Any]?
+    private var configsDict:[String:String]?
     
-    init(bundleId:String) {
-        infoDict = loadBundleInfo(bundleId: bundleId)
-    }
-
-    init(resource: String, withExtension ext: String) {
-        configsDict = loadConfig(resource: resource, ext: ext)
-    }
-
-    
-    public var bundleName:String? { get {
+    init() {
         #if SWIFT_PACKAGE
-        let name = packageConfig("PRODUCT_NAME")
+        configsDict = loadPackageConfig(resource: "PlayerPackaging", ext: "txt")
         #else
-        let name = bundleInfo("CFBundleName")
+        infoDict = loadBundleInfo(bundleId: PlayerPackaging.bundleId)
+        #endif
+    }
+ 
+    var name:String? { get {
+        #if SWIFT_PACKAGE
+        let name = configsDict?["PRODUCT_NAME"]
+        #else
+        let name = infoDict?["CFBundleName"] as? String
         #endif
         guard let bundleName = name else {
             Logger.shared.error("no bundle name found")
@@ -61,11 +54,11 @@ public class PlayerConfiguration {
         return bundleName
     }}
     
-    public var bundleVersion:String? { get {
+    var version:String? { get {
         #if SWIFT_PACKAGE
-        let version = packageConfig("MARKETING_VERSION")
+        let version = configsDict?["MARKETING_VERSION"]
         #else
-        let version = bundleInfo("CFBundleShortVersionString")
+        let version =  infoDict?["CFBundleShortVersionString"] as? String
         #endif
         guard let bundleVersion = version else {
             Logger.shared.error("no bundle version found")
@@ -75,11 +68,11 @@ public class PlayerConfiguration {
         return bundleVersion
     }}
  
-    public var bundleBuildNumber:String? { get {
+    var buildNumber:String? { get {
         #if SWIFT_PACKAGE
-        let build = packageConfig("CURRENT_PROJECT_VERSION")
+        let build = configsDict?["CURRENT_PROJECT_VERSION"]
         #else
-        let build = bundleInfo("CFBundleVersion")
+        let build = infoDict?["CFBundleVersion"] as? String
         #endif
         guard let buildNumber = build else {
             Logger.shared.error("no bundle build number found")
@@ -90,12 +83,33 @@ public class PlayerConfiguration {
     }}
     
     // MARK: private helpers
-    
-    private func bundleInfo(_ dict:String) -> String? {
-        return infoDict?[dict] as? String ?? nil
+
+    private func loadBundleInfo(bundleId:String)  -> [String:Any]? {
+        guard let info = Bundle(identifier: PlayerPackaging.bundleId)?.infoDictionary else {
+            Logger.shared.error("no bundle info for \(bundleId) found")
+            return nil
+        }
+        Logger.shared.info("bundle \(bundleId) info is \(info)")
+        return info
     }
-    private func packageConfig(_ entry:String) -> String? {
-        return configsDict?[entry] ?? nil
+    
+    #if SWIFT_PACKAGE
+    private func loadPackageConfig(resource: String, ext: String) -> [String:String]? {
+        let configRessource = Bundle.module.url(forResource: resource, withExtension: ext)
+        guard let configPath = configRessource?.path else {
+            Logger.shared.error("no configs from \(resource).\(ext) found")
+            return nil
+        }
+    
+        do {
+            let pckgConfig = try String(contentsOfFile: configPath, encoding: String.Encoding.utf8)
+            let configs = parseConfig(fileContent: pckgConfig)
+            Logger.shared.info("configs from \(configPath) \(configs)")
+            return configs
+        } catch {
+            Logger.shared.error("cannot parse configs from \(configPath), cause: \(error.localizedDescription)")
+            return nil
+        }
     }
     
     private func parseConfig(fileContent:String) -> [String:String] {
@@ -116,32 +130,5 @@ public class PlayerConfiguration {
         }
         return properties
     }
-    
-    private func loadBundleInfo(bundleId:String)  -> [String:Any]? {
-        guard let info = Bundle.module.infoDictionary else {
-            Logger.shared.error("no bundle info for \(bundleId) found")
-            return nil
-        }
-        Logger.shared.info("bundle \(bundleId) info is \(info)")
-        return info
-    }
-    
-    private func loadConfig(resource: String, ext: String) -> [String:String]? {
-        let configRessource = Bundle.module.url(forResource: resource, withExtension: ext)
-        guard let configPath = configRessource?.path else {
-            Logger.shared.error("no configs from \(resource).\(ext) found")
-            return nil
-        }
-    
-        do {
-            let pckgConfig = try String(contentsOfFile: configPath, encoding: String.Encoding.utf8)
-            let configs = parseConfig(fileContent: pckgConfig)
-            Logger.shared.info("configs from \(configPath) \(configs)")
-            return configs
-        } catch {
-            Logger.shared.error("cannot parse configs from \(configPath), cause: \(error.localizedDescription)")
-            return nil
-        }
-    }
-
+    #endif
 }
