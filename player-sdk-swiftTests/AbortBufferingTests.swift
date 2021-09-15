@@ -26,6 +26,10 @@
 import XCTest
 @testable import YbridPlayerSDK
 
+extension Logger {
+    static let testing: Logger = Logger(category: "testing")
+}
+
 class AbortBufferingTests: XCTestCase {
     
     override func tearDownWithError() throws {
@@ -39,25 +43,25 @@ class AbortBufferingTests: XCTestCase {
     let maxSecondsWait = 4
     
     // MARK: abort playing mp3
-        
-    func testAbortMp3_until200msAfterConnect_CleanedUp() throws {
+
+    func testAbortMp3_until200msAfterConnectCleanedUp_failsSometimesFrom25msTo35ms() throws {
         Logger.verbose = false
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
       }
 
-    func testAbortMp3_until1sAfterConnect_CleanedUp() throws {
+    func testAbortMp3_until1sAfterConnectCleanedUp_ok() throws {
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
     }
     
-    func testAbortOpus_0until100msAfterConnect_CleanedUp() throws {
+    func testAbortOpus_0until100msAfterConnectCleanedUp_failsSometimesFrom20To60ms() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
         Logger.testing.notice("\(failed) failed abortion tests")
     }
     
-    func testAbortOpus_until1sAfterConnect_CleanedUp() throws {
+    func testAbortOpus_until1sAfterConnect_CleanedUp_ok() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
         Logger.testing.notice("\(failed) failed abortion tests")
@@ -159,13 +163,22 @@ class AbortBufferingTests: XCTestCase {
         XCTAssertEqual(until, player.state)
         return seconds
     }
-    
- 
-    
 }
+
+
 // MARK: abort playing
 
-class CtrlStopListener: AbstractAudioPlayerListener  {
+class CtrlStopListener: AudioPlayerListener  {
+    func stateChanged(_ state: PlaybackState) {    }
+    
+    func metadataChanged(_ metadata: Metadata) {    }
+    
+    func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {    }
+
+    func playingSince(_ seconds: TimeInterval?) {     }
+    
+    func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {    }
+    
     var afterConnect:TimeInterval = -1.0
     
     var control:PlaybackControl?
@@ -193,7 +206,7 @@ class CtrlStopListener: AbstractAudioPlayerListener  {
         control?.stop()
     }
     
-    override func durationConnected(_ seconds: TimeInterval?) {
+    func durationConnected(_ seconds: TimeInterval?) {
         Logger.testing.notice("-- recieved first data from url after \(seconds!.S) seconds ")
         guard let state = control?.state else {
             XCTFail("durationConnected -- player without state.")
@@ -206,7 +219,7 @@ class CtrlStopListener: AbstractAudioPlayerListener  {
         }
     }
     
-    override func durationReadyToPlay(_ seconds: TimeInterval?) {
+    func durationReadyToPlay(_ seconds: TimeInterval?) {
         hasPlayed = true
         
         guard let duration = seconds else {

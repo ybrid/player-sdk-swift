@@ -22,10 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-//#if os(iOS)
+
 import Foundation
 import YbridOgg 
-
 
 class OggContainer {
     
@@ -206,4 +205,3 @@ class OggContainer {
         return info
     }
 }
-//#endif
