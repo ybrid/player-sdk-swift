@@ -40,21 +40,14 @@ let package = Package(
     ],
     targets: [
 
-// use binary target only for build and releases
+// binary target only for builds and releases
         .binaryTarget(
            name: "YbridPlayerSDK",
            url: "https://github.com/ybrid/player-sdk-swift/releases/download/\(version)/YbridPlayerSDK.xcframework.zip",
-            checksum: "66048b2581c476433be214c5d6a9b3b5427f57803c8d78e76a2af3df47fac828"
-           ),
-// use this for integration tests on built target or during deelopment
-        .testTarget(
-           name: "YbridPlayerSDK-PlatformTests",
-           dependencies: [ "YbridPlayerSDK", "YbridOpus", "YbridOgg" ],
-           path: "./player-sdk-swiftUITests",
-           exclude: ["Info.plist"]
+            checksum: "1e51c7e6c4ab26a969a1d52d11b4f9bc4f857e6aadafa3e8cada37f70fbaa554"
            ),
 
-// use this targets only during development and unit tests
+// targets only during development
 //         .target(
 //             name: "YbridPlayerSDK",
 //             dependencies: [ "YbridOpus", "YbridOgg" ],
@@ -70,6 +63,13 @@ let package = Package(
 //            resources: [.process("unit/res"), .process("session/res")]
 //            ),
 
+// target for testing of built target and during development
+        .testTarget(
+           name: "YbridPlayerSDK-PlatformTests",
+           dependencies: [ "YbridPlayerSDK", "YbridOpus", "YbridOgg" ],
+           path: "./player-sdk-swiftUITests",
+           exclude: ["Info.plist"]
+           ),
     ]
 )
 
