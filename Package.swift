@@ -16,7 +16,7 @@ let package = Package(
             targets: [
                 "YbridPlayerSDK",
 //                "YbridPlayerSDK-UnitTests",
-                "YbridPlayerSDK-PlatformTests"
+//                "YbridPlayerSDK-PlatformTests"
             ]),
     ],
     dependencies: [
@@ -54,13 +54,13 @@ let package = Package(
 //            resources: [.process("unit/res"), .process("session/res")]
 //            ),
 
-// target for testing of built target and during development
-        .testTarget(
-           name: "YbridPlayerSDK-PlatformTests",
-           dependencies: [ "YbridPlayerSDK", "YbridOpus", "YbridOgg" ],
-           path: "./player-sdk-swiftUITests",
-           exclude: ["Info.plist"]
-           ),
+// target for testing after development
+//        .testTarget(
+//           name: "YbridPlayerSDK-PlatformTests",
+//           dependencies: [ "YbridPlayerSDK", "YbridOpus", "YbridOgg" ],
+//           path: "./player-sdk-swiftUITests",
+//           exclude: ["Info.plist"]
+//           ),
     ]
 )
 
