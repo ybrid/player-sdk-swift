@@ -110,7 +110,7 @@ A Swift Package uses YbridPlayerSDK as Swift Package with the following lines (t
     .package(
         name: "YbridPlayerSDK",
         url: "git@github.com:ybrid/player-sdk-swift.git",
-        from: "0.13.0"),
+        from: "0.13.1"),
   ...
 ```
 Or in a Xcode project, choose "File" -> "Swift Packages" -> "Add Package Dependency" three times and pass url, version and name above. Have a look at the properties editor, and ensure the Packages are shown in section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. 
