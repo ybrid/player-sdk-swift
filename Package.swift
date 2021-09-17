@@ -20,19 +20,10 @@ let package = Package(
             ]),
     ],
     dependencies: [
-//        .package(
-//            name: "YbridOpus",
-//            path: "../../github/opus-swift/OpusSwiftLocal")
-        
         .package(
             name: "YbridOpus",
             url: "git@github.com:ybrid/opus-swift.git",
             from: "0.8.0"),
-
-//        .package(
-//            name: "YbridOgg",
-//            path: "../../github/ogg-swift/OggSwiftLocal"),
-        
         .package(
             name: "YbridOgg",
             url: "git@github.com:ybrid/ogg-swift.git",
@@ -44,7 +35,7 @@ let package = Package(
         .binaryTarget(
            name: "YbridPlayerSDK",
            url: "https://github.com/ybrid/player-sdk-swift/releases/download/\(version)/YbridPlayerSDK.xcframework.zip",
-            checksum: "1e51c7e6c4ab26a969a1d52d11b4f9bc4f857e6aadafa3e8cada37f70fbaa554"
+            checksum: "81ee05ef4797bb3630c7f35994a68a51f56032d9b4f1f53235437398739a05c2"
            ),
 
 // targets only during development

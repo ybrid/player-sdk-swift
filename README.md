@@ -92,9 +92,10 @@ target 'app-example-ios' do
   pod 'YbridPlayerSDK'
 end
 ```
-## If you use Swift Package Management
-The Package.swift using the YbridPlayerSDK Package should look like
+### If you use Swift Packages
+A Swift Package uses YbridPlayerSDK as Swift Package with the following lines (three Packages) in Package.swift:
 ```swift 
+// swift-tools-version:5.3
   ...
   dependencies: [
     .package(
@@ -112,9 +113,13 @@ The Package.swift using the YbridPlayerSDK Package should look like
         from: "0.13.0"),
   ...
 ```
-#### If you don't use CocoaPods
+Or in a Xcode project, choose "File" -> "Swift Packages" -> "Add Package Dependency" three times and pass url, version and name above. Have a look at the properties editor, and ensure the Packages are shown in section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. 
 
-If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release 1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases) 2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
+#### If you don't use CocoaPods or Swift Packages
+
+If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release 
+1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases) 
+2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
 3. YbridOpus.xcframework.zip from [ybrid/opus-swift/releases](https://github.com/ybrid/opus-swift/releases)
 
 Unzip the files into a directory called 'Frameworks' of your XCode project. In the properties editor, drag and drop the directories into the section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. Please report any issue to tell us your need.
