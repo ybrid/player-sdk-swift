@@ -78,6 +78,28 @@ class SystemAudioData : AudioData {
                     self.format = format
                 }
             }
+        case kAudioFileStreamProperty_FormatList:
+// @constant   kAudioFileStreamProperty_FormatList
+// In order to support formats such as AAC SBR where an encoded data stream can be decoded to
+//  multiple destination formats, this property returns an array of AudioFormatListItems
+// (see AudioFormat.h) of those formats.
+// The default behavior is to return the an AudioFormatListItem that has the same
+// AudioStreamBasicDescription that kAudioFileStreamProperty_DataFormat returns.
+            let formats:[AVAudioFormat]
+            do {
+                formats = try readFormatList()
+            } catch {
+                Logger.decoding.error(error.localizedDescription)
+                return
+            }
+            for format in formats {
+                Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is \(AudioData.describeAVFormat(format))")
+                if format.isSuperior(to: self.format) {
+                    Logger.decoding.debug("kAudioFileStreamProperty_FormatList altering source format to \(AudioData.describeAVFormat(format))")
+                    self.format = format
+                }
+            }
+        // read properties and debug values
         case kAudioFileStreamProperty_FileFormat:
             var value:UInt32 = 0
             readAudioProperty(property, &value)
@@ -87,43 +109,36 @@ class SystemAudioData : AudioData {
             }
             let charCode = String(bytes: byteArray, encoding:  .ascii)
             Logger.decoding.debug("kAudioFileStreamProperty_FileFormat \(charCode ?? "(nothing)") unused")
-            
-        case kAudioFileStreamProperty_FormatList:
-// @constant   kAudioFileStreamProperty_FormatList
-// In order to support formats such as AAC SBR where an encoded data stream can be decoded to
-//  multiple destination formats, this property returns an array of AudioFormatListItems
-// (see AudioFormat.h) of those formats.
-// The default behavior is to return the an AudioFormatListItem that has the same
-// AudioStreamBasicDescription that kAudioFileStreamProperty_DataFormat returns.
- 
-            let formatDescriptions:[AudioStreamBasicDescription]
-            do {
-                formatDescriptions = try readFormatList()
-            } catch {
-                Logger.decoding.error(error.localizedDescription)
-                return
-            }
-            formatDescriptions
-                .forEach{ (desc) in
-                    var description = desc
-                    if let format = AVAudioFormat(streamDescription: &description ) {
-                        if format.isUsable {
-                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList entry is \(AudioData.describeAVFormat(format))")
-                            if format.isSuperior(to: self.format) {
-                                Logger.decoding.debug("kAudioFileStreamProperty_FormatList altering source format to \(AudioData.describeAVFormat(format))")
-                                self.format = format
-                            }
-                        } else {
-                            Logger.decoding.debug("kAudioFileStreamProperty_FormatList ignoring entry  \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
-                        }
-                    }
-            }
+        case kAudioFileStreamProperty_DataOffset:
+            var value:Int64 = 0
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_DataOffset \(value) unused")
+        case kAudioFileStreamProperty_AudioDataByteCount:
+            var value:UInt64 = 0
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_AudioDataByteCount \(value) unused")
+        case kAudioFileStreamProperty_AudioDataPacketCount:
+            var value:UInt64 = 0
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_AudioDataPacketCount \(value) unused")
+        case kAudioFileStreamProperty_MaximumPacketSize:
+            var value:UInt32 = 0
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_MaximumPacketSize \(value) unused")
+        case kAudioFileStreamProperty_BitRate:
+            var value:UInt32 = 0
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_BitRate \(value) unused")
+        case kAudioFileStreamProperty_ReadyToProducePackets:
+            var value:Bool = false
+            readAudioProperty(property, &value)
+            Logger.decoding.debug("kAudioFileStreamProperty_ReadyToProducePackets \(value) unused")
         default:
             Logger.decoding.debug("\(AudioData.describeProperty(property)) unused")
         }
     }
     
-    func readFormatList() throws -> [AudioStreamBasicDescription] {
+    private func readFormatList() throws -> [AVAudioFormat] {
         
         let size = MemoryLayout<AudioStreamBasicDescription>.size
         var formatListSize = UInt32()
@@ -141,17 +156,25 @@ class SystemAudioData : AudioData {
             throw AudioDataError(.parsingFailed, error, "unable to read  kAudioFileStreamProperty_FormatList")
         }
         
-        var descriptions:[AudioStreamBasicDescription] = []
+        var formats:[AVAudioFormat] = []
         var i = 0
         while i < total {
             let pasbd = formatListData.advanced(by: i).pointee
-            descriptions.append(pasbd.mASBD)
             let chLayoutTag = pasbd.mChannelLayoutTag
             let nCh = AudioChannelLayoutTag_GetNumberOfChannels(chLayoutTag)
             if Logger.verbose { Logger.decoding.debug("kAudioFileStreamProperty_FormatList ignoring info \(nCh) channel layout \(describe(chLayoutTag))") }
             i += size
+            
+            var description = pasbd.mASBD
+            if let format = AVAudioFormat(streamDescription: &description ) {
+                guard format.isUsable else {
+                    Logger.decoding.debug("kAudioFileStreamProperty_FormatList ignoring entry  \(AudioData.describeFormatId(description.mFormatID, false)), \(description)")
+                    continue
+                }
+                formats.append(format)
+            }
         }
-        return descriptions
+        return formats
     }
     
     /// used by audioPacketCallback
