@@ -30,6 +30,7 @@ class AbstractSession {
     
     let driver: MediaDriver
     let state: MediaState
+    var timeshifting:Bool = false
     
     init(state: MediaState, driver: MediaDriver) {
         self.driver = driver
@@ -50,6 +51,10 @@ class AbstractSession {
     func hasChanged(_ what: SubInfo) -> Bool {
         return state.hasChanged(what)
     }
+    
+    func fetchMetadataSync(metadataIn: AbstractMetadata) {
+        fatalError(#function + " must be overridden")
+    }
 }
 
 class IcySession : AbstractSession {
@@ -58,17 +63,35 @@ class IcySession : AbstractSession {
         let state = MediaState(endpoint)
         super.init(state: state, driver: driver)
     }
+    
+    override func fetchMetadataSync(metadataIn: AbstractMetadata) {
+        state.metadata = metadataIn
+    }
 }
 
 class YbridSession : AbstractSession {
     
     let encoder = JSONEncoder()
+    let v2Driver:YbridV2Driver
   
     init(endpoint: MediaEndpoint, v2 driver: YbridV2Driver) {
         let state = MediaState(endpoint)
+        self.v2Driver = driver
         super.init(state: state, driver: driver)
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
         driver.ybridSession = self
+    }
+    
+    override func fetchMetadataSync(metadataIn: AbstractMetadata) {
+        if timeshifting {
+            v2Driver.info()
+        } else {
+            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
+                v2Driver.showMeta(streamUrl)
+            } else {
+                v2Driver.info()
+            }
+        }
     }
     
     // MARK: accept response objects

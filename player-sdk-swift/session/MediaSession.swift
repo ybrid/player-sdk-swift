@@ -106,24 +106,17 @@ public class MediaSession {
     
     var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
         Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
+        if let ybrid = session as? YbridSession {
+          if .timeshift == changingOver?.subInfo {
+              ybrid.timeshifting = true
+          } else {
+              ybrid.timeshifting = false
+          }
+        }
     }}
     
     func fetchMetadataSync(metadataIn: AbstractMetadata) {
-        guard let media = v2Driver else {
-            state?.metadata = metadataIn
-            return
-        }
-        
-        if .timeshift == changingOver?.subInfo {
-            media.info()
-        }
-        else {
-            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
-                media.showMeta(streamUrl)
-            } else {
-                media.info()
-            }
-        }
+        session?.fetchMetadataSync(metadataIn: metadataIn)
     }
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
