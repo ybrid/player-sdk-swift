@@ -51,7 +51,31 @@ class MediaControlFactory {
         return driver
     }
     
-    func getVersion(_ uri:String) throws -> MediaProtocol {
+    func createSession(_ session:MediaSession) throws -> AbstractSession {
+        let apiVersion:MediaProtocol
+        if let forced = session.endpoint.forcedProtocol {
+            apiVersion = forced
+        } else {
+            let uri = session.endpoint.uri
+            apiVersion = try getVersion(uri)
+        }
+        let driver:MediaDriver
+        let abstractSession:AbstractSession
+        switch apiVersion {
+        case .plain, .icy:
+            driver = IcyDriver(session:session)
+            abstractSession = IcySession(on: session.endpoint, driver)
+        case .ybridV2:
+            driver = YbridV2Driver(session:session)
+            abstractSession = YbridSession(on: session.endpoint, driver)
+        }
+        Logger.session.notice("selected media protocol is \(apiVersion)")
+        return abstractSession
+    }
+    
+    
+    
+    private func getVersion(_ uri:String) throws -> MediaProtocol {
         
         guard let url = URL(string: uri) else {
             throw SessionError(ErrorKind.invalidUri, uri)

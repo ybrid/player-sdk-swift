@@ -34,7 +34,16 @@ enum SubInfo : String, CaseIterable {
 //    case VALIDITY
 }
 
-class MediaDriver {
+protocol MediaSessionDelegate {
+//    func fetchMetadataSync(metadataIn: AbstractMetadata)
+    func disconnect()
+    var state:MediaState { get }
+    var mediaProtocol:MediaProtocol { get }
+    func clearChanged(_ what: SubInfo)
+    func hasChanged(_ what: SubInfo) -> Bool 
+}
+
+class MediaDriver : MediaSessionDelegate {
     
     let mediaProtocol:MediaProtocol
     var valid:Bool = true //  { get }
@@ -66,12 +75,11 @@ class MediaDriver {
         return state.hasChanged(what)
     }
     
+    func fetchMetadataSync(metadataIn: AbstractMetadata) {
+        fatalError(#function + " must be overridden")
+    }
     //    func getBouquet() -> Bouquet
     //    @NotNull Service getCurrentService();
     
-//    func notify(_ severity:ErrorSeverity, _ error: SessionError ) {
-//        DispatchQueue.global().async {
-//            self.listener?.error(severity, error)
-//        }
-//    }
+
 }

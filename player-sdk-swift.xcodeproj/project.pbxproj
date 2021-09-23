@@ -195,6 +195,8 @@
 		17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */; };
 		17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */; };
 		17F3C23D267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */; };
+		17F4FB7926FCB2F800EF5019 /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
+		17F4FB7A26FCB2F800EF5019 /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
 		17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A151266F789D00F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
@@ -328,6 +330,7 @@
 		17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSessionCreated.json; sourceTree = "<group>"; };
 		17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridNewsResponse.json; sourceTree = "<group>"; };
 		17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridStreamUrlMetadata.json; sourceTree = "<group>"; };
+		17F4FB7826FCB2F800EF5019 /* YbridSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSession.swift; sourceTree = "<group>"; };
 		17F6A14E266F5B0100F48432 /* Bouquet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bouquet.swift; sourceTree = "<group>"; };
 		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
 		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
@@ -463,6 +466,7 @@
 		17539E502626D108000FE902 /* session */ = {
 			isa = PBXGroup;
 			children = (
+				17F4FB7726FCB2B500EF5019 /* ybrid */,
 				17539E47262591C3000FE902 /* MediaSession.swift */,
 				17317FAC26D54A28009E1658 /* drivers */,
 				17539E93262869E7000FE902 /* MediaControlFactory.swift */,
@@ -636,6 +640,14 @@
 				177727352696E16000D0A67B /* YbridV1ResponseTests.swift */,
 			);
 			path = session;
+			sourceTree = "<group>";
+		};
+		17F4FB7726FCB2B500EF5019 /* ybrid */ = {
+			isa = PBXGroup;
+			children = (
+				17F4FB7826FCB2F800EF5019 /* YbridSession.swift */,
+			);
+			path = ybrid;
 			sourceTree = "<group>";
 		};
 		3F7B41F7F7B1F25031E24BC3 /* Pods */ = {
@@ -1087,6 +1099,7 @@
 				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
 				1799DCAB25D565DB0055C973 /* SystemAudioData.swift in Sources */,
 				17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */,
+				17F4FB7926FCB2F800EF5019 /* YbridSession.swift in Sources */,
 				171345C4263153500054DB9D /* MediaDriver.swift in Sources */,
 				1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */,
 				1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */,
@@ -1244,6 +1257,7 @@
 				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
 				17CBC8D425E2517F00B2F7E7 /* SystemAudioData.swift in Sources */,
 				17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */,
+				17F4FB7A26FCB2F800EF5019 /* YbridSession.swift in Sources */,
 				171345C6263153500054DB9D /* MediaDriver.swift in Sources */,
 				17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */,
 				17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */,

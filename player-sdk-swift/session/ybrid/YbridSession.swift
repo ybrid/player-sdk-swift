@@ -1,5 +1,5 @@
 //
-// EmptyDriver.swift
+// YbridSession.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -26,30 +26,25 @@
 import Foundation
 
 
-class IcyDriver : MediaDriver {
-    
-    init(session:MediaSession) {
-        super.init(session: session, version: .icy)
+class AbstractSession {
+    let endpoint:MediaEndpoint
+    let driver: MediaDriver
+    init(on endpoint : MediaEndpoint, driver:MediaDriver) {
+        self.endpoint = endpoint
+        self.driver = driver
     }
+}
+
+class YbridSession : AbstractSession {
     
-    override func connect() throws {
-        if connected {
-            return
-        }
-        
-        if !valid {
-            throw SessionError(ErrorKind.invalidSession, "session is not valid.")
-        }
-        connected = true
+    init(on endpoint:MediaEndpoint, _ driver: MediaDriver) {
+        super.init(on: endpoint, driver: driver)
     }
-       
-    override func disconnect() {
-        if !connected {
-            return
-        }
-        connected = false
+}
+
+class IcySession : AbstractSession {
+    
+    init(on endpoint:MediaEndpoint, _ driver: MediaDriver) {
+        super.init(on: endpoint, driver: driver)
     }
-    
-    
-    
 }

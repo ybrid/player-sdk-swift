@@ -28,11 +28,14 @@
 
 import Foundation
 
-public class MediaSession  {
-       
-    let endpoint:MediaEndpoint
+public class MediaSession {
+
     let factory = MediaControlFactory()
-    var driver:MediaDriver?
+    var session:AbstractSession?
+    let endpoint:MediaEndpoint
+    var driver:MediaSessionDelegate? {
+        return session?.driver
+    }
      
     weak var playerListener:AudioPlayerListener?
     
@@ -74,12 +77,14 @@ public class MediaSession  {
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
+
     }
     
     func connect() throws {
         do {
             let mediaDriver = try factory.create(self)
-            self.driver = mediaDriver
+            self.session = try factory.createSession(self)
+//            self.driver = mediaDriver
             try mediaDriver.connect()
         } catch {
             if let playerError = error as? SessionError {
@@ -230,5 +235,4 @@ public class MediaSession  {
         return v2Driver?.swapService(id: id) ?? false
     }
 }
-
 
