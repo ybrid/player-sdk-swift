@@ -82,16 +82,12 @@ public class MediaSession  {
             self.driver = mediaDriver
             try mediaDriver.connect()
         } catch {
-            if let playerError = error as? AudioPlayerError {
-                DispatchQueue.global().async {
-                    self.playerListener?.error(.fatal, playerError)
-                }
+            if let playerError = error as? SessionError {
+                notifyError(.fatal, playerError)
                 throw error
             } else {
                 let playerError = SessionError(.unknown, "cannot connect to endpoint \(endpoint)", error)
-                DispatchQueue.global().async {
-                    self.playerListener?.error(.fatal, playerError)
-                }
+                notifyError(.fatal, playerError)
                 throw playerError
             }
         }

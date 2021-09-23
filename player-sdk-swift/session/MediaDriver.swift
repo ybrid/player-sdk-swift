@@ -69,9 +69,9 @@ class MediaDriver {
     //    func getBouquet() -> Bouquet
     //    @NotNull Service getCurrentService();
     
-    func notify(_ severity:ErrorSeverity, _ error: SessionError ) {
-        DispatchQueue.global().async {
-            self.listener?.error(severity, error)
-        }
-    }
+//    func notify(_ severity:ErrorSeverity, _ error: SessionError ) {
+//        DispatchQueue.global().async {
+//            self.listener?.error(severity, error)
+//        }
+//    }
 }
