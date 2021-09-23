@@ -34,22 +34,22 @@ public enum MediaProtocol : String {
 
 class MediaControlFactory {
     
-    func create(_ session:MediaSession) throws -> MediaDriver {
-        let apiVersion:MediaProtocol
-        if let forced = session.endpoint.forcedProtocol {
-            apiVersion = forced
-        } else {
-            let uri = session.endpoint.uri
-            apiVersion = try getVersion(uri)
-        }
-        let driver:MediaDriver
-        switch apiVersion {
-        case .plain, .icy: driver = IcyDriver(session:session)
-        case .ybridV2: driver = YbridV2Driver(session:session)
-        }
-        Logger.session.notice("selected media protocol is \(apiVersion)")
-        return driver
-    }
+//    func create(_ session:MediaSession) throws -> MediaDriver {
+//        let apiVersion:MediaProtocol
+//        if let forced = session.endpoint.forcedProtocol {
+//            apiVersion = forced
+//        } else {
+//            let uri = session.endpoint.uri
+//            apiVersion = try getVersion(uri)
+//        }
+//        let driver:MediaDriver
+//        switch apiVersion {
+//        case .plain, .icy: driver = IcyDriver(session:session)
+//        case .ybridV2: driver = YbridV2Driver(session:session)
+//        }
+//        Logger.session.notice("selected media protocol is \(apiVersion)")
+//        return driver
+//    }
     
     func createSession(_ session:MediaSession) throws -> AbstractSession {
         let apiVersion:MediaProtocol
@@ -59,17 +59,17 @@ class MediaControlFactory {
             let uri = session.endpoint.uri
             apiVersion = try getVersion(uri)
         }
-        let driver:MediaDriver
+        Logger.session.notice("selected media protocol is \(apiVersion)")
+
         let abstractSession:AbstractSession
         switch apiVersion {
         case .plain, .icy:
-            driver = IcyDriver(session:session)
-            abstractSession = IcySession(on: session.endpoint, driver)
+            abstractSession = IcySession(endpoint: session.endpoint, icy: IcyDriver())
         case .ybridV2:
-            driver = YbridV2Driver(session:session)
-            abstractSession = YbridSession(on: session.endpoint, driver)
+            let driver = YbridV2Driver(notifyError: session.notifyError)
+            abstractSession = YbridSession(endpoint: session.endpoint, v2: driver)
         }
-        Logger.session.notice("selected media protocol is \(apiVersion)")
+        try abstractSession.connect()
         return abstractSession
     }
     

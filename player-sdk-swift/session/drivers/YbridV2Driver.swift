@@ -27,15 +27,12 @@ import Foundation
 
 
 class YbridV2Driver : MediaDriver {
-    
-    
-    let encoder = JSONEncoder()
 
-    
-    init(session:MediaSession) {
-        self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
-        self.notify = session.notifyError
-        super.init(session:session, version: .ybridV2)
+
+    weak var ybridSession:YbridSession?
+    init(notifyError:@escaping ((ErrorSeverity, SessionError)->())) {
+        self.notify = notifyError
+        super.init(version: .ybridV2)
     }
     
     let notify:((ErrorSeverity, SessionError)->())
@@ -55,7 +52,7 @@ class YbridV2Driver : MediaDriver {
         Logger.session.info("creating ybrid session")
         
         let sessionObj = try createSessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "create")
-        accecpt(response: sessionObj)
+        ybridSession?.accecpt(response: sessionObj)
         super.connected = true
     }
     
@@ -67,7 +64,7 @@ class YbridV2Driver : MediaDriver {
         
         do {
             let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/close", actionString: "close")
-            accecpt(response: sessionObj)
+            ybridSession?.accecpt(response: sessionObj)
             super.connected = false
         } catch {
             Logger.session.error(error.localizedDescription)
@@ -92,7 +89,7 @@ class YbridV2Driver : MediaDriver {
         
         do {
             let sessionObj = try sessionRequest(ctrlPath: "ctrl/v2/session/info", actionString: "get info")
-            accecpt(response: sessionObj)
+            ybridSession?.accecpt(response: sessionObj)
             if !super.valid {
                 try reconnect()
             }
@@ -119,7 +116,7 @@ class YbridV2Driver : MediaDriver {
                 throw SessionError(ErrorKind.invalidResponse, "no result for show meta")
             }
 //            Logger.session.debug("show-meta is \(showMetaObj)")
-            accept(showMeta: showMetaObj)
+            ybridSession?.accept(showMeta: showMetaObj)
         } catch {
             Logger.session.error(error.localizedDescription)
         }
@@ -130,7 +127,7 @@ class YbridV2Driver : MediaDriver {
     func reconnect() throws {
         Logger.session.info("reconnecting ybrid session")
         let sessionObj = try createSessionRequest(ctrlPath: "ctrl/v2/session/create", actionString: "reconnect")
-        accecpt(response: sessionObj)
+        ybridSession?.accecpt(response: sessionObj)
         super.connected = true
     }
     
@@ -146,7 +143,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let bitRate = URLQueryItem(name: "value", value: "\(maxBps)")
             let bitrateObj = try changeBitrateRequest(ctrlPath: "ctrl/v2/session/set-max-bit-rate", actionString: "limit bit-rate to \(maxBps)", queryParam: bitRate)
-            accept(maxBitrate: bitrateObj.maxBitRate)
+            ybridSession?.accept(maxBitrate: bitrateObj.maxBitRate)
             if !super.valid {
                 try reconnect()
             }
@@ -165,7 +162,7 @@ class YbridV2Driver : MediaDriver {
             let millis = Int(by * 1000)
             let windByMillis = URLQueryItem(name: "duration", value: "\(millis)")
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind by \(by.S)", queryParam: windByMillis)
-            accept(winded: windedObj)
+            ybridSession?.accept(winded: windedObj)
             if !super.valid {
                 try reconnect()
             }
@@ -179,7 +176,7 @@ class YbridV2Driver : MediaDriver {
     func windToLive() -> Bool {
         do {
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind/back-to-live", actionString: "wind to live")
-            accept(winded: windedObj)
+            ybridSession?.accept(winded: windedObj)
             if !super.valid {
                 try reconnect()
             }
@@ -196,7 +193,7 @@ class YbridV2Driver : MediaDriver {
             let tsString = String(Int64(dateDouble*1000))
             let tsQuery = URLQueryItem(name: "ts", value: tsString)
             let windedObj = try windRequest(ctrlPath: "ctrl/v2/playout/wind", actionString: "wind to \(to)", queryParam: tsQuery)
-            accept(winded: windedObj)
+            ybridSession?.accept(winded: windedObj)
             if !super.valid {
                 try reconnect()
             }
@@ -219,7 +216,7 @@ class YbridV2Driver : MediaDriver {
             } else {
                 windedObj = try windRequest(ctrlPath: ctrlPath, actionString: "skip \(direction) to item")
             }
-            accept(winded: windedObj)
+            ybridSession?.accept(winded: windedObj)
             if !super.valid {
                 try reconnect()
             }
@@ -240,7 +237,7 @@ class YbridV2Driver : MediaDriver {
     func swapItem(_ mode: SwapMode? = nil) -> Bool {
 
         var actionString = "swap item"
-        guard state.swaps != 0 else {
+        guard ybridSession?.state.swaps != 0 else {
             let warning = SessionError(ErrorKind.noSwapsLeft, actionString + " not available")
             notify(.recoverable, warning)
             Logger.session.notice(actionString + " not available")
@@ -256,7 +253,7 @@ class YbridV2Driver : MediaDriver {
             } else {
                 swappedObj = try swapItemRequest(ctrlPath: "ctrl/v2/playout/swap/item", actionString: actionString)
             }
-            accept(swapped: swappedObj)
+            ybridSession?.accept(swapped: swappedObj)
             if !super.valid {
                 try reconnect()
             }
@@ -274,7 +271,7 @@ class YbridV2Driver : MediaDriver {
         do {
             let serviceQuery = URLQueryItem(name: "service-id", value: id)
             let swappedObj = try swapServiceRequest(ctrlPath: "ctrl/v2/playout/swap/service", actionString: "swap to service \(id)", queryParam: serviceQuery)
-            accept(ybridBouquet: swappedObj.bouquet)
+            ybridSession?.accept(ybridBouquet: swappedObj.bouquet)
             if !super.valid {
                 try reconnect()
             }
@@ -285,101 +282,12 @@ class YbridV2Driver : MediaDriver {
         return true
     }
     
-    // MARK: accept response objects
-    
-    private func accecpt(response:YbridSessionObject) {
-        super.valid = response.valid
-        state.startDate = response.startDate
-        state.token = response.sessionId
-        
-        if let playout = response.playout {
-            state.playbackUri = playout.playbackURI
-            state.baseUrl = playout.baseURL
-            accept(offset: playout.offsetToLive)
-            accept(currentBitRate: playout.currentBitRate)
-            accept(maxBitrate: playout.maxBitRate)
-        }
-        if let ybridBouquet = response.bouquet {
-            accept(ybridBouquet: ybridBouquet)
-        }
-        if let metadata = response.metadata {
-            accept(newMetadata: metadata) // Metadata must be accepted after bouquet
-        }
-        if let swapInfo = response.swapInfo {
-            accept(swapped: swapInfo)
-        }
-    }
-    
-    private func accept(showMeta:YbridShowMeta) {
-        accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
-        accept(swapped:showMeta.swapInfo)
-        accept(currentBitRate: showMeta.currentBitRate)
-        // 2021-08-25 not using showMeta.timeToNextItemMillis
-    }
-    
-    private func accept(winded:YbridWindedObject) {
-        accept(offset:winded.totalOffset)
-        accept(newCurrentItem: winded.newCurrentItem)
-    }
-
-    private func accept(newMetadata:YbridV2Metadata) {
-        let ybridV2Metadata = YbridV2Metadata(currentItem: newMetadata.currentItem, nextItem: newMetadata.nextItem, station: newMetadata.station)
-        if Logger.verbose == true {
-            do {
-                let currentItemData = try encoder.encode(newMetadata.currentItem)
-                let metadataString = String(data: currentItemData, encoding: .utf8)!
-                Logger.session.debug("current item is \(metadataString)")
-            } catch {
-                Logger.session.error("cannot log metadata")
-            }
-        }
-        let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = state.bouquet?.activeService
-        state.metadata = ybridMD
-    }
-    
-    private func accept(newCurrentItem:YbridItem) {
-        let ybridV2Metadata = YbridV2Metadata(currentItem: newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
-        
-        let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = state.bouquet?.activeService
-        state.metadata = ybridMD
-    }
-    
-    private func accept(swapped:YbridSwapInfo) {
-        state.swaps = swapped.swapsLeft
-    }
-    
-    private func accept(ybridBouquet:YbridBouquet) {
-        do {
-            if Logger.verbose == true {
-                let bouquetData = try encoder.encode(ybridBouquet)
-                let bouquetString = String(data: bouquetData, encoding: .utf8)!
-                Logger.session.debug("current bouquet is \(bouquetString)")
-            }
-            state.bouquet = try Bouquet(bouquet: ybridBouquet)
-        } catch {
-            Logger.session.error(error.localizedDescription)
-        }
-    }
-    func accept(offset: Int) {
-        state.offset = Double(offset) / 1000
-    }
-    func accept(maxBitrate: Int32) {
-        if maxBitrate != -1 {
-            state.maxBitRate = maxBitrate
-        }
-    }
-    func accept(currentBitRate: Int32) {
-        if currentBitRate != -1 {
-            state.currentBitRate = currentBitRate
-        }
-    }
-    
     // MARK: all requests
     
-    
     private func createSessionRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
+        guard let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
+        }
         do {
             let result:YbridSessionResponse = try jsonRequest(baseUrl: state.endpointUri, ctrlPath: ctrlPath, actionString: actionString)
 
@@ -395,7 +303,9 @@ class YbridV2Driver : MediaDriver {
 
     
     private func sessionRequest(ctrlPath:String, actionString:String) throws -> YbridSessionObject {
-        
+        guard super.connected, let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
+        }
         do {
             let result:YbridSessionResponse = try jsonRequest(baseUrl: state.baseUrl, ctrlPath: ctrlPath, actionString: actionString)
 
@@ -410,8 +320,8 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func windRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridWindedObject {
-        guard super.connected else {
-            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        guard super.connected, let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
         }
         Logger.session.info(actionString)
         do {
@@ -428,8 +338,8 @@ class YbridV2Driver : MediaDriver {
     }
     
     private func swapItemRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridSwapInfo {
-        guard super.connected else {
-            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        guard super.connected, let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
         }
         Logger.session.info(actionString)
         do {
@@ -446,8 +356,8 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func swapServiceRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridBouquetObject {
-        guard super.connected else {
-            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        guard super.connected, let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
         }
         Logger.session.info(actionString)
         do {
@@ -464,8 +374,8 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func changeBitrateRequest(ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> YbridBitRate {
-        guard super.connected else {
-            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session")
+        guard super.connected, let state = ybridSession?.state else {
+            throw SessionError(.noSession, "cannot \(actionString), no connected ybrid session or state")
         }
         Logger.session.info(actionString)
         do {
@@ -482,7 +392,7 @@ class YbridV2Driver : MediaDriver {
     }
 
     private func jsonRequest<T:Decodable>(baseUrl: URL, ctrlPath:String, actionString:String, queryParam:URLQueryItem? = nil) throws -> T {
-        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString) else {
+        guard var ctrlUrl = URLComponents(string: baseUrl.appendingPathComponent(ctrlPath).absoluteString), let state = ybridSession?.state else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }
         var urlQueries:[URLQueryItem] = []

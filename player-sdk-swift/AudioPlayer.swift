@@ -98,7 +98,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     }}
     
     public var mediaProtocol:MediaProtocol? { get {
-        return session.driver?.mediaProtocol
+        return session.mediaProtocol
     }}
     
     public var mediaEndpoint: MediaEndpoint { get {

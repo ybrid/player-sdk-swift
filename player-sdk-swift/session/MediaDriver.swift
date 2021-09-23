@@ -34,52 +34,18 @@ enum SubInfo : String, CaseIterable {
 //    case VALIDITY
 }
 
-protocol MediaSessionDelegate {
-//    func fetchMetadataSync(metadataIn: AbstractMetadata)
-    func disconnect()
-    var state:MediaState { get }
-    var mediaProtocol:MediaProtocol { get }
-    func clearChanged(_ what: SubInfo)
-    func hasChanged(_ what: SubInfo) -> Bool 
-}
-
-class MediaDriver : MediaSessionDelegate {
+class MediaDriver{
     
     let mediaProtocol:MediaProtocol
     var valid:Bool = true //  { get }
     var connected:Bool = false { didSet {
         Logger.session.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
-    var state:MediaState
     
-//    let changed = ThreadsafeSet<SubInfo>(MediaDriver.v2Queue)
-//    static let v2Queue = DispatchQueue(label: "io.ybrid.session.driver.changes")
-//    
-    private weak var listener:AudioPlayerListener?
-    
-    init(session:MediaSession, version:MediaProtocol) {
+    init(version:MediaProtocol) {
         self.mediaProtocol = version
-        self.listener = session.playerListener
-        self.state = MediaState(session.endpoint)
     }
     
     func connect() throws {}
     func disconnect() {}
-    //    var playoutInfo: PlayoutInfo { get }
-    //    var capabilities: CapabilitySet { get }
-    
-    func clearChanged(_ what: SubInfo) {
-        state.clearChanged(what)
-    }
-    func hasChanged(_ what: SubInfo) -> Bool {
-        return state.hasChanged(what)
-    }
-    
-    func fetchMetadataSync(metadataIn: AbstractMetadata) {
-        fatalError(#function + " must be overridden")
-    }
-    //    func getBouquet() -> Bouquet
-    //    @NotNull Service getCurrentService();
-    
-
 }

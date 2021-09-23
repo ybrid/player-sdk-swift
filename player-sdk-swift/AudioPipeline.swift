@@ -264,8 +264,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return nil
         }
         
-        if let media = session.driver,
-           let completeCallback = changeOver.matches(to: media.state) {
+        if let state = session.state,
+           let completeCallback = changeOver.matches(to: state) {
             return completeCallback
         }
         

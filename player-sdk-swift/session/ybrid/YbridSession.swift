@@ -27,24 +27,139 @@ import Foundation
 
 
 class AbstractSession {
-    let endpoint:MediaEndpoint
-    let driver: MediaDriver
-    init(on endpoint : MediaEndpoint, driver:MediaDriver) {
-        self.endpoint = endpoint
-        self.driver = driver
-    }
-}
-
-class YbridSession : AbstractSession {
     
-    init(on endpoint:MediaEndpoint, _ driver: MediaDriver) {
-        super.init(on: endpoint, driver: driver)
+    let driver: MediaDriver
+    let state: MediaState
+    
+    init(state: MediaState, driver: MediaDriver) {
+        self.driver = driver
+        self.state = state
+    }
+    
+    func connect() throws {
+        try driver.connect()
+    }
+    
+    func disconnect() {
+        driver.disconnect()
+    }
+    
+    func clearChanged(_ what: SubInfo) {
+        state.clearChanged(what)
+    }
+    func hasChanged(_ what: SubInfo) -> Bool {
+        return state.hasChanged(what)
     }
 }
 
 class IcySession : AbstractSession {
     
-    init(on endpoint:MediaEndpoint, _ driver: MediaDriver) {
-        super.init(on: endpoint, driver: driver)
+    init(endpoint: MediaEndpoint, icy driver: MediaDriver) {
+        let state = MediaState(endpoint)
+        super.init(state: state, driver: driver)
     }
 }
+
+class YbridSession : AbstractSession {
+    
+    let encoder = JSONEncoder()
+  
+    init(endpoint: MediaEndpoint, v2 driver: YbridV2Driver) {
+        let state = MediaState(endpoint)
+        super.init(state: state, driver: driver)
+        self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
+        driver.ybridSession = self
+    }
+    
+    // MARK: accept response objects
+    
+    func accecpt(response:YbridSessionObject) {
+        driver.valid = response.valid
+        state.startDate = response.startDate
+        state.token = response.sessionId
+        
+        if let playout = response.playout {
+            state.playbackUri = playout.playbackURI
+            state.baseUrl = playout.baseURL
+            accept(offset: playout.offsetToLive)
+            accept(currentBitRate: playout.currentBitRate)
+            accept(maxBitrate: playout.maxBitRate)
+        }
+        if let ybridBouquet = response.bouquet {
+            accept(ybridBouquet: ybridBouquet)
+        }
+        if let metadata = response.metadata {
+            accept(newMetadata: metadata) // Metadata must be accepted after bouquet
+        }
+        if let swapInfo = response.swapInfo {
+            accept(swapped: swapInfo)
+        }
+    }
+    
+    func accept(showMeta:YbridShowMeta) {
+        accept(newMetadata: YbridV2Metadata(currentItem: showMeta.currentItem, nextItem: showMeta.nextItem, station: showMeta.station) )
+        accept(swapped:showMeta.swapInfo)
+        accept(currentBitRate: showMeta.currentBitRate)
+        // 2021-08-25 not using showMeta.timeToNextItemMillis
+    }
+    
+    func accept(winded:YbridWindedObject) {
+        accept(offset:winded.totalOffset)
+        accept(newCurrentItem: winded.newCurrentItem)
+    }
+
+    func accept(newMetadata:YbridV2Metadata) {
+        let ybridV2Metadata = YbridV2Metadata(currentItem: newMetadata.currentItem, nextItem: newMetadata.nextItem, station: newMetadata.station)
+        if Logger.verbose == true {
+            do {
+                let currentItemData = try encoder.encode(newMetadata.currentItem)
+                let metadataString = String(data: currentItemData, encoding: .utf8)!
+                Logger.session.debug("current item is \(metadataString)")
+            } catch {
+                Logger.session.error("cannot log metadata")
+            }
+        }
+        let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
+        ybridMD.currentService = state.bouquet?.activeService
+        state.metadata = ybridMD
+    }
+    
+    private func accept(newCurrentItem:YbridItem) {
+        let ybridV2Metadata = YbridV2Metadata(currentItem: newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
+        
+        let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
+        ybridMD.currentService = state.bouquet?.activeService
+        state.metadata = ybridMD
+    }
+    
+    func accept(swapped:YbridSwapInfo) {
+        state.swaps = swapped.swapsLeft
+    }
+    
+    func accept(ybridBouquet:YbridBouquet) {
+        do {
+            if Logger.verbose == true {
+                let bouquetData = try encoder.encode(ybridBouquet)
+                let bouquetString = String(data: bouquetData, encoding: .utf8)!
+                Logger.session.debug("current bouquet is \(bouquetString)")
+            }
+            state.bouquet = try Bouquet(bouquet: ybridBouquet)
+        } catch {
+            Logger.session.error(error.localizedDescription)
+        }
+    }
+    func accept(offset: Int) {
+        state.offset = Double(offset) / 1000
+    }
+    func accept(maxBitrate: Int32) {
+        if maxBitrate != -1 {
+            state.maxBitRate = maxBitrate
+        }
+    }
+    func accept(currentBitRate: Int32) {
+        if currentBitRate != -1 {
+            state.currentBitRate = currentBitRate
+        }
+    }
+}
+

@@ -28,8 +28,8 @@ import Foundation
 
 class IcyDriver : MediaDriver {
     
-    init(session:MediaSession) {
-        super.init(session: session, version: .icy)
+    init() {
+        super.init(version: .icy)
     }
     
     override func connect() throws {
