@@ -42,6 +42,9 @@
                   Identifier = "AbortBufferingTests">
                </Test>
                <Test
+                  Identifier = "AudioCodecsAACCompareTests">
+               </Test>
+               <Test
                   Identifier = "AudioCodecsTests">
                </Test>
                <Test

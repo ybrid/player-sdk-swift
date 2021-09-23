@@ -1,0 +1,29 @@
+# EXTM3U
+#
+# This play list has been prepared
+# for testing of audio applications
+# developed for ESP32 audio boards 
+# programmed using Espressif Audio Development Framework
+# (ESP-ADF) https://github.com/espressif/esp-adf
+#
+https://dl.espressif.com/dl/audio/ff-16b-1c-8000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-11025hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-12000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-16000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-22050hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-24000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-32000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-1c-44100hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-8000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-11025hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-12000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-16000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-22050hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-24000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-32000hz.mp3
+https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp3
+#
+# Original music file: "Furious Freak"
+# Kevin MacLeod (incompetech.com)
+# Licensed under Creative Commons: By Attribution 3.0
+# http://creativecommons.org/licenses/by/3.0/

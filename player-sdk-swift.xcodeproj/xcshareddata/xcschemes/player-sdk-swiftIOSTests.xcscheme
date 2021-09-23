@@ -26,6 +26,15 @@
                   Identifier = "AbortBufferingTests">
                </Test>
                <Test
+                  Identifier = "AudioCodecsAACCompareTests">
+               </Test>
+               <Test
+                  Identifier = "AudioCodecsTests">
+               </Test>
+               <Test
+                  Identifier = "AudioPlaylistTests">
+               </Test>
+               <Test
                   Identifier = "PlayerToggleStressTest">
                </Test>
                <Test

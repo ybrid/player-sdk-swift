@@ -51,6 +51,20 @@
                BlueprintName = "player-sdk-swiftTests"
                ReferencedContainer = "container:player-sdk-swift.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AbortBufferingTests">
+               </Test>
+               <Test
+                  Identifier = "ThreadsafeDequeueTests">
+               </Test>
+               <Test
+                  Identifier = "ThreadsafeDictionaryTests">
+               </Test>
+               <Test
+                  Identifier = "ThreadsafeSetTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

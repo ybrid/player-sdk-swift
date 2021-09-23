@@ -27,75 +27,167 @@ import XCTest
 import YbridPlayerSDK
 
 class AudioCodecsTests: XCTestCase {
-    
 
-    /*
-     Audio codec AAC are supported up to profile HE-AAC_v2.
-     
-     Besides the first sine you should hear 4 different high frequencies.
-     The first ones on the left. The second ones on the right channel.
-     */
-    func test20_playingHEAACv2() {
-        _ = TestControl(aacHEv2Endpoint)
-            .playing(6)
-            .checkErrors(expected: 0)
-    }
-
-    /*
-     
-     */
-    func test21_playingSpeechMale_HEAACv1_XHEAAC() {
-        _ = TestControl(heaac24kbps_SpeechMale)
-            .playing(6)
-            .checkErrors(expected: 0)
-            
-            .select(xheaac24kbps_SpeechMale)
-            .playing(6)
-            .checkErrors(expected: 0)
-    }
+//  from  https://docs.espressif.com/projects/esp-adf/en/latest/design-guide/audio-samples.html
     
-    func test22_playingMusic_24kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(heaac24kbps_music)
-            .playing(6)
-            .checkErrors(expected: 0)
-
-            .select(xheaac24kbps_music)
-            .playing(6)
-            .checkErrors(expected: 0)
-    }
     
-    func test22_playingMusic_48kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(heaac48kbps_music)
-            .playing(12)
-            .checkErrors(expected: 0)
-
-            .select(xheaac48kbps_music)
-            .playing(12)
-            .checkErrors(expected: 0)
-    }
-    
-    func test23_playingMusic_128kbps_HEAACv1_XHEAAC() {
-        _ = TestControl(heaac128kbps_music)
-            .playing(18)
-            .checkErrors(expected: 0)
+    //    OK
+//    2021-09-21 17:16:06.507628+0200 player-sdk-swiftMacTests-Runner[2184:78408] [loading] AudioDecoderFactory.createDecoder-44 mimeType application/octet-stream resolved to system audio decoder with hint kAudioFileMPEG4Type
+//    kAudioFileStreamProperty_FileFormat adts unused
+//    kAudioFileStreamProperty_MagicCookieData unused
+//    kAudioFileStreamProperty_FormatList entry is audio aac  2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_FormatList altering source format to audio aac  2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_DataOffset 0 unused
+//    kAudioFileStreamProperty_ReadyToProducePackets unused
+        func testEspressif_aac() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac"))
+        }
         
-            .select(xheaac128kbps_music)
-            .playing(18)
-            .checkErrors(expected: 0)
-    }
+    //    ok
+//    mimeType application/octet-stream resolved to system audio decoder
+//    kAudioFileStreamProperty_MagicCookieData unused
+//    kAudioFileStreamProperty_FileFormat ac-3 unused
+//    kAudioFileStreamProperty_DataFormat using source format audio ac-3 2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_FormatList entry is audio ac-3 2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_ChannelLayout unused
+//    kAudioFileStreamProperty_DataOffset 0 unused
+//    kAudioFileStreamProperty_ReadyToProducePackets unused
+        func testEspressif_ac3() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.ac3"))
+        }
+        
+    //    ok
+//    mimeType audio/mpeg resolved to system audio decoder with hint kAudioFileMP3Type
+    
+//  kAudioFileStreamProperty_BitRate 127999 unused
+//  kAudioFileStreamProperty_AudioDataByteCount 2993841 unused
+//  kAudioFileStreamProperty_AudioDataPacketCount 7163 unused
+//  kAudioFileStreamProperty_PacketTableInfo unused
+//  kAudioFileStreamProperty_FileFormat MPG3 unused
+//    kAudioFileStreamProperty_DataFormat using source format audio .mp3 2 ch 44100 Hz no pcm interleaved
+//  kAudioFileStreamProperty_DataOffset 508 unused
+//  kAudioFileStreamProperty_ReadyToProducePackets unuse
+        func testEspressif_mp3() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp3"))
+        }
+        
+        
+    //    ok
+//    mimeType application/octet-stream resolved to system audio decoder
+//    kAudioFileStreamProperty_FileFormat AIFC unused
+//    kAudioFileStreamProperty_DataFormat using source format audio lpcm 2 ch 44100 Hz pcmInt16 interleaved
+// kAudioFileStreamProperty_AudioDataByteCount 33002080 unused
+// kAudioFileStreamProperty_DataOffset 72 unused
+// kAudioFileStreamProperty_AudioDataPacketCount 8250520 unused
+// kAudioFileStreamProperty_ReadyToProducePackets unused
+        func testEspressif_aiff() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aiff"))
+        }
+        
+    //    ok
+//    mimeType application/octet-stream resolved to system audio decoder
+    
+//    kAudioFileStreamProperty_FileFormat flac unused
+//    kAudioFileStreamProperty_DataFormat using source format audio flac 2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_AudioDataPacketCount 1791 unused
+//    kAudioFileStreamProperty_MagicCookieData unused
+//    kAudioFileStreamProperty_InfoDictionary unused
+//    kAudioFileStreamProperty_DataOffset 8519 unused
+//    kAudioFileStreamProperty_ChannelLayout unused
+//    kAudioFileStreamProperty_MaximumPacketSize 16823 unused
+//    kAudioFileStreamProperty_ReadyToProducePackets true unused
+        func testEspressif_flac() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.flac"))
+        }
+        
+    //    fails
+    //    mimeType audio/x-m4a resolved to system audio decoder with hint kAudioFileMPEG4Type
+    //    kAudioFileStreamProperty_FileFormat m4af unused
+        // 2021-09-21 16:46:07.586683+0200 app-example-ios[1293:35035] [] AudioPlayer.notify-252 fatal 525 DecoderError.failedPackaging, cause: 412 AudioDataError.parsingFailed, OSStatus=1869640813, It is not possible to produce output packets because the file's packet table or other defining info is either not present or is after the audio data.
+        func testEspressif_m4a() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.m4a").forceProtocol(.plain))
+        }
+        
+    
+    
+        func testM4a() {
+            play(MediaEndpoint(mediaUri:
+            "https://filesamples.com/samples/audio/m4a/sample2.m4a").forceProtocol(.plain))
+        }
+    
+        // fails
+    //  mimeType video/mp4 resolved to system audio decoder with hint kAudioFileMPEG4Type
+    //  kAudioFileStreamProperty_FileFormat mp4f unused
+        // 2021-09-21 16:47:00.497239+0200 app-example-ios[1312:36539] [] AudioPlayer.notify-252 fatal 525 DecoderError.failedPackaging, cause: 412 AudioDataError.parsingFailed, OSStatus=1869640813, It is not possible to produce output packets because the file's packet table or other defining info is either not present or is after the audio data.
+        func testEspressif_mp4() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp4"))
+        }
+        
+        
+//        fails
+//    mimeType audio/ogg with filename Optional("ff-16b-2c-44100hz.ogg") resolved to opus decoder
+        // no stream for  -1265036395 on page 0
+//    bis page 186
+        func testEspressif_ogg() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.ogg"))
+        }
+
+        // ok
+//    mimeType application/octet-stream with filename Optional("ff-16b-2c-44100hz.opus") resolved to opus decoder
+    //  OpusData.mapOpusPacket-207 bos opus packet 0
+    //  OpusData.onOpusHead-221 OpusHead ver 1, ch 2, skip first 312 audio frames, mapping family 0
+        func testEspressif_opus() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.opus"))
+        }
+        
+        // ok
+//
+//    kAudioFileStreamProperty_FileFormat WAVE unused
+//    kAudioFileStreamProperty_DataFormat using source format audio lpcm 2 ch 44100 Hz pcmInt16 interleaved
+//    kAudioFileStreamProperty_AudioDataByteCount 33002080 unused
+//    kAudioFileStreamProperty_DataOffset 46 unused
+//    kAudioFileStreamProperty_AudioDataPacketCount 8250520 unused
+//    kAudioFileStreamProperty_ReadyToProducePackets unused
+        func testEspressif_wav() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.wav"))
+        }
+
+
+        // ok,
+//    mimeType application/octet-stream resolved to system audio decoder
+//    kAudioFileStreamProperty_FileFormat adts unused
+//    kAudioFileStreamProperty_MagicCookieData unused
+//    kAudioFileStreamProperty_FormatList entry is audio aac  2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_FormatList altering source format to audio aac  2 ch 44100 Hz no pcm interleaved
+//    kAudioFileStreamProperty_DataOffset 0 unused
+//    kAudioFileStreamProperty_ReadyToProducePackets unused
+        func testEspressif_wma() {
+            play(MediaEndpoint(mediaUri: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.wma"))
+        }
+        
+        
+        func test21_playingMusic_48kbps_HEAACv1() {
+           play(heaac48kbps_music)
+        }
+
+        func test22_playingMusic_48kbps_XHEAAC() {
+            play(xheaac48kbps_music)
+        }
+
+        
+        private func play(_ media:MediaEndpoint) {
+            do {
+                
+                try AudioPlayer.open(for: media.forceProtocol(.plain), listener: nil) {
+                    [self] (control) in
+                        control.play()
+                        sleep(12)
+                        control.stop()
+                    }
+                    sleep(14)
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+        
 }
-
-// @see https://www2.iis.fraunhofer.de/AAC/stereo.html
-let gitTestfilesAacUrl = "https://github.com/ybrid/test-files/blob/main/aac/fraunhofer/"
-
-
-// @see https://www2.iis.fraunhofer.de/AAC/xhe-aac-compare-tab.html
-let heaac24kbps_SpeechMale = MediaEndpoint( mediaUri:  gitTestfilesAacUrl + "sqam50_LN_HEAACv1_024s_AACLC_320s.mp4?raw=true" )
-let xheaac24kbps_SpeechMale = MediaEndpoint( mediaUri: gitTestfilesAacUrl + "sqam50_LN_xHE_024s_AACLC_320s.mp4?raw=true")
-
-let heaac24kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_024s_AACLC_320s.mp4?raw=true")
-let xheaac24kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_024s_AACLC_320s.mp4?raw=true")
-let heaac48kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_AACLC_048s_AACLC_320s.mp4?raw=true")
-let xheaac48kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Farewell01_LN_xHE_048s_AACLC_320s.mp4?raw=true")
-let heaac128kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_AACLC_128s_AACLC_320s.mp4?raw=true")
-let xheaac128kbps_music = MediaEndpoint(mediaUri: gitTestfilesAacUrl + "Walking01_LN_xHE_128s_AACLC_320s.mp4?raw=true")
