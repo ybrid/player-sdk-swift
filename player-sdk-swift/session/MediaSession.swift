@@ -37,7 +37,10 @@ public class MediaSession {
     var state:MediaState? { get {
         return session?.state
     }}
-     
+    private var v2Driver:YbridV2Driver? { get {
+       return session?.driver as? YbridV2Driver
+    }}
+    
     weak var playerListener:AudioPlayerListener?
     
     public var mediaProtocol:MediaProtocol? { get {
@@ -47,38 +50,36 @@ public class MediaSession {
     public var playbackUri:String { get {
         return state?.playbackUri ?? endpoint.uri
     }}
-    
-    var swaps: Int { get {
-        return state?.swaps ?? -1
-    }}
-    var maxBitRate: Int32? { get {
-        return state?.maxBitRate
-    }}
-    var currentBitRate: Int32? { get {
-        return state?.currentBitRate
-    }}
-    var services: [Service] { get {
-        return state?.bouquet?.services ?? []
-    }}
-    var offset: TimeInterval? { get {
-        return state?.offset
-    }}
-    var metadata: AbstractMetadata? { get {
-        return state?.metadata
-    }}
-    
-    private var v2Driver:YbridV2Driver? { get {
-       return session?.driver as? YbridV2Driver
-    }}
+//
+//    var swaps: Int { get {
+//        return state?.swaps ?? -1
+//    }}
+//    var maxBitRate: Int32? { get {
+//        return state?.maxBitRate
+//    }}
+//    var currentBitRate: Int32? { get {
+//        return state?.currentBitRate
+//    }}
+//    var services: [Service] { get {
+//        return state?.bouquet?.services ?? []
+//    }}
+//    var offset: TimeInterval? { get {
+//        return state?.offset
+//    }}
+//    var metadata: AbstractMetadata? { get {
+//        return state?.metadata
+//    }}
+
     
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
     }
     
-    func connect() throws {
+    func connect() throws -> AbstractSession {
+        let abstractSession:AbstractSession
         do {
-            self.session = try factory.createSession(self)
+            abstractSession = try factory.createSession(self)
         } catch {
             if let playerError = error as? SessionError {
                 notifyError(.fatal, playerError)
@@ -89,6 +90,8 @@ public class MediaSession {
                 throw playerError
             }
         }
+        self.session = abstractSession
+        return abstractSession
     }
     
     func close() {
@@ -115,7 +118,7 @@ public class MediaSession {
         }
     }}
     
-    func fetchMetadataSync(metadataIn: AbstractMetadata) {
+    func notifyMetadata(metadataIn: AbstractMetadata) {
         session?.fetchMetadataSync(metadataIn: metadataIn)
     }
     
@@ -124,7 +127,7 @@ public class MediaSession {
     )
     
     func maintainMetadata() -> UUID? {
-        guard let metadata = metadata else {
+        guard let metadata = state?.metadata else {
             return nil
         }
         let uuid = UUID()
@@ -159,7 +162,7 @@ public class MediaSession {
     
     private func notifyChangedMetadata() {
         if session?.hasChanged(SubInfo.metadata) == true,
-           let metadata = metadata {
+           let metadata = state?.metadata {
             DispatchQueue.global().async {
                 self.playerListener?.metadataChanged(metadata)
                 self.session?.clearChanged(SubInfo.metadata)
@@ -169,9 +172,10 @@ public class MediaSession {
     
     private func notifyChangedOffset(clear:Bool = true) {
         if session?.hasChanged(SubInfo.timeshift) == true,
-           let ybridListener = self.playerListener as? YbridControlListener {
+           let ybridListener = self.playerListener as? YbridControlListener,
+           let offset = state?.offset {
             DispatchQueue.global().async {
-                ybridListener.offsetToLiveChanged(self.offset)
+                ybridListener.offsetToLiveChanged(offset)
                 if clear { self.session?.clearChanged(SubInfo.timeshift) }
             }
         }
@@ -181,17 +185,21 @@ public class MediaSession {
         if session?.hasChanged(SubInfo.playout) == true,
            let ybridListener = self.playerListener as? YbridControlListener {
             DispatchQueue.global().async {
-                ybridListener.swapsChanged(self.swaps)
-                ybridListener.bitRateChanged(currentBitsPerSecond: self.currentBitRate, maxBitsPerSecond: self.maxBitRate)
-                self.session?.clearChanged(SubInfo.playout) }
+                if let swaps = self.state?.swaps {
+                    ybridListener.swapsChanged(swaps)
+                }
+                ybridListener.bitRateChanged(currentBitsPerSecond: self.state?.currentBitRate, maxBitsPerSecond: self.state?.maxBitRate)
+                self.session?.clearChanged(SubInfo.playout)
+            }
         }
     }
     
     private func notifyChangedServices() {
         if session?.hasChanged(SubInfo.bouquet) == true,
-           let ybridListener = self.playerListener as? YbridControlListener {
+           let ybridListener = self.playerListener as? YbridControlListener,
+           let services = state?.bouquet?.services {
             DispatchQueue.global().async {
-                ybridListener.servicesChanged(self.services)
+                ybridListener.servicesChanged(services)
                 self.session?.clearChanged(SubInfo.bouquet) }
         }
     }
@@ -218,7 +226,7 @@ public class MediaSession {
     func skipBackward(_ type:ItemType?) -> Bool {
         return v2Driver?.skipItem(false, type) ?? false
     }
-    
+
     func swapItem() -> Bool {
         return v2Driver?.swapItem(.end2end) ?? false
     }

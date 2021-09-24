@@ -225,7 +225,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
-        session.fetchMetadataSync(metadataIn: metadata)
+        session.notifyMetadata(metadataIn: metadata)
         
         if let bufferSize = buffer?.size, bufferSize > 0.0 {
           

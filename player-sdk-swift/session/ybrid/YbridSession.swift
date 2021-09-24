@@ -28,13 +28,12 @@ import Foundation
 
 class AbstractSession {
     
-    let driver: MediaDriver
     let state: MediaState
-    var timeshifting:Bool = false
+    let driver: MediaDriver
     
     init(state: MediaState, driver: MediaDriver) {
-        self.driver = driver
         self.state = state
+        self.driver = driver
     }
     
     func connect() throws {
@@ -73,7 +72,8 @@ class YbridSession : AbstractSession {
     
     let encoder = JSONEncoder()
     let v2Driver:YbridV2Driver
-  
+    var timeshifting:Bool = false
+    
     init(endpoint: MediaEndpoint, v2 driver: YbridV2Driver) {
         let state = MediaState(endpoint)
         self.v2Driver = driver
@@ -93,6 +93,33 @@ class YbridSession : AbstractSession {
             }
         }
     }
+    
+    func wind(by:TimeInterval) -> Bool {
+        return v2Driver.wind(by: by)
+    }
+    func windToLive() -> Bool {
+        return v2Driver.windToLive()
+    }
+    func wind(to:Date) -> Bool {
+        return v2Driver.wind(to:to)
+    }
+    func skipForward(_ type:ItemType?) -> Bool {
+        return v2Driver.skipItem(true, type)
+    }
+    func skipBackward(_ type:ItemType?) -> Bool {
+        return v2Driver.skipItem(false, type)
+    }
+    func swapItem() -> Bool {
+        return v2Driver.swapItem(.end2end)
+    }
+    func swapService(id:String) -> Bool {
+        return v2Driver.swapService(id: id)
+    }
+    
+    
+    
+    
+    
     
     // MARK: accept response objects
     

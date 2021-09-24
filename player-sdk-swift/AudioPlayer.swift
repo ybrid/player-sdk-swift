@@ -70,8 +70,9 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     public static func openSync(for endpoint:MediaEndpoint, listener: AudioPlayerListener?) -> AudioPlayer? {
         
         let session = MediaSession(on: endpoint, playerListener: listener)
+        let abstractSession:AbstractSession
         do {
-            try session.connect()
+            abstractSession = try session.connect()
         } catch {
             DispatchQueue.global().async {
                 if let audioDataError = error as? AudioPlayerError {
@@ -83,11 +84,11 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
             return nil
         }
 
-        switch session.mediaProtocol {
+        switch abstractSession.driver.mediaProtocol {
         case .plain, .icy:
             return AudioPlayer(session: session)
         case .ybridV2:
-            return YbridAudioPlayer(session: session)
+            return YbridAudioPlayer(session: session, ybridSession: abstractSession as! YbridSession)
         default:
             return nil
         }
