@@ -39,9 +39,10 @@ class MediaSessionTests: XCTestCase {
     func testSession_YbridDemo() throws {
         let session = MediaSession(on:ybridDemoEndpoint, playerListener: listener)
         XCTAssertNotNil(session.playerListener)
+        try session.connect()
         let player = AudioPlayer(session: session)
         XCTAssertNotNil(player.playerListener)
-        try session.connect()
+        
         let playbackUri = session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
@@ -135,7 +136,7 @@ class MediaSessionTests: XCTestCase {
         try session.connect()
         let player = AudioPlayer(session: session)
         usleep(10_000) // the listener is notified asynchronously
-        XCTAssertNotNil(player.session, "session expected")
+        XCTAssertNotNil(player.session, "no session expected")
         XCTAssertEqual(0,listener.errors.count)
     }
     
@@ -144,13 +145,13 @@ class MediaSessionTests: XCTestCase {
         let session = MediaSession(on: endpoint, playerListener: listener)
         session.playerListener = listener
         do {
-        try session.connect()
-            XCTFail()
+            _ = try session.connect()
+            XCTFail(); return
         } catch {
             XCTAssertTrue( error is SessionError )
         }
-        let player = AudioPlayer(session: session)
-        XCTAssertNotNil(player, "player expected")
+//        let player = AudioPlayer(session: session, abstract: abstractSession)
+//        XCTAssertNotNil(player, "player expected")
 
         usleep(10_000) // the listener is notified asynchronously
         guard let error = listener.errors.first else {

@@ -42,26 +42,30 @@ class YbridSpecialActionTests: XCTestCase {
              playbackControl: { (c) in
                 return },
              ybridControl: { (ybridControl) in
-                if let ybrid = ybridControl as? YbridAudioPlayer {
-                    if let driver = ybrid.session.driver as? YbridV2Driver {
-                        print("base uri is \(driver.state.baseUrl)")
-                        let baseUrlOrig = driver.state.baseUrl
-                        
-                        // forcing to reconnect
-                        do {
-                            try driver.reconnect()
-                        } catch {
-                            Logger.session.error(error.localizedDescription)
-                            XCTFail("should work, but \(error.localizedDescription)")
-                        }
-                        print("base uri is \(driver.state.baseUrl)")
-                        let baseUrlReconnected = driver.state.baseUrl
-                        XCTAssertEqual(baseUrlOrig, baseUrlReconnected)
- 
+                if let ybrid = ybridControl as? YbridAudioPlayer,
+                   let session = ybrid.session.session {
+                    let state = session.state
                     
-                        ybrid.play()
-                        print("base uri is \(driver.state.baseUrl)")
+                    print("base uri is \(state.baseUrl)")
+                    let baseUrlOrig = state.baseUrl
+                    
+                    guard let v2 = session.driver as? YbridV2Driver else {
+                        XCTFail(); semaphore.signal(); return
                     }
+                    // forcing to reconnect
+                    do {
+                        try v2.reconnect()
+                    } catch {
+                        Logger.session.error(error.localizedDescription)
+                        XCTFail("should work, but \(error.localizedDescription)")
+                    }
+                    print("base uri is \(state.baseUrl)")
+                    let baseUrlReconnected = state.baseUrl
+                    XCTAssertEqual(baseUrlOrig, baseUrlReconnected)
+                
+                    ybrid.play()
+                    print("base uri is \(state.baseUrl)")
+             
                 }
                 sleep(4)
                 ybridControl.close()
@@ -94,10 +98,10 @@ class YbridSpecialActionTests: XCTestCase {
                 
                 bitrates.forEach{
                     let kbps = Int32($0)*1000
-                    ybrid.session.maxBitRate(to:kbps)
+                    ybrid.maxBitRate(to:kbps)
                     sleep(1)
-                    XCTAssertEqual(kbps, ybrid.session.maxBitRate)
-                    if kbps == ybrid.session.maxBitRate {
+                    XCTAssertEqual(kbps, ybrid.session.state?.maxBitRate)
+                    if kbps == ybrid.session.state?.maxBitRate {
                         adoptedRates.append(kbps)
                     }
                 }
@@ -126,34 +130,36 @@ class YbridSpecialActionTests: XCTestCase {
                 }
                 ybrid.play()
                 sleep(4)
-                
-                ybrid.session.maxBitRate(to:77)
+                    
+                ybrid.maxBitRate(to:77)
                 sleep(1)
-                XCTAssertEqual(8_000, ybrid.session.maxBitRate)
+            XCTAssertEqual(8_000, ybrid.session.state?.maxBitRate)
                 
-                ybrid.session.maxBitRate(to:31_000)
+                ybrid.maxBitRate(to:31_000)
                 sleep(1)
-                XCTAssertEqual(32_000, ybrid.session.maxBitRate)
+            XCTAssertEqual(32_000, ybrid.session.state?.maxBitRate)
 
-                ybrid.session.maxBitRate(to:57_000)
+                ybrid.maxBitRate(to:57_000)
                 sleep(1)
-                XCTAssertEqual(64_000, ybrid.session.maxBitRate)
+            XCTAssertEqual(64_000, ybrid.session.state?.maxBitRate)
 
-                ybrid.session.maxBitRate(to:191_999)
+                ybrid.maxBitRate(to:191_999)
                 sleep(1)
-                XCTAssertEqual(192_000, ybrid.session.maxBitRate)
+            XCTAssertEqual(192_000, ybrid.session.state?.maxBitRate)
 
-                ybrid.session.maxBitRate(to:447_000)
+                ybrid.maxBitRate(to:447_000)
                 sleep(1)
-                XCTAssertEqual(448_000, ybrid.session.maxBitRate)
+            XCTAssertEqual(448_000, ybrid.session.state?.maxBitRate)
+
+            
+            ybrid.maxBitRate(to:449_000)
+                sleep(1)
+            // unchanged
+            XCTAssertEqual(448_000, ybrid.session.state?.maxBitRate)
                 
-                ybrid.session.maxBitRate(to:449_000)
+                ybrid.maxBitRate(to:390291781)
                 sleep(1)
-                XCTAssertEqual(-1, ybrid.session.maxBitRate)
-                
-                ybrid.session.maxBitRate(to:390291781)
-                sleep(1)
-                XCTAssertEqual(-1, ybrid.session.maxBitRate)
+            XCTAssertEqual(448_000, ybrid.session.state?.maxBitRate)
   
                 ybridControl.close()
                 sleep(1)

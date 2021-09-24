@@ -77,14 +77,16 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let v2 = player.session.driver as? YbridV2Driver else {
-            XCTFail("expected a v2 driver"); return
+        guard let ybridSession = (player as? YbridAudioPlayer)?.session.session as? YbridSession else {
+            XCTFail("expected a ybrid session"); return
         }
+        let v2 = ybridSession.v2Driver
+        let state = ybridSession.state
         XCTAssertEqual(MediaProtocol.ybridV2, v2.mediaProtocol)
         XCTAssertTrue(v2.connected)
-        XCTAssertNotNil(v2.state.playbackUri)
-        XCTAssertTrue(v2.state.playbackUri.starts(with: "icyx"))
-        XCTAssertTrue(v2.state.playbackUri.contains("edge"))
+        XCTAssertNotNil(state.playbackUri)
+        XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(state.playbackUri.contains("edge"))
       
         v2.disconnect()
         XCTAssertFalse(v2.connected)
@@ -97,7 +99,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session.driver as? IcyDriver else {
+        guard let driver = player.session.session?.driver as? IcyDriver else {
             XCTFail("expected an icy driver"); return
         }
         XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
@@ -109,15 +111,18 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let controller = player.session.driver as? YbridV2Driver else {
+        guard let controller = player.session.session?.driver as? YbridV2Driver else {
             XCTFail("expected a v2 driver"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
         XCTAssertTrue(controller.connected)
-                
-        XCTAssertNotNil(controller.state.playbackUri)
-        XCTAssertTrue(controller.state.playbackUri.starts(with: "icyx"))
-        XCTAssertTrue(controller.state.playbackUri.contains("edge"))
+            
+        guard let state = player.session.state else {
+            XCTFail("expected a state"); return
+        }
+        XCTAssertNotNil(state.playbackUri)
+        XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(state.playbackUri.contains("edge"))
       
         controller.disconnect()
         XCTAssertFalse(controller.connected)
@@ -130,19 +135,21 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session.driver as? YbridV2Driver else {
-            XCTFail("expected a controller"); return
+        guard let driver = player.session.session?.driver else {
+            XCTFail("expected a driver"); return
         }
         XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
         XCTAssertTrue(driver.connected)
-
-        var playbackUri = driver.state.playbackUri
+        guard let state = player.session.session?.state else {
+            XCTFail("expected a state"); return
+        }
+        var playbackUri = state.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
         
         try driver.connect()
         XCTAssertTrue(driver.connected)
-        playbackUri = driver.state.playbackUri
+        playbackUri = state.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
         XCTAssertTrue(playbackUri.contains("edge"))
     }
@@ -152,7 +159,7 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        XCTAssertNotNil(player.session.driver)
+        XCTAssertNotNil(player.session.session?.driver)
         
         XCTAssertEqual(endpoint.uri, player.session.playbackUri)
     }
@@ -163,12 +170,13 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let icy = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
+        guard let icy = player.session.session as? IcySession else {
+            XCTFail("expected an icy session"); return
         }
-        XCTAssertEqual(MediaProtocol.icy, icy.mediaProtocol)
+
+            XCTAssertEqual(MediaProtocol.icy, icy.driver.mediaProtocol)
         XCTAssertEqual(endpoint.uri, icy.state.playbackUri)
-        XCTAssertTrue(icy.connected)
+            XCTAssertTrue(icy.driver.connected)
     }
     
     func testDriver_EgoFM() throws {
@@ -176,12 +184,13 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
-        XCTAssertEqual(endpoint.uri, driver.state.playbackUri)
-        XCTAssertTrue(driver.connected)
+        guard let icy = player.session.session as? IcySession else {
+                XCTFail("expected an icy session"); return
+            }
+
+            XCTAssertEqual(MediaProtocol.icy, icy.driver.mediaProtocol)
+        XCTAssertEqual(endpoint.uri, icy.state.playbackUri)
+            XCTAssertTrue(icy.driver.connected)
     }
     
     func testDriver_DlfOpus() throws {
@@ -189,12 +198,12 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
-        XCTAssertEqual(endpoint.uri, driver.state.playbackUri)
-        XCTAssertTrue(driver.connected)
+        guard let icy = player.session.session as? IcySession else {
+                XCTFail("expected an icy session"); return
+            }
+            XCTAssertEqual(MediaProtocol.icy, icy.driver.mediaProtocol)
+        XCTAssertEqual(endpoint.uri, icy.state.playbackUri)
+            XCTAssertTrue(icy.driver.connected)
     }
     
     func testDriver_OnDemandSound() throws {
@@ -202,12 +211,12 @@ class MediaProtocolTests: XCTestCase {
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
-        guard let driver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
-        XCTAssertEqual(endpoint.uri, driver.state.playbackUri)
-        XCTAssertTrue(driver.connected)
+        guard let icy = player.session.session as? IcySession else {
+                XCTFail("expected an icy session"); return
+            }
+            XCTAssertEqual(MediaProtocol.icy, icy.driver.mediaProtocol)
+        XCTAssertEqual(endpoint.uri, icy.state.playbackUri)
+            XCTAssertTrue(icy.driver.connected)
     }
     
     

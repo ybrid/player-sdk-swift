@@ -33,12 +33,9 @@ public class MediaSession {
     let factory = MediaControlFactory()
     let endpoint:MediaEndpoint
     
-    private var session:AbstractSession?
+    var session:AbstractSession?
     var state:MediaState? { get {
         return session?.state
-    }}
-    private var v2Driver:YbridV2Driver? { get {
-       return session?.driver as? YbridV2Driver
     }}
     
     weak var playerListener:AudioPlayerListener?
@@ -50,36 +47,16 @@ public class MediaSession {
     public var playbackUri:String { get {
         return state?.playbackUri ?? endpoint.uri
     }}
-//
-//    var swaps: Int { get {
-//        return state?.swaps ?? -1
-//    }}
-//    var maxBitRate: Int32? { get {
-//        return state?.maxBitRate
-//    }}
-//    var currentBitRate: Int32? { get {
-//        return state?.currentBitRate
-//    }}
-//    var services: [Service] { get {
-//        return state?.bouquet?.services ?? []
-//    }}
-//    var offset: TimeInterval? { get {
-//        return state?.offset
-//    }}
-//    var metadata: AbstractMetadata? { get {
-//        return state?.metadata
-//    }}
-
     
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
     }
     
-    func connect() throws -> AbstractSession {
-        let abstractSession:AbstractSession
+    func connect() throws  {
+
         do {
-            abstractSession = try factory.createSession(self)
+            self.session = try factory.createSession(self)
         } catch {
             if let playerError = error as? SessionError {
                 notifyError(.fatal, playerError)
@@ -90,21 +67,14 @@ public class MediaSession {
                 throw playerError
             }
         }
-        self.session = abstractSession
-        return abstractSession
     }
     
     func close() {
-        self.session?.disconnect()
+        session?.disconnect()
     }
     
     func refresh() {
-        v2Driver?.info()
-    }
-    
-    func maxBitRate(to bps:Int32) {
-        v2Driver?.limitBitRate(maxBps: bps)
-        notifyChangedPlayout()
+        session?.refresh()
     }
     
     var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
@@ -210,28 +180,6 @@ public class MediaSession {
             self.playerListener?.error(severity, error)
         }
     }
-    
-    func wind(by:TimeInterval) -> Bool {
-        return v2Driver?.wind(by: by) ?? false
-    }
-    func windToLive() -> Bool {
-        return v2Driver?.windToLive() ?? false
-    }
-    func wind(to:Date) -> Bool {
-        return v2Driver?.wind(to:to) ?? false
-    }
-    func skipForward(_ type:ItemType?) -> Bool {
-        return v2Driver?.skipItem(true, type) ?? false
-    }
-    func skipBackward(_ type:ItemType?) -> Bool {
-        return v2Driver?.skipItem(false, type) ?? false
-    }
 
-    func swapItem() -> Bool {
-        return v2Driver?.swapItem(.end2end) ?? false
-    }
-    func swapService(id:String) -> Bool {
-        return v2Driver?.swapService(id: id) ?? false
-    }
 }
 

@@ -113,24 +113,15 @@ public extension AudioPlayer {
               ybridControl: YbridControlCallback? = nil ) throws {
         
         let session = MediaSession(on: endpoint, playerListener: listener)
-        let abstractSession = try session.connect()
+        try session.connect()
         controllerQueue.async {
-            if let ybrid = abstractSession as? YbridSession {
-                let player = YbridAudioPlayer(session:session, ybridSession: ybrid)
+            if session.session is YbridSession {
+                let player = YbridAudioPlayer(session:session) //, ybridSession: ybrid)
                 ybridControl?(player)
             } else {
-                let player = AudioPlayer(session: session)
+                let player = AudioPlayer(session: session) // abstract: abstractSession)
                 playbackControl?(player)
             }
-
-//            switch session.mediaProtocol {
-//            case .ybridV2:
-//                let player = YbridAudioPlayer(session: session)
-//                ybridControl?(player)
-//            default:
-//                let player = AudioPlayer(session: session)
-//                playbackControl?(player)
-//            }
         }
     }
 
@@ -150,40 +141,24 @@ public extension AudioPlayer {
 
 class YbridAudioPlayer : AudioPlayer, YbridControl {
 
-//    override init(session:MediaSession) {
-//        super.init(session: session)
-//        session.notifyChanged( SubInfo.bouquet )
-//        session.notifyChanged( SubInfo.timeshift )
-//        session.notifyChanged( SubInfo.playout )
-//    }
+    private var ybridSession:YbridSession? { get {
+        return super.session.session as? YbridSession
+    }}
     
-    var ybridSession:YbridSession?
-    init(session:MediaSession, ybridSession:YbridSession) {
+    override init(session:MediaSession) {
         super.init(session: session)
         session.notifyChanged( SubInfo.bouquet )
         session.notifyChanged( SubInfo.timeshift )
         session.notifyChanged( SubInfo.playout )
-        self.ybridSession = ybridSession
     }
-    
-    
-    func maxBitRate(to maxRate:Int32) {
-        playerQueue.async {
-            if let ybrid = self.ybridSession?.v2Driver {
-                ybrid.limitBitRate(maxBps: maxRate)
-            } else {
-                super.session.maxBitRate(to: maxRate)
-            }
-        }
-    }
-    
+
     func select() {
         DispatchQueue.global().async {
             if let metadata = self.session.state?.metadata {
                 super.playerListener?.metadataChanged(metadata)
             }
             if let ybridListener = super.playerListener as? YbridControlListener,
-                let state = self.ybridSession?.state {
+               let state = self.ybridSession?.state {
                 ybridListener.offsetToLiveChanged(state.offset)
                 ybridListener.servicesChanged(state.bouquet?.services ?? [])
                 ybridListener.swapsChanged(state.swaps ?? -1)
@@ -192,99 +167,75 @@ class YbridAudioPlayer : AudioPlayer, YbridControl {
         }
     }
     
+    func maxBitRate(to maxRate:Int32) {
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                ybridSession.maxBitRate(to: maxRate)
+                self.session.notifyChanged( SubInfo.playout )
+        }}
+    }
+    
+    
     func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.wind(by:by)
-            } else {
-                actionResult = self.session.wind(by:by)
-            }
-            changeover.inProgress(actionResult)
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
+                let actionResult = ybridSession.wind(by:by)
+                changeover.inProgress(actionResult)
+        }}
     }
     
     func windToLive( _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
-            
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.windToLive()
-            } else {
-                actionResult = self.session.windToLive()
-            }
-            changeover.inProgress(actionResult)
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
+                let actionResult = ybridSession.windToLive()
+                changeover.inProgress(actionResult)
+        }}
     }
     
     func wind(to:Date, _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.wind(to:to)
-            } else {
-                actionResult = self.session.wind(to:to)
-            }
-            changeover.inProgress(actionResult)
-
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
+                let actionResult = ybridSession.wind(to:to)
+                changeover.inProgress(actionResult)
+        }}
     }
 
     func skipForward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.skipItem(true, type)
-            } else {
-                actionResult = self.session.skipForward(type)
-            }
-            changeover.inProgress(actionResult)
-
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
+                let actionResult = ybridSession.skipForward(type)
+                changeover.inProgress(actionResult)
+        }}
     }
 
     func skipBackward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.skipItem(false, type)
-            } else {
-                actionResult = self.session.skipBackward(type)
-            }
-            changeover.inProgress(actionResult)
-
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.timeshift)
+                let actionResult = ybridSession.skipBackward(type)
+                changeover.inProgress(actionResult)
+        }}
     }
     
     public func swapItem(_ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.metadata)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.swapItem()
-            } else {
-                actionResult = self.session.swapItem()
-            }
-            changeover.inProgress(actionResult)
-
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.metadata)
+                let actionResult = ybridSession.swapItem()
+                changeover.inProgress(actionResult)
+        }}
     }
     public func swapService(to id:String, _ audioComplete: AudioCompleteCallback?) {
-        playerQueue.async {
-            let changeover = self.newChangeOver(audioComplete, SubInfo.bouquet)
-            let actionResult:Bool
-            if let ybrid = self.ybridSession?.v2Driver {
-                actionResult = ybrid.swapService(id:id)
-            } else {
-                actionResult = self.session.swapService(id:id)
-            }
-            changeover.inProgress(actionResult)
-        }
+        if let ybridSession = self.ybridSession {
+            playerQueue.async {
+                let changeover = self.newChangeOver(audioComplete, SubInfo.bouquet)
+                let actionResult = ybridSession.swapService(id:id)
+                changeover.inProgress(actionResult)
+        }}
     }
         
     // MARK: change over

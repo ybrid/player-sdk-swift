@@ -44,6 +44,10 @@ class AbstractSession {
         driver.disconnect()
     }
     
+    func refresh() {
+        fatalError(#function + " must be overridden")
+    }
+    
     func clearChanged(_ what: SubInfo) {
         state.clearChanged(what)
     }
@@ -66,12 +70,15 @@ class IcySession : AbstractSession {
     override func fetchMetadataSync(metadataIn: AbstractMetadata) {
         state.metadata = metadataIn
     }
+    
+    override func refresh() {
+    }
 }
 
 class YbridSession : AbstractSession {
     
-    let encoder = JSONEncoder()
-    let v2Driver:YbridV2Driver
+    private let encoder = JSONEncoder()
+    let v2Driver:YbridV2Driver // visible for unit testing
     var timeshifting:Bool = false
     
     init(endpoint: MediaEndpoint, v2 driver: YbridV2Driver) {
@@ -92,6 +99,15 @@ class YbridSession : AbstractSession {
                 v2Driver.info()
             }
         }
+    }
+    
+    override func refresh() {
+        v2Driver.info()
+    }
+    
+    
+    func maxBitRate(to bps:Int32) {
+        v2Driver.limitBitRate(maxBps: bps)
     }
     
     func wind(by:TimeInterval) -> Bool {
@@ -115,10 +131,6 @@ class YbridSession : AbstractSession {
     func swapService(id:String) -> Bool {
         return v2Driver.swapService(id: id)
     }
-    
-    
-    
-    
     
     
     // MARK: accept response objects

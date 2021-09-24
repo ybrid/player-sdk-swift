@@ -139,7 +139,7 @@ class YbridSteelinessTests: XCTestCase {
                                  ybridControl: {
                 (ybridControl) in
                 if let ybrid = ybridControl as? YbridAudioPlayer {
-                    if let base = ybrid.session.driver?.state.baseUrl {
+                    if let base = ybrid.session.state?.baseUrl {
                         print("base url is \(base)")
                         baseURLs.append(base)
                     }
@@ -178,23 +178,23 @@ class YbridSteelinessTests: XCTestCase {
                 semaphore.signal() },
              ybridControl: { (ybridControl) in
                 if let ybrid = ybridControl as? YbridAudioPlayer {
-                    if let v2 = ybrid.session.driver as? YbridV2Driver {
-                        print("base uri is \(v2.state.baseUrl)")
-                        let baseUrlOrig = v2.state.baseUrl
+                    if let ySession = ybrid.session.session as? YbridSession {
+                        print("base uri is \(ySession.state.baseUrl)")
+                        let baseUrlOrig = ySession.state.baseUrl
                         
                         // forcing to reconnect
                         do {
-                            try v2.reconnect()
+                            try ySession.v2Driver.reconnect()
                         } catch {
                             Logger.session.error(error.localizedDescription)
                             XCTFail("should work, but \(error.localizedDescription)")
                         }
-                        print("base uri is \(v2.state.baseUrl)")
-                        let baseUrlReconnected = v2.state.baseUrl
+                        print("base uri is \(ySession.state.baseUrl)")
+                        let baseUrlReconnected = ySession.state.baseUrl
                         XCTAssertNotEqual(baseUrlOrig, baseUrlReconnected)
                         
                         ybrid.play()
-                        print("base uri is \(v2.state.baseUrl)")
+                        print("base uri is \(ySession.state.baseUrl)")
                     }
                 }
                 sleep(4)
@@ -220,24 +220,24 @@ class YbridSteelinessTests: XCTestCase {
                 return },
              ybridControl: { (ybridControl) in
                 if let ybrid = ybridControl as? YbridAudioPlayer {
-                    if let v2 = ybrid.session.driver as? YbridV2Driver {
-                        print("base uri is \(v2.state.baseUrl)")
-                        let baseUrlOrig = v2.state.baseUrl
+                    if let ySession = ybrid.session.session as? YbridSession {
+                        print("base uri is \(ySession.state.baseUrl)")
+                        let baseUrlOrig = ySession.state.baseUrl
                         
                         // forcing to reconnect
                         do {
-                            try v2.reconnect()
+                            try ySession.v2Driver.reconnect()
                         } catch {
                             Logger.session.error(error.localizedDescription)
                             XCTFail("should work, but \(error.localizedDescription)")
                         }
-                        print("base uri is \(v2.state.baseUrl)")
-                        let baseUrlReconnected = v2.state.baseUrl
+                        print("base uri is \(ySession.state.baseUrl)")
+                        let baseUrlReconnected = ySession.state.baseUrl
                         XCTAssertEqual(baseUrlOrig, baseUrlReconnected)
  
                     
                         ybrid.play()
-                        print("base uri is \(v2.state.baseUrl)")
+                        print("base uri is \(ySession.state.baseUrl)")
                     }
                 }
                 sleep(4)

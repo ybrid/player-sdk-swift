@@ -74,8 +74,8 @@ class MediaControlFactory {
     }
     
     
-    
-    private func getVersion(_ uri:String) throws -> MediaProtocol {
+    // visible for unit tests
+    func getVersion(_ uri:String) throws -> MediaProtocol {
         
         guard let url = URL(string: uri) else {
             throw SessionError(ErrorKind.invalidUri, uri)

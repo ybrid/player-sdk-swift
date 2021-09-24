@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		170AFF2926FDC8A800444FCD /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
 		170CECC4268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC5268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC7268CAC2900E09F99 /* YbridSwapServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */; };
@@ -1163,6 +1164,7 @@
 				177727362696E16000D0A67B /* YbridV1ResponseTests.swift in Sources */,
 				17E9AB8F265547F9001ED9C8 /* YbridV2ResponseTests.swift in Sources */,
 				17E3391B26F247FE0026711D /* AbortBufferingTests.swift in Sources */,
+				170AFF2926FDC8A800444FCD /* YbridSession.swift in Sources */,
 				17539E712626E18F000FE902 /* MediaProtocolTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* SystemDecoder.swift in Sources */,

@@ -41,7 +41,6 @@ class YbridControlBasicTests: XCTestCase {
         Logger.testing.info("-- consumed metadata \(listener.metadatas.count)")
     }
     
-    
     /*
      The listener is notified of ybrid states in the beginning of the session.
      */
