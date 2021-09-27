@@ -3,7 +3,7 @@
 
 import PackageDescription
 
-let version = "0.13.1"
+let version = "0.13.2"
 let package = Package(
     name: "YbridPlayerSDK",
     platforms: [
