@@ -83,7 +83,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
             return nil
         }
 
-        switch session.session?.driver.mediaProtocol {
+        switch session.mediaProtocol {
         case .plain, .icy:
             return AudioPlayer(session: session)
         case .ybridV2:

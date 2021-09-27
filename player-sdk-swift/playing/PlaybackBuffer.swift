@@ -55,6 +55,13 @@ class PlaybackBuffer {
         }
     }
 
+    var hasBuffer:Bool { get {
+        if let size = size, size > 0.0 {
+            return true
+        }
+        return false
+    }}
+    
     var playingSince: TimeInterval? {
         return scheduling.audioSince
     }
@@ -122,7 +129,7 @@ class PlaybackBuffer {
         let chunk = Chunk(pcm: empty, duration: 0, cueAudioComplete: cueAudioComplete)
         cachedChunks.put(chunk: chunk)
         
-        if Logger.verbose { Logger.playing.debug("cached complete cue point --> \(String(describing: cueAudioComplete))") }
+        Logger.playing.debug("cached complete cue point --> \(String(describing: cueAudioComplete))")
     }
     
     func pause() {

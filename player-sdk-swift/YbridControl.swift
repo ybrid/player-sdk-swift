@@ -115,12 +115,15 @@ public extension AudioPlayer {
         let session = MediaSession(on: endpoint, playerListener: listener)
         try session.connect()
         controllerQueue.async {
-            if session.session is YbridSession {
-                let player = YbridAudioPlayer(session:session) //, ybridSession: ybrid)
+            switch session.mediaProtocol {
+            case .ybridV2:
+                let player = YbridAudioPlayer(session: session)
                 ybridControl?(player)
-            } else {
-                let player = AudioPlayer(session: session) // abstract: abstractSession)
+            case .plain, .icy:
+                let player = AudioPlayer(session: session)
                 playbackControl?(player)
+            default:
+                return
             }
         }
     }

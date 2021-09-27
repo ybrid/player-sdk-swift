@@ -77,19 +77,10 @@ public class MediaSession {
         session?.refresh()
     }
     
-    var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
-        Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
-        if let ybrid = session as? YbridSession {
-          if .timeshift == changingOver?.subInfo {
-              ybrid.timeshifting = true
-          } else {
-              ybrid.timeshifting = false
-          }
-        }
-    }}
+    // MARK: metadata
     
-    func notifyMetadata(metadataIn: AbstractMetadata) {
-        session?.fetchMetadataSync(metadataIn: metadataIn)
+    func takeMetadata(metadata: AbstractMetadata) {
+        session?.takeMetadata(metadataIn: metadata)
     }
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
@@ -106,6 +97,45 @@ public class MediaSession {
         return uuid
     }
 
+    // MARK: change over
+    
+    var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
+        Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
+        if let ybrid = session as? YbridSession {
+          if .timeshift == changingOver?.subInfo {
+              ybrid.timeshifting = true
+          } else {
+              ybrid.timeshifting = false
+          }
+        }
+    }}
+    
+    func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+        
+        guard let changeOver = changingOver else {
+            return nil
+        }
+        
+        let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
+        Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
+        guard canTrigger else {
+            return nil
+        }
+        
+        guard let state = state,
+           let completeCallback = changeOver.matches(to: state) else {
+               // no change over in progress or no media state change that matches
+               return nil
+        }
+        
+        // change over is completed
+        self.changingOver = nil
+        return completeCallback
+     }
+    
+    
+    // MARK: notify audio player listener
+    
     func notifyMetadata(uuid:UUID) {
         if let metadata = metadataDict.pop(id:uuid) {
             DispatchQueue.global().async {
@@ -173,7 +203,6 @@ public class MediaSession {
                 self.session?.clearChanged(SubInfo.bouquet) }
         }
     }
-    
     
     func notifyError(_ severity:ErrorSeverity, _ error: SessionError) {
         DispatchQueue.global().async {

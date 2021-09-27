@@ -208,7 +208,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
 
         self.decode(data: audioData)
     }
-
     
     func metadataReady(_ metadata: AbstractMetadata) {
         guard !self.stopping else {
@@ -225,31 +224,35 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
-        session.notifyMetadata(metadataIn: metadata)
+        session.takeMetadata(metadata: metadata)
+        let hasBuffer = buffer?.hasBuffer ?? false
         
-        if let bufferSize = buffer?.size, bufferSize > 0.0 {
-          
-            if let completeCallback = triggersAudioComplete(metadata) {
+        /// must be called before propagating state changes
+        if let completeCallback = session.triggeredAudioComplete(metadata) {
+            if hasBuffer {
+                /// delay callback until corresponding audio is scheduled
                 buffer?.put(completeCallback)
-                self.session.changingOver = nil
+            } else {
+                /// immediately call callback
+                completeCallback(true)
             }
+        }
+        
+        /// propagating changed states, includes clearing changed status
+        if hasBuffer {
+            /// delay metadata notification until corresponding audio is scheduled
             if let uuid = session.maintainMetadata() {
                 buffer?.put(cuePoint: uuid)
             }
-            
-         } else {
-            
-            if let completeCallback = triggersAudioComplete(metadata) {
-                    completeCallback(true)
-                self.session.changingOver = nil
-            }
+        } else {
+            /// do not delay notifaction
             session.notifyChanged(SubInfo.metadata)
         }
-            
-        /// keeping other values up to date
+        /// do not delay notifaction on other states changes
         session.notifyChanged(SubInfo.playout)
         session.notifyChanged(SubInfo.timeshift)
         session.notifyChanged(SubInfo.bouquet)
+
     }
     
     private func triggersAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {

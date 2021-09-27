@@ -70,15 +70,7 @@ class YbridV2Driver : MediaDriver {
             Logger.session.error(error.localizedDescription)
         }
     }
-    
-    func metadata() {
-        guard super.connected else {
-            Logger.session.error("no connected ybrid session")
-            return
-        }
-        Logger.session.debug("getting metadata from ybrid session")
-        
-    }
+
     
     func info() {
         guard super.connected else {
