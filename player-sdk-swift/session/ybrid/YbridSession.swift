@@ -55,7 +55,7 @@ class AbstractSession {
         return state.hasChanged(what)
     }
     
-    func takeMetadata(metadataIn: AbstractMetadata) {
+    func setMetadata(metadataIn: AbstractMetadata) {
         fatalError(#function + " must be overridden")
     }
 }
@@ -67,7 +67,7 @@ class IcySession : AbstractSession {
         super.init(state: state, driver: driver)
     }
     
-    override func takeMetadata(metadataIn: AbstractMetadata) {
+    override func setMetadata(metadataIn: AbstractMetadata) {
         state.metadata = metadataIn
     }
     
@@ -89,7 +89,7 @@ class YbridSession : AbstractSession {
         driver.ybridSession = self
     }
     
-    override func takeMetadata(metadataIn: AbstractMetadata) {
+    override func setMetadata(metadataIn: AbstractMetadata) {
         fetchMetadataSync(metadataIn: metadataIn)
     }
     

@@ -79,8 +79,8 @@ public class MediaSession {
     
     // MARK: metadata
     
-    func takeMetadata(metadata: AbstractMetadata) {
-        session?.takeMetadata(metadataIn: metadata)
+    func setMetadata(metadata: AbstractMetadata) {
+        session?.setMetadata(metadataIn: metadata)
     }
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(

@@ -224,31 +224,26 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             metadata.setGenre(genre)
         }
         
-        session.takeMetadata(metadata: metadata)
-        let hasBuffer = buffer?.hasBuffer ?? false
         
-        /// must be called before propagating state changes
-        if let completeCallback = session.triggeredAudioComplete(metadata) {
-            if hasBuffer {
-                /// delay callback until corresponding audio is scheduled
-                buffer?.put(completeCallback)
-            } else {
-                /// immediately call callback
-                completeCallback(true)
-            }
-        }
+        session.setMetadata(metadata: metadata)
+        
+        let completeCallback = session.triggeredAudioComplete(metadata)
         
         /// propagating changed states, includes clearing changed status
-        if hasBuffer {
+        if buffer?.noBuffer ?? true {
+            session.notifyChanged(SubInfo.metadata)
+            completeCallback?(true)
+        } else {
             /// delay metadata notification until corresponding audio is scheduled
             if let uuid = session.maintainMetadata() {
                 buffer?.put(cuePoint: uuid)
             }
-        } else {
-            /// do not delay notifaction
-            session.notifyChanged(SubInfo.metadata)
+            if let complete = completeCallback {
+                buffer?.put(complete)
+            }
         }
-        /// do not delay notifaction on other states changes
+        
+        /// do not delay notifaction of other states changes
         session.notifyChanged(SubInfo.playout)
         session.notifyChanged(SubInfo.timeshift)
         session.notifyChanged(SubInfo.bouquet)

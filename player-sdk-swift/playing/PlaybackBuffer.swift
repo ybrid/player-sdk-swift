@@ -62,6 +62,10 @@ class PlaybackBuffer {
         return false
     }}
     
+    var noBuffer:Bool { get {
+        return state == .empty
+    }}
+    
     var playingSince: TimeInterval? {
         return scheduling.audioSince
     }
