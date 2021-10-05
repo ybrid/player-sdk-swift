@@ -28,7 +28,9 @@ import YbridPlayerSDK
 
 class YbridSwapItemTests: XCTestCase {
 
-    static let maxAudioComplete:TimeInterval = 4.0
+    let maxAudioChanged:TimeInterval = 1.5
+    let maxBuffer:TimeInterval = 2.0
+    
     var listener = TestYbridPlayerListener()
     var testControl:TestYbridControl?
     let poller = Poller()
@@ -36,6 +38,7 @@ class YbridSwapItemTests: XCTestCase {
         testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
+        Logger.testing.debug("metadata was \(listener.metadatas.map{ $0.displayTitle })")
         listener.reset()
     }
     
@@ -76,7 +79,8 @@ class YbridSwapItemTests: XCTestCase {
             
             var titleSwapped:String?
             ybridControl.swapItem()
-            _ = poller.wait(max: 10) {
+            let maxAudioComplete = Int(maxAudioChanged + maxBuffer)
+            _ = poller.wait(max: maxAudioComplete) {
                 guard let swapped = test.listener.metadatas.last?.displayTitle else {
                     return false
                 }
@@ -84,17 +88,16 @@ class YbridSwapItemTests: XCTestCase {
                 Logger.testing.info("title swapped =\(titleSwapped!)")
                 return titleMain != titleSwapped!
             }
-            sleep(2)
+            sleep(3)
             
             ybridControl.swapItem()
-            _ = poller.wait(max: 10) {
+            _ = poller.wait(max: maxAudioComplete) {
                 guard let titleSwapped2 = test.listener.metadatas.last?.displayTitle else {
                     return false
                 }
                 Logger.testing.info("title swapped =\(titleSwapped2)")
                 return titleSwapped2 != titleSwapped
             }
-            sleep(2)
         }
         
         let titles:[String] =
@@ -120,7 +123,8 @@ class YbridSwapItemTests: XCTestCase {
             ybridControl.swapItem { (success) in
                 carriedOut = success
             }
-            _ = poller.wait(max: 10) {
+            let maxAudioComplete = Int(maxAudioChanged + maxBuffer)
+            _ = poller.wait(max: maxAudioComplete) {
                 carriedOut == true
             }
             XCTAssertTrue(carriedOut, "swap was not carried out")
@@ -139,34 +143,43 @@ class YbridSwapItemTests: XCTestCase {
     // MARK: using audio complete
     
     func test11_SwapItem_complete() throws {
+        var buffer = 0.0
         let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
         testControl.playing{ (_) in
-            testControl.swapItemSynced(maxWait: 8.0)
+            usleep(200_000)
+            buffer += self.listener.bufferDuration ?? 0.0
+            Logger.testing.debug("max wait \((buffer + self.maxAudioChanged).S)")
+            
+            testControl.swapItemSynced(maxWait: buffer + self.maxAudioChanged)
         }
         testControl.checkErrors(expected: 0)
-        .checkAllActions(confirm: 1, withinS: YbridSwapItemTests.maxAudioComplete)
+        .checkAllActions(confirm: 1, withinS: buffer + maxAudioChanged)
     }
     
     func test12_SwapItem_3Times() throws {
         let testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
+        var maxAudioComplete = maxAudioChanged
         testControl.playing{ (_) in
-            testControl.swapItemSynced(maxWait: 8.0)
-            testControl.swapItemSynced(maxWait: 8.0)
-            testControl.swapItemSynced(maxWait: 8.0)
+            usleep(200_000)
+            maxAudioComplete += self.listener.bufferDuration ?? 0.0
+            Logger.testing.debug("max wait \(maxAudioComplete.S)")
+            testControl.swapItemSynced(maxWait: maxAudioComplete)
+            testControl.swapItemSynced(maxWait: maxAudioComplete)
+            testControl.swapItemSynced(maxWait: maxAudioComplete)
         }
         testControl.checkErrors(expected: 0)
-            .checkAllActions(confirm: 3, withinS: YbridSwapItemTests.maxAudioComplete)
+            .checkAllActions(confirm: 3, withinS: maxAudioComplete)
     }
     
     func test13_SwapItemFromAd_doesntSwap() throws {
         let testControl = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
         
         testControl.playing{ (ybrid) in
-            testControl.swapItemSynced(maxWait: 8.0)
+            testControl.swapItemSynced(maxWait: 0.1)
         }
         
         testControl.checkErrors(expected: 1)
-            .checkAllActions(confirm: 1, withinS: 1.0)
+            .checkAllActions(confirm: 1, withinS: 0.1)
     }
   
     
@@ -182,4 +195,3 @@ class YbridSwapItemTests: XCTestCase {
     }
     
 }
-

@@ -43,10 +43,19 @@ extension TimeInterval {
 
 class TestAudioPlayerListener : AbstractAudioPlayerListener {
 
+    var bufferDuration:TimeInterval?
+    var bufferS:Int { get {
+        guard let duration = bufferDuration else {
+            return 0
+        }
+        return Int(duration) + 1
+    }}
+    
     func reset() {
         queue.async {
             self.metadatas.removeAll()
             self.errors.removeAll()
+            self.bufferDuration = 0.0
         }
     }
     
@@ -81,6 +90,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     override func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let bufferLength = currentSeconds {
             Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
+            self.bufferDuration = bufferLength
         }
     }
 }
@@ -184,7 +194,6 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     var services:[[Service]] = []
     var swaps:[Int] = []
     var bitrates:[(current:Int32?,max:Int32?)] = []
-    
     
     // getting the latest recieved values for ...
     

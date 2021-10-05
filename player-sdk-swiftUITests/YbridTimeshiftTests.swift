@@ -28,9 +28,11 @@ import YbridPlayerSDK
 
 class YbridTimeshiftTests: XCTestCase {
 
-    let maxWindComplete = 4.0
-    let maxWindResponseS = 2
-    var maxWindCompleteS: UInt32 { get { return UInt32(maxWindComplete)+1 }}
+    let maxWindChanged = 2.0
+    let maxWindChangedS = 2
+    let maxControlChangedS = 2
+
+    let icyMaxInterval:TimeInterval = 15.0
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
 
     let ybridPlayerListener = TestYbridPlayerListener()
@@ -71,14 +73,20 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test03_WindBackward120_WindForward60() throws {
         testControl!.playing{ [self] (ybrid) in
+            _ = wait(max: 2) { ybridPlayerListener.bufferS != 0 } /// ensure the buffer is filled
+            let bufferS = ybridPlayerListener.bufferS
+            let maxAudioComplete: Int = bufferS + maxWindChangedS
+            Logger.testing.info("buffer duration <= \(bufferS) s, max audio complete \(maxAudioComplete) s")
             
             ybrid.wind(by: -120.0)
-            wait(ybridPlayerListener, shifted: -120.0, maxSeconds: maxWindResponseS)
-            sleep(maxWindCompleteS)
+            /// the first notification of expected offset occurs early, with the response of change request, it may be not precise
+            wait(ybridPlayerListener, shifted: -120.0, maxSeconds: maxControlChangedS)
+            sleep(UInt32(maxAudioComplete))
             
             ybrid.wind(by: 60.0)
-            wait(ybridPlayerListener, shifted: -60.0, maxSeconds: maxWindResponseS)
-            sleep(maxWindCompleteS)
+            /// the first notification of expected offset occurs early, with the response of change request, it may be not precise
+            wait(ybridPlayerListener, shifted: -60.0, maxSeconds: maxControlChangedS)
+            sleep(UInt32(maxAudioComplete))
         }
         
         XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 2, "expected to be at least the initial and one more change of offset")
@@ -94,7 +102,7 @@ class YbridTimeshiftTests: XCTestCase {
         testAdDemo.playing{ [self] (ybrid) in
             
             ybrid.wind(by: -120.0)
-            sleep(maxWindCompleteS)
+            sleep(UInt32(maxControlChangedS))
         }
         
         XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 1, "expected to be only the initial change of offset")
@@ -112,17 +120,20 @@ class YbridTimeshiftTests: XCTestCase {
 
     func test05_WindToLive() throws {
         testControl!.playing{ [self] (ybrid) in
-            
+            usleep(200_000)
+            let bufferS = ybridPlayerListener.bufferS
+            let maxAudioComplete: Int = bufferS + maxWindChangedS
+            Logger.testing.info("buffer duration \(bufferS) s, max audio complete \(maxAudioComplete) s")
+
             ybrid.wind(by:-20.0)
-            wait(ybridPlayerListener, shifted: -20.0, maxSeconds: maxWindResponseS)
-            sleep(maxWindCompleteS)
+            wait(ybridPlayerListener, shifted: -20.0, maxSeconds: maxControlChangedS)
+            sleep(UInt32(maxAudioComplete))
             
             ybrid.windToLive()
-            wait(ybridPlayerListener, shifted: 0.0, maxSeconds: maxWindResponseS)
-            sleep(maxWindCompleteS)
+            wait(ybridPlayerListener, shifted: 0.0, maxSeconds: maxControlChangedS)
+            sleep(UInt32(maxAudioComplete))
         }
 
-        
         XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 3, "expected to be at least the initial and two more changes of offset")
         guard let lastOffset = ybridPlayerListener.offsets.last else {
             XCTFail(); return
@@ -133,21 +144,33 @@ class YbridTimeshiftTests: XCTestCase {
     
     func test06_WindToDate_BeforeFullHourAdvertisement__failsInTheNight() throws {
         testControl!.playing{ [self] (ybrid) in
+            usleep(200_000)
+            let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+            let maxAudioComplete = buffer + maxWindChanged
+            Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
             
             let date = self.lastFullHour(secondsBefore:15)
             ybrid.wind(to:date)
-            waitUntil(ybrid, in: [ItemType.ADVERTISEMENT], maxSeconds: maxWindComplete)
+            
+            waitUntil(ybrid, in: [ItemType.ADVERTISEMENT], maxSeconds: maxAudioComplete)
         }
     }
     
+    // fails during news
     func test07_SkipBackwardNews_SkipForwardMusic_ok() throws {
         testControl!.playing{ [self] (ybrid) in
+            usleep(200_000)
+            let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+            let maxAudioComplete = buffer + maxWindChanged
+            Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
             
             ybrid.skipBackward(ItemType.NEWS)
-            waitUntil(ybrid, in:[ItemType.NEWS], maxSeconds: maxWindComplete)
+            waitUntil(ybrid, in:[ItemType.NEWS], maxSeconds: maxAudioComplete)
 
             ybrid.skipForward(ItemType.MUSIC)
-            waitUntil(ybrid, in:[ItemType.MUSIC], maxSeconds: maxWindComplete)
+            waitUntil(ybrid, in:[ItemType.MUSIC], maxSeconds: maxAudioComplete)
+            
+            sleep(UInt32(maxAudioComplete))
         }
     }
     
@@ -209,89 +232,114 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
+        var maxWait:maxValues = (0.0, 0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
+            
             test.windSynced(by:-300)
             test.windSynced(to:nil)
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 2, withinS: maxWindComplete)
+            .checkAllActions(confirm: 2, withinS: maxWait.complete)
     }
     
-    func test12_WindToWindForward__failsOften() throws {
+    typealias maxValues = (buffer:TimeInterval, complete:TimeInterval)
+    private func durations() -> maxValues {
+
+        _ = wait(max: 3) { ybridPlayerListener.bufferDuration != nil }
+        let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+        let maxAudioComplete = buffer + maxWindChanged
+        Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
+        return (buffer, maxAudioComplete)
+    }
+    
+    func test12_WindToWindForward__fails() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
-
+        
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
+  
             let date = self.lastFullHour(secondsBefore:-4)
             test.windSynced(to:date)
-            test.windSynced(by:30, maxWait: 15.0)
+            test.windSynced(by:30, maxWait: maxWait.complete)
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 2, withinS: maxWindComplete)
+            .checkAllActions(confirm: 2, withinS: maxWait.complete)
     }
     
+    // fails during news
     func test13_SkipBackNewsSkipMusic_ok() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
 
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
             test.skipSynced(-1, to:ItemType.NEWS)
             test.skipSynced(+1, to:ItemType.MUSIC)
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 2, withinS: maxWindComplete)
+            .checkAllActions(confirm: 2, withinS: maxWait.complete)
     }
     
-    func test14_SkipBackItem__failsSometimes() throws {
+    func test14_SkipBackItem__fails() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
 
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
-            test.skipSynced(-1, to:nil, maxWait: 15.0)
+            maxWait = self.durations()
+            test.skipSynced(-1, to:nil, maxWait: maxWait.complete)
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 1, withinS: maxWindComplete)
+            .checkAllActions(confirm: 1, withinS: maxWait.complete)
     }
     
     func test15_windLiveWhenLive__fails() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
-            test.windSynced(to:nil, maxWait: 15.0)
+            maxWait = self.durations()
+            test.windSynced(to:nil, maxWait: maxWait.complete)
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 1, withinS: maxWindComplete)
+            .checkAllActions(confirm: 1, withinS: maxWait.complete)
     }
     
-    func test16_SkipBackwardItem_LastItemAgain__failsOften() throws {
+    func test16_SkipBackwardItem_LastItemAgain__fails() throws {
         guard let test = testControl else {
             XCTFail("cannot use ybrid test control."); return
         }
         
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ [self] (ybrid) in
+            maxWait = durations()
             
             let typeBegin = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBegin)
             Logger.testing.notice("-- playing \(typeBegin ?? ItemType.UNKNOWN)")
             
             
-            test.skipSynced(-1, to: nil, maxWait: 15.0)
+            test.skipSynced(-1, to: nil, maxWait: icyMaxInterval)
             
             let typeBack1 = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBack1)
             Logger.testing.notice("-- playing \(typeBack1 ?? ItemType.UNKNOWN)")
   
             
-            test.skipSynced( -1, to: nil, maxWait: 15.0)
+            test.skipSynced( -1, to: nil, maxWait: icyMaxInterval)
             
             let typeBack2 = test.listener.metadatas.last?.current?.type
             XCTAssertNotNil(typeBack2)
@@ -301,7 +349,7 @@ class YbridTimeshiftTests: XCTestCase {
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 2, withinS: maxWindComplete)
+            .checkAllActions(confirm: 2, withinS: maxWait.complete)
     }
     
     func test21_windBack10Times() throws {
@@ -309,7 +357,10 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
+            
             test.windSynced(by:-201)
             test.windSynced(by:-202)
             test.windSynced(by:-203)
@@ -323,7 +374,7 @@ class YbridTimeshiftTests: XCTestCase {
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 10, withinS: maxWindComplete)
+            .checkAllActions(confirm: 10, withinS: maxWait.complete)
     }
 
     func test22_windForward10Times() throws {
@@ -331,7 +382,10 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
+            
             test.windSynced(by:-3600)
             test.windSynced(by:101)
             test.windSynced(by:102)
@@ -346,7 +400,7 @@ class YbridTimeshiftTests: XCTestCase {
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 11, withinS: maxWindComplete)
+            .checkAllActions(confirm: 11, withinS: maxWait.complete)
 
     }
     
@@ -355,7 +409,10 @@ class YbridTimeshiftTests: XCTestCase {
             XCTFail("cannot use ybrid test control."); return
         }
         
+        var maxWait:maxValues = (0.0,0.0)
         test.playing{ (ybrid) in
+            maxWait = self.durations()
+            
             test.windSynced(by:-3600)
             test.skipSynced(-1, to:nil)
             test.skipSynced(-1, to:nil)
@@ -370,7 +427,7 @@ class YbridTimeshiftTests: XCTestCase {
         }
         
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 11, withinS: maxWindComplete)
+            .checkAllActions(confirm: 11, withinS: maxWait.complete)
     }
 
 
@@ -409,4 +466,3 @@ fileprivate func timeshiftComplete(_ success:Bool,_ trace:Trace) {
    Logger.testing.notice( "***** audio complete ***** did \(success ? "":"not ")\(trace.name)")
    sleep(3)
 }
-
