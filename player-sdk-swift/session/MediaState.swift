@@ -31,7 +31,13 @@ class MediaState  {
     var baseUrl:URL
     var playbackUri:String
     var token:String?
-
+    
+    var valid:Bool = false { didSet {
+        if oldValue != valid {
+            Logger.shared.debug("connection set \(valid ? "valid" : "not valid").")
+        }
+    }}
+    
     var startDate:Date? { didSet {
         if let start = startDate, startDate != oldValue {
             Logger.session.debug("start date is \(Formatter.iso8601withMillis.string(from: start))")
@@ -59,28 +65,23 @@ class MediaState  {
         }
     }}
     
-    var maxBitRate:Int32? {
-        didSet {
-            if let bitrate = maxBitRate, bitrate != oldValue {
-                setChanged(SubInfo.playout)
-            }
+    var maxBitRate:Int32? { didSet {
+        if let bitrate = maxBitRate, bitrate != oldValue {
+            setChanged(SubInfo.playout)
         }
-    }
+    }}
     
-    var currentBitRate:Int32? {
-        didSet {
-            if let bitrate = currentBitRate, bitrate != oldValue {
-                setChanged(SubInfo.playout)
-            }
+    var currentBitRate:Int32? { didSet {
+        if let bitrate = currentBitRate, bitrate != oldValue {
+            setChanged(SubInfo.playout)
         }
-    }
+    }}
     
     var offset:TimeInterval? { didSet {
         if let _ = offset {
             setChanged(SubInfo.timeshift)
         }
     }}
-
     
     private let changed = ThreadsafeSet<SubInfo>(MediaState.stateQueue)
     static let stateQueue = DispatchQueue(label: "io.ybrid.session.state.changes")
@@ -90,8 +91,7 @@ class MediaState  {
         self.playbackUri = endpoint.uri
         self.baseUrl = endpointUri
     }
-
- 
+    
     func clearChanged(_ what:SubInfo) {
         changed.remove(what)
     }
@@ -99,10 +99,6 @@ class MediaState  {
         changed.insert(what)
     }
     func hasChanged(_ what: SubInfo) -> Bool {
-        return changed.contains(what);
+        return changed.contains(what)
     }
-    
-
- 
- 
 }

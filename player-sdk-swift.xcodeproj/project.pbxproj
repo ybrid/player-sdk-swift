@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		170AFF2926FDC8A800444FCD /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
 		170CECC4268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC5268CA51300E09F99 /* YbridSwapItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */; };
 		170CECC7268CAC2900E09F99 /* YbridSwapServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */; };
@@ -185,6 +184,15 @@
 		17D96D4626ADEEC800D25D93 /* TestYbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */; };
 		17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */; };
 		17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
+		17DE7558270C3B8B00C21639 /* ChangeOver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE7557270C3B8B00C21639 /* ChangeOver.swift */; };
+		17DE7559270C3B8B00C21639 /* ChangeOver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE7557270C3B8B00C21639 /* ChangeOver.swift */; };
+		17DE755A270C3B8B00C21639 /* ChangeOver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE7557270C3B8B00C21639 /* ChangeOver.swift */; };
+		17DE755C270C3DCE00C21639 /* YbridState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755B270C3DCE00C21639 /* YbridState.swift */; };
+		17DE755D270C3DCE00C21639 /* YbridState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755B270C3DCE00C21639 /* YbridState.swift */; };
+		17DE755E270C3DCE00C21639 /* YbridState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755B270C3DCE00C21639 /* YbridState.swift */; };
+		17DE7560270C40A000C21639 /* IcyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755F270C40A000C21639 /* IcyState.swift */; };
+		17DE7561270C40A000C21639 /* IcyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755F270C40A000C21639 /* IcyState.swift */; };
+		17DE7562270C40A000C21639 /* IcyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DE755F270C40A000C21639 /* IcyState.swift */; };
 		17E3391926F226D20026711D /* PlayerPackaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1758476826E8ACED002C729D /* PlayerPackaging.swift */; };
 		17E3391B26F247FE0026711D /* AbortBufferingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E3391A26F247FE0026711D /* AbortBufferingTests.swift */; };
 		17E9AB842653A808001ED9C8 /* YbridControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E9AB832653A808001ED9C8 /* YbridControl.swift */; };
@@ -196,8 +204,6 @@
 		17E9AB9F26554B6C001ED9C8 /* ybridSessionCreated.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */; };
 		17E9ABA026554B6C001ED9C8 /* ybridNewsResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */; };
 		17F3C23D267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */; };
-		17F4FB7926FCB2F800EF5019 /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
-		17F4FB7A26FCB2F800EF5019 /* YbridSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F4FB7826FCB2F800EF5019 /* YbridSession.swift */; };
 		17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
 		17F6A151266F789D00F48432 /* Bouquet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F6A14E266F5B0100F48432 /* Bouquet.swift */; };
@@ -323,6 +329,9 @@
 		17D96D4426ADEEC800D25D93 /* TestYbridControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestYbridControl.swift; sourceTree = "<group>"; };
 		17DB767E25D5AD0000994379 /* UseAudioPlayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UseAudioPlayerTests.swift; sourceTree = "<group>"; };
 		17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerToggleStressTest.swift; sourceTree = "<group>"; };
+		17DE7557270C3B8B00C21639 /* ChangeOver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeOver.swift; sourceTree = "<group>"; };
+		17DE755B270C3DCE00C21639 /* YbridState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridState.swift; sourceTree = "<group>"; };
+		17DE755F270C40A000C21639 /* IcyState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IcyState.swift; sourceTree = "<group>"; };
 		17E3391A26F247FE0026711D /* AbortBufferingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbortBufferingTests.swift; sourceTree = "<group>"; };
 		17E9AB832653A808001ED9C8 /* YbridControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridControl.swift; sourceTree = "<group>"; };
 		17E9AB8C2655467D001ED9C8 /* ybridResponseNoMilliseconds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridResponseNoMilliseconds.json; sourceTree = "<group>"; };
@@ -331,7 +340,6 @@
 		17E9AB9C26554B6C001ED9C8 /* ybridSessionCreated.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridSessionCreated.json; sourceTree = "<group>"; };
 		17E9AB9D26554B6C001ED9C8 /* ybridNewsResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridNewsResponse.json; sourceTree = "<group>"; };
 		17F3C23C267D4C6B003A8CC9 /* ybridStreamUrlMetadata.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridStreamUrlMetadata.json; sourceTree = "<group>"; };
-		17F4FB7826FCB2F800EF5019 /* YbridSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridSession.swift; sourceTree = "<group>"; };
 		17F6A14E266F5B0100F48432 /* Bouquet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bouquet.swift; sourceTree = "<group>"; };
 		1D2A350D8EC0B8B759E6E9F1 /* Pods-player-sdk-swift_mac.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift_mac.release.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift_mac/Pods-player-sdk-swift_mac.release.xcconfig"; sourceTree = "<group>"; };
 		2BF2003FBF280B12452AE451 /* Pods-player-sdk-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-player-sdk-swift.debug.xcconfig"; path = "Target Support Files/Pods-player-sdk-swift/Pods-player-sdk-swift.debug.xcconfig"; sourceTree = "<group>"; };
@@ -454,22 +462,22 @@
 			path = "player-sdk-swiftTests";
 			sourceTree = "<group>";
 		};
-		17317FAC26D54A28009E1658 /* drivers */ = {
+		17317FAC26D54A28009E1658 /* icecast */ = {
 			isa = PBXGroup;
 			children = (
+				17DE755F270C40A000C21639 /* IcyState.swift */,
 				17D01BFB262F174D007B0A3C /* IcyDriver.swift */,
-				17539E512626D2C6000FE902 /* YbridV2Driver.swift */,
-				17539E9C26286F98000FE902 /* YbridJsonResponse.swift */,
 			);
-			path = drivers;
+			path = icecast;
 			sourceTree = "<group>";
 		};
 		17539E502626D108000FE902 /* session */ = {
 			isa = PBXGroup;
 			children = (
+				17DE7557270C3B8B00C21639 /* ChangeOver.swift */,
 				17F4FB7726FCB2B500EF5019 /* ybrid */,
 				17539E47262591C3000FE902 /* MediaSession.swift */,
-				17317FAC26D54A28009E1658 /* drivers */,
+				17317FAC26D54A28009E1658 /* icecast */,
 				17539E93262869E7000FE902 /* MediaControlFactory.swift */,
 				171345C3263153500054DB9D /* MediaDriver.swift */,
 				177AF70826A1E65D0095BEA5 /* MediaState.swift */,
@@ -646,7 +654,9 @@
 		17F4FB7726FCB2B500EF5019 /* ybrid */ = {
 			isa = PBXGroup;
 			children = (
-				17F4FB7826FCB2F800EF5019 /* YbridSession.swift */,
+				17DE755B270C3DCE00C21639 /* YbridState.swift */,
+				17539E512626D2C6000FE902 /* YbridV2Driver.swift */,
+				17539E9C26286F98000FE902 /* YbridJsonResponse.swift */,
 			);
 			path = ybrid;
 			sourceTree = "<group>";
@@ -1098,9 +1108,9 @@
 				17539E48262591C3000FE902 /* MediaSession.swift in Sources */,
 				17F6A14F266F5B0100F48432 /* Bouquet.swift in Sources */,
 				1799DCAD25D565DB0055C973 /* OpusData.swift in Sources */,
+				17DE7558270C3B8B00C21639 /* ChangeOver.swift in Sources */,
 				1799DCAB25D565DB0055C973 /* SystemAudioData.swift in Sources */,
 				17B54DD825F7B45800CDEBAD /* LoadingError.swift in Sources */,
-				17F4FB7926FCB2F800EF5019 /* YbridSession.swift in Sources */,
 				171345C4263153500054DB9D /* MediaDriver.swift in Sources */,
 				1799DCB125D565DB0055C973 /* OpusMapping.swift in Sources */,
 				1799DCAE25D565DB0055C973 /* OpusDecoder.swift in Sources */,
@@ -1118,9 +1128,11 @@
 				1799DC9025D565A10055C973 /* MetadataExtractor.swift in Sources */,
 				1711D183263AB45400882D2B /* MetadataMappings.swift in Sources */,
 				17109E1125F8DF4C003DA621 /* DecodingError.swift in Sources */,
+				17DE7560270C40A000C21639 /* IcyState.swift in Sources */,
 				17539E82262720F5000FE902 /* JsonRequest.swift in Sources */,
 				17539E9D26286F98000FE902 /* YbridJsonResponse.swift in Sources */,
 				17539E94262869E7000FE902 /* MediaControlFactory.swift in Sources */,
+				17DE755C270C3DCE00C21639 /* YbridState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1154,6 +1166,7 @@
 				17539E95262869E7000FE902 /* MediaControlFactory.swift in Sources */,
 				17E9AB852653A808001ED9C8 /* YbridControl.swift in Sources */,
 				175AFB2A25FA428100005046 /* AudioPlayerError.swift in Sources */,
+				17DE755D270C3DCE00C21639 /* YbridState.swift in Sources */,
 				1799DCCB25D566AF0055C973 /* Logger.swift in Sources */,
 				1799DCC625D566AF0055C973 /* MetadataExtractor.swift in Sources */,
 				17A6C1C4268AFFD700D401AE /* YbridSpecialActionTests.swift in Sources */,
@@ -1164,7 +1177,7 @@
 				177727362696E16000D0A67B /* YbridV1ResponseTests.swift in Sources */,
 				17E9AB8F265547F9001ED9C8 /* YbridV2ResponseTests.swift in Sources */,
 				17E3391B26F247FE0026711D /* AbortBufferingTests.swift in Sources */,
-				170AFF2926FDC8A800444FCD /* YbridSession.swift in Sources */,
+				17DE7561270C40A000C21639 /* IcyState.swift in Sources */,
 				17539E712626E18F000FE902 /* MediaProtocolTests.swift in Sources */,
 				1799DD4025D580D40055C973 /* MetadataExtractorTests.swift in Sources */,
 				1799DCD425D566BB0055C973 /* SystemDecoder.swift in Sources */,
@@ -1185,6 +1198,7 @@
 				17539E49262591C3000FE902 /* MediaSession.swift in Sources */,
 				1799DCD925D566C00055C973 /* OpusDecoder.swift in Sources */,
 				17134569263015440054DB9D /* MediaSessionTests.swift in Sources */,
+				17DE7559270C3B8B00C21639 /* ChangeOver.swift in Sources */,
 				1799DD3B25D580D40055C973 /* PlayerMetricsTests.swift in Sources */,
 				17B54DD925F7B45800CDEBAD /* LoadingError.swift in Sources */,
 				17539E83262720F5000FE902 /* JsonRequest.swift in Sources */,
@@ -1257,9 +1271,9 @@
 				17539E4A262591C3000FE902 /* MediaSession.swift in Sources */,
 				17F6A150266F5B0100F48432 /* Bouquet.swift in Sources */,
 				17CBC8D325E2517F00B2F7E7 /* OpusData.swift in Sources */,
+				17DE755A270C3B8B00C21639 /* ChangeOver.swift in Sources */,
 				17CBC8D425E2517F00B2F7E7 /* SystemAudioData.swift in Sources */,
 				17B54DDA25F7B45800CDEBAD /* LoadingError.swift in Sources */,
-				17F4FB7A26FCB2F800EF5019 /* YbridSession.swift in Sources */,
 				171345C6263153500054DB9D /* MediaDriver.swift in Sources */,
 				17CBC8D525E2517F00B2F7E7 /* OpusMapping.swift in Sources */,
 				17CBC8D625E2517F00B2F7E7 /* OpusDecoder.swift in Sources */,
@@ -1277,9 +1291,11 @@
 				17CBC8DE25E2517F00B2F7E7 /* MetadataExtractor.swift in Sources */,
 				1711D185263AB45400882D2B /* MetadataMappings.swift in Sources */,
 				17109E1325F8DF4C003DA621 /* DecodingError.swift in Sources */,
+				17DE7562270C40A000C21639 /* IcyState.swift in Sources */,
 				17539E84262720F5000FE902 /* JsonRequest.swift in Sources */,
 				17539E9F26286F98000FE902 /* YbridJsonResponse.swift in Sources */,
 				17539E96262869E7000FE902 /* MediaControlFactory.swift in Sources */,
+				17DE755E270C3DCE00C21639 /* YbridState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

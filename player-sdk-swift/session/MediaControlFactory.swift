@@ -34,24 +34,7 @@ public enum MediaProtocol : String {
 
 class MediaControlFactory {
     
-//    func create(_ session:MediaSession) throws -> MediaDriver {
-//        let apiVersion:MediaProtocol
-//        if let forced = session.endpoint.forcedProtocol {
-//            apiVersion = forced
-//        } else {
-//            let uri = session.endpoint.uri
-//            apiVersion = try getVersion(uri)
-//        }
-//        let driver:MediaDriver
-//        switch apiVersion {
-//        case .plain, .icy: driver = IcyDriver(session:session)
-//        case .ybridV2: driver = YbridV2Driver(session:session)
-//        }
-//        Logger.session.notice("selected media protocol is \(apiVersion)")
-//        return driver
-//    }
-    
-    func createSession(_ session:MediaSession) throws -> AbstractSession {
+    func create(_ session:MediaSession) throws -> (MediaDriver,MediaState) {
         let apiVersion:MediaProtocol
         if let forced = session.endpoint.forcedProtocol {
             apiVersion = forced
@@ -59,20 +42,23 @@ class MediaControlFactory {
             let uri = session.endpoint.uri
             apiVersion = try getVersion(uri)
         }
-        Logger.session.notice("selected media protocol is \(apiVersion)")
-
-        let abstractSession:AbstractSession
+        let driver:MediaDriver
+        let state:MediaState
         switch apiVersion {
         case .plain, .icy:
-            abstractSession = IcySession(endpoint: session.endpoint, icy: IcyDriver())
+            let iState = IcyState(endpoint: session.endpoint)
+            let iDriver = IcyDriver(icyState: iState)
+            state = iState
+            driver = iDriver
         case .ybridV2:
-            let driver = YbridV2Driver(notifyError: session.notifyError)
-            abstractSession = YbridSession(endpoint: session.endpoint, v2: driver)
+            let yState = YbridState(endpoint: session.endpoint)
+            let yDriver = YbridV2Driver(ybridState: yState, notifyError: session.notifyError)
+            state = yState
+            driver = yDriver
         }
-        try abstractSession.connect()
-        return abstractSession
+        Logger.session.notice("selected media protocol is \(apiVersion)")
+        return (driver,state)
     }
-    
     
     // visible for unit tests
     func getVersion(_ uri:String) throws -> MediaProtocol {

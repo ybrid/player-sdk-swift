@@ -37,15 +37,29 @@ enum SubInfo : String, CaseIterable {
 class MediaDriver{
     
     let mediaProtocol:MediaProtocol
-    var valid:Bool = true //  { get }
     var connected:Bool = false { didSet {
         Logger.session.info("\(mediaProtocol) controller \(connected ? "connected" : "disconnected")")
     }}
+    
+    var timeshifting:Bool = false
     
     init(version:MediaProtocol) {
         self.mediaProtocol = version
     }
     
-    func connect() throws {}
-    func disconnect() {}
+    func connect() throws { fatalError(#function + " must be overridden") }
+    func disconnect() { fatalError(#function + " must be overridden") }
+    func refresh() { fatalError(#function + " must be overridden") }
+    
+    func setMetadata(metadata: AbstractMetadata) { fatalError(#function + " must be overridden") }
+    
+    func maxBitRate(to bps:Int32) { fatalError(#function + " must be overridden") }
+    
+    func wind(by:TimeInterval) -> Bool { fatalError(#function + " must be overridden") }
+    func windToLive() -> Bool { fatalError(#function + " must be overridden") }
+    func wind(to:Date) -> Bool { fatalError(#function + " must be overridden") }
+    func skipForward(_ type:ItemType?) -> Bool { fatalError(#function + " must be overridden") }
+    func skipBackward(_ type:ItemType?) -> Bool { fatalError(#function + " must be overridden") }
+    func swapItem() -> Bool { fatalError(#function + " must be overridden") }
+    func swapService(id:String) -> Bool { fatalError(#function + " must be overridden") }
 }

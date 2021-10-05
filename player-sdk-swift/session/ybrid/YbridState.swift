@@ -1,5 +1,5 @@
 //
-// YbridSession.swift
+// YbridState.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,130 +25,27 @@
 
 import Foundation
 
-
-class AbstractSession {
-    
-    let state: MediaState
-    let driver: MediaDriver
-    
-    init(state: MediaState, driver: MediaDriver) {
-        self.state = state
-        self.driver = driver
-    }
-    
-    func connect() throws {
-        try driver.connect()
-    }
-    
-    func disconnect() {
-        driver.disconnect()
-    }
-    
-    func refresh() {
-        fatalError(#function + " must be overridden")
-    }
-    
-    func clearChanged(_ what: SubInfo) {
-        state.clearChanged(what)
-    }
-    func hasChanged(_ what: SubInfo) -> Bool {
-        return state.hasChanged(what)
-    }
-    
-    func setMetadata(metadataIn: AbstractMetadata) {
-        fatalError(#function + " must be overridden")
-    }
-}
-
-class IcySession : AbstractSession {
-    
-    init(endpoint: MediaEndpoint, icy driver: MediaDriver) {
-        let state = MediaState(endpoint)
-        super.init(state: state, driver: driver)
-    }
-    
-    override func setMetadata(metadataIn: AbstractMetadata) {
-        state.metadata = metadataIn
-    }
-    
-    override func refresh() {
-    }
-}
-
-class YbridSession : AbstractSession {
+class YbridState : MediaState {
     
     private let encoder = JSONEncoder()
-    var v2Driver:YbridV2Driver // visible for unit testing
+
     var timeshifting:Bool = false
     
-    init(endpoint: MediaEndpoint, v2 driver: YbridV2Driver) {
-        let state = MediaState(endpoint)
-        self.v2Driver = driver
-        super.init(state: state, driver: driver)
+    init(endpoint: MediaEndpoint) {
+        super.init(endpoint)
         self.encoder.dateEncodingStrategy = .formatted(Formatter.iso8601withMillis)
-        driver.ybridSession = self
     }
-    
-    override func setMetadata(metadataIn: AbstractMetadata) {
-        fetchMetadataSync(metadataIn: metadataIn)
-    }
-    
-    
-    private func fetchMetadataSync(metadataIn: AbstractMetadata) {
-        if timeshifting {
-            v2Driver.info()
-        } else {
-            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
-                v2Driver.showMeta(streamUrl)
-            } else {
-                v2Driver.info()
-            }
-        }
-    }
-    
-    
-    override func refresh() {
-        v2Driver.info()
-    }
-    
-    
-    func maxBitRate(to bps:Int32) {
-        v2Driver.limitBitRate(maxBps: bps)
-    }
-    
-    func wind(by:TimeInterval) -> Bool {
-        return v2Driver.wind(by: by)
-    }
-    func windToLive() -> Bool {
-        return v2Driver.windToLive()
-    }
-    func wind(to:Date) -> Bool {
-        return v2Driver.wind(to:to)
-    }
-    func skipForward(_ type:ItemType?) -> Bool {
-        return v2Driver.skipItem(true, type)
-    }
-    func skipBackward(_ type:ItemType?) -> Bool {
-        return v2Driver.skipItem(false, type)
-    }
-    func swapItem() -> Bool {
-        return v2Driver.swapItem(.end2end)
-    }
-    func swapService(id:String) -> Bool {
-        return v2Driver.swapService(id: id)
-    }
-    
     
     // MARK: accept response objects
     
     func accecpt(response:YbridSessionObject) {
-        driver.valid = response.valid
-        state.startDate = response.startDate
-        state.token = response.sessionId
+        super.valid = response.valid
+        super.startDate = response.startDate
+        super.token = response.sessionId
         
         if let playout = response.playout {
-            state.playbackUri = playout.playbackURI
-            state.baseUrl = playout.baseURL
+            super.playbackUri = playout.playbackURI
+            super.baseUrl = playout.baseURL
             accept(offset: playout.offsetToLive)
             accept(currentBitRate: playout.currentBitRate)
             accept(maxBitrate: playout.maxBitRate)
@@ -188,20 +85,20 @@ class YbridSession : AbstractSession {
             }
         }
         let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = state.bouquet?.activeService
-        state.metadata = ybridMD
+        ybridMD.currentService = super.bouquet?.activeService
+        super.metadata = ybridMD
     }
     
     private func accept(newCurrentItem:YbridItem) {
         let ybridV2Metadata = YbridV2Metadata(currentItem: newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
         
         let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = state.bouquet?.activeService
-        state.metadata = ybridMD
+        ybridMD.currentService = super.bouquet?.activeService
+        super.metadata = ybridMD
     }
     
     func accept(swapped:YbridSwapInfo) {
-        state.swaps = swapped.swapsLeft
+        super.swaps = swapped.swapsLeft
     }
     
     func accept(ybridBouquet:YbridBouquet) {
@@ -211,22 +108,22 @@ class YbridSession : AbstractSession {
                 let bouquetString = String(data: bouquetData, encoding: .utf8)!
                 Logger.session.debug("current bouquet is \(bouquetString)")
             }
-            state.bouquet = try Bouquet(bouquet: ybridBouquet)
+            super.bouquet = try Bouquet(bouquet: ybridBouquet)
         } catch {
             Logger.session.error(error.localizedDescription)
         }
     }
     func accept(offset: Int) {
-        state.offset = Double(offset) / 1000
+        super.offset = Double(offset) / 1000
     }
     func accept(maxBitrate: Int32) {
         if maxBitrate != -1 {
-            state.maxBitRate = maxBitrate
+            super.maxBitRate = maxBitrate
         }
     }
     func accept(currentBitRate: Int32) {
         if currentBitRate != -1 {
-            state.currentBitRate = currentBitRate
+            super.currentBitRate = currentBitRate
         }
     }
 }

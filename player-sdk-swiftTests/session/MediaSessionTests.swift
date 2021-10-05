@@ -67,7 +67,6 @@ class MediaSessionTests: XCTestCase {
         let player = AudioPlayer(session: session)
         let playbackUri = player.session.playbackUri
         XCTAssertTrue(playbackUri.starts(with: "icyx"))
-        XCTAssertTrue(playbackUri.contains("edge"))
         
         session.notifyChanged(SubInfo.metadata)
         usleep(10_000)

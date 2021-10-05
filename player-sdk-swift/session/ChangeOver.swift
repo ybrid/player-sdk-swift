@@ -1,5 +1,5 @@
 //
-// EmptyDriver.swift
+// ChangeOver.swift
 // player-sdk-swift
 //
 // Copyright (c) 2021 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,31 +25,35 @@
 
 import Foundation
 
-
-class IcyDriver : MediaDriver {
+class ChangeOver {
     
-    init() {
-        super.init(version: .icy)
+    let subInfo:SubInfo
+    var ctrlComplete: (() -> ())?
+    var audioComplete: AudioCompleteCallback
+    
+    
+    init(_ subInfo:SubInfo, ctrlComplete: (()->())? = nil, audioComplete: @escaping AudioCompleteCallback ) {
+        self.subInfo = subInfo
+        self.ctrlComplete = ctrlComplete
+        self.audioComplete = audioComplete
     }
     
-    override func connect() throws {
-        if connected {
-            return
+    func matches(to state:MediaState) -> AudioCompleteCallback? {
+        let changed = state.hasChanged(subInfo)
+        switch subInfo {
+        case .metadata:
+            Logger.session.notice("change over \(subInfo), metadata did \(changed ? "":"not ")change")
+        case .timeshift:
+             Logger.session.notice("change over \(subInfo), offset did \(changed ? "":"not ")change")
+        case .bouquet:
+            Logger.session.notice("change over \(subInfo), active service did \(changed ? "":"not ")change")
+        default:
+            Logger.session.error("change over \(subInfo) doesn't match to media state \(state)")
         }
         
-        if !valid {
-            throw SessionError(ErrorKind.invalidSession, "session is not valid.")
+        if changed {
+            return self.audioComplete
         }
-        connected = true
+        return nil
     }
-       
-    override func disconnect() {
-        if !connected {
-            return
-        }
-        connected = false
-    }
-    
-    
-    
 }

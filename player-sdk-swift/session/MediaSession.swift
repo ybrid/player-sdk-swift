@@ -33,19 +33,17 @@ public class MediaSession {
     let factory = MediaControlFactory()
     let endpoint:MediaEndpoint
     
-    var session:AbstractSession?
-    var state:MediaState? { get {
-        return session?.state
-    }}
+    var mediaState:MediaState?
+    var driver: MediaDriver? // visible for unit tests
     
     weak var playerListener:AudioPlayerListener?
     
     public var mediaProtocol:MediaProtocol? { get {
-        return session?.driver.mediaProtocol
+        return driver?.mediaProtocol
     }}
 
     public var playbackUri:String { get {
-        return state?.playbackUri ?? endpoint.uri
+        return mediaState?.playbackUri ?? endpoint.uri
     }}
     
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
@@ -54,9 +52,11 @@ public class MediaSession {
     }
     
     func connect() throws  {
-
         do {
-            self.session = try factory.createSession(self)
+            let created = try factory.create(self)
+            self.driver = created.0
+            self.mediaState = created.1
+            try driver?.connect()
         } catch {
             if let playerError = error as? SessionError {
                 notifyError(.fatal, playerError)
@@ -70,43 +70,122 @@ public class MediaSession {
     }
     
     func close() {
-        session?.disconnect()
+        driver?.disconnect()
     }
     
     func refresh() {
-        session?.refresh()
+        driver?.refresh()
     }
     
+    // MARK: changes
+       
+       func maxBitRate(to bps:Int32) {
+           driver?.maxBitRate(to: bps)
+       }
+       func wind(by:TimeInterval) -> Bool {
+           return driver?.wind(by: by) ?? false
+       }
+       func windToLive() -> Bool {
+           return driver?.windToLive() ?? false
+       }
+       func wind(to:Date) -> Bool {
+           return driver?.wind(to:to) ?? false
+       }
+       func skipForward(_ type:ItemType?) -> Bool {
+           return driver?.skipForward(type) ?? false
+       }
+       func skipBackward(_ type:ItemType?) -> Bool {
+           return driver?.skipBackward(type) ?? false
+       }
+       func swapItem() -> Bool {
+           return driver?.swapItem() ?? false
+       }
+       func swapService(id:String) -> Bool {
+           return driver?.swapService(id: id) ?? false
+       }
+       
     // MARK: metadata
     
     func setMetadata(metadata: AbstractMetadata) {
-        session?.setMetadata(metadataIn: metadata)
-    }
+           driver?.setMetadata(metadata: metadata)
+       }
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
         DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
     )
     
     func maintainMetadata() -> UUID? {
-        guard let metadata = state?.metadata else {
+        guard let metadata = mediaState?.metadata else {
             return nil
         }
         let uuid = UUID()
         metadataDict.put(id: uuid, value: metadata)
-        session?.clearChanged(SubInfo.metadata)
+        mediaState?.clearChanged(SubInfo.metadata)
         return uuid
     }
+    
+    func notifyMetadata(uuid:UUID) {
+         if let metadata = metadataDict.pop(id:uuid) {
+             DispatchQueue.global().async {
+                 self.playerListener?.metadataChanged(metadata)
+             }
+         }
+     }
 
     // MARK: change over
     
-    var changingOver:YbridAudioPlayer.ChangeOver? { didSet {
+    func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
+                 _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
+         
+         let success = action()
+         let change = newChangeOver(subtype, userAudioComplete)
+         change.ctrlComplete?()
+         
+         if !running {
+             change.audioComplete(success)
+             return false
+         }
+         
+         if !success {
+             change.audioComplete(false)
+             return false
+         }
+
+         changingOver = change
+         return true
+     }
+
+    private func newChangeOver(_ subtype: SubInfo, _ userAudioComplete: AudioCompleteCallback?)  ->  ChangeOver {
+        
+        let audioComplete:AudioCompleteCallback = { (success) in
+            Logger.playing.debug("change over \(subtype) complete (\(success ? "with":"no") success)")
+            if let userCompleteCallback = userAudioComplete {
+                DispatchQueue.global().async {
+                    userCompleteCallback(success)
+                }
+            }
+        }
+        
+        switch subtype {
+        case .timeshift:
+            return ChangeOver(subtype,
+                              ctrlComplete: { self.notifyChanged(SubInfo.timeshift, clear: false) },
+                              audioComplete: audioComplete )
+        case .metadata:
+            return ChangeOver(subtype, audioComplete: audioComplete)
+        case .bouquet:
+            return ChangeOver(subtype, audioComplete: audioComplete)
+        default:
+            return ChangeOver(subtype, audioComplete: audioComplete)
+        }
+    }
+    
+    var changingOver:ChangeOver? { didSet {
         Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
-        if let ybrid = session as? YbridSession {
-          if .timeshift == changingOver?.subInfo {
-              ybrid.timeshifting = true
-          } else {
-              ybrid.timeshifting = false
-          }
+        if .timeshift == changingOver?.subInfo {
+            driver?.timeshifting = true
+        } else {
+            driver?.timeshifting = false
         }
     }}
     
@@ -122,7 +201,7 @@ public class MediaSession {
             return nil
         }
         
-        guard let state = state,
+        guard let state = mediaState,
            let completeCallback = changeOver.matches(to: state) else {
                // no change over in progress or no media state change that matches
                return nil
@@ -135,14 +214,6 @@ public class MediaSession {
     
     
     // MARK: notify audio player listener
-    
-    func notifyMetadata(uuid:UUID) {
-        if let metadata = metadataDict.pop(id:uuid) {
-            DispatchQueue.global().async {
-                self.playerListener?.metadataChanged(metadata)
-            }
-        }
-    }
     
     func notifyChanged(_ subInfo:SubInfo? = nil, clear:Bool = true) {
         var subInfos:[SubInfo] = SubInfo.allCases
@@ -161,48 +232,48 @@ public class MediaSession {
     }
     
     private func notifyChangedMetadata() {
-        if session?.hasChanged(SubInfo.metadata) == true,
-           let metadata = state?.metadata {
-            DispatchQueue.global().async {
-                self.playerListener?.metadataChanged(metadata)
-                self.session?.clearChanged(SubInfo.metadata)
-            }
-        }
-    }
-    
-    private func notifyChangedOffset(clear:Bool = true) {
-        if session?.hasChanged(SubInfo.timeshift) == true,
-           let ybridListener = self.playerListener as? YbridControlListener,
-           let offset = state?.offset {
-            DispatchQueue.global().async {
-                ybridListener.offsetToLiveChanged(offset)
-                if clear { self.session?.clearChanged(SubInfo.timeshift) }
-            }
-        }
-    }
-    
-    private func notifyChangedPlayout() {
-        if session?.hasChanged(SubInfo.playout) == true,
-           let ybridListener = self.playerListener as? YbridControlListener {
-            DispatchQueue.global().async {
-                if let swaps = self.state?.swaps {
-                    ybridListener.swapsChanged(swaps)
-                }
-                ybridListener.bitRateChanged(currentBitsPerSecond: self.state?.currentBitRate, maxBitsPerSecond: self.state?.maxBitRate)
-                self.session?.clearChanged(SubInfo.playout)
-            }
-        }
-    }
-    
-    private func notifyChangedServices() {
-        if session?.hasChanged(SubInfo.bouquet) == true,
-           let ybridListener = self.playerListener as? YbridControlListener,
-           let services = state?.bouquet?.services {
-            DispatchQueue.global().async {
-                ybridListener.servicesChanged(services)
-                self.session?.clearChanged(SubInfo.bouquet) }
-        }
-    }
+         if mediaState?.hasChanged(SubInfo.metadata) == true,
+            let metadata = mediaState?.metadata {
+             DispatchQueue.global().async {
+                 self.playerListener?.metadataChanged(metadata)
+                 self.mediaState?.clearChanged(SubInfo.metadata)
+             }
+         }
+     }
+     
+     private func notifyChangedOffset(clear:Bool = true) {
+         if mediaState?.hasChanged(SubInfo.timeshift) == true,
+            let ybridListener = self.playerListener as? YbridControlListener,
+            let offset = mediaState?.offset {
+             DispatchQueue.global().async {
+                 ybridListener.offsetToLiveChanged(offset)
+                 if clear { self.mediaState?.clearChanged(SubInfo.timeshift) }
+             }
+         }
+     }
+     
+     private func notifyChangedPlayout() {
+         if mediaState?.hasChanged(SubInfo.playout) == true,
+            let ybridListener = self.playerListener as? YbridControlListener {
+             DispatchQueue.global().async {
+                 if let swaps = self.mediaState?.swaps {
+                     ybridListener.swapsChanged(swaps)
+                 }
+                 ybridListener.bitRateChanged(currentBitsPerSecond: self.mediaState?.currentBitRate, maxBitsPerSecond: self.mediaState?.maxBitRate)
+                 self.mediaState?.clearChanged(SubInfo.playout)
+             }
+         }
+     }
+     
+     private func notifyChangedServices() {
+         if mediaState?.hasChanged(SubInfo.bouquet) == true,
+            let ybridListener = self.playerListener as? YbridControlListener,
+            let services = mediaState?.bouquet?.services {
+             DispatchQueue.global().async {
+                 ybridListener.servicesChanged(services)
+                 self.mediaState?.clearChanged(SubInfo.bouquet) }
+         }
+     }
     
     func notifyError(_ severity:ErrorSeverity, _ error: SessionError) {
         DispatchQueue.global().async {

@@ -40,7 +40,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var started = Date()
     var resumed = false
     var firstPCM = true
-//    var firstMetadata = true
     var stopping = false
 
     var icyFields:[String:String]? { didSet {
@@ -93,7 +92,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func reset() {
         started = Date()
         firstPCM = true
-//        firstMetadata = true
         resumed = true
         
         session.refresh()
@@ -249,27 +247,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         session.notifyChanged(SubInfo.bouquet)
 
     }
-    
-    private func triggersAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
-        
-        guard let changeOver = session.changingOver else {
-            return nil
-        }
-        
-        let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
-        Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
-        guard canTrigger else {
-            return nil
-        }
-        
-        if let state = session.state,
-           let completeCallback = changeOver.matches(to: state) {
-            return completeCallback
-        }
-        
-        // no change over in progress or no media that matches
-        return nil
-     }
     
     
     // MARK: processing steps
