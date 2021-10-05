@@ -60,10 +60,27 @@ extension JSONDecoder.DateDecodingStrategy {
 
 class JsonRequest {
     
-    static let applicationJson:String = "application/json"
     static let encodingUtf8:String = "utf-8"
-    static let onlyPostfix = ", */*; q=0"
+    static let notAcceptable = "q=0"
+    static let charsetString = "\(encodingUtf8), *; \(JsonRequest.notAcceptable)"
+    /// Accept-Charset: utf-8, *; q=0
+ 
+    static let applicationYbridJson:String = "application/vnd.nacamar.ybrid+json"
+    static let applicationYbridV2:String = "version=v2"
+    static let mostAcceptable = "q=1"
+    static let applicationJson:String = "application/json"
+    static let leastAcceptable = "q=0.001"
     
+    static let acceptString = "\(applicationYbridJson); \(applicationYbridV2); \(mostAcceptable), "
+                            + "\(applicationJson); \(leastAcceptable), "
+                            + "*/*; \(JsonRequest.notAcceptable)"
+    /// Accept: application/vnd.nacamar.ybrid+json; version=v2; q=1, application/json; q=0.001, */*; q=0
+    
+    static let acceptedContentTypes = ["\(applicationYbridJson); \(applicationYbridV2)",
+                                       applicationYbridJson,
+                                       applicationJson]
+    /// ["application/vnd.nacamar.ybrid+json; version=v2", "application/vnd.nacamar.ybrid+json", "application/json"]
+
     let url:URL
     let configuration = URLSessionConfiguration.default
     
@@ -74,6 +91,11 @@ class JsonRequest {
         configuration.timeoutIntervalForResource = 3
         configuration.timeoutIntervalForRequest = 3
         self.decoder.dateDecodingStrategy = JSONDecoder.DateDecodingStrategy.flexMillisIso8601
+        if Logger.verbose {
+            Logger.loading.debug("Accept-Charset: \(JsonRequest.charsetString)")
+            Logger.loading.debug("Accept: \(JsonRequest.acceptString)")
+            Logger.loading.debug("accepted content-types are: \(JsonRequest.acceptedContentTypes)")
+        }
     }
     
     func performOptionsSync<T : Decodable>(responseType: T.Type) throws -> T? {
@@ -90,9 +112,9 @@ class JsonRequest {
         let session = URLSession(configuration: configuration)
         var request = URLRequest(url: url)
         request.httpMethod = "OPTIONS"
-        request.setValue(JsonRequest.applicationJson + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept")
-        request.setValue(JsonRequest.encodingUtf8 + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept-Charset")
-        
+        request.setValue(JsonRequest.charsetString, forHTTPHeaderField: "Accept-Charset")
+        request.setValue(JsonRequest.acceptString, forHTTPHeaderField: "Accept")
+               
         let task = session.dataTask(with: request) { data, response, error in
 
             if let error = error {
@@ -165,9 +187,9 @@ class JsonRequest {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue(JsonRequest.applicationJson + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept")
-        request.setValue(JsonRequest.encodingUtf8 + JsonRequest.onlyPostfix, forHTTPHeaderField: "Accept-Charset")
-        
+        request.setValue(JsonRequest.charsetString, forHTTPHeaderField: "Accept-Charset")
+        request.setValue(JsonRequest.acceptString, forHTTPHeaderField: "Accept")
+          
         let task = session.dataTask(with: request) { data, response, error in
             
             if let noJsonError = self.validateJsonResponse(response) {
@@ -216,7 +238,6 @@ class JsonRequest {
         return result
     }
     
-    
     private func validateJsonResponse(_ response: URLResponse?) -> SessionError? {
         
         if let response = response {
@@ -242,10 +263,16 @@ class JsonRequest {
         guard let type = headers["Content-Type"] as? String else {
             return SessionError(ErrorKind.invalidResponse,"missing Content-Type")
         }
-        guard type.lowercased().contains(JsonRequest.applicationJson) else {
+
+        Logger.loading.debug("content-type is \(type)")
+        guard isAcceptedContentType(type) else {
             return SessionError(ErrorKind.missingMimeType,"unsupported Content-Type \(type)")
         }
         return nil
+    }
+    
+    private func isAcceptedContentType(_ type:String) -> Bool {
+        return JsonRequest.acceptedContentTypes.contains(type.lowercased())
     }
 }
 
