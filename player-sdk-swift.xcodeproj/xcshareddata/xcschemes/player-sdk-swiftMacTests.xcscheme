@@ -48,6 +48,9 @@
                   Identifier = "AudioCodecsTests">
                </Test>
                <Test
+                  Identifier = "AudioPlaylistTests">
+               </Test>
+               <Test
                   Identifier = "PlayerToggleStressTest">
                </Test>
                <Test

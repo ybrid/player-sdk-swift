@@ -51,11 +51,7 @@ class IcyDriver : MediaDriver {
     
     override func refresh() { }
     override func setMetadata(metadata: AbstractMetadata) {
-        guard let icyMeta = metadata as? IcyMetadata else {
-            Logger.shared.error("should be icy metadata")
-            return
-        }
-        icyState.accept(metadata: icyMeta)
+        icyState.accept(metadata:metadata)
     }
     
     override func maxBitRate(to bps:Int32) { Logger.shared.error("should not be called") }

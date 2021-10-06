@@ -26,7 +26,7 @@
 import Foundation
 
 
-public class Bouquet {
+class Bouquet {
     
     let services:[Service]
     var defaultService:Service?

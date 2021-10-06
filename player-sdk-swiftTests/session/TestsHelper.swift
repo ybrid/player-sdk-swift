@@ -26,10 +26,15 @@
 import Foundation
 @testable import YbridPlayerSDK
 
+// demo
 let ybridDemoEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
-let ybridStageDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
 let ybridAdDemoEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/ad-injection-demo")
-let ybridStageSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").forceProtocol(.ybridV2)
+
+// stage
+let ybridStageDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+let ybridStageSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid")
+
+// prod
 let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "https://swr-swr3.cast.ybrid.io/swr/swr3/ybrid").forceProtocol(.ybridV2)
 
 let icecastSwr3Endpoint = MediaEndpoint(mediaUri: "http://swr-swr3-live.cast.addradio.de/swr/swr3/live/mp3/128/stream.mp3")

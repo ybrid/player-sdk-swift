@@ -30,49 +30,14 @@ class MediaProtocolTests: XCTestCase {
     
     let factory = MediaControlFactory()
     
-    func testFactoryGetVersion_YbridDemo_AutodetectYbrid() throws {
+    // Demo
+    
+    func testYbridDemo_GetVersion_AutodetectYbrid() throws {
         let version = try factory.getVersion("https://democast.ybrid.io/adaptive-demo")
         XCTAssertEqual(MediaProtocol.ybridV2, version)
     }
     
-    func testFactoryGetVersion_YbridStageDemo_NoAutodetectYbrid() throws {
-        let version = try factory.getVersion("https://stagecast.ybrid.io/adaptive-demo")
-        XCTAssertEqual(MediaProtocol.icy, version)
-    }
-    
-    func testFactoryGetVersion_wrongUrl_AutodetectIcy() throws {
-        let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
-        XCTAssertEqual(MediaProtocol.icy, version)
-    }
-    
-    func testFactoryGetVersion_UrlNotFound_AutodetectIcy() throws {
-        let version = try factory.getVersion("https://stagecast.ybrid.io/gibtsNicht")
-        XCTAssertEqual(MediaProtocol.icy, version)
-    }
-    
-    func testFactoryGetVersion_Hr2_AutodetectIcy() throws {
-        let version = try factory.getVersion("https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        XCTAssertEqual(MediaProtocol.icy, version)
-    }
-    
-    
-    func testFactoryGetVersion_BadUrl_ThrowsError() throws {
-        do {
-            _ = try factory.getVersion("no url")
-        } catch {
-            XCTAssertTrue(error is SessionError)
-            return
-        }
-        XCTFail()
-    }
-    
-    
-    func testFactoryGetVersion_OnDemand_AutodetectIcy() throws {
-        let version = try factory.getVersion("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
-        XCTAssertEqual(MediaProtocol.icy, version)
-    }
-    
-    func testDriver_YbridDemo_Connect_Disconnect() throws {
+    func testYbridDemo_Driver_State_Disconnect() throws {
         let endpoint = ybridDemoEndpoint
         guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
             XCTFail("expected a player"); return
@@ -84,52 +49,15 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertEqual(MediaProtocol.ybridV2, v2.mediaProtocol)
         XCTAssertTrue(v2.connected)
         let state = session.mediaState!
+        XCTAssertTrue(state.valid)
         XCTAssertNotNil(state.playbackUri)
         XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
       
         v2.disconnect()
         XCTAssertFalse(v2.connected)
     }
-
-    func testDriver_YbridStageDemo_YbridV2MustBeForced() throws {
-        var endpoint = ybridStageDemoEndpoint
-        
-        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
-            XCTFail("expected a player"); return
-        }
-        guard let driver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
-        XCTAssertTrue(driver.connected)
-        
-        player.close()
-        
-        endpoint = endpoint.forceProtocol(.ybridV2)
-        guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
-            XCTFail("expected a player"); return
-        }
-        guard let controller = player.session.driver as? YbridV2Driver else {
-            XCTFail("expected a v2 driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.ybridV2, controller.mediaProtocol)
-        XCTAssertTrue(controller.connected)
-            
-        guard let state = player.session.mediaState else {
-            XCTFail("expected a state"); return
-        }
-        XCTAssertNotNil(state.playbackUri)
-        XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
-        XCTAssertTrue(state.playbackUri.contains("edge"))
-      
-        controller.disconnect()
-        XCTAssertFalse(controller.connected)
-    }
-
     
-    
-    
-    func testDriver_Connect_Connect() throws {
+    func testYbridDemo_Connect_Connect() throws {
         guard let player = AudioPlayer.openSync(for: ybridDemoEndpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
@@ -152,6 +80,115 @@ class MediaProtocolTests: XCTestCase {
         XCTAssertTrue(playbackUri.contains("edge"))
     }
     
+    func testYbridAdDemo_GetVersion_AutodetectYbrid() throws {
+        let version = try factory.getVersion(ybridAdDemoEndpoint.uri)
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
+    }
+    
+    // Stage
+    
+    func testYbridStageDemo_GetVersion_NoAutodetectYbrid() throws {
+        let version = try factory.getVersion(ybridStageDemoEndpoint.uri)
+        XCTAssertEqual(MediaProtocol.icy, version)
+    }
+    
+    func testYbridStageDemo_YbridV2MustBeForced() throws {
+        let endpoint = ybridStageDemoEndpoint
+        
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session.driver as? IcyDriver else {
+            XCTFail("expected an icy driver"); return
+        }
+        XCTAssertEqual(MediaProtocol.icy, driver.mediaProtocol)
+        XCTAssertTrue(driver.connected)
+
+        guard let state = player.session.mediaState else {
+            XCTFail("expected a state"); return
+        }
+        XCTAssertTrue(state.playbackUri.starts(with:"https://"))
+        
+        player.close()
+        XCTAssertFalse(driver.connected)
+        
+//        endpoint = endpoint.forceProtocol(.ybridV2)
+//        guard let player = AudioPlayer.openSync(for: endpoint, listener: nil) else {
+//            XCTFail("expected a player"); return
+//        }
+//        guard let driver = player.session.driver as? YbridV2Driver else {
+//            XCTFail("expected a v2 driver"); return
+//        }
+//        XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
+//        XCTAssertTrue(driver.connected)
+//
+//        guard let state = player.session.mediaState else {
+//            XCTFail("expected a state"); return
+//        }
+//        XCTAssertNotNil(state.playbackUri)
+//        XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
+//        XCTAssertTrue(state.playbackUri.contains("edge"))
+//
+//        XCTAssertEqual(endpoint.uri, player.session.playbackUri)
+//
+//        driver.disconnect()
+//        XCTAssertFalse(driver.connected)
+    }
+    
+    func testYbridStageSwr3_GetVersion_AutodetectYbrid() throws {
+        let version = try factory.getVersion(ybridStageSwr3Endpoint.uri)
+        XCTAssertEqual(MediaProtocol.ybridV2, version)
+    }
+    
+    func testYbridStageSwr3_Driver_State() throws {
+        let endpoint = ybridStageSwr3Endpoint
+        
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let driver = player.session.driver as? YbridV2Driver else {
+            XCTFail("expected an icy driver"); return
+        }
+        XCTAssertEqual(MediaProtocol.ybridV2, driver.mediaProtocol)
+        XCTAssertTrue(driver.connected)
+
+        
+        guard let state = player.session.mediaState else {
+            XCTFail("expected a state"); return
+        }
+        XCTAssertTrue(state.valid)
+        
+        XCTAssertNotNil(state.playbackUri)
+        XCTAssertTrue(state.playbackUri.starts(with: "icyx"))
+        XCTAssertTrue(state.playbackUri.contains("edge"))
+        
+        player.close()
+        XCTAssertFalse(driver.connected)
+    }
+    
+    
+    // none
+    
+    func testGetVersion_wrongUrl_AutodetectIcy() throws {
+        let version = try factory.getVersion("https://stagecast.ybrid.io/swr3/mp3")
+        XCTAssertEqual(MediaProtocol.icy, version)
+    }
+    
+    func testGetVersion_UrlNotFound_AutodetectIcy() throws {
+        let version = try factory.getVersion("https://stagecast.ybrid.io/gibtsNicht")
+        XCTAssertEqual(MediaProtocol.icy, version)
+    }
+
+    func testGetVersion_BadUrl_ThrowsError() throws {
+        do {
+            _ = try factory.getVersion("no url")
+        } catch {
+            XCTAssertTrue(error is SessionError)
+            return
+        }
+        XCTFail()
+    }
+    
     func testDriver_Swr3WrongUrl_Connect() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://stagecast.ybrid.io/swr3/mp3")
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
@@ -161,63 +198,22 @@ class MediaProtocolTests: XCTestCase {
         
         XCTAssertEqual(endpoint.uri, player.session.playbackUri)
     }
+
+    // on demand mp3s
     
-    
-    func testDriver_Hr2() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
-        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
-            XCTFail("expected a player"); return
-        }
-        guard let icyDriver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, icyDriver.mediaProtocol)
-            XCTAssertTrue(icyDriver.connected)
-        
-        
-        guard let icy = player.session.mediaState as? IcyState else {
-            XCTFail("expected an icy session"); return
-        }
-        XCTAssertEqual(endpoint.uri, icy.playbackUri)
- 
+    func testOnDemand_GetVersion_AutodetectIcy() throws {
+        let version = try factory.getVersion("https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
+        XCTAssertEqual(MediaProtocol.icy, version)
     }
     
-    func testDriver_EgoFM() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
-        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
-            XCTFail("expected a player"); return
-        }
-        guard let icyDriver = player.session.driver as? IcyDriver else {
-            XCTFail("expected an icy driver"); return
-        }
-        XCTAssertEqual(MediaProtocol.icy, icyDriver.mediaProtocol)
-            XCTAssertTrue(icyDriver.connected)
-        
-        guard let icy = player.session.mediaState as? IcyState else {
-            XCTFail("expected an icy session"); return
-        }
-        XCTAssertEqual(endpoint.uri, icy.playbackUri)
-    }
-    
-    func testDriver_DlfOpus() throws {
-        let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
-        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
-            XCTFail("expected a player"); return
-        }
-        let session = player.session
-        XCTAssertTrue(session.driver?.connected ?? false)
-        XCTAssertEqual(MediaProtocol.icy, session.driver?.mediaProtocol)
-        XCTAssertEqual(endpoint.uri, session.mediaState?.playbackUri)
-    }
-    
-    func testDriver_OnDemandSound() throws {
+    func testOnDemand_Driver() throws {
         let endpoint = MediaEndpoint(mediaUri:"https://github.com/ybrid/test-files/blob/main/mpeg-audio/music/organ.mp3?raw=true")
         guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
             XCTFail("expected a player"); return
         }
         guard let icy = player.session.mediaState as? IcyState else {
-                XCTFail("expected an icy session"); return
-            }
+            XCTFail("expected an icy session"); return
+        }
         XCTAssertEqual(endpoint.uri, icy.playbackUri)
         
         guard let icyDriver = player.session.driver as? IcyDriver else {
@@ -229,5 +225,59 @@ class MediaProtocolTests: XCTestCase {
     }
     
     
+    // prod
+    
+    func testGetVersion_Hr2_AutodetectIcy() throws {
+        let version = try factory.getVersion("https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
+        XCTAssertEqual(MediaProtocol.icy, version)
+    }
+    
+    func testHr2_PlaybackUri() throws {
+        let endpoint = MediaEndpoint(mediaUri:"https://hr-hr2-live.cast.addradio.de/hr/hr2/live/mp3/128/stream.mp3")
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let icyDriver = player.session.driver as? IcyDriver else {
+            XCTFail("expected an icy driver"); return
+        }
+        XCTAssertEqual(MediaProtocol.icy, icyDriver.mediaProtocol)
+        XCTAssertTrue(icyDriver.connected)
+        
+        
+        guard let icy = player.session.mediaState as? IcyState else {
+            XCTFail("expected an icy session"); return
+        }
+        XCTAssertEqual(endpoint.uri, icy.playbackUri)
+    }
+    
+    func testEgoFM_PlaybackUri() throws {
+        let endpoint = MediaEndpoint(mediaUri:"https://egofm-live.cast.addradio.de/egofm/live/mp3/high/stream.mp3")
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        guard let icyDriver = player.session.driver as? IcyDriver else {
+            XCTFail("expected an icy driver"); return
+        }
+        XCTAssertEqual(MediaProtocol.icy, icyDriver.mediaProtocol)
+        XCTAssertTrue(icyDriver.connected)
+        
+        guard let icy = player.session.mediaState as? IcyState else {
+            XCTFail("expected an icy session"); return
+        }
+        XCTAssertEqual(endpoint.uri, icy.playbackUri)
+    }
+    
+    func testDlfOpus_PlaybackUri() throws {
+        let endpoint = MediaEndpoint(mediaUri:"https://dradio-dlf-live.cast.addradio.de/dradio/dlf/live/opus/high/stream.opus")
+        guard let player = AudioPlayer.openSync(for:endpoint, listener: nil) else {
+            XCTFail("expected a player"); return
+        }
+        let session = player.session
+        XCTAssertTrue(session.driver?.connected ?? false)
+        XCTAssertEqual(MediaProtocol.icy, session.driver?.mediaProtocol)
+        XCTAssertEqual(endpoint.uri, session.mediaState?.playbackUri)
+    }
+    
+ 
     
 }

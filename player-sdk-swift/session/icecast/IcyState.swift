@@ -32,7 +32,7 @@ class IcyState : MediaState {
         super.init(endpoint)
     }
     
-    func accept(metadata:IcyMetadata) {
+    func accept(metadata:AbstractMetadata) {
         super.metadata = metadata
     }
 }

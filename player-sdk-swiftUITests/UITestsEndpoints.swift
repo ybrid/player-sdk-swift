@@ -31,8 +31,8 @@ import YbridPlayerSDK
 let ybridDemoEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/adaptive-demo")
 let ybridAdDemoEndpoint = MediaEndpoint(mediaUri: "https://democast.ybrid.io/ad-injection-demo")
 let ybridStageSwr3Endpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/swr3/mp3/mid").forceProtocol(.ybridV2)
-let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "http://swr-swr3.cast.ybrid.io/swr/swr3/ybrid").forceProtocol(.ybridV2)
 let ybridStageDemoEndpoint = MediaEndpoint(mediaUri: "https://stagecast.ybrid.io/adaptive-demo")
+let ybridSwr3Endpoint = MediaEndpoint(mediaUri: "http://swr-swr3.cast.ybrid.io/swr/swr3/ybrid").forceProtocol(.ybridV2)
 
 // MARK: icecast endpoints
 
@@ -53,7 +53,6 @@ let onDemandOpusTestEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid
 let flacOnDemandEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/flac/24bit96_Pink-Noise_24_44.flac?raw=true")
 
 // MARK: AAC test endpoints
-
 
 let aac48kHzEndpoint = MediaEndpoint(mediaUri:     "https://www2.iis.fraunhofer.de/AAC/xheDemo/Rain01_LN_xHE_016s_AACLC_320s.mp4") // AAC 48 kHz
 

@@ -477,14 +477,13 @@
 		17539E502626D108000FE902 /* session */ = {
 			isa = PBXGroup;
 			children = (
-				17DE7557270C3B8B00C21639 /* ChangeOver.swift */,
-				17F4FB7726FCB2B500EF5019 /* ybrid */,
 				17539E47262591C3000FE902 /* MediaSession.swift */,
-				17317FAC26D54A28009E1658 /* icecast */,
 				17539E93262869E7000FE902 /* MediaControlFactory.swift */,
 				171345C3263153500054DB9D /* MediaDriver.swift */,
 				177AF70826A1E65D0095BEA5 /* MediaState.swift */,
-				17539E81262720F5000FE902 /* JsonRequest.swift */,
+				17DE7557270C3B8B00C21639 /* ChangeOver.swift */,
+				17F4FB7726FCB2B500EF5019 /* ybrid */,
+				17317FAC26D54A28009E1658 /* icecast */,
 				1711D182263AB45400882D2B /* MetadataMappings.swift */,
 				17F6A14E266F5B0100F48432 /* Bouquet.swift */,
 				17539E8A26272AC8000FE902 /* SessionError.swift */,
@@ -660,6 +659,7 @@
 			children = (
 				17DE755B270C3DCE00C21639 /* YbridState.swift */,
 				17539E512626D2C6000FE902 /* YbridV2Driver.swift */,
+				17539E81262720F5000FE902 /* JsonRequest.swift */,
 				17539E9C26286F98000FE902 /* YbridJsonResponse.swift */,
 			);
 			path = ybrid;
