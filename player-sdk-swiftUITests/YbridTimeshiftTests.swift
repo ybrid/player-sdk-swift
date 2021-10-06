@@ -35,14 +35,18 @@ class YbridTimeshiftTests: XCTestCase {
     let icyMaxInterval:TimeInterval = 15.0
     let liveOffsetRange_LostSign = TimeInterval(0.0) ..< TimeInterval(10.0)
 
-    let ybridPlayerListener = TestYbridPlayerListener()
+    let listener = TestYbridPlayerListener()
     var testControl:TestYbridControl?
     override func setUpWithError() throws {
-        testControl = TestYbridControl(ybridSwr3Endpoint, listener: ybridPlayerListener)
+        listener.logPlayingSince = false
+        listener.logBufferSize = false
+        listener.logMetadata = false
+        
+        testControl = TestYbridControl(ybridSwr3Endpoint, listener: listener)
     }
     override func tearDownWithError() throws {
-        print( "offsets were \(ybridPlayerListener.offsets)")
-        ybridPlayerListener.reset()
+        print( "offsets were \(listener.offsets)")
+        listener.reset()
     }
     
     func test01_InitialOffsetChange() throws {
@@ -51,7 +55,7 @@ class YbridTimeshiftTests: XCTestCase {
             usleep(20_000)
         }
         
-        XCTAssertEqual(ybridPlayerListener.offsets.count, 1)
+        XCTAssertEqual(listener.offsets.count, 1)
     }
     
     func test02_PlayOffsetChanges() throws {
@@ -65,54 +69,54 @@ class YbridTimeshiftTests: XCTestCase {
             wait(ybrid, until: PlaybackState.stopped, maxSeconds: 2)
         }
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 2)
-        ybridPlayerListener.offsets.forEach{
+        XCTAssertGreaterThanOrEqual(listener.offsets.count, 2)
+        listener.offsets.forEach{
             XCTAssertTrue(liveOffsetRange_LostSign.contains(-$0))
         }
     }
     
-    func test03_WindBackward120_WindForward60() throws {
+    func test03_WindBackward120_WindForward60_failsOccasionally() throws {
         testControl!.playing{ [self] (ybrid) in
-            _ = wait(max: 2) { ybridPlayerListener.bufferS != 0 } /// ensure the buffer is filled
-            let bufferS = ybridPlayerListener.bufferS
+            _ = wait(max: 2) { listener.bufferS != 0 } /// ensure the buffer is filled
+            let bufferS = listener.bufferS
             let maxAudioComplete: Int = bufferS + maxWindChangedS
             Logger.testing.info("buffer duration <= \(bufferS) s, max audio complete \(maxAudioComplete) s")
             
             ybrid.wind(by: -120.0)
             /// the first notification of expected offset occurs early, with the response of change request, it may be not precise
-            wait(ybridPlayerListener, shifted: -120.0, maxSeconds: maxControlChangedS)
+            wait(listener, shifted: -120.0, maxSeconds: maxControlChangedS)
             sleep(UInt32(maxAudioComplete))
             
             ybrid.wind(by: 60.0)
             /// the first notification of expected offset occurs early, with the response of change request, it may be not precise
-            wait(ybridPlayerListener, shifted: -60.0, maxSeconds: maxControlChangedS)
+            wait(listener, shifted: -60.0, maxSeconds: maxControlChangedS)
             sleep(UInt32(maxAudioComplete))
         }
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 2, "expected to be at least the initial and one more change of offset")
-        guard let lastOffset = ybridPlayerListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(listener.offsets.count, 2, "expected to be at least the initial and one more change of offset")
+        guard let lastOffset = listener.offsets.last else {
             XCTFail(); return
         }
         let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: +60.0)
-        XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
+        XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)") // occasionally some ms
     }
     
     func test04_Wind_Cannot() throws {
-        let testAdDemo = TestYbridControl(ybridAdDemoEndpoint, listener: ybridPlayerListener)
+        let testAdDemo = TestYbridControl(ybridAdDemoEndpoint, listener: listener)
         testAdDemo.playing{ [self] (ybrid) in
             
             ybrid.wind(by: -120.0)
             sleep(UInt32(maxControlChangedS))
         }
         
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 1, "expected to be only the initial change of offset")
-        guard let lastOffset = ybridPlayerListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(listener.offsets.count, 1, "expected to be only the initial change of offset")
+        guard let lastOffset = listener.offsets.last else {
             XCTFail(); return
         }
         let shiftedRangeNegated = shift(liveOffsetRange_LostSign, by: 0.0)
         XCTAssertTrue(shiftedRangeNegated.contains(-lastOffset), "\(-lastOffset) not within \(shiftedRangeNegated)")
         
-        guard let error = ybridPlayerListener.errors.last else {
+        guard let error = listener.errors.last else {
             XCTFail( "expected an error message"); return
         }
         XCTAssertTrue(error.message?.contains("cannot wind ") == true, "human readably message expected" )
@@ -121,21 +125,21 @@ class YbridTimeshiftTests: XCTestCase {
     func test05_WindToLive() throws {
         testControl!.playing{ [self] (ybrid) in
             usleep(200_000)
-            let bufferS = ybridPlayerListener.bufferS
+            let bufferS = listener.bufferS
             let maxAudioComplete: Int = bufferS + maxWindChangedS
             Logger.testing.info("buffer duration \(bufferS) s, max audio complete \(maxAudioComplete) s")
 
             ybrid.wind(by:-20.0)
-            wait(ybridPlayerListener, shifted: -20.0, maxSeconds: maxControlChangedS)
+            wait(listener, shifted: -20.0, maxSeconds: maxControlChangedS)
             sleep(UInt32(maxAudioComplete))
             
             ybrid.windToLive()
-            wait(ybridPlayerListener, shifted: 0.0, maxSeconds: maxControlChangedS)
+            wait(listener, shifted: 0.0, maxSeconds: maxControlChangedS)
             sleep(UInt32(maxAudioComplete))
         }
 
-        XCTAssertGreaterThanOrEqual(ybridPlayerListener.offsets.count, 3, "expected to be at least the initial and two more changes of offset")
-        guard let lastOffset = ybridPlayerListener.offsets.last else {
+        XCTAssertGreaterThanOrEqual(listener.offsets.count, 3, "expected to be at least the initial and two more changes of offset")
+        guard let lastOffset = listener.offsets.last else {
             XCTFail(); return
         }
         XCTAssertTrue(liveOffsetRange_LostSign.contains(-lastOffset), "\(-lastOffset) not within \(liveOffsetRange_LostSign)")
@@ -145,7 +149,7 @@ class YbridTimeshiftTests: XCTestCase {
     func test06_WindToDate_BeforeFullHourAdvertisement__failsInTheNight() throws {
         testControl!.playing{ [self] (ybrid) in
             usleep(200_000)
-            let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+            let buffer = listener.bufferDuration ?? 0.0
             let maxAudioComplete = buffer + maxWindChanged
             Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
             
@@ -160,7 +164,7 @@ class YbridTimeshiftTests: XCTestCase {
     func test07_SkipBackwardNews_SkipForwardMusic_ok() throws {
         testControl!.playing{ [self] (ybrid) in
             usleep(200_000)
-            let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+            let buffer = listener.bufferDuration ?? 0.0
             let maxAudioComplete = buffer + maxWindChanged
             Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
             
@@ -195,9 +199,9 @@ class YbridTimeshiftTests: XCTestCase {
 
         let roundedUp = Int(maxSeconds) + 1
         let took = wait(max: roundedUp) {
-            return ybridPlayerListener.isItem(of: types)
+            return listener.isItem(of: types)
         }
-        XCTAssertLessThanOrEqual(took, roundedUp, "item type is \(String(describing: ybridPlayerListener.metadatas.last?.current?.type)), not in \(types)")
+        XCTAssertLessThanOrEqual(took, roundedUp, "item type is \(String(describing: listener.metadatas.last?.current?.type)), not in \(types)")
     }
         
     private func wait(_ control:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
@@ -247,8 +251,8 @@ class YbridTimeshiftTests: XCTestCase {
     typealias maxValues = (buffer:TimeInterval, complete:TimeInterval)
     private func durations() -> maxValues {
 
-        _ = wait(max: 3) { ybridPlayerListener.bufferDuration != nil }
-        let buffer = ybridPlayerListener.bufferDuration ?? 0.0
+        _ = wait(max: 3) { listener.bufferDuration != nil }
+        let buffer = listener.bufferDuration ?? 0.0
         let maxAudioComplete = buffer + maxWindChanged
         Logger.testing.info("buffer duration \(buffer.S), max audio complete \(maxAudioComplete.S)")
         return (buffer, maxAudioComplete)
@@ -448,9 +452,9 @@ class YbridTimeshiftTests: XCTestCase {
     }
     
     private func checkErrors(expectedErrors:Int)  {
-        guard ybridPlayerListener.errors.count == expectedErrors else {
-            XCTFail("\(expectedErrors) errors expected, but were \(ybridPlayerListener.errors.count)")
-            ybridPlayerListener.errors.forEach { (err) in
+        guard listener.errors.count == expectedErrors else {
+            XCTFail("\(expectedErrors) errors expected, but were \(listener.errors.count)")
+            listener.errors.forEach { (err) in
                 let errMessage = err.localizedDescription
                 Logger.testing.error("-- error is \(errMessage)")
             }

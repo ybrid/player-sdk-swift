@@ -30,6 +30,9 @@ class YbridControlBasicTests: XCTestCase {
 
     let listener = TestYbridPlayerListener()
     override func setUpWithError() throws {
+        listener.logPlayingSince = false
+        listener.logBufferSize = false
+        listener.logMetadata = false
         listener.reset()
     }
     override func tearDownWithError() throws {
@@ -163,57 +166,4 @@ class YbridControlBasicTests: XCTestCase {
         XCTAssertNil(listener.maxBitRate)
     }
     
-    func test05_maxBitRate_stopped_TakesEffekt() throws {
-        
-        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
-        test.stopped() { (ybrid:YbridControl) in
-            
-            XCTAssertNil(self.listener.maxBitRate)
-            XCTAssertNil(self.listener.currentBitRate)
-            
-            ybrid.maxBitRate(to: 32_000)
-            sleep(1)
-            XCTAssertEqual(self.listener.maxBitRate, 32_000)
-            XCTAssertNil(self.listener.currentBitRate)
-            
-            ybrid.play()
-            sleep(4)
-            XCTAssertEqual(self.listener.maxBitRate, 32_000)
-            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
-            
-            sleep(4)
-            
-            ybrid.stop()
-            sleep(1)
-        }
-        
-    }
-    
-    func test06_maxBitRate_playing() throws {
-        
-        let test = TestYbridControl(ybridDemoEndpoint, listener: listener)
-        test.playing() { (ybrid) in
-            
-            sleep(1)
-            XCTAssertNil(self.listener.maxBitRate)
-            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 8_000)
-            
-            ybrid.maxBitRate(to:32_000)
-            sleep(1)
-            XCTAssertEqual(self.listener.maxBitRate, 32_000)
-            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
-            
-            ybrid.maxBitRate(to:128_000)
-            sleep(1)
-            XCTAssertEqual(self.listener.maxBitRate, 128_000)
-            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
-            
-            ybrid.maxBitRate(to:192_000)
-            sleep(1)
-            XCTAssertEqual(self.listener.maxBitRate, 192_000)
-            XCTAssertGreaterThanOrEqual(self.listener.currentBitRate ?? 0, 32_000)
-            
-            sleep(4)
-        }
-    }
 }

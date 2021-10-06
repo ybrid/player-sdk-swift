@@ -51,6 +51,12 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
         return Int(duration) + 1
     }}
     
+    
+    var logPlayingSince = true
+    var logBufferSize = true
+    var logMetadata = true
+    
+    
     func reset() {
         queue.async {
             self.metadatas.removeAll()
@@ -64,7 +70,9 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var metadatas:[Metadata] = []
     override func metadataChanged(_ metadata: Metadata) {
         super.metadataChanged(metadata)
-        Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+        if logMetadata {
+            Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+        }
         queue.async {
             self.metadatas.append(metadata)
         }
@@ -80,6 +88,9 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     
     
     override func playingSince(_ seconds: TimeInterval?) {
+        guard logPlayingSince else {
+            return
+        }
         if let duration = seconds {
             Logger.testing.notice("-- playing for \(duration.S) seconds ")
         } else {
@@ -89,8 +100,11 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
 
     override func bufferSize(averagedSeconds: TimeInterval?, currentSeconds: TimeInterval?) {
         if let bufferLength = currentSeconds {
-            Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
             self.bufferDuration = bufferLength
+            guard logBufferSize else {
+                return
+            }
+            Logger.testing.notice("-- currently buffered \(bufferLength.S) seconds of audio")
         }
     }
 }
@@ -218,6 +232,13 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
         }
     }}
     
+    
+    var maxRateNotifications:Int { get {
+        queue.sync {
+            return bitrates.map{ $0.max }.filter{ $0 != nil }.count
+        }
+    }}
+    
     func isItem(_ type:ItemType) -> Bool {
         queue.sync {
             if let currentType = metadatas.last?.current?.type {
@@ -267,10 +288,8 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- metadata: display title \(String(describing: metadata.displayTitle)), service \(String(describing: metadata.activeService?.identifier))")
-        queue.async {
-            self.metadatas.append(metadata)
-        }
+        Logger.testing.notice("-- service \(String(describing: metadata.activeService?.identifier))")
+        super.metadataChanged(metadata)
     }
 }
 

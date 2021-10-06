@@ -129,6 +129,7 @@ class YbridSpecialActionTests: XCTestCase {
                 }
                 ybrid.play()
                 sleep(4)
+                XCTAssertNil(ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:77)
                 sleep(1)

@@ -29,6 +29,8 @@
 		1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DDBD25D59EBC0055C973 /* UITestsHelper.swift */; };
 		1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB768825D5AD4600994379 /* PlayerToggleStressTest.swift */; };
 		1718FD1925D5E34C00C390F5 /* DevelopingPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1799DD9325D599820055C973 /* DevelopingPlayerTests.swift */; };
+		171F389A270D7E55003A24DB /* YbridBitrateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F3898270D7E55003A24DB /* YbridBitrateTests.swift */; };
+		171F389B270DB8BD003A24DB /* YbridBitrateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171F3898270D7E55003A24DB /* YbridBitrateTests.swift */; };
 		1722839226BC0E210040E9F6 /* AudioCodecsAACCompareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1722839126BC0E210040E9F6 /* AudioCodecsAACCompareTests.swift */; };
 		1722839326BC0E210040E9F6 /* AudioCodecsAACCompareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1722839126BC0E210040E9F6 /* AudioCodecsAACCompareTests.swift */; };
 		17241ECF2682126500CCBB77 /* AnalyseDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */; };
@@ -248,6 +250,7 @@
 		171345B426306D780054DB9D /* ConsumeMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumeMetadataTests.swift; sourceTree = "<group>"; };
 		171345C3263153500054DB9D /* MediaDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDriver.swift; sourceTree = "<group>"; };
 		1714DA84263A0B7700DD17B8 /* MetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataTests.swift; sourceTree = "<group>"; };
+		171F3898270D7E55003A24DB /* YbridBitrateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridBitrateTests.swift; sourceTree = "<group>"; };
 		1722839126BC0E210040E9F6 /* AudioCodecsAACCompareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodecsAACCompareTests.swift; sourceTree = "<group>"; };
 		17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyseDataTests.swift; sourceTree = "<group>"; };
 		17268BE1265D2C4400E2F8E3 /* ybridWindBackResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridWindBackResponse.json; sourceTree = "<group>"; };
@@ -627,6 +630,7 @@
 				175849F2264F31390071FEE6 /* UITestsEndpoints.swift */,
 				171345B426306D780054DB9D /* ConsumeMetadataTests.swift */,
 				176081DF268DA1D700E623E2 /* YbridControlBasicTests.swift */,
+				171F3898270D7E55003A24DB /* YbridBitrateTests.swift */,
 				170CECC3268CA51300E09F99 /* YbridSwapItemTests.swift */,
 				170CECC6268CAC2900E09F99 /* YbridSwapServiceTests.swift */,
 				17D45D7C2657180600983025 /* YbridTimeshiftTests.swift */,
@@ -1220,6 +1224,7 @@
 				1718FD0A25D5E27A00C390F5 /* UseAudioPlayerTests.swift in Sources */,
 				1718FD1425D5E28D00C390F5 /* PlayerToggleStressTest.swift in Sources */,
 				17539EBF26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
+				171F389A270D7E55003A24DB /* YbridBitrateTests.swift in Sources */,
 				1718FD0F25D5E28800C390F5 /* UITestsHelper.swift in Sources */,
 				175849F4264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,
 				17D96D4626ADEEC800D25D93 /* TestYbridControl.swift in Sources */,
@@ -1242,6 +1247,7 @@
 				1799DD9425D599820055C973 /* DevelopingPlayerTests.swift in Sources */,
 				17DB767F25D5AD0000994379 /* UseAudioPlayerTests.swift in Sources */,
 				17DB768925D5AD4600994379 /* PlayerToggleStressTest.swift in Sources */,
+				171F389B270DB8BD003A24DB /* YbridBitrateTests.swift in Sources */,
 				17539EBE26287B6D000FE902 /* ContolMatchesProtocolTests.swift in Sources */,
 				1799DDBF25D59EBC0055C973 /* UITestsHelper.swift in Sources */,
 				175849F3264F31390071FEE6 /* UITestsEndpoints.swift in Sources */,

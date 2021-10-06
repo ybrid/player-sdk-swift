@@ -35,6 +35,9 @@ class YbridSwapItemTests: XCTestCase {
     var testControl:TestYbridControl?
     let poller = Poller()
     override func setUpWithError() throws {
+        listener.logPlayingSince = false
+        listener.logBufferSize = false
+        
         testControl = TestYbridControl(ybridDemoEndpoint, listener: listener)
     }
     override func tearDownWithError() throws {
