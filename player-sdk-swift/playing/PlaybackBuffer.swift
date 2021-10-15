@@ -54,25 +54,13 @@ class PlaybackBuffer {
             }
         }
     }
-
-    var hasBuffer:Bool { get {
-        if let size = size, size > 0.0 {
-            return true
-        }
-        return false
-    }}
     
-    var noBuffer:Bool { get {
+    var isEmpty:Bool { get {
         return state == .empty
     }}
     
     var playingSince: TimeInterval? {
         return scheduling.audioSince
-    }
-    
-    var size: TimeInterval? {
-        refreshSize()
-        return total
     }
     
     private let cachedChunks:ChunkCache
@@ -83,12 +71,8 @@ class PlaybackBuffer {
     
     private var bufferingS:TimeInterval = preBufferingS
 
-    private var caching:TimeInterval = 0.0
-    private var remaining:TimeInterval = 0.0
-    private var total:TimeInterval { get { return caching + remaining } }
-    private var bufferDescription:String { get {
-        return "buffer size \(total.S) ( caching \(caching.S), remainig \(remaining.S) )"
-    } }
+    private var caching:TimeInterval { get { return cachedChunks.duration }}
+    private var remaining:TimeInterval? { get { return scheduling.remainingS }}
 
     var onMetadataCue:((UUID)->())?
     
@@ -114,23 +98,21 @@ class PlaybackBuffer {
         let chunk = Chunk(pcm: buffer, duration: bufferDuration)
         
         cachedChunks.put(chunk: chunk)
-        caching += chunk.duration
+        if Logger.verbose { Logger.playing.debug("cached \(chunk.duration.S)") }
         
-        if Logger.verbose { Logger.playing.debug("cached \(chunk.duration.S) --> \(bufferDescription)") }
-        
-        takeCare()
+        ensurePlayback()
     }
     
-    let empty = AVAudioPCMBuffer()
+    static let emptyPcm = AVAudioPCMBuffer()
     func put(cuePoint:UUID) {
-        let chunk = Chunk(pcm: empty, duration: 0, cuePoint: cuePoint)
+        let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cuePoint: cuePoint)
         cachedChunks.put(chunk: chunk)
         
         if Logger.verbose { Logger.playing.debug("cached metadata cue point --> \(cuePoint)") }
     }
     
     func put(_ cueAudioComplete: @escaping AudioCompleteCallback) {
-        let chunk = Chunk(pcm: empty, duration: 0, cueAudioComplete: cueAudioComplete)
+        let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cueAudioComplete: cueAudioComplete)
         cachedChunks.put(chunk: chunk)
         
         Logger.playing.debug("cached complete cue point --> \(String(describing: cueAudioComplete))")
@@ -145,54 +127,66 @@ class PlaybackBuffer {
     }
 
     func update() -> TimeInterval {
-        refreshSize()
-        takeCare()
-        return total
+        ensurePlayback()
+        return caching + (remaining ?? 0.0)
     }
     
     func reset() {
         if let cleared = cachedChunks.clear() {
             Logger.playing.notice("discarded \(cleared.S) s of cached audio")
-            refreshSize()
             return
         }
     }
     
-    private var isEmpty:Bool { get { return total <= 0.0 } }
-    private var isBufferingDone:Bool { return remaining <= 0.0 && caching >= bufferingS }
-    private var isSchedulingLow: Bool { return remaining > 0.0 && remaining <= PlaybackBuffer.lowRemainingScheduledS }
-    
-    fileprivate func refreshSize() {
-        caching = cachedChunks.duration
-        remaining = scheduling.remainingS ?? 0.0
+    class BufferInstant {
+        private let cached:TimeInterval
+        private let threshold:TimeInterval
+        private let scheduled:TimeInterval
+        init(_ cached:TimeInterval, _ threshold:TimeInterval, _ scheduled:TimeInterval) {
+            self.cached = cached
+            self.scheduled = scheduled
+            self.threshold = threshold
+        }
+        var drained:Bool { get { return cached + scheduled <= 0.0 } }
+        var sufficient:Bool { return scheduled <= 0.0 && cached >= threshold }
+        var lowScheduling: Bool { return scheduled > 0.0 && scheduled <= PlaybackBuffer.lowRemainingScheduledS }
+        
+        var description:String { get {
+            return "\((cached + scheduled).S) ( caching \(cached.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
+        } }
+
     }
     
-    fileprivate func takeCare() {
+ 
+    
+    fileprivate func ensurePlayback() {
         guard state != .wait else {
             return
         }
         
-        if Logger.verbose { Logger.playing.debug("\(bufferDescription)") }
+
+        let instant = BufferInstant(caching, bufferingS, remaining ?? 0.0)
+        if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         
-        if isEmpty {
+        if state != .empty && instant.drained {
             state = .empty
             scheduling.reset()
             bufferingS = PlaybackBuffer.reBufferingS
             return
         }
         
-        if isBufferingDone  { // needs scheduling first chunks
+        if instant.sufficient  { // needs scheduling first chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
-                if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S) --> \(bufferDescription)") }
+                if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S)") }
                 state = .ready
             }
             return
         }
 
-        if isSchedulingLow { // needs scheduling next chunks
+        if instant.lowScheduling { // needs scheduling next chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
                 if Logger.verbose {
-                    Logger.playing.debug("scheduled next \(scheduled.S) --> \(bufferDescription)") }
+                    Logger.playing.debug("scheduled next \(scheduled.S)") }
             }
         }
         
@@ -220,22 +214,19 @@ class PlaybackBuffer {
             return nil
         }
         if let cue = takenChunk.cuePoint {
-            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
+            DispatchQueue.global().asyncAfter(deadline: .now() + (remaining ?? 0.0)) {
                 self.onMetadataCue?(cue)
             }
             return 0.0
         }
         if let complete = takenChunk.cueAudioComplete {
-            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
+            DispatchQueue.global().asyncAfter(deadline: .now() + (remaining ?? 0.0)) {
                 complete(true)
             }
             return 0.0
         }
         self.scheduling.schedule(chunk: takenChunk)
-        let scheduled = takenChunk.duration
-        caching -= scheduled
-        remaining += scheduled
-        return scheduled
+        return takenChunk.duration
     }
     
     fileprivate func audioOn() {

@@ -136,7 +136,7 @@ class UseAudioPlayerTests: XCTestCase {
     func test04_Error_NoPlayer() throws {
         defer { self.semaphore?.signal() }
         
-        let badEndpoint = MediaEndpoint(mediaUri:  "https://swr-swr3.cast.io/bad/url")
+        let badEndpoint = MediaEndpoint(mediaUri:  "https://wrong.host/bad/url")
         do {
             try AudioPlayer.open(for: badEndpoint, listener: playerListener) {
                 (control) in

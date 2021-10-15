@@ -228,7 +228,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         let completeCallback = session.triggeredAudioComplete(metadata)
         
         /// propagating changed states, includes clearing changed status
-        if buffer?.noBuffer ?? true {
+        if buffer?.isEmpty ?? true {
             session.notifyChanged(SubInfo.metadata)
             completeCallback?(true)
         } else {

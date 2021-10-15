@@ -171,10 +171,11 @@ class PlaybackEngine : Playback {
             }
         }
         
-        let bufferedS = playbackBuffer?.update()
-        let avrgBuffS = metrics.averagedBufferS(bufferedS)
-        DispatchQueue.global().async {
-            self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
+        if let bufferedS = playbackBuffer?.update() {
+            let avrgBuffS = metrics.averagedBufferS(bufferedS)
+            DispatchQueue.global().async {
+                self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
+            }
         }
     }
     

@@ -34,7 +34,7 @@ class PlaybackScheduling {
     private var totalScheduled:TimeInterval = 0.0
     
     var nodeNow:AVAudioTime? {
-        guard playerNode.isPlaying, let lastSample = playerNode.lastRenderTime  else {
+        guard let lastSample = playerNode.lastRenderTime  else {
             return nil
         }
         return lastSample
@@ -57,14 +57,16 @@ class PlaybackScheduling {
         return diff(audioStarted, playerNow)
     }
     
+    var lastRemaining:TimeInterval?
     var remainingS:TimeInterval? {
         guard let since = audioSince else {
-            return nil
+            return lastRemaining
         }
-        let result = totalScheduled - since
-        guard result > 0.0 else {
-            return 0.0
+        var result = totalScheduled - since
+        if result <= 0.0  {
+            result = 0.0
         }
+        lastRemaining = result
         return result
     }
 
