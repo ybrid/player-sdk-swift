@@ -31,6 +31,7 @@ protocol BufferListener: class {
 
 class PlaybackBuffer {
     
+    private static let minBufferingS = 0.1
     private static let preBufferingS = 0.5
     private static let reBufferingS = 1.5
     private static let lowRemainingScheduledS = 0.6
@@ -44,7 +45,7 @@ class PlaybackBuffer {
     private var state:BufferState = .empty {
         didSet {
             if state != oldValue {
-                Logger.playing.debug("\(state)")
+                Logger.playing.debug("buffer state is \(state)")
                 listener?.stateChanged(state)
                 switch state {
                 case .ready: audioOn()
@@ -69,17 +70,22 @@ class PlaybackBuffer {
     weak var listener:BufferListener?
     let engine: PlaybackEngine
     
-    private var bufferingS:TimeInterval = preBufferingS
+    private var bufferingS:TimeInterval
 
-    private var caching:TimeInterval { get { return cachedChunks.duration }}
-    private var remaining:TimeInterval? { get { return scheduling.remainingS }}
+    private var caching:TimeInterval { get {
+        return cachedChunks.duration
+    }}
+    private var remaining:TimeInterval { get {
+        return scheduling.remainingS ?? 0.0
+    }}
 
     var onMetadataCue:((UUID)->())?
     
-    init(scheduling:PlaybackScheduling, engine: PlaybackEngine) {
+    init(scheduling:PlaybackScheduling, engine: PlaybackEngine, preBuffering: Bool) {
         self.cachedChunks = ChunkCache()
         self.scheduling = scheduling
         self.engine = engine
+        self.bufferingS = preBuffering ? PlaybackBuffer.preBufferingS : PlaybackBuffer.minBufferingS
     }
     
     deinit {
@@ -128,7 +134,7 @@ class PlaybackBuffer {
 
     func update() -> TimeInterval {
         ensurePlayback()
-        return caching + (remaining ?? 0.0)
+        return caching + remaining
     }
     
     func reset() {
@@ -136,6 +142,11 @@ class PlaybackBuffer {
             Logger.playing.notice("discarded \(cleared.S) s of cached audio")
             return
         }
+    }
+    
+    func flush() {
+        Logger.playing.debug()
+        bufferingS = 0.0
     }
     
     class BufferInstant {
@@ -147,35 +158,32 @@ class PlaybackBuffer {
             self.scheduled = scheduled
             self.threshold = threshold
         }
-        var drained:Bool { get { return cached + scheduled <= 0.0 } }
-        var sufficient:Bool { return scheduled <= 0.0 && cached >= threshold }
-        var lowScheduling: Bool { return scheduled > 0.0 && scheduled <= PlaybackBuffer.lowRemainingScheduledS }
+        
+        var drained:Bool { get {
+            return cached + scheduled <= 0.0
+        } }
+        var sufficient:Bool { get {
+            return scheduled <= 0.0 && cached >= threshold
+        } }
+        var lowScheduling: Bool { get {
+            return scheduled > 0.0 && scheduled <= PlaybackBuffer.lowRemainingScheduledS
+        } }
         
         var description:String { get {
             return "\((cached + scheduled).S) ( caching \(cached.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
         } }
-
     }
-    
- 
+
     
     fileprivate func ensurePlayback() {
         guard state != .wait else {
             return
         }
         
-
-        let instant = BufferInstant(caching, bufferingS, remaining ?? 0.0)
+        let instant = BufferInstant(caching, bufferingS, remaining)
         if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         
-        if state != .empty && instant.drained {
-            state = .empty
-            scheduling.reset()
-            bufferingS = PlaybackBuffer.reBufferingS
-            return
-        }
-        
-        if instant.sufficient  { // needs scheduling first chunks
+        if state == .empty && instant.sufficient  { // needs scheduling first chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
                 if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S)") }
                 state = .ready
@@ -183,16 +191,25 @@ class PlaybackBuffer {
             return
         }
 
-        if instant.lowScheduling { // needs scheduling next chunks
+        if state == .ready && instant.lowScheduling { // needs scheduling next chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
                 if Logger.verbose {
                     Logger.playing.debug("scheduled next \(scheduled.S)") }
             }
+            return
         }
-        
+   
+        if state != .empty && instant.drained {
+            state = .empty
+            scheduling.reset()
+            bufferingS = PlaybackBuffer.reBufferingS
+            return
+        }
+ 
+        if Logger.verbose {
+            Logger.playing.debug("nothing to do") }
         return
     }
-
     
     private func schedule(expectS:TimeInterval) -> TimeInterval? {
         var scheduled:TimeInterval = 0.0
@@ -214,13 +231,13 @@ class PlaybackBuffer {
             return nil
         }
         if let cue = takenChunk.cuePoint {
-            DispatchQueue.global().asyncAfter(deadline: .now() + (remaining ?? 0.0)) {
+            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
                 self.onMetadataCue?(cue)
             }
             return 0.0
         }
         if let complete = takenChunk.cueAudioComplete {
-            DispatchQueue.global().asyncAfter(deadline: .now() + (remaining ?? 0.0)) {
+            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
                 complete(true)
             }
             return 0.0

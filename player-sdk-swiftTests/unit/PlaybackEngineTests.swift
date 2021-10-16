@@ -19,7 +19,7 @@ class PlaybackEngineTests: XCTestCase {
     static let relativeTimeAccuracyS = 0.01
     static let outputLatencyToleranceS = 0.02
         
-    var engine = PlaybackEngine(format: format48, listener: nil)
+    var engine = PlaybackEngine(format: format48, finate: false, listener: nil)
     var buffer:PlaybackBuffer?
     var format:AVAudioFormat { return PlaybackEngineTests.format48 }
     var sampleRate:Double { PlaybackEngineTests.format48.sampleRate }

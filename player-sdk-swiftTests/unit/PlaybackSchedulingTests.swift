@@ -25,7 +25,7 @@ class PlaybackSchedulingTests: XCTestCase {
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        engine = PlaybackEngine(format: format48, listener: nil)
+        engine = PlaybackEngine(format: format48, finate: true, listener: nil)
         playbackBuffer = engine?.start()
     }
     

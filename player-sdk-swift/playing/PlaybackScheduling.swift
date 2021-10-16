@@ -29,12 +29,12 @@ class PlaybackScheduling {
     
     let playerNode:AVAudioPlayerNode // visible for tests
     let sampleRate:Double // visible for buffer
-    var firstScheduled:AVAudioTime?
+    private var firstScheduled:AVAudioTime?
     private var nextScheduleTime:AVAudioTime?
     private var totalScheduled:TimeInterval = 0.0
     
     var nodeNow:AVAudioTime? {
-        guard let lastSample = playerNode.lastRenderTime  else {
+        guard let lastSample = playerNode.lastRenderTime else {
             return nil
         }
         return lastSample
@@ -95,7 +95,7 @@ class PlaybackScheduling {
         let scheduleTime:AVAudioTime
         if firstScheduled == nil {
             firstScheduled = now
-            Logger.playing.debug("first scheduling at \(describe(firstScheduled)) ms")
+            Logger.playing.debug("first scheduling at \(describe(firstScheduled))")
             scheduleTime = now
         } else {
             guard let nextTime = nextScheduleTime else {

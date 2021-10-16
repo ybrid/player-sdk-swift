@@ -113,6 +113,12 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
         }
     }
 
+    override func flush() {
+        Logger.decoding.debug()
+        listener.pcmDone()
+    }
+    
+    
     // MARK: Opus audio data listener
     
     func preskip(preskip: Int) {

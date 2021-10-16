@@ -140,6 +140,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
+        self.decoder?.flush()
     }
     
     func changeOverInProgress() {
@@ -153,8 +154,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         do {
             guard let buffer = self.buffer else {
                 /// first time format is detected
-                let engine = PlaybackEngine(format: pcmTargetFormat, listener: playerListener )
-                if !infinite { engine.canPause = true }
+                let engine = PlaybackEngine(format: pcmTargetFormat, finate: !infinite, listener: playerListener )
                 if let buffer = engine.start() {
                     self.pipelineListener.ready(playback: engine)
                     self.buffer = buffer
@@ -193,6 +193,16 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             }
         }
     }
+    
+    func pcmDone() {
+        guard !self.stopping else {
+            Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
+            return
+        }
+        
+        buffer?.flush()
+    }
+    
     
     // MARK: metadata listener
     
@@ -245,7 +255,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         session.notifyChanged(SubInfo.playout)
         session.notifyChanged(SubInfo.timeshift)
         session.notifyChanged(SubInfo.bouquet)
-
     }
     
     

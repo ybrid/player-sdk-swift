@@ -43,14 +43,20 @@ class PlaybackEngine : Playback {
     private let timerInterval = DispatchTimeInterval.milliseconds(200)
     
     var playbackBuffer:PlaybackBuffer? /// visible for unit testing
-    var canPause:Bool = false
+    internal var canPause:Bool = false
+    private var preBuffering:Bool = true
     
     private var metrics = Metrics()
     
     private weak var playerListener: AudioPlayerListener?
-    init(format: AVAudioFormat,  listener: AudioPlayerListener?) {
+    init(format: AVAudioFormat, finate: Bool, listener: AudioPlayerListener?) {
         self.sampleRate = format.sampleRate
+        if finate {
+            self.canPause = true
+            self.preBuffering = false
+        }
         self.playerListener = listener
+        
         self.engine.attach(self.playerNode)
         // an interleaved format leads to exception with code=-10868 --> kAudioUnitErr_FormatNotSupported
         Logger.playing.debug("engine format is \(AudioData.describeAVFormat(format)) ")
@@ -63,7 +69,6 @@ class PlaybackEngine : Playback {
         self.engine.disconnectNodeInput(playerNode)
         self.engine.detach(playerNode)
     }
-    
     
     func alterTarget(format: AVAudioFormat) {
         Logger.playing.info("altering engine format to \(AudioData.describeAVFormat(format))")
@@ -86,7 +91,6 @@ class PlaybackEngine : Playback {
         playbackBuffer?.scheduling = scheduling
         
         startTimer()
-
     }
     
     // MARK: playback
@@ -105,7 +109,8 @@ class PlaybackEngine : Playback {
         }
         
         let scheduling = PlaybackScheduling(playerNode, sampleRate: sampleRate)
-        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self)
+
+        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self, preBuffering: preBuffering)
         
         startTimer()
 
@@ -171,12 +176,12 @@ class PlaybackEngine : Playback {
             }
         }
         
-        if let bufferedS = playbackBuffer?.update() {
-            let avrgBuffS = metrics.averagedBufferS(bufferedS)
-            DispatchQueue.global().async {
-                self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
-            }
+        let bufferedS = playbackBuffer?.update()
+        let avrgBuffS = metrics.averagedBufferS(bufferedS)
+        DispatchQueue.global().async {
+            self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
         }
+
     }
     
     

@@ -104,6 +104,26 @@ class SystemDecoder : AudioDecoder {
         self.pcmReady(pcmBuffer: buffer)
     }
     
+    override func flush() {
+        Logger.decoding.debug()
+        
+        guard let newPackages = source?.packages.count, newPackages > 0 else {
+            listener.pcmDone()
+            return // nothing to convert
+        }
+
+        do {
+            let buffer = try convert(newPackages: newPackages)
+            self.pcmReady(pcmBuffer: buffer)
+        } catch {
+            let err = DecoderError(.failedConverting)
+            err.cause = error
+            Logger.decoding.error("ignoring error in flushing residual \(newPackages) audio packasges")
+        }
+        
+        listener.pcmDone()
+    }
+    
     private func convert(newPackages:Int) throws -> AVAudioPCMBuffer {
         guard let sourceFormat = source?.format else {
             Logger.decoding.error("source format missing")
