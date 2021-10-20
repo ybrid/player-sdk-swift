@@ -25,7 +25,7 @@ class PlaybackSchedulingTests: XCTestCase {
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        engine = PlaybackEngine(format: format48, finate: true, listener: nil)
+        engine = PlaybackEngine(format: format48, infinite: false, listener: nil)
         playbackBuffer = engine?.start()
     }
     
@@ -75,9 +75,9 @@ class PlaybackSchedulingTests: XCTestCase {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
         guard let nodeNow = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
           print("\(nodeNow.sampleTime)")
-        let changedNow = playbackBuffer?.scheduling.calc(nodeNow, sub: 3*oneSec)
+        let changedNow = calc(nodeNow, sub: 3*oneSec)
         var took = schedule(buffer, at: changedNow)
-        print ( "1. scheduled \(changedNow!.sampleTime) took \(took*1000) ms" )
+        print ( "1. scheduled \(changedNow.sampleTime) took \(took*1000) ms" )
         took = schedule(buffer, at: nil)
         print ( "2. scheduled nil took \(took*1000) ms" )
     }
@@ -175,6 +175,17 @@ class PlaybackSchedulingTests: XCTestCase {
         }
         return took
     }
+    
+    
+    private func calc(_ time:AVAudioTime, sub:Int64) -> AVAudioTime {
+        let calcTime = AVAudioTime(sampleTime: time.sampleTime - sub, atRate: sampleRate )
+        if time.isHostTimeValid {
+            return calcTime.extrapolateTime(fromAnchor: time)!
+        }
+        return calcTime
+    }
+    
+    
 }
 
 class Wait {

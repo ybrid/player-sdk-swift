@@ -55,6 +55,14 @@ class PlaybackBuffer {
             }
         }
     }
+    private func audioOn() {
+        Logger.playing.notice()
+        engine.change(volume: 1)
+    }
+    private func audioOff() {
+        Logger.playing.notice()
+        engine.change(volume: 0)
+    }
     
     var isEmpty:Bool { get {
         return state == .empty
@@ -81,11 +89,11 @@ class PlaybackBuffer {
 
     var onMetadataCue:((UUID)->())?
     
-    init(scheduling:PlaybackScheduling, engine: PlaybackEngine, preBuffering: Bool) {
+    init(scheduling:PlaybackScheduling, engine: PlaybackEngine, infinite: Bool) {
         self.cachedChunks = ChunkCache()
         self.scheduling = scheduling
         self.engine = engine
-        self.bufferingS = preBuffering ? PlaybackBuffer.preBufferingS : PlaybackBuffer.minBufferingS
+        self.bufferingS = infinite ? PlaybackBuffer.preBufferingS : PlaybackBuffer.minBufferingS
     }
     
     deinit {
@@ -246,15 +254,7 @@ class PlaybackBuffer {
         return takenChunk.duration
     }
     
-    fileprivate func audioOn() {
-        Logger.playing.notice()
-        engine.change(volume: 1)
-    }
-    
-    fileprivate func audioOff() {
-        Logger.playing.notice()
-        engine.change(volume: 0)
-    }
+ 
     
      // MARK: caching pcm audio chunks
 

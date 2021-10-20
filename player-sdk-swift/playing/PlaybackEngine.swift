@@ -44,16 +44,16 @@ class PlaybackEngine : Playback {
     
     var playbackBuffer:PlaybackBuffer? /// visible for unit testing
     internal var canPause:Bool = false
-    private var preBuffering:Bool = true
+    private var infinite:Bool = true
     
     private var metrics = Metrics()
     
     private weak var playerListener: AudioPlayerListener?
-    init(format: AVAudioFormat, finate: Bool, listener: AudioPlayerListener?) {
+    init(format: AVAudioFormat, infinite: Bool, listener: AudioPlayerListener?) {
         self.sampleRate = format.sampleRate
-        if finate {
+        if !infinite {
             self.canPause = true
-            self.preBuffering = false
+            self.infinite = false
         }
         self.playerListener = listener
         
@@ -110,7 +110,7 @@ class PlaybackEngine : Playback {
         
         let scheduling = PlaybackScheduling(playerNode, sampleRate: sampleRate)
 
-        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self, preBuffering: preBuffering)
+        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self, infinite: infinite)
         
         startTimer()
 

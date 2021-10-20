@@ -57,7 +57,7 @@ class PlaybackScheduling {
         return diff(audioStarted, playerNow)
     }
     
-    var lastRemaining:TimeInterval?
+    private var lastRemaining:TimeInterval?
     var remainingS:TimeInterval? {
         guard let since = audioSince else {
             return lastRemaining
@@ -87,7 +87,7 @@ class PlaybackScheduling {
     }
     
     func schedule(chunk:PlaybackBuffer.Chunk) {
-         guard let now = playerNow else {
+        guard let now = playerNow else {
             Logger.playing.debug(String(format: "isn't running, ignoring %3.0f ms", chunk.duration*1000))
             return
         }
@@ -109,9 +109,9 @@ class PlaybackScheduling {
         
         playerNode.scheduleBuffer(chunk.pcm, at: scheduleTime, options: [])
         totalScheduled += chunk.duration
-     }
+    }
     
-     func calc(_ time:AVAudioTime, add:Int64) -> AVAudioTime {
+    func calc(_ time:AVAudioTime, add:Int64) -> AVAudioTime {
         let calcTime = AVAudioTime(sampleTime: time.sampleTime + add, atRate: sampleRate)
         if time.isHostTimeValid {
             return calcTime.extrapolateTime(fromAnchor: time)!
@@ -119,16 +119,8 @@ class PlaybackScheduling {
         return calcTime
     }
     
-    func calc(_ time:AVAudioTime, sub:Int64) -> AVAudioTime {
-        let calcTime = AVAudioTime(sampleTime: time.sampleTime - sub, atRate: sampleRate )
-        if time.isHostTimeValid {
-            return calcTime.extrapolateTime(fromAnchor: time)!
-        }
-        return calcTime
-    }
-    
+ 
     private func diff(_ from:AVAudioTime, _ to:AVAudioTime) -> TimeInterval {
-        
         return TimeInterval( Double(to.sampleTime - from.sampleTime) / sampleRate)
     }
     
