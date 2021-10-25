@@ -42,6 +42,7 @@
 		1732222325F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
 		1732222425F614BC00AEC833 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1732222125F614BC00AEC833 /* Metadata.swift */; };
 		17404C8625E78DCC00051988 /* YbridPlayerSDK.framework in Resources */ = {isa = PBXBuildFile; fileRef = 170703D025D2F44400549B8A /* YbridPlayerSDK.framework */; };
+		174A8C3F2726BDC8007BD407 /* BasicPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174A8C3E2726BDC8007BD407 /* BasicPlayerTests.swift */; };
 		17539E3F26257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
 		17539E4026257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
 		17539E4126257A9A000FE902 /* MediaEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17539E3E26257A9A000FE902 /* MediaEndpoint.swift */; };
@@ -258,6 +259,7 @@
 		17268BE5265E8CBE00E2F8E3 /* ybridDateDecoding.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridDateDecoding.json; sourceTree = "<group>"; };
 		17268BE7265E8EF800E2F8E3 /* ybridDateDecodingNanos.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ybridDateDecodingNanos.json; sourceTree = "<group>"; };
 		1732222125F614BC00AEC833 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
+		174A8C3E2726BDC8007BD407 /* BasicPlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicPlayerTests.swift; sourceTree = "<group>"; };
 		17539E3E26257A9A000FE902 /* MediaEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaEndpoint.swift; sourceTree = "<group>"; };
 		17539E47262591C3000FE902 /* MediaSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSession.swift; sourceTree = "<group>"; };
 		17539E512626D2C6000FE902 /* YbridV2Driver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YbridV2Driver.swift; sourceTree = "<group>"; };
@@ -461,6 +463,7 @@
 				17E9AB872655456B001ED9C8 /* session */,
 				17241ECD2682126500CCBB77 /* AnalyseDataTests.swift */,
 				17E3391A26F247FE0026711D /* AbortBufferingTests.swift */,
+				174A8C3E2726BDC8007BD407 /* BasicPlayerTests.swift */,
 			);
 			path = "player-sdk-swiftTests";
 			sourceTree = "<group>";
@@ -1163,6 +1166,7 @@
 				175849E7264BB6760071FEE6 /* ThreadsafeCollections.swift in Sources */,
 				17109E1225F8DF4C003DA621 /* DecodingError.swift in Sources */,
 				17539E8C26272AC8000FE902 /* SessionError.swift in Sources */,
+				174A8C3F2726BDC8007BD407 /* BasicPlayerTests.swift in Sources */,
 				1714DA85263A0B7700DD17B8 /* MetadataTests.swift in Sources */,
 				1799DCC925D566AF0055C973 /* AudioDataLoader.swift in Sources */,
 				17241ECF2682126500CCBB77 /* AnalyseDataTests.swift in Sources */,
