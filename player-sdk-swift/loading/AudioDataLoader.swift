@@ -264,7 +264,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         Logger.loading.debug(logMessage)
         
         pipeline.decodingQueue.async {
-            self.pipeline.flushAudio()
+            self.pipeline.endOfData()
         }
         
         taskState = SessionTaskState.getSessionTaskState(task.state, error)

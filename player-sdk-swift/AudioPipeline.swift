@@ -50,7 +50,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
-    var infinite: Bool = true // default live
+    private var infinite: Bool = true // default live
     
     weak var playerListener:AudioPlayerListener?
     let session:MediaSession
@@ -132,7 +132,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         audiodataReady(data)
     }
 
-    func flushAudio() {
+    func endOfData() {
         Logger.decoding.debug()
         if let mdExtractor = metadataExtractor {
             mdExtractor.flush(audiodataReady)
@@ -140,7 +140,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
-        self.decoder?.flush()
+        self.decoder?.endOfStream()
     }
     
     func changeOverInProgress() {
@@ -184,7 +184,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return
         }
         
-        buffer?.put(buffer: pcmBuffer)
+        buffer?.put(pcmBuffer: pcmBuffer)
         
         if firstPCM {
             firstPCM = false
@@ -194,13 +194,13 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
     }
     
-    func pcmDone() {
+    func endOfStream() {
         guard !self.stopping else {
             Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
             return
         }
         
-        buffer?.flush()
+        buffer?.endOfStream()
     }
     
     

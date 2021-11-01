@@ -64,17 +64,17 @@ class PlaybackEngineTests: XCTestCase {
         XCTAssertFalse(engine.playerNode.isPlaying)
         XCTAssertFalse(engine.engine.isRunning)
         
-        let playerStarted = buffer?.scheduling.playerNow
+        let playerStarted = buffer?.scheduler.playerNow
         XCTAssertNil(playerStarted)
  
     }
     
     func testEngine_NodeTime() throws {
         
-//        XCTAssertNil(engine.playbackBuffer?.scheduling.nodeNow)
+//        XCTAssertNil(engine.playbackBuffer?.scheduler.nodeNow)
         
         buffer = engine.start()
-        let nodeStarted = buffer?.scheduling.nodeNow
+        let nodeStarted = buffer?.scheduler.nodeNow
         XCTAssertNotNil(nodeStarted)
         XCTAssertTrue(nodeStarted!.isSampleTimeValid)
         XCTAssertTrue(nodeStarted!.isHostTimeValid)
@@ -84,27 +84,27 @@ class PlaybackEngineTests: XCTestCase {
         print ("node time started \(nodeStartedS) s")
         
         sleep(1)
-        guard let node1SecLater = buffer?.scheduling.nodeNow else { XCTFail(); return }
+        guard let node1SecLater = buffer?.scheduler.nodeNow else { XCTFail(); return }
         /// but you can be shure about the difference
         let node1SecLaterS = Double(node1SecLater.sampleTime) / format.sampleRate
         print ("node time 1 sec later \(node1SecLaterS) s")
         XCTAssertEqual( 1.0, node1SecLaterS - nodeStartedS, accuracy: PlaybackEngineTests.relativeTimeAccuracyS )
         
         engine.stop()
-        XCTAssertNil(buffer?.scheduling.nodeNow)
+        XCTAssertNil(buffer?.scheduler.nodeNow)
     }
     
     func testEngine_NodeTimeStopStart() throws {
         
         buffer = engine.start()
-        guard let nodeBeforeStop = buffer?.scheduling.nodeNow else { XCTFail(); return }
+        guard let nodeBeforeStop = buffer?.scheduler.nodeNow else { XCTFail(); return }
         DispatchQueue.global().async { self.engine.stop() }
         sleep(3)
         let now = Date()
-        engine.start()
+        _ = engine.start()
         let playTookS = Date().timeIntervalSince(now)
         print("play took \(playTookS) seconds")
-        guard let nodeResumed = buffer?.scheduling.nodeNow else { XCTFail(); return }
+        guard let nodeResumed = buffer?.scheduler.nodeNow else { XCTFail(); return }
         
         let nodeBeforeStopS = Double(nodeBeforeStop.sampleTime) / format.sampleRate
         let nodeResumedS = Double(nodeResumed.sampleTime) / format.sampleRate
@@ -114,10 +114,10 @@ class PlaybackEngineTests: XCTestCase {
     }
     
     func testEngine_PlayerTime() throws {
-//        XCTAssertNil(engine.playbackBuffer?.scheduling.started)
+//        XCTAssertNil(engine.playbackBuffer?.scheduler.started)
         
         buffer = engine.start()
-        let playerStarted = buffer?.scheduling.playerNow
+        let playerStarted = buffer?.scheduler.playerNow
         XCTAssertNotNil(playerStarted)
         XCTAssertTrue(playerStarted!.isSampleTimeValid)
         XCTAssertTrue(playerStarted!.isHostTimeValid)
@@ -127,7 +127,7 @@ class PlaybackEngineTests: XCTestCase {
         XCTAssertEqual( 0.0, playerStartedS, accuracy: PlaybackEngineTests.aboluteTimeAccuracyS, "expected player time 0 s, but is \(playerStartedS)"  )
         
         sleep(1)
-        guard let player1SecLater = buffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let player1SecLater = buffer?.scheduler.playerNow else { XCTFail(); return }
         /// ensure player time is 1 sec later
         let playerLaterS = Double(player1SecLater.sampleTime) / format.sampleRate
         XCTAssertEqual( 1.0, playerLaterS - playerStartedS, accuracy: PlaybackEngineTests.relativeTimeAccuracyS, "expected player time 1 s, but is \(playerLaterS - playerStartedS)" )
@@ -137,16 +137,16 @@ class PlaybackEngineTests: XCTestCase {
     
     func testEngine_PlayerTimeStopStart() throws {
         buffer = engine.start()
-        guard let playerStarted = buffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let playerStarted = buffer?.scheduler.playerNow else { XCTFail(); return }
         /// player time is 0 (+/- 0.01) seconds
         let playerStartedS = Double(playerStarted.sampleTime) / format.sampleRate
         XCTAssertEqual( 0.0, playerStartedS, accuracy: PlaybackEngineTests.aboluteTimeAccuracyS, "expected player time 0 s, but is \(playerStartedS)"  )
         
         engine.stop()
         sleep(3)
-        engine.start()
+        _ = engine.start()
         
-        guard let playerLater = buffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let playerLater = buffer?.scheduler.playerNow else { XCTFail(); return }
         /// player time starts with 0 again
         let playerLaterS = Double(playerLater.sampleTime) / format.sampleRate
         XCTAssertEqual( 0.0, playerLaterS, accuracy: PlaybackEngineTests.aboluteTimeAccuracyS, "expected player time 0 s, but is \(playerLaterS)"  )

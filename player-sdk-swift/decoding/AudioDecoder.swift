@@ -28,7 +28,7 @@ import AVFoundation
 protocol DecoderListener: MetadataListener {
     func onFormatChanged(_ srcFormat : AVAudioFormat)
     func pcmReady(pcmBuffer: AVAudioPCMBuffer)
-    func pcmDone()
+    func endOfStream()
 }
 typealias DecoderNotification = (ErrorSeverity, DecoderError)->()
 class AudioDecoder : AudioDataListener {
@@ -78,7 +78,7 @@ class AudioDecoder : AudioDataListener {
     }
     
     
-    internal func flush() {
+    internal func endOfStream() {
         fatalError(#function + " must be overridden")
     }
     

@@ -104,11 +104,12 @@ class SystemDecoder : AudioDecoder {
         self.pcmReady(pcmBuffer: buffer)
     }
     
-    override func flush() {
+    // eos  
+    override func endOfStream() {
         Logger.decoding.debug()
         
         guard let newPackages = source?.packages.count, newPackages > 0 else {
-            listener.pcmDone()
+            listener.endOfStream()
             return // nothing to convert
         }
 
@@ -121,7 +122,7 @@ class SystemDecoder : AudioDecoder {
             Logger.decoding.error("ignoring error in flushing residual \(newPackages) audio packasges")
         }
         
-        listener.pcmDone()
+        listener.endOfStream()
     }
     
     private func convert(newPackages:Int) throws -> AVAudioPCMBuffer {

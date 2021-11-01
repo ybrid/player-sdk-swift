@@ -31,7 +31,6 @@ protocol BufferListener: class {
 
 class PlaybackBuffer {
     
-    private static let minBufferingS = 0.1
     private static let preBufferingS = 0.5
     private static let reBufferingS = 1.5
     private static let lowRemainingScheduledS = 0.6
@@ -69,31 +68,30 @@ class PlaybackBuffer {
     }}
     
     var playingSince: TimeInterval? {
-        return scheduling.audioSince
+        return scheduler.audioSince
     }
     
-    private let cachedChunks:ChunkCache
-    var scheduling:PlaybackScheduling /// visible for unit tests
-    
-    weak var listener:BufferListener?
-    let engine: PlaybackEngine
-    
-    private var bufferingS:TimeInterval
+    private let buffer:ChunkedBuffer
+    var scheduler:PlaybackScheduler /// visible for unit tests
 
-    private var caching:TimeInterval { get {
-        return cachedChunks.duration
+    let engine: PlaybackEngine
+    private var thresholdS:TimeInterval
+    weak var listener:BufferListener?
+
+    private var buffering:TimeInterval { get {
+        return buffer.duration
     }}
     private var remaining:TimeInterval { get {
-        return scheduling.remainingS ?? 0.0
+        return scheduler.remainingS ?? 0.0
     }}
 
     var onMetadataCue:((UUID)->())?
     
-    init(scheduling:PlaybackScheduling, engine: PlaybackEngine, infinite: Bool) {
-        self.cachedChunks = ChunkCache()
-        self.scheduling = scheduling
+    init(scheduling:PlaybackScheduler, engine: PlaybackEngine) {
+        self.buffer = ChunkedBuffer()
+        self.scheduler = scheduling
         self.engine = engine
-        self.bufferingS = infinite ? PlaybackBuffer.preBufferingS : PlaybackBuffer.minBufferingS
+        self.thresholdS = PlaybackBuffer.preBufferingS
     }
     
     deinit {
@@ -102,17 +100,17 @@ class PlaybackBuffer {
     
     func dispose() {
         Logger.playing.debug("pre deinit")
-        if let disposedS = cachedChunks.clear() {
+        if let disposedS = buffer.clear() {
             Logger.playing.debug("disposed \(disposedS.S) of buffered audio")
         }
     }
     
-    func put(buffer: AVAudioPCMBuffer) {
-        let bufferDuration = Double(AVAudioFramePosition(buffer.frameLength)) / scheduling.sampleRate
-        let chunk = Chunk(pcm: buffer, duration: bufferDuration)
+    func put(pcmBuffer: AVAudioPCMBuffer) {
+        let bufferDuration = Double(AVAudioFramePosition(pcmBuffer.frameLength)) / scheduler.sampleRate
+        let chunk = Chunk(pcm: pcmBuffer, duration: bufferDuration)
         
-        cachedChunks.put(chunk: chunk)
-        if Logger.verbose { Logger.playing.debug("cached \(chunk.duration.S)") }
+        buffer.put(chunk: chunk)
+        if Logger.verbose { Logger.playing.debug("buffered \(chunk.duration.S)") }
         
         ensurePlayback()
     }
@@ -120,18 +118,19 @@ class PlaybackBuffer {
     static let emptyPcm = AVAudioPCMBuffer()
     func put(cuePoint:UUID) {
         let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cuePoint: cuePoint)
-        cachedChunks.put(chunk: chunk)
+        buffer.put(chunk: chunk)
         
-        if Logger.verbose { Logger.playing.debug("cached metadata cue point --> \(cuePoint)") }
+        if Logger.verbose { Logger.playing.debug("metadata cue point --> \(cuePoint)") }
     }
     
     func put(_ cueAudioComplete: @escaping AudioCompleteCallback) {
         let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cueAudioComplete: cueAudioComplete)
-        cachedChunks.put(chunk: chunk)
+        buffer.put(chunk: chunk)
         
-        Logger.playing.debug("cached complete cue point --> \(String(describing: cueAudioComplete))")
+        Logger.playing.debug("audio complete cue point --> \(String(describing: cueAudioComplete))")
     }
     
+    // REVIEW pause and resume should net set calculated state
     func pause() {
         state = .wait
     }
@@ -139,56 +138,57 @@ class PlaybackBuffer {
     func resume() {
         state = .ready
     }
-
+    
     func update() -> TimeInterval {
         ensurePlayback()
-        return caching + remaining
+        return buffering + remaining
     }
     
     func reset() {
-        if let cleared = cachedChunks.clear() {
-            Logger.playing.notice("discarded \(cleared.S) s of cached audio")
+        if let cleared = buffer.clear() {
+            Logger.playing.notice("discarded \(cleared.S) s of buffered audio")
             return
         }
     }
     
-    func flush() {
+    func endOfStream() {
         Logger.playing.debug()
-        bufferingS = 0.0
+        thresholdS = 0.0
+        /// scheduler needs no eos signalling
     }
     
-    class BufferInstant {
-        private let cached:TimeInterval
+    private class BufferInstant {
+        private let buffered:TimeInterval
         private let threshold:TimeInterval
         private let scheduled:TimeInterval
-        init(_ cached:TimeInterval, _ threshold:TimeInterval, _ scheduled:TimeInterval) {
-            self.cached = cached
-            self.scheduled = scheduled
+        init(_ buffered:TimeInterval, _ threshold:TimeInterval, _ scheduled:TimeInterval) {
+            self.buffered = buffered
             self.threshold = threshold
+            self.scheduled = scheduled
         }
         
         var drained:Bool { get {
-            return cached + scheduled <= 0.0
+            return buffered + scheduled <= 0.0
         } }
         var sufficient:Bool { get {
-            return scheduled <= 0.0 && cached >= threshold
+            return scheduled <= 0.0 && buffered >= threshold
         } }
         var lowScheduling: Bool { get {
             return scheduled > 0.0 && scheduled <= PlaybackBuffer.lowRemainingScheduledS
         } }
         
         var description:String { get {
-            return "\((cached + scheduled).S) ( caching \(cached.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
+            return "\((buffered + scheduled).S) ( buffering \(buffered.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
         } }
     }
 
     
-    fileprivate func ensurePlayback() {
+    private func ensurePlayback() {
         guard state != .wait else {
             return
         }
         
-        let instant = BufferInstant(caching, bufferingS, remaining)
+        let instant = BufferInstant(buffering, thresholdS, remaining)
         if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         
         if state == .empty && instant.sufficient  { // needs scheduling first chunks
@@ -201,21 +201,19 @@ class PlaybackBuffer {
 
         if state == .ready && instant.lowScheduling { // needs scheduling next chunks
             if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
-                if Logger.verbose {
-                    Logger.playing.debug("scheduled next \(scheduled.S)") }
+                if Logger.verbose { Logger.playing.debug("scheduled next \(scheduled.S)") }
             }
             return
         }
    
-        if state != .empty && instant.drained {
+        if state == .ready && instant.drained {
             state = .empty
-            scheduling.reset()
-            bufferingS = PlaybackBuffer.reBufferingS
+            scheduler.reset()
+            thresholdS = PlaybackBuffer.reBufferingS
             return
         }
  
-        if Logger.verbose {
-            Logger.playing.debug("nothing to do") }
+        if Logger.verbose { Logger.playing.debug("nothing to do") }
         return
     }
     
@@ -235,7 +233,7 @@ class PlaybackBuffer {
     }
     
     private func scheduleNext() -> TimeInterval? {
-        guard let takenChunk = cachedChunks.pop() else {
+        guard let takenChunk = buffer.pop() else {
             return nil
         }
         if let cue = takenChunk.cuePoint {
@@ -250,13 +248,11 @@ class PlaybackBuffer {
             }
             return 0.0
         }
-        self.scheduling.schedule(chunk: takenChunk)
+        self.scheduler.schedule(chunk: takenChunk)
         return takenChunk.duration
     }
     
- 
-    
-     // MARK: caching pcm audio chunks
+    // MARK: buffering pcm audio chunks
 
     struct Chunk {
         let pcm:AVAudioPCMBuffer
@@ -265,7 +261,7 @@ class PlaybackBuffer {
         var cueAudioComplete:AudioCompleteCallback? = nil
     }
     
-    private class ChunkCache : ThreadsafeDequeue<Chunk> {
+    private class ChunkedBuffer : ThreadsafeDequeue<Chunk> {
         
         init() {
             let queue = DispatchQueue(label: "io.ybrid.playing.chunks", qos: PlayerContext.processingPriority)

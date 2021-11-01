@@ -86,9 +86,9 @@ class PlaybackEngine : Playback {
         }
  
         self.sampleRate = format.sampleRate
-        let scheduling = PlaybackScheduling(playerNode, sampleRate: sampleRate)
+        let scheduling = PlaybackScheduler(playerNode, sampleRate: sampleRate)
         scheduling.reset()
-        playbackBuffer?.scheduling = scheduling
+        playbackBuffer?.scheduler = scheduling
         
         startTimer()
     }
@@ -108,9 +108,9 @@ class PlaybackEngine : Playback {
             Logger.playing.error("failed to start engine: \(error.localizedDescription)")
         }
         
-        let scheduling = PlaybackScheduling(playerNode, sampleRate: sampleRate)
+        let scheduling = PlaybackScheduler(playerNode, sampleRate: sampleRate)
 
-        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self, infinite: infinite)
+        playbackBuffer = PlaybackBuffer(scheduling: scheduling, engine: self)
         
         startTimer()
 

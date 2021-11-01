@@ -1,5 +1,5 @@
 //
-//  PlaybackSchedulingTests.swift
+//  PlaybackSchedulerTests.swift
 //  app-example-iosTests
 //
 //  Created by Florian Nowotny on 13.09.20.
@@ -13,7 +13,7 @@ import AVFoundation
 let format48 = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 48000, channels: 2, interleaved: false)!
 
 @available(iOS 11.0, macOS 10.13,  *)
-class PlaybackSchedulingTests: XCTestCase {
+class PlaybackSchedulerTests: XCTestCase {
     
     
     var format:AVAudioFormat { return PlaybackEngineTests.format48 }
@@ -36,7 +36,7 @@ class PlaybackSchedulingTests: XCTestCase {
     
     func test01ScheduleEmpty_Nil()  {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
-        guard let nodeNow = playbackBuffer?.scheduling.nodeNow else { XCTFail(); return }
+        guard let nodeNow = playbackBuffer?.scheduler.nodeNow else { XCTFail(); return }
         print("\(nodeNow.sampleTime)")
         let took = schedule(buffer, at: nil)
         print ( "scheduled nil took \(took*1000) ms" )
@@ -57,23 +57,23 @@ class PlaybackSchedulingTests: XCTestCase {
     
     func test10ScheduleEmpty_Started() throws {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
-        guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
         let took = schedule(buffer, at: started)
         print ( "scheduled node now took \(took*1000) ms" )
     }
     
     func test12ScheduleEmpty_StartedPlusOne()  {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
-        guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
           print("\(started.sampleTime)")
-        guard let inOneSecond = playbackBuffer?.scheduling.calc(started, add: oneSec) else { XCTFail(); return }
+        guard let inOneSecond = playbackBuffer?.scheduler.calc(started, add: oneSec) else { XCTFail(); return }
         let took = schedule(buffer, at: inOneSecond)
         print ( "scheduled \(inOneSecond.sampleTime) took \(took*1000) ms" )
     }
     
     func test13ScheduleEmpty_NodeInPast_Nil()  {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
-        guard let nodeNow = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let nodeNow = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
           print("\(nodeNow.sampleTime)")
         let changedNow = calc(nodeNow, sub: 3*oneSec)
         var took = schedule(buffer, at: changedNow)
@@ -85,7 +85,7 @@ class PlaybackSchedulingTests: XCTestCase {
     func test15ScheduleEmpty_MutlipleStarted() throws {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
         for i in (0...5) {
-            guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+            guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
             let took = schedule(buffer, at: started)
             print ( "\(i). scheduled node now took \(took.magnitude * 1000) ms" )
         }
@@ -93,7 +93,7 @@ class PlaybackSchedulingTests: XCTestCase {
         
     func test17ScheduleEmpty_StartedMultipleNext() throws {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 0)!
-        guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
         
         let took = schedule(buffer, at: started)
         print ( "0. scheduled empty node now took \(took.magnitude * 1000) ms" )
@@ -131,7 +131,7 @@ class PlaybackSchedulingTests: XCTestCase {
         let frames = AVAudioFrameCount(Int64(oneSec/4))
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames)!
         buffer.frameLength = frames
-        guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
         let took = schedule(buffer, at: started)
         print ( "scheduled short node now took \(took * 1000) ms" )
     }
@@ -141,7 +141,7 @@ class PlaybackSchedulingTests: XCTestCase {
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames)!
         buffer.frameLength = frames
         for i in (0...5) {
-            guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+            guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
             let took = schedule(buffer, at: started)
             print ( "\(i). scheduled short node now took \(took.magnitude * 1000) ms" )
         }
@@ -151,7 +151,7 @@ class PlaybackSchedulingTests: XCTestCase {
         let frames = AVAudioFrameCount(oneSec/4)
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames)!
         buffer.frameLength = frames
-        guard let started = playbackBuffer?.scheduling.playerNow else { XCTFail(); return }
+        guard let started = playbackBuffer?.scheduler.playerNow else { XCTFail(); return }
         
         let took = schedule(buffer, at: started)
         print ( "0. scheduled short node now took \(took * 1000) ms" )
@@ -168,7 +168,7 @@ class PlaybackSchedulingTests: XCTestCase {
 
     fileprivate func schedule(_ buffer:AVAudioPCMBuffer, at:AVAudioTime?) -> TimeInterval {
         let wait = Wait()
-        guard let took = wait.exec( { self.playbackBuffer?.scheduling.playerNode.scheduleBuffer(buffer, at: at, options: [], completionCallbackType: AVAudioPlayerNodeCompletionCallbackType.dataConsumed, completionHandler: { (completion:AVAudioPlayerNodeCompletionCallbackType?) -> () in wait.thx() } )
+        guard let took = wait.exec( { self.playbackBuffer?.scheduler.playerNode.scheduleBuffer(buffer, at: at, options: [], completionCallbackType: AVAudioPlayerNodeCompletionCallbackType.dataConsumed, completionHandler: { (completion:AVAudioPlayerNodeCompletionCallbackType?) -> () in wait.thx() } )
         } ).go(3, 0.001) else {
             XCTFail("scheduling didn't complete within 3 s")
             return TimeInterval()

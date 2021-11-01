@@ -28,6 +28,8 @@ import XCTest
 
 class YbridSpecialActionTests: XCTestCase {
     
+    let maxCtrlCompleteUs:useconds_t = 1_500_000
+    
     var listener = ErrorListener()
     override func setUpWithError() throws {
     }
@@ -73,7 +75,7 @@ class YbridSpecialActionTests: XCTestCase {
         _ = semaphore.wait(timeout: .distantFuture)
         let errCount = listener.errors.count
         guard errCount == 0 else {
-            XCTFail("recreating session should work")
+            XCTFail("error during recreating session \(listener.errors)")
             return
         }
     }
@@ -98,7 +100,7 @@ class YbridSpecialActionTests: XCTestCase {
                 bitrates.forEach{
                     let kbps = Int32($0)*1000
                     ybrid.maxBitRate(to:kbps)
-                    sleep(1)
+                    usleep(self.maxCtrlCompleteUs)
                     XCTAssertEqual(kbps, ybrid.session.mediaState?.maxBitRate)
                     if kbps == ybrid.session.mediaState?.maxBitRate {
                         adoptedRates.append(kbps)
@@ -112,7 +114,7 @@ class YbridSpecialActionTests: XCTestCase {
         _ = semaphore.wait(timeout: .distantFuture)
         let errCount = listener.errors.count
         guard errCount == 0 else {
-            XCTFail("recreating session should work")
+            XCTFail("set max bit-rate raised error \(listener.errors)")
             return
         }
         print("adopted bit rates are \(adoptedRates)")
@@ -123,7 +125,7 @@ class YbridSpecialActionTests: XCTestCase {
         try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
              playbackControl: { (_) in
                 return },
-             ybridControl: { (ybridControl) in
+             ybridControl: { [self] (ybridControl) in
                 guard let ybrid = ybridControl as? YbridAudioPlayer else {
                     XCTFail(); semaphore.signal(); return
                 }
@@ -132,43 +134,43 @@ class YbridSpecialActionTests: XCTestCase {
                 XCTAssertNil(ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:77)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(8_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:31_000)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(32_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:57_000)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(64_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:191_999)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(192_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:447_000)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
                 
                 
                 ybrid.maxBitRate(to:449_000)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 // unchanged
                 XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:390291781)
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybridControl.close()
-                sleep(1)
+                usleep(maxCtrlCompleteUs)
                 semaphore.signal()
              })
         _ = semaphore.wait(timeout: .distantFuture)
         let errCount = listener.errors.count
         guard errCount == 0 else {
-            XCTFail("recreating session should work")
+            XCTFail("set max bit-rate raised error \(listener.errors)")
             return
         }
     }    

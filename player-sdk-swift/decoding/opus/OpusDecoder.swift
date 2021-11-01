@@ -113,9 +113,9 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
         }
     }
 
-    override func flush() {
+    override func endOfStream() {
         Logger.decoding.debug()
-        listener.pcmDone()
+        listener.endOfStream()
     }
     
     

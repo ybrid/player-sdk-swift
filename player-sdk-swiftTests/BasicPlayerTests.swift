@@ -36,7 +36,7 @@ class BasicPlayerTests: XCTestCase {
     }
  
 
-    func testPlayShortMp3() throws {
+    func testPlayMp3_400ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test400ms.mp3?raw=true")
         try AudioPlayer.open(for: shortEndpoint, listener: nil) {
             (control) in
@@ -50,7 +50,7 @@ class BasicPlayerTests: XCTestCase {
         }
     }
 
-    func testPlay100Mp3() throws {
+    func testPlayMp3_100ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test100ms.mp3?raw=true")
         try AudioPlayer.open(for: shortEndpoint, listener: nil) {
             (control) in
@@ -64,8 +64,8 @@ class BasicPlayerTests: XCTestCase {
         }
     }
     
-    func testPlayShortFlac() throws {
-        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/flac/test400ms.flac?raw=true")
+    func testPlayMp3_10ms() throws {
+        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test10ms.mp3?raw=true")
         try AudioPlayer.open(for: shortEndpoint, listener: nil) {
             (control) in
             
@@ -78,8 +78,8 @@ class BasicPlayerTests: XCTestCase {
         }
     }
     
-    func testPlayVeryShortMp3() throws {
-        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test10ms.mp3?raw=true")
+    func testPlayFlac_400ms() throws {
+        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/flac/test400ms.flac?raw=true")
         try AudioPlayer.open(for: shortEndpoint, listener: nil) {
             (control) in
             

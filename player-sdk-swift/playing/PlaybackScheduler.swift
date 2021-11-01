@@ -1,5 +1,5 @@
 //
-// PlaybackScheduling.swift
+// PlaybackScheduler.swift
 // player-sdk-swift
 //
 // Copyright (c) 2020 nacamar GmbH - Ybrid®, a Hybrid Dynamic Live Audio Technology
@@ -25,7 +25,7 @@
 
 import AVFoundation
 
-class PlaybackScheduling {
+class PlaybackScheduler {
     
     let playerNode:AVAudioPlayerNode // visible for tests
     let sampleRate:Double // visible for buffer
