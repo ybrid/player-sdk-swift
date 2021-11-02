@@ -75,7 +75,6 @@ class PlaybackBuffer {
     var scheduler:PlaybackScheduler /// visible for unit tests
 
     let engine: PlaybackEngine
-    private var thresholdS:TimeInterval
     weak var listener:BufferListener?
 
     private var buffering:TimeInterval { get {
@@ -85,13 +84,15 @@ class PlaybackBuffer {
         return scheduler.remainingS ?? 0.0
     }}
 
+    private let instant:BufferInstant
+    
     var onMetadataCue:((UUID)->())?
     
     init(scheduling:PlaybackScheduler, engine: PlaybackEngine) {
         self.buffer = ChunkedBuffer()
         self.scheduler = scheduling
         self.engine = engine
-        self.thresholdS = PlaybackBuffer.preBufferingS
+        self.instant = BufferInstant(PlaybackBuffer.preBufferingS)
     }
     
     deinit {
@@ -139,36 +140,42 @@ class PlaybackBuffer {
         state = .ready
     }
     
+    
     func update() -> TimeInterval {
         ensurePlayback()
-        return buffering + remaining
+        return instant.totalS
     }
     
     func reset() {
         if let cleared = buffer.clear() {
-            Logger.playing.notice("discarded \(cleared.S) s of buffered audio")
+            Logger.playing.notice("discarded \(cleared.S) of buffered audio")
             return
         }
     }
     
     func endOfStream() {
         Logger.playing.debug()
-        thresholdS = 0.0
+        instant.threshold = 0.0
         /// scheduler needs no eos signalling
     }
     
     private class BufferInstant {
-        private let buffered:TimeInterval
-        private let threshold:TimeInterval
-        private let scheduled:TimeInterval
-        init(_ buffered:TimeInterval, _ threshold:TimeInterval, _ scheduled:TimeInterval) {
-            self.buffered = buffered
+        fileprivate var buffered:TimeInterval
+        fileprivate var threshold:TimeInterval
+        fileprivate var scheduled:TimeInterval
+        
+        init(_ threshold:TimeInterval) {
             self.threshold = threshold
-            self.scheduled = scheduled
+            self.buffered = 0.0
+            self.scheduled = 0.0
         }
         
+        var totalS:TimeInterval { get {
+            return buffered + scheduled
+        } }
+        
         var drained:Bool { get {
-            return buffered + scheduled <= 0.0
+            return totalS <= 0.0
         } }
         var sufficient:Bool { get {
             return scheduled <= 0.0 && buffered >= threshold
@@ -178,7 +185,7 @@ class PlaybackBuffer {
         } }
         
         var description:String { get {
-            return "\((buffered + scheduled).S) ( buffering \(buffered.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
+            return "\((totalS).S) ( buffering \(buffered.S), remainig \(scheduled.S) ), threshold \(threshold.S)"
         } }
     }
 
@@ -188,32 +195,39 @@ class PlaybackBuffer {
             return
         }
         
-        let instant = BufferInstant(buffering, thresholdS, remaining)
+        instant.buffered = buffering
+        instant.scheduled = remaining
+        
         if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         
-        if state == .empty && instant.sufficient  { // needs scheduling first chunks
-            if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
-                if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S)") }
-                state = .ready
+        switch state {
+        case .empty:
+            if instant.sufficient  { // needs scheduling first chunks
+                if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
+                    if Logger.verbose { Logger.playing.debug("scheduled first \(scheduled.S)") }
+                    state = .ready
+                }
+                return
             }
-            return
-        }
-
-        if state == .ready && instant.lowScheduling { // needs scheduling next chunks
-            if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
-                if Logger.verbose { Logger.playing.debug("scheduled next \(scheduled.S)") }
+        case .ready:
+            if instant.lowScheduling { // needs scheduling next chunks
+                if let scheduled = schedule(expectS: PlaybackBuffer.healScheduledS) {
+                    if Logger.verbose { Logger.playing.debug("scheduled next \(scheduled.S)") }
+                }
+                return
             }
-            return
-        }
-   
-        if state == .ready && instant.drained {
-            state = .empty
-            scheduler.reset()
-            thresholdS = PlaybackBuffer.reBufferingS
+            if instant.drained {
+                state = .empty
+                scheduler.reset()
+                instant.threshold = PlaybackBuffer.reBufferingS
+                return
+            }
+        case .wait:
+            if Logger.verbose { Logger.playing.debug("\(state)") }
             return
         }
  
-        if Logger.verbose { Logger.playing.debug("nothing to do") }
+        if Logger.verbose { Logger.playing.debug("\(state)") }
         return
     }
     

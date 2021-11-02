@@ -140,7 +140,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         if let audioData = accumulator?.reset() {
             self.decode(data: audioData)
         }
-        self.decoder?.endOfStream()
+        decodingQueue.async {
+            guard let decoder = self.decoder else {
+                Logger.decoding.error("no decoder avaliable")
+                return
+            }
+            
+            decoder.endOfStream()
+        }
     }
     
     func changeOverInProgress() {

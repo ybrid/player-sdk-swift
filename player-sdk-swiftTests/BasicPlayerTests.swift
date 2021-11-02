@@ -28,7 +28,10 @@ import XCTest
 class BasicPlayerTests: XCTestCase {
 
     var semaphore:DispatchSemaphore?
+    let poller = Poller()
+    let maxWait = 5
     override func setUpWithError() throws {
+        Logger.verbose = true
         semaphore = DispatchSemaphore(value: 0)
     }
     override func tearDownWithError() throws {
@@ -38,57 +41,49 @@ class BasicPlayerTests: XCTestCase {
 
     func testPlayMp3_400ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test400ms.mp3?raw=true")
-        try AudioPlayer.open(for: shortEndpoint, listener: nil) {
-            (control) in
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
             
             control.play()
-            sleep(2)
-            control.stop()
-            sleep(1)
-            
-            self.semaphore?.signal()
+            poller.wait(control, untilState: .playing, intervalMs: 50, maxS: maxWait)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore?.signal()
         }
     }
 
     func testPlayMp3_100ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test100ms.mp3?raw=true")
-        try AudioPlayer.open(for: shortEndpoint, listener: nil) {
-            (control) in
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
             
             control.play()
-            sleep(2)
-            control.stop()
-            sleep(1)
-            
-            self.semaphore?.signal()
+            poller.wait(control, untilState: .playing, intervalMs: 10, maxS: maxWait)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore?.signal()
         }
     }
     
     func testPlayMp3_10ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test10ms.mp3?raw=true")
-        try AudioPlayer.open(for: shortEndpoint, listener: nil) {
-            (control) in
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
             
             control.play()
-            sleep(2)
-            control.stop()
-            sleep(1)
-            
-            self.semaphore?.signal()
+            poller.wait(control, untilState: .playing, intervalMs: 5, maxS: maxWait)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore?.signal()
         }
     }
     
     func testPlayFlac_400ms() throws {
         let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/flac/test400ms.flac?raw=true")
-        try AudioPlayer.open(for: shortEndpoint, listener: nil) {
-            (control) in
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
             
             control.play()
-            sleep(2)
-            control.stop()
-            sleep(1)
-            
-            self.semaphore?.signal()
+            poller.wait(control, untilState: .playing, intervalMs: 100, maxS: maxWait)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore?.signal()
         }
     }
     

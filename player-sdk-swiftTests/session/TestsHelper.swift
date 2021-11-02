@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import XCTest
 @testable import YbridPlayerSDK
 
 // demo
@@ -59,5 +60,32 @@ class ErrorListener : AudioPlayerListener {
     var errors:[AudioPlayerError] = []
     func error(_ severity: ErrorSeverity, _ exception: AudioPlayerError) {
         errors.append(exception)
+    }
+}
+
+
+class Poller {
+    
+    func wait(_ control:PlaybackControl, untilState:PlaybackState, maxS:Int) {
+        return wait(control, untilState: untilState, intervalMs: 1_000, maxS: maxS)
+    }
+    
+    func wait(_ control:PlaybackControl, untilState:PlaybackState, intervalMs:UInt32, maxS:Int) {
+        let maxMs = UInt32(maxS) * 1000
+        let took = wait(maxMs: maxMs, intervalMs: intervalMs) {
+            return control.state == untilState
+        }
+        XCTAssertLessThanOrEqual(took, maxMs, "not \(untilState) within \(maxS) s")
+    }
+    
+    private func wait(maxMs max:UInt32, intervalMs: UInt32, until:() -> (Bool)) -> UInt32 {
+        var millis:UInt32 = 0
+        let stepUs = intervalMs * 1000
+        while !until() && millis <= max {
+            usleep(stepUs)
+            millis += intervalMs
+        }
+        XCTAssertTrue(until(), "condition not satisfied within \(millis) ms")
+        return millis
     }
 }
