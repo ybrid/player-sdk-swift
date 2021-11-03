@@ -31,7 +31,7 @@ let package = Package(
         .binaryTarget(
            name: "YbridPlayerSDK",
            url: "https://github.com/ybrid/player-sdk-swift/releases/download/\(version)/YbridPlayerSDK.xcframework.zip",
-            checksum: "5cc4b7ecd9b714cab3677dad01e73dff284eb9dac0bcefa935bb4b3cc44d4a2d"
+            checksum: "d2c4ec2ceb5272e6827714fa7ca64bbdc0182a4177a8c9b36921f97934628a26"
            )
     ]
 )
