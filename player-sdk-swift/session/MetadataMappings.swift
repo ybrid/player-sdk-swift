@@ -32,8 +32,14 @@ class IcyMetadata : AbstractMetadata {
     
     init(icyData:[String:String]) {
         super.init(current: IcyMetadata.createItem(icyData),
-                   station: IcyMetadata.createStation(icyData) )
+                   service: IcyMetadata.createService(icyData) )
         streamUrl = icyData["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
+    }
+    
+    func setService(icyData:[String:String]) {
+        if let service = IcyMetadata.createService(icyData) {
+            super.setService( service )
+        }
     }
     
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
@@ -42,13 +48,15 @@ class IcyMetadata : AbstractMetadata {
             return nil
         }
         
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, version:nil, artist:nil, album:nil, description:nil, durationMillis:nil)
+        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, artist:nil, album:nil, version:nil, description:nil, playbackLength:nil, genre: nil,
+            infoUri: nil, companions: nil)
     }
     
     
     // content of http-headers "icy-name" and "icy-genre" or "ice-*"
-    private static func createStation(_ icy: [String:String]) -> Station? {
-        return Station(name: icy["icy-name"], genre: icy["icy-genre"])
+    private static func createService(_ icy: [String:String]) -> Service? {
+        guard let name = icy["icy-name"] else { return nil }
+        return Service(identifier: name, displayName: name, genre: icy["icy-genre"])
     }
     
 }
@@ -60,7 +68,8 @@ class OpusMetadata : AbstractMetadata {
     
     private static func createItem(vorbis: [String:String]) -> Item? {
         let displayTitle = OpusMetadata.combinedTitle(comments: vorbis)
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:vorbis["TITLE"], version:vorbis["VERSION"], artist:vorbis["ARTIST"], album:vorbis["ALBUM"], description:nil, durationMillis:nil)
+        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:vorbis["TITLE"], artist:vorbis["ARTIST"], album:vorbis["ALBUM"], version:vorbis["VERSION"], description:nil, playbackLength:nil, genre: nil,
+                    infoUri: nil, companions: nil)
     }
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"
@@ -81,23 +90,25 @@ class OpusMetadata : AbstractMetadata {
 }
 
 class YbridMetadata : AbstractMetadata {
-    var currentService:Service?
     
     init(ybridV2:YbridV2Metadata) {
         super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
                    next: YbridMetadata.createItem(ybrid: ybridV2.nextItem),
-                   station: YbridMetadata.createStation(ybridV2.station) )
+                   service: YbridMetadata.createService(ybridV2.station) )
     }
 
     // content of __responseObject.metatdata.station
-    private static func createStation(_ ybridStation: YbridStation) -> Station? {
-        return Station(name: ybridStation.name, genre:  ybridStation.genre)
+    private static func createService(_ ybridStation: YbridStation) -> Service? {
+        let name = ybridStation.name
+        return Service(identifier: name, displayName: name, genre: ybridStation.genre)
     }
     
     private static func createItem(ybrid: YbridItem) -> Item? {
         let type = YbridMetadata.typeFrom(type: ybrid.type)
         let displayTitle = YbridMetadata.combinedTitle(item: ybrid)
-        return Item(type:type, displayTitle:displayTitle, identifier:ybrid.id, title:ybrid.title, version:nil, artist:ybrid.artist, album:nil, description:ybrid.description, durationMillis: ybrid.durationMillis )
+        let playbackLength = TimeInterval( ybrid.durationMillis / 1_000 )
+        return Item(type:type, displayTitle:displayTitle, identifier:ybrid.id, title:ybrid.title, artist:ybrid.artist, album:nil, version:nil, description:ybrid.description, playbackLength: playbackLength, genre: nil,
+                    infoUri: nil, companions: nil)
     }
     
     private static func typeFrom(type: String) -> ItemType {

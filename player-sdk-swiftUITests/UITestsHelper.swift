@@ -288,7 +288,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- service \(String(describing: metadata.activeService?.identifier))")
+        Logger.testing.notice("-- service \(String(describing: metadata.service?.identifier))")
         super.metadataChanged(metadata)
     }
 }

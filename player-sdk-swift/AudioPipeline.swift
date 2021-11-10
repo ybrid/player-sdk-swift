@@ -230,16 +230,12 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return
         }
         
-        Logger.loading.debug("metadata \(metadata.displayTitle ?? "(no title)")")
-
-        if let broadcaster = icyFields?["icy-name"] {
-            metadata.setBroadcaster(broadcaster)
-        }
-        if let genre = icyFields?["icy-genre"] {
-            metadata.setGenre(genre)
-        }
+        Logger.loading.debug("\(metadata.self) \(metadata.displayTitle ?? "(no title)")")
         
-        
+        if let fields = icyFields,
+           let icyServiceInfo = IcyMetadata(icyData: fields).service {
+                metadata.setService(icyServiceInfo)
+        }
         session.setMetadata(metadata: metadata)
         
         let completeCallback = session.triggeredAudioComplete(metadata)

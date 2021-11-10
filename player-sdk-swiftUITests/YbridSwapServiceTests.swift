@@ -78,7 +78,7 @@ class YbridSwapServiceTests: XCTestCase {
 
         
         let services:[String] =
-            test.listener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+            test.listener.metadatas.map{ $0.service?.identifier ?? "(nil)"}
         Logger.testing.info("services were \(services)")
     }
     
@@ -103,7 +103,7 @@ class YbridSwapServiceTests: XCTestCase {
             let maxWait = Int(buffer + maxAudioChanged)+1
             Logger.testing.debug("buffer \(buffer.S), max wait \(maxWait) s")
             _ = poller.wait(max: maxWait) {
-                let serviceSwapped = test.listener.metadatas.last?.activeService
+                let serviceSwapped = test.listener.metadatas.last?.service
                 Logger.testing.info("service=\(String(describing: serviceSwapped))")
                 return serviceSwapped?.identifier == "swr-raka09"
             }
@@ -118,12 +118,12 @@ class YbridSwapServiceTests: XCTestCase {
         XCTAssertGreaterThan(test.listener.services[0].count, swr3MinServicesCount)
         
         let services:[String] =
-            test.listener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+            test.listener.metadatas.map{ $0.service?.identifier ?? "(nil)"}
         Logger.testing.info("services were \(services)")
         
         XCTAssertGreaterThanOrEqual(test.listener.metadatas.count, 1)
-        XCTAssertEqual("swr3-live",  test.listener.metadatas.first?.activeService?.identifier)
-        XCTAssertEqual("swr3-live",  test.listener.metadatas.last?.activeService?.identifier)
+        XCTAssertEqual("swr3-live",  test.listener.metadatas.first?.service?.identifier)
+        XCTAssertEqual("swr3-live",  test.listener.metadatas.last?.service?.identifier)
     }
     
     func test04_OnPlay_ActiveServiceInNextMetadata() throws {
@@ -133,10 +133,10 @@ class YbridSwapServiceTests: XCTestCase {
             let buffer = test.listener.bufferS
             let maxWait: Int = buffer + Int(maxAudioChanged)+1
             
-            let mainService = test.listener.metadatas.last?.activeService
+            let mainService = test.listener.metadatas.last?.service
             ybridControl.swapService(to:"swr-raka09")
             _ = poller.wait(max: maxWait) {
-                let serviceSwapped = test.listener.metadatas.last?.activeService
+                let serviceSwapped = test.listener.metadatas.last?.service
                 Logger.testing.info("service=\(String(describing: serviceSwapped))")
                 return serviceSwapped?.identifier != mainService?.identifier
             }
@@ -148,7 +148,7 @@ class YbridSwapServiceTests: XCTestCase {
         _ = test.checkErrors(expected: 0)
         
         let services:[String] =
-            test.listener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+            test.listener.metadatas.map{ $0.service?.identifier ?? "(nil)"}
         Logger.testing.info( "services were \(services)")
         
         XCTAssertGreaterThanOrEqual(services.count, 2, "should be 2 different active services, but were \(services.count)")
@@ -177,7 +177,7 @@ class YbridSwapServiceTests: XCTestCase {
             let maxWait: Int = buffer + Int(maxAudioChanged)+1
             
             _ = poller.wait(max: maxWait) {
-                let serviceSwapped = test.listener.metadatas.last?.activeService
+                let serviceSwapped = test.listener.metadatas.last?.service
                 Logger.testing.info("service=\(String(describing: serviceSwapped))")
                 return serviceSwapped?.identifier == "swr-raka09"
             }
@@ -192,11 +192,11 @@ class YbridSwapServiceTests: XCTestCase {
         
         
         let services:[String] =
-            test.listener.metadatas.map{ $0.activeService?.identifier ?? "(nil)"}
+            test.listener.metadatas.map{ $0.service?.identifier ?? "(nil)"}
         Logger.testing.info( "services were \(services)")
         
-        XCTAssertEqual("swr3-live",  test.listener.metadatas.first?.activeService?.identifier)
-        XCTAssertEqual("swr-raka09",  test.listener.metadatas.last?.activeService?.identifier)
+        XCTAssertEqual("swr3-live",  test.listener.metadatas.first?.service?.identifier)
+        XCTAssertEqual("swr-raka09",  test.listener.metadatas.last?.service?.identifier)
     }
     
     // MARK: using audio complete

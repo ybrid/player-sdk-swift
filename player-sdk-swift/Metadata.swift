@@ -33,11 +33,10 @@ public protocol Metadata {
 
     var displayTitle: String? { get }
     
-    var station: Station? { get }
     var current: Item? { get }
     var next: Item? { get }
     
-    var activeService: Service? { get }
+    var service: Service? { get }
 }
 
 public struct Item {
@@ -46,11 +45,15 @@ public struct Item {
     
     public let identifier: String?
     public let title: String?
-    public let version: String?
     public let artist: String?
     public let album: String?
+    public let version: String?
     public let description: String?
-    public let durationMillis: Int64?
+    public let playbackLength: TimeInterval?
+    
+    public let genre: String?
+    public let infoUri: String?
+    public let companions: [String]?
 }
 
 public enum ItemType : String  {
@@ -65,48 +68,35 @@ public enum ItemType : String  {
     case UNKNOWN
 }
 
-public struct Station {
-    public var name: String?
-    public var genre: String?
-}
-
 public struct Service : Equatable {
     public let identifier:String
     public var displayName:String?
     public var iconUri:String?
+    public var genre: String?
+    public var description: String?
+    public var infoUri:String?
 }
 
 class AbstractMetadata : Metadata {
     
     private var currentItem:Item?
     private var nextItem:Item?
-    private var stationInfo: Station?
+    private var serviceInfo: Service?
+    
     private var delegate:AbstractMetadata?
     
-    init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
+    init(current:Item? = nil, next:Item? = nil, service:Service? = nil) {
         self.currentItem = current
         self.nextItem = next
-        self.stationInfo = station
+        self.serviceInfo = service
     }
     
     func delegate(with other: AbstractMetadata) {
         self.delegate = other
     }
     
-    func setBroadcaster(_ broadcaster:String) {
-        guard let _ = stationInfo else {
-            stationInfo = Station(name:broadcaster)
-            return
-        }
-        stationInfo!.name = broadcaster
-    }
-    
-    func setGenre(_ genre:String) {
-        guard let _ = stationInfo else {
-            stationInfo = Station(genre:genre)
-            return
-        }
-        stationInfo!.genre = genre
+    func setService( _ service:Service) {
+        serviceInfo = service
     }
     
     public final var displayTitle: String? {
@@ -116,35 +106,16 @@ class AbstractMetadata : Metadata {
         return current?.displayTitle
     }
     
-    public final var station: Station?  {
-        if let delegate = delegate {
-            return delegate.station
-        }
-        return stationInfo
-    }
-    
     public final var current: Item? {
-        if let delegate = delegate {
-            return delegate.current
-        }
-        return currentItem
+        return delegate?.current ?? currentItem
     }
     
     public final var next: Item?  {
-        if let delegate = delegate {
-            return delegate.next
-        }
-        return nextItem
+        return delegate?.next ?? nextItem
     }
     
-    public final var activeService: Service? {
-        if let delegate = delegate {
-            return delegate.activeService
-        }
-        guard let ybrid = self as? YbridMetadata else {
-            return nil
-        }
-        return ybrid.currentService
+    public final var service: Service? {
+        return delegate?.service ?? serviceInfo
     }
     
 }

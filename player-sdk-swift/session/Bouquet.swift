@@ -33,7 +33,12 @@ class Bouquet {
     let activeService:Service
     
     init(bouquet: YbridBouquet) throws {
-        self.services = bouquet.availableServices.map{ Service(identifier: $0.id, displayName: $0.displayName, iconUri: $0.iconURL) }
+        self.services = bouquet.availableServices.map{
+            var service = Service(identifier: $0.id)
+            if let name = $0.displayName?.value { service.displayName = name }
+            if let icon = $0.iconURL?.value { service.iconUri = icon }
+            return service
+        }
         if let mainServiceIndex = self.services.firstIndex(where: { (service) in return service.identifier == bouquet.primaryServiceId }) {
             self.defaultService = services[mainServiceIndex]
         } else {
@@ -46,5 +51,15 @@ class Bouquet {
         }
         self.activeService = services[activeIndex]
     }
-    
+}
+
+
+extension String {
+    var value:String? { get {
+        let value = self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        if !value.isEmpty {
+            return value
+        }
+        return nil
+    }}
 }

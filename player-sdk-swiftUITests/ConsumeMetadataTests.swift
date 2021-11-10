@@ -67,9 +67,8 @@ class ConsumeMetadataTests: XCTestCase {
         guard let next = metadata.next else { XCTFail("next expected"); return }
         XCTAssertTrue(checkIsDemoItem(next))
         
-        guard let _ = metadata.station else { XCTFail("next expected"); return }
+        guard let _ = metadata.service else { XCTFail("service expected"); return }
     }
-    
     
     private func checkIsDemoItem(_ item:Item) -> Bool {
         let expectedTypes = [ItemType.MUSIC, ItemType.JINGLE]
@@ -87,11 +86,11 @@ class ConsumeMetadataTests: XCTestCase {
         
         XCTAssertNotNil(item.identifier,"id expected")
         XCTAssertNotNil(item.description,"descriptiion expected")
-        XCTAssertNotNil(item.durationMillis,"durationMillis expected")
+        XCTAssertNotNil(item.playbackLength,"playbackLength expected")
         return true
     }
     
-    func test02_Ybrid_Swr3_OnEachPlayAndInStream_CurrentNextStation() throws {
+    func test02_Ybrid_Swr3_OnEachPlayAndInStream_CurrentNextService() throws {
         
         try AudioPlayer.open(for: ybridSwr3Endpoint, listener: consumer) {
             [self] control in player = control
@@ -120,11 +119,12 @@ class ConsumeMetadataTests: XCTestCase {
             XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
         }
         
-        let stations = consumer.metadatas.filter{ return $0.station != nil }.map { $0.station! }
-        XCTAssertGreaterThan(stations.count, 0, "must be at least one station")
-        stations.forEach { (station) in
-            XCTAssertEqual("SWR3", station.name)
-            XCTAssertEqual("Pop Music", station.genre)
+        let services = consumer.metadatas.filter{ return $0.service != nil }.map { $0.service! }
+        XCTAssertGreaterThan(services.count, 0, "must be at least one station")
+        services.forEach { (service) in
+            XCTAssertEqual("swr3-live", service.identifier)
+            XCTAssertEqual("SWR3 Live", service.displayName)
+            XCTAssertNil(service.genre)
         }
     }
 
@@ -157,15 +157,18 @@ class ConsumeMetadataTests: XCTestCase {
         }
         XCTAssertNil(firstMetadata.next, "icy usually doesn't include next item")
         
-        guard let station = firstMetadata.station else {
+        guard let service = firstMetadata.service else {
             XCTFail("icy usually uses http-header 'icy-name'"); return
         }
-        XCTAssertEqual("hr2", station.name)
-        XCTAssertNil(station.genre)
+        XCTAssertEqual("hr2", service.identifier)
+        XCTAssertEqual("hr2", service.displayName)
+        XCTAssertNil(service.genre)
         
     }
     
     func test04_OpusDlf_InStreamOnly_CurrentStation() throws {
+        Logger.verbose = true
+        
         try AudioPlayer.open(for: opusDlfEndpoint, listener: consumer) {
             [self] control in player = control
             
@@ -189,11 +192,12 @@ class ConsumeMetadataTests: XCTestCase {
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
         
-        guard let station = consumer.metadatas[0].station else {
+        guard let service = consumer.metadatas[0].service else {
             XCTFail("icy usually uses http-header 'icy-name'"); return
         }
-        XCTAssertEqual("Deutschlandfunk", station.name)
-        XCTAssertEqual("Information", station.genre)
+        XCTAssertEqual("Deutschlandfunk", service.identifier)
+        XCTAssertEqual("Deutschlandfunk", service.displayName)
+        XCTAssertEqual("Information", service.genre)
 
     }
     
@@ -227,11 +231,12 @@ class ConsumeMetadataTests: XCTestCase {
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
         
-        guard let station = consumer.metadatas[0].station else {
+        guard let service = consumer.metadatas[0].service else {
             XCTFail("This server supports icy-fields, 'icy-name' missing"); return
         }
-        XCTAssertEqual("TheRadio.CC", station.name)
-        XCTAssertEqual("Creative Commons", station.genre)
+        XCTAssertEqual("TheRadio.CC", service.identifier)
+        XCTAssertEqual("TheRadio.CC", service.displayName)
+        XCTAssertEqual("Creative Commons", service.genre)
     }
     
     func test06_OnDemand_OnBeginningNoneOnResume() throws {
@@ -262,8 +267,8 @@ class ConsumeMetadataTests: XCTestCase {
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
         
-        let station = consumer.metadatas[0].station
-        XCTAssertNil(station, "This server does not support icy-fields")
+        let service = consumer.metadatas[0].service
+        XCTAssertNil(service, "This server does not support icy-fields")
     }
     
     
