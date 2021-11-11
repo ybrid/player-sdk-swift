@@ -61,9 +61,7 @@ class MetadataRealpayloadExtractorTest: XCTestCase {
         
         var titles:[String] = []
         func metadataReady(_ metadata: AbstractMetadata) {
-            if let title = metadata.displayTitle {
-                titles.append(title)
-            }
+            titles.append(metadata.displayTitle)
         }
     }
     var consumer = TestMetadataListener()

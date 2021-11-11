@@ -201,7 +201,7 @@ class YbridTimeshiftTests: XCTestCase {
         let took = wait(max: roundedUp) {
             return listener.isItem(of: types)
         }
-        XCTAssertLessThanOrEqual(took, roundedUp, "item type is \(String(describing: listener.metadatas.last?.current?.type)), not in \(types)")
+        XCTAssertLessThanOrEqual(took, roundedUp, "item type is \(String(describing: listener.metadatas.last?.current.type)), not in \(types)")
     }
         
     private func wait(_ control:PlaybackControl, until:PlaybackState, maxSeconds:Int) {
@@ -331,21 +331,21 @@ class YbridTimeshiftTests: XCTestCase {
         test.playing{ [self] (ybrid) in
             maxWait = durations()
             
-            let typeBegin = test.listener.metadatas.last?.current?.type
+            let typeBegin = test.listener.metadatas.last?.current.type
             XCTAssertNotNil(typeBegin)
             Logger.testing.notice("-- playing \(typeBegin ?? ItemType.UNKNOWN)")
             
             
             test.skipSynced(-1, to: nil, maxWait: icyMaxInterval)
             
-            let typeBack1 = test.listener.metadatas.last?.current?.type
+            let typeBack1 = test.listener.metadatas.last?.current.type
             XCTAssertNotNil(typeBack1)
             Logger.testing.notice("-- playing \(typeBack1 ?? ItemType.UNKNOWN)")
   
             
             test.skipSynced( -1, to: nil, maxWait: icyMaxInterval)
             
-            let typeBack2 = test.listener.metadatas.last?.current?.type
+            let typeBack2 = test.listener.metadatas.last?.current.type
             XCTAssertNotNil(typeBack2)
             Logger.testing.notice("-- playing \(typeBack2 ?? ItemType.UNKNOWN)")
 

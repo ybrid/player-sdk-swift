@@ -43,7 +43,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var stopping = false
 
     private var metadataExtractor: MetadataExtractor?
-    private var fallbackService:Service?
+    private var fallbackMetadata:IcyMetadata?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
@@ -104,9 +104,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func prepareDecoder(_ mimeType: String?, _ filename: String?) throws {
         self.decoder = try AudioDecoder.factory.createDecoder(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
     }
-
-    func setService(_ service:Service) {
-        self.fallbackService = service
+    
+    func setIcyService(_ icyService:IcyMetadata) {
+        self.fallbackMetadata = icyService
     }
     
     func setInfinite(_ infinite: Bool) {
@@ -232,12 +232,14 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             return
         }
         
-        Logger.loading.debug("\(metadata.self) \(metadata.displayTitle ?? "(no title)")")
+        Logger.loading.debug("\(metadata.self) displayTitle is '\(metadata.displayTitle)'")
         
-        if metadata.service == nil, let service = fallbackService {
-            metadata.setService(service)
+        if let fallback = fallbackMetadata {
+            fallback.delegate(with: metadata)
+            session.setMetadata(metadata: fallback)
+        } else {
+            session.setMetadata(metadata: metadata)
         }
-        session.setMetadata(metadata: metadata)
     
         
         let completeCallback = session.triggeredAudioComplete(metadata)

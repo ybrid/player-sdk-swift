@@ -37,7 +37,7 @@ class IcyMetadata : AbstractMetadata {
     }
     
     // content of http-headers "icy-name" and "icy-genre" ("ice-*" were mapped to "icy-*")
-    public static func createService(_ icy: [String:String]) -> Service? {
+    private static func createService(_ icy: [String:String]) -> Service? {
         guard let name = icy["icy-name"] else { return nil }
         return Service(identifier: name, displayName: name, genre: icy["icy-genre"])
     }
@@ -48,10 +48,10 @@ class IcyMetadata : AbstractMetadata {
             return nil
         }
         
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, artist:nil, album:nil, version:nil, description:nil, playbackLength:nil, genre: nil,
-            infoUri: nil, companions: nil)
+        return Item(displayTitle:displayTitle)
     }
 }
+
 
 class OpusMetadata : AbstractMetadata {
     init(vorbisComments:[String:String]) {
@@ -60,8 +60,8 @@ class OpusMetadata : AbstractMetadata {
     
     private static func createItem(vorbis: [String:String]) -> Item? {
         let displayTitle = OpusMetadata.combinedTitle(comments: vorbis)
-        return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:vorbis["TITLE"], artist:vorbis["ARTIST"], album:vorbis["ALBUM"], version:vorbis["VERSION"], description:nil, playbackLength:nil, genre: nil,
-                    infoUri: nil, companions: nil)
+        return Item(displayTitle:displayTitle, title:vorbis["TITLE"], artist:vorbis["ARTIST"],
+                    album:vorbis["ALBUM"], version:vorbis["VERSION"])
     }
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"
@@ -81,6 +81,7 @@ class OpusMetadata : AbstractMetadata {
     }
 }
 
+
 class YbridMetadata : AbstractMetadata {
     
     init(ybridV2:YbridV2Metadata) {
@@ -99,8 +100,9 @@ class YbridMetadata : AbstractMetadata {
         let type = YbridMetadata.typeFrom(type: ybrid.type)
         let displayTitle = YbridMetadata.combinedTitle(item: ybrid)
         let playbackLength = TimeInterval( ybrid.durationMillis / 1_000 )
-        return Item(type:type, displayTitle:displayTitle, identifier:ybrid.id, title:ybrid.title, artist:ybrid.artist, album:nil, version:nil, description:ybrid.description, playbackLength: playbackLength, genre: nil,
-                    infoUri: nil, companions: nil)
+        return Item(displayTitle:displayTitle, identifier:ybrid.id, type:type,
+                    title:ybrid.title, artist:ybrid.artist,
+                    description:ybrid.description, playbackLength: playbackLength)
     }
     
     private static func typeFrom(type: String) -> ItemType {
@@ -118,7 +120,4 @@ class YbridMetadata : AbstractMetadata {
         }
         return result
     }
-    
-    
 }
-

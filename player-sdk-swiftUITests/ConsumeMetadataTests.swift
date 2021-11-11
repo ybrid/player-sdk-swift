@@ -60,23 +60,29 @@ class ConsumeMetadataTests: XCTestCase {
             XCTFail("metadatas[0] expected")
             return
         }
-        guard let current = metadata.current else { XCTFail("current expected"); return }
+        
+        XCTAssertNotNil(metadata.displayTitle, "expected a displayTitle" )
+        
+        let current = metadata.current
         XCTAssertTrue(checkIsDemoItem(current))
         
            
         guard let next = metadata.next else { XCTFail("next expected"); return }
         XCTAssertTrue(checkIsDemoItem(next))
         
-        guard let _ = metadata.service else { XCTFail("service expected"); return }
+        XCTAssertEqual(metadata.service.identifier,"") // no bouquet in server communication yet
     }
     
+    let expectedYbridDemoTitles = ["The Winner Takes It All", "Your Personal Audio Experience", "All I Need"]
     private func checkIsDemoItem(_ item:Item) -> Bool {
         let expectedTypes = [ItemType.MUSIC, ItemType.JINGLE]
-        XCTAssertTrue( expectedTypes.contains(item.type), "\(item.type) not expected" )
+        guard let type = item.type else {
+            XCTFail("type expected"); return false
+        }
+        XCTAssertTrue( expectedTypes.contains(type), "\(type) not expected" )
         
         guard let title = item.title else { XCTFail("title expected"); return false }
-        let expectedTitles = ["The Winner Takes It All", "Your Personal Audio Experience", "All I Need"]
-        XCTAssertTrue(expectedTitles.contains(title), "\(title) not expected" )
+        XCTAssertTrue(expectedYbridDemoTitles.contains(title), "\(title) not expected" )
 
         XCTAssertNotNil(item.displayTitle,"display title expected")
         XCTAssertNil(item.version,"no version expected")
@@ -105,10 +111,10 @@ class ConsumeMetadataTests: XCTestCase {
         _ = semaphore?.wait(timeout: .distantFuture)
         
         
-        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
         currentItems.forEach{ (item) in
-            let type = item.type
+            guard let type = item.type else { XCTFail("expected a type"); return }
             print("\(item)")
             XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
         }
@@ -116,10 +122,11 @@ class ConsumeMetadataTests: XCTestCase {
         let nextItems = consumer.metadatas.filter{ return $0.next != nil }.map{ $0.next! }
         XCTAssertGreaterThan(nextItems.count, 0, "must be at least one next item")
         nextItems.map{ $0.type }.forEach{ (type) in
+            guard let type = type else { XCTFail("expected a type"); return }
             XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
         }
         
-        let services = consumer.metadatas.filter{ return $0.service != nil }.map { $0.service! }
+        let services = consumer.metadatas.map { $0.service }
         XCTAssertGreaterThan(services.count, 0, "must be at least one station")
         services.forEach { (service) in
             XCTAssertEqual("swr3-live", service.identifier)
@@ -143,11 +150,9 @@ class ConsumeMetadataTests: XCTestCase {
         }
         _ = semaphore?.wait(timeout: .distantFuture)
     
-        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
-        currentItems.map{ $0.type }.forEach{ (type) in
-            XCTAssertEqual(ItemType.UNKNOWN, type, "\(type) not expected")
-        }
+
         currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
             XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
         }
@@ -157,13 +162,10 @@ class ConsumeMetadataTests: XCTestCase {
         }
         XCTAssertNil(firstMetadata.next, "icy usually doesn't include next item")
         
-        guard let service = firstMetadata.service else {
-            XCTFail("icy usually uses http-header 'icy-name'"); return
-        }
+        let service = firstMetadata.service
         XCTAssertEqual("hr2", service.identifier)
         XCTAssertEqual("hr2", service.displayName)
         XCTAssertNil(service.genre)
-        
     }
     
     func test04_OpusDlf_InStreamOnly_CurrentService() throws {
@@ -181,24 +183,21 @@ class ConsumeMetadataTests: XCTestCase {
         }
         _ = semaphore?.wait(timeout: .distantFuture)
     
-        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current! }
+        let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertGreaterThan(currentItems.count, 0, "must be at least one current item")
-        currentItems.map{ $0.type }.forEach{ (type) in
-            XCTAssertEqual(ItemType.UNKNOWN, type, "\(type) not expected")
-        }
+
         currentItems.map{ $0.displayTitle }.forEach{ (displayTitle) in
             XCTAssertNotNil(displayTitle, "\(displayTitle) expected")
         }
         
-        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
+        XCTAssertNil(consumer.metadatas.first?.next, "icy usually doesn't include next item")
         
-        guard let service = consumer.metadatas[0].service else {
-            XCTFail("icy usually uses http-header 'icy-name'"); return
+        guard let service = consumer.metadatas.first?.service else {
+            XCTFail("This server supports icy-fields, 'icy-name' missing"); return
         }
         XCTAssertEqual("Deutschlandfunk", service.identifier)
         XCTAssertEqual("Deutschlandfunk", service.displayName)
         XCTAssertEqual("Information", service.genre)
-
     }
     
     func test05_OpusCC_InStreamOnly_TitleArtistAlbumService() throws {
@@ -215,9 +214,9 @@ class ConsumeMetadataTests: XCTestCase {
         }
         _ = semaphore?.wait(timeout: .distantFuture)
         
-        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current }
+        let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertGreaterThan(currentItems.count, 1, "must be one current item")
-        guard let item = currentItems[0] else { XCTFail(); return }
+        guard let item = currentItems.first else { XCTFail(); return }
         
         XCTAssertNotNil(item.album)
         XCTAssertNotNil(item.title)
@@ -226,12 +225,12 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertNil(item.description)
         XCTAssertNil(item.identifier)
         XCTAssertNil(item.version)
-        XCTAssertEqual(ItemType.UNKNOWN, item.type)
+        XCTAssertNil(item.type)
         
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
         
-        guard let service = consumer.metadatas[0].service else {
+        guard let service = consumer.metadatas.first?.service else {
             XCTFail("This server supports icy-fields, 'icy-name' missing"); return
         }
         XCTAssertEqual("TheRadio.CC", service.identifier)
@@ -252,9 +251,9 @@ class ConsumeMetadataTests: XCTestCase {
         }
         _ = semaphore?.wait(timeout: .distantFuture)
     
-        let currentItems = consumer.metadatas.filter{ return $0.current != nil }.map{ $0.current }
+        let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertEqual(currentItems.count, 1, "must be one current item")
-        guard let item = currentItems[0] else { XCTFail(); return }
+        guard let item = currentItems.first else { XCTFail(); return }
         XCTAssertNotNil(item.album)
         XCTAssertNotNil(item.title)
         XCTAssertNotNil(item.artist)
@@ -262,13 +261,17 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertNil(item.description)
         XCTAssertNil(item.identifier)
         XCTAssertNil(item.version)
-        XCTAssertEqual(ItemType.UNKNOWN, item.type)
+        XCTAssertNil(item.type)
         
+        guard let metadata = consumer.metadatas.first else {
+            XCTFail(); return
+        }
+        XCTAssertNil(metadata.next, "icy usually doesn't include next item")
         
-        XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
-        
-        let service = consumer.metadatas[0].service
-        XCTAssertNil(service, "This server does not support icy-fields")
+        ///
+        let service = metadata.service
+        XCTAssertEqual(service.identifier,"", "This server does not support icy-fields")
+        XCTAssertNil(service.displayName, "This server does not support icy-fields")
     }
     
     
@@ -325,7 +328,7 @@ class ConsumeMetadataTests: XCTestCase {
         let queue = DispatchQueue(label: "io.ybrid.testing.metadata.calls")
         
         override func metadataChanged(_ metadata: Metadata) {
-            Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+            Logger.testing.info("-- metadata changed, display title is '\(metadata.displayTitle)'")
 //            XCTAssertNotNil(metadata.displayTitle)
             queue.async {
                 self.metadatas.append(metadata)

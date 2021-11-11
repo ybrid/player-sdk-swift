@@ -205,9 +205,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     
     fileprivate func handleMetadata(_ icyHeader:[String:String]) {
         Logger.loading.debug("icy-fields: \(icyHeader)")
-        if let service = IcyMetadata.createService(icyHeader) {
-            pipeline.setService(service)
-        }
+        let service = IcyMetadata(icyData: icyHeader)
+        pipeline.setIcyService(service)
         
         if withMetadata, let metaint = icyHeader["icy-metaint"] {
             guard let metadataEveryBytes = Int(metaint) else {

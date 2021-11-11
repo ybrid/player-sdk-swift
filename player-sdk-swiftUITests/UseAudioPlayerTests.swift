@@ -275,12 +275,12 @@ class UseAudioPlayerTests: XCTestCase {
                 sleep(1)
                 
                 XCTAssertGreaterThan(playerListener.metadatas.count, 0)
-                guard playerListener.metadatas.count > 0 else {
+                guard let metadata = playerListener.metadatas.first else {
                     XCTFail("expected at least one metadata called");
                     self.semaphore?.signal(); return
                 }
-                let metadata = playerListener.metadatas[0]
-                XCTAssertNotNil(metadata.current?.displayTitle)
+                XCTAssertNotNil(metadata.current.displayTitle)
+                XCTAssertNotNil(metadata.service.identifier)
                 
                 self.semaphore?.signal()
             }

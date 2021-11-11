@@ -31,29 +31,45 @@ import Foundation
 
 public protocol Metadata {
 
-    var displayTitle: String? { get }
+    var displayTitle: String { get }
     
-    var current: Item? { get }
+    var current: Item { get }
     var next: Item? { get }
     
-    var service: Service? { get }
+    var service: Service { get }
 }
 
 public struct Item {
-    public let type: ItemType
     public let displayTitle: String
-    
     public let identifier: String?
+    public let type: ItemType?
     public let title: String?
     public let artist: String?
     public let album: String?
     public let version: String?
     public let description: String?
     public let playbackLength: TimeInterval?
-    
     public let genre: String?
     public let infoUri: String?
     public let companions: [String]?
+    
+    init(displayTitle: String, identifier: String? = nil, type: ItemType? = nil,
+         title: String? = nil, artist: String? = nil, album: String? = nil, version: String? = nil,
+         description: String? = nil, playbackLength: TimeInterval? = nil, genre: String? = nil,
+         infoUri: String? = nil, companions: [String]? = nil) {
+        self.displayTitle = displayTitle
+        self.identifier = identifier
+        self.type = type
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.version  = version
+        self.description = description
+        self.playbackLength = playbackLength
+        self.genre = genre
+        self.infoUri = infoUri
+        self.companions = companions
+      }
 }
 
 public enum ItemType : String  {
@@ -70,20 +86,22 @@ public enum ItemType : String  {
 
 public struct Service : Equatable {
     public let identifier:String
-    public var displayName:String?
-    public var iconUri:String?
-    public var genre: String?
-    public var description: String?
-    public var infoUri:String?
+    public var displayName:String? = nil
+    public var iconUri:String? = nil
+    public var genre: String? = nil
+    public var description: String? = nil
+    public var infoUri:String? = nil
 }
 
 class AbstractMetadata : Metadata {
     
-    private var currentItem:Item?
-    private var nextItem:Item?
-    private var serviceInfo: Service?
+    var currentItem:Item?
+    var nextItem:Item?
+    var serviceInfo: Service?
     
     private var delegate:AbstractMetadata?
+    private static let noItem = Item(displayTitle: "")
+    private static let noServie = Service(identifier: "")
     
     init(current:Item? = nil, next:Item? = nil, service:Service? = nil) {
         self.currentItem = current
@@ -99,23 +117,23 @@ class AbstractMetadata : Metadata {
         serviceInfo = service
     }
     
-    public final var displayTitle: String? {
+    public final var displayTitle: String {
         if let delegate = delegate {
             return delegate.displayTitle
         }
-        return current?.displayTitle
+        return currentItem?.displayTitle ?? AbstractMetadata.noItem.displayTitle
     }
     
-    public final var current: Item? {
-        return delegate?.current ?? currentItem
+    public final var current: Item {
+        return delegate?.currentItem ?? currentItem ?? AbstractMetadata.noItem
     }
     
     public final var next: Item?  {
-        return delegate?.next ?? nextItem
+        return delegate?.nextItem ?? nextItem
     }
     
-    public final var service: Service? {
-        return delegate?.service ?? serviceInfo
+    public final var service: Service {
+        return delegate?.serviceInfo ?? serviceInfo ?? AbstractMetadata.noServie
     }
     
 }

@@ -71,7 +71,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     override func metadataChanged(_ metadata: Metadata) {
         super.metadataChanged(metadata)
         if logMetadata {
-            Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+            Logger.testing.info("-- metadata changed, display title is '\(metadata.displayTitle)'")
         }
         queue.async {
             self.metadatas.append(metadata)
@@ -241,7 +241,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     func isItem(_ type:ItemType) -> Bool {
         queue.sync {
-            if let currentType = metadatas.last?.current?.type {
+            if let currentType = metadatas.last?.current.type {
                 return type == currentType
             }
             return false
@@ -250,7 +250,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     func isItem(of types:[ItemType]) -> Bool {
         queue.sync {
-            if let currentType = metadatas.last?.current?.type {
+            if let currentType = metadatas.last?.current.type {
                 return types.contains(currentType)
             }
             return false
@@ -288,7 +288,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- service \(String(describing: metadata.service?.identifier))")
+        Logger.testing.notice("-- service \(String(describing: metadata.service.identifier))")
         super.metadataChanged(metadata)
     }
 }

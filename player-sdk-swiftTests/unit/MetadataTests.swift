@@ -96,32 +96,32 @@ class MetadataTests: XCTestCase {
     func testDisplayTitle_YbridAndYbrid_DelegateWins() {
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         let metadata = YbridMetadata(ybridV2: ybridMD)
-        XCTAssertEqual("Ybrid demo",  metadata.service?.displayName )
+        XCTAssertEqual("Ybrid demo",  metadata.service.displayName )
         
         let ybridMD2 = toYbridV2Metadata(metadataRawJson)
         let metadata2 = YbridMetadata(ybridV2: ybridMD2)
         metadata.delegate(with: metadata2)
         
         XCTAssertEqual("All I Need\nby Air",  metadata.displayTitle)
-        XCTAssertEqual("All I Need",  metadata.current?.title )
+        XCTAssertEqual("All I Need",  metadata.current.title )
         XCTAssertEqual(ItemType.JINGLE,  metadata.next?.type )
         
-        XCTAssertEqual("",  metadata.service?.displayName )
+        XCTAssertEqual("",  metadata.service.displayName )
     }
     
     func testYbridMetadata_CurrentNextService() {
         let md = toYbridV2Metadata(metadataRawJson)
         let metadata = YbridMetadata(ybridV2: md)
         
-        XCTAssertEqual(ItemType.MUSIC, metadata.current?.type )
-        XCTAssertEqual("Air", metadata.current?.artist )
+        XCTAssertEqual(ItemType.MUSIC, metadata.current.type )
+        XCTAssertEqual("Air", metadata.current.artist )
         
         XCTAssertEqual(ItemType.JINGLE, metadata.next?.type )
         XCTAssertEqual("Your Personal Audio Experience", metadata.next?.title )
         
-        XCTAssertEqual("", metadata.service?.identifier )
-        XCTAssertEqual("", metadata.service?.displayName )
-        XCTAssertEqual("", metadata.service?.genre )
+        XCTAssertEqual("", metadata.service.identifier )
+        XCTAssertEqual("", metadata.service.displayName )
+        XCTAssertEqual("", metadata.service.genre )
     }
 
 
@@ -131,18 +131,18 @@ class MetadataTests: XCTestCase {
         heyJudeIcyTitleExtended["icy-genre"] = "Pop Music"
         let metadata = IcyMetadata(icyData: heyJudeIcyTitleExtended )
         
-        XCTAssertEqual("SWR3", metadata.service?.identifier )
-        XCTAssertEqual("SWR3", metadata.service?.displayName )
-        XCTAssertEqual("Pop Music", metadata.service?.genre )
+        XCTAssertEqual("SWR3", metadata.service.identifier )
+        XCTAssertEqual("SWR3", metadata.service.displayName )
+        XCTAssertEqual("Pop Music", metadata.service.genre )
         
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
         
         XCTAssertEqual("Hey Jude\nby Beatles", metadata.displayTitle )
         
-        XCTAssertEqual("Ybrid demo", metadata.service?.identifier )
-        XCTAssertEqual("Ybrid demo", metadata.service?.displayName)
-        XCTAssertEqual("", metadata.service?.genre)
+        XCTAssertEqual("Ybrid demo", metadata.service.identifier )
+        XCTAssertEqual("Ybrid demo", metadata.service.displayName)
+        XCTAssertEqual("", metadata.service.genre)
     }
 
     func testDisplayTitle_IcyAndOpus_IcyService() {
@@ -153,16 +153,16 @@ class MetadataTests: XCTestCase {
         
         XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle)
         
-        XCTAssertEqual("SWR3", metadata.service?.identifier )
-        XCTAssertEqual("SWR3", metadata.service?.displayName )
-        XCTAssertEqual("Pop Music", metadata.service?.genre )
+        XCTAssertEqual("SWR3", metadata.service.identifier )
+        XCTAssertEqual("SWR3", metadata.service.displayName )
+        XCTAssertEqual("Pop Music", metadata.service.genre )
         
         let opusMD = OpusMetadata(vorbisComments: heyJudeFullVorbisComments )
         metadata.delegate(with: opusMD)
         XCTAssertEqual("Love - Beatles - Hey Jude (Remastered 2015)", metadata.displayTitle )
         
-        XCTAssertEqual("SWR3", metadata.service?.identifier )
-        XCTAssertEqual("SWR3", metadata.service?.displayName )
-        XCTAssertEqual("Pop Music", metadata.service?.genre )
+        XCTAssertEqual("SWR3", metadata.service.identifier )
+        XCTAssertEqual("SWR3", metadata.service.displayName )
+        XCTAssertEqual("Pop Music", metadata.service.genre )
     }
 }
