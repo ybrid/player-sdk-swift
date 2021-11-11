@@ -159,6 +159,9 @@ public class MediaSession {
         
         let audioComplete:AudioCompleteCallback = { (success) in
             Logger.playing.debug("change over \(subtype) complete (\(success ? "with":"no") success)")
+            if subtype == .bouquet {
+                self.notifyChanged(SubInfo.metadata, clear: false)
+            }
             if let userCompleteCallback = userAudioComplete {
                 DispatchQueue.global().async {
                     userCompleteCallback(success)

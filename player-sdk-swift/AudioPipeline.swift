@@ -42,11 +42,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var firstPCM = true
     var stopping = false
 
-    var icyFields:[String:String]? { didSet {
-        Logger.loading.notice("icy fields \(icyFields ?? [:])")
-    }}
-
     private var metadataExtractor: MetadataExtractor?
+    private var fallbackService:Service?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
@@ -108,6 +105,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.decoder = try AudioDecoder.factory.createDecoder(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
     }
 
+    func setService(_ service:Service) {
+        self.fallbackService = service
+    }
+    
     func setInfinite(_ infinite: Bool) {
         self.infinite = infinite
     }
@@ -224,6 +225,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.decode(data: audioData)
     }
     
+    
     func metadataReady(_ metadata: AbstractMetadata) {
         guard !self.stopping else {
             Logger.decoding.debug("stopping pipeline, ignoring metadata")
@@ -232,11 +234,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         Logger.loading.debug("\(metadata.self) \(metadata.displayTitle ?? "(no title)")")
         
-        if let fields = icyFields,
-           let icyServiceInfo = IcyMetadata(icyData: fields).service {
-                metadata.setService(icyServiceInfo)
+        if metadata.service == nil, let service = fallbackService {
+            metadata.setService(service)
         }
         session.setMetadata(metadata: metadata)
+    
         
         let completeCallback = session.triggeredAudioComplete(metadata)
         

@@ -129,7 +129,7 @@ class ConsumeMetadataTests: XCTestCase {
     }
 
     
-    func test03_Icy_InStreamOnly_CurrentStation() throws {
+    func test03_Icy_InStreamOnly_CurrentService() throws {
         
         try AudioPlayer.open(for: icecastHr2Endpoint, listener: consumer) {
             [self] control in player = control
@@ -166,7 +166,7 @@ class ConsumeMetadataTests: XCTestCase {
         
     }
     
-    func test04_OpusDlf_InStreamOnly_CurrentStation() throws {
+    func test04_OpusDlf_InStreamOnly_CurrentService() throws {
         Logger.verbose = true
         
         try AudioPlayer.open(for: opusDlfEndpoint, listener: consumer) {
@@ -201,7 +201,7 @@ class ConsumeMetadataTests: XCTestCase {
 
     }
     
-    func test05_OpusCC_InStreamOnly_TitleArtistAlbum() throws {
+    func test05_OpusCC_InStreamOnly_TitleArtistAlbumService() throws {
         
         try AudioPlayer.open(for: opusCCEndpoint, listener: consumer) {
             [self] control in player = control
@@ -323,9 +323,10 @@ class ConsumeMetadataTests: XCTestCase {
         
         var metadatas:[Metadata] = []
         let queue = DispatchQueue(label: "io.ybrid.testing.metadata.calls")
+        
         override func metadataChanged(_ metadata: Metadata) {
             Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
-            XCTAssertNotNil(metadata.displayTitle)
+//            XCTAssertNotNil(metadata.displayTitle)
             queue.async {
                 self.metadatas.append(metadata)
             }

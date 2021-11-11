@@ -32,16 +32,16 @@ class IcyMetadata : AbstractMetadata {
     
     init(icyData:[String:String]) {
         super.init(current: IcyMetadata.createItem(icyData),
-                   service: IcyMetadata.createService(icyData) )
+                   service: IcyMetadata.createService(icyData))
         streamUrl = icyData["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
     }
     
-    func setService(icyData:[String:String]) {
-        if let service = IcyMetadata.createService(icyData) {
-            super.setService( service )
-        }
+    // content of http-headers "icy-name" and "icy-genre" ("ice-*" were mapped to "icy-*")
+    public static func createService(_ icy: [String:String]) -> Service? {
+        guard let name = icy["icy-name"] else { return nil }
+        return Service(identifier: name, displayName: name, genre: icy["icy-genre"])
     }
-    
+        
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
     private static func createItem(_ icy: [String:String]) -> Item? {
         guard let displayTitle = icy["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {
@@ -51,14 +51,6 @@ class IcyMetadata : AbstractMetadata {
         return Item(type:ItemType.UNKNOWN, displayTitle:displayTitle, identifier:nil, title:nil, artist:nil, album:nil, version:nil, description:nil, playbackLength:nil, genre: nil,
             infoUri: nil, companions: nil)
     }
-    
-    
-    // content of http-headers "icy-name" and "icy-genre" or "ice-*"
-    private static func createService(_ icy: [String:String]) -> Service? {
-        guard let name = icy["icy-name"] else { return nil }
-        return Service(identifier: name, displayName: name, genre: icy["icy-genre"])
-    }
-    
 }
 
 class OpusMetadata : AbstractMetadata {

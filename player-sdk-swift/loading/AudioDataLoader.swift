@@ -172,18 +172,18 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         
         do {
             if response is HTTPURLResponse {
-                var icyMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")
-                if icyMetadata.count == 0 {
+                var icyHeader = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "icy-")
+                if icyHeader.count == 0 {
                     let iceMetadata = getHeaders(response as! HTTPURLResponse, fieldsStartingWith: "ice-")
                     iceMetadata.forEach { (key:String,value) in
                         let endIndex = key.index(key.startIndex, offsetBy: 3)
                         var icyKey:String = key
                         icyKey.replaceSubrange(...endIndex, with: "icy-")
                         Logger.loading.notice("changed http field '\(key)' to '\(icyKey)'")
-                        icyMetadata[icyKey] = value
+                        icyHeader[icyKey] = value
                     }
                 }
-                handleMetadata(icyMetadata)
+                handleMetadata(icyHeader)
             }
             try pipeline.prepareDecoder(response.mimeType, response.suggestedFilename)
             handleMediaLength(response.expectedContentLength)
@@ -203,11 +203,13 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         return
     }
     
-    fileprivate func handleMetadata(_ icyMetadata:[String:String]) {
-        Logger.loading.debug("icy-fields: \(icyMetadata)")
-        pipeline.icyFields = icyMetadata
+    fileprivate func handleMetadata(_ icyHeader:[String:String]) {
+        Logger.loading.debug("icy-fields: \(icyHeader)")
+        if let service = IcyMetadata.createService(icyHeader) {
+            pipeline.setService(service)
+        }
         
-        if withMetadata, let metaint = icyMetadata["icy-metaint"] {
+        if withMetadata, let metaint = icyHeader["icy-metaint"] {
             guard let metadataEveryBytes = Int(metaint) else {
                 Logger.loading.error("invalid icy-metaint value '\(metaint)'")
                 return
@@ -237,13 +239,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         
         if Logger.verbose { Logger.loading.debug("recieved \(data.count) bytes, total \(dataTask.countOfBytesReceived)") }
         
-//        if firstBytes {
-//            firstBytes = false
-//            let asText = String(decoding: data, as: UTF8.self)
-//            Logger.loading.info("first bytes as string is '\(asText)'" )
-//        }
-//
-//
         pipeline.decodingQueue.async {
             self.pipeline.process(data: data)
         }
