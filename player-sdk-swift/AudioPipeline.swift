@@ -246,7 +246,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         /// propagating changed states, includes clearing changed status
         if buffer?.isEmpty ?? true {
-            session.notifyChanged(SubInfo.metadata)
+//            session.notifyChanged(SubInfo.metadata)
+//            session.notifyChanged(SubInfo.bouquet)
             completeCallback?(true)
         } else {
             /// delay metadata notification until corresponding audio is scheduled
@@ -260,8 +261,8 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         /// do not delay notifaction of other states changes
         session.notifyChanged(SubInfo.playout)
-        session.notifyChanged(SubInfo.timeshift)
-        session.notifyChanged(SubInfo.bouquet)
+//        session.notifyChanged(SubInfo.timeshift)
+//        session.notifyChanged(SubInfo.bouquet)
     }
     
     

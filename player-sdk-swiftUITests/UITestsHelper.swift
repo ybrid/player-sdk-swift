@@ -147,7 +147,6 @@ class TimingListener : AudioPlayerListener {
         errors.removeAll()
     }
     
-    
     var buffers:[TimeInterval] = []
     func stateChanged(_ state: PlaybackState) {}
     func metadataChanged(_ metadata: Metadata) {}

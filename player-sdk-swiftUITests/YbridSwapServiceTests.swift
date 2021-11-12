@@ -34,7 +34,7 @@ class YbridSwapServiceTests: XCTestCase {
     let maxAudioChanged:TimeInterval = 1.008
     
     let poller = Poller()
-    let epCanSwapService = ybridDemoEndpoint
+//    let epCanSwapService = ybridDemoEndpoint
     
     func test01_AvailableServices_BeforePlay() throws {
         let test = TestYbridControl(ybridSwr3Endpoint)
@@ -185,7 +185,7 @@ class YbridSwapServiceTests: XCTestCase {
 
         _ = test.checkErrors(expected: 0)
         
-        XCTAssertEqual(test.listener.services.count, 2)
+        XCTAssertEqual(test.listener.services.count, 1)
         test.listener.services.forEach{
             XCTAssertGreaterThan($0.count, swr3MinServicesCount)
         }

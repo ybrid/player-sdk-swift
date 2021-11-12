@@ -58,7 +58,7 @@ class YbridSwapItemTests: XCTestCase {
         XCTAssertEqual(test.listener.swapsLeft, 0, "\(String(describing: test.listener.swapsLeft)) swaps are left.")
         
         let titles:[String] =
-            test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+            test.listener.metadatas.map{ $0.displayTitle }
         Logger.testing.info( "titles were \(titles)")
     }
 
@@ -103,8 +103,7 @@ class YbridSwapItemTests: XCTestCase {
             }
         }
         
-        let titles:[String] =
-            test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        let titles:[String] = test.listener.metadatas.map{ $0.displayTitle }
         Logger.testing.info( "titles were \(titles)")
         
         XCTAssertTrue((3...5).contains(test.listener.metadatas.count), "should be 3 (5 if item changed) metadata changes, but were \(test.listener.metadatas.count)")
@@ -133,7 +132,7 @@ class YbridSwapItemTests: XCTestCase {
             XCTAssertTrue(carriedOut, "swap was not carried out")
         }
         
-        let titles:[String] = test.listener.metadatas.map{ $0.displayTitle ?? "(nil)"}
+        let titles:[String] = test.listener.metadatas.map{ $0.displayTitle }
         Logger.testing.info( "titles were \(titles)")
         
         let differentTitles = Set(titles)

@@ -46,12 +46,14 @@ public class MediaSession {
         return mediaState?.playbackUri ?? endpoint.uri
     }}
     
+    var changeOverFactory:ChangeOverFactory?
+    
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
     }
     
-    func connect() throws  {
+    func connect() throws {
         do {
             let created = try factory.create(self)
             self.driver = created.0
@@ -67,6 +69,8 @@ public class MediaSession {
                 throw playerError
             }
         }
+        
+        changeOverFactory = ChangeOverFactory(self.notifyChanged(_:clear:))
     }
     
     func close() {
@@ -135,57 +139,32 @@ public class MediaSession {
     // MARK: change over
     
     func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
-                 _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
-         
-         let success = action()
-         let change = newChangeOver(subtype, userAudioComplete)
-         change.ctrlComplete?()
-         
-         if !running {
-             change.audioComplete(success)
-             return false
-         }
-         
-         if !success {
-             change.audioComplete(false)
-             return false
-         }
-
-         changingOver = change
-         return true
-     }
-
-    private func newChangeOver(_ subtype: SubInfo, _ userAudioComplete: AudioCompleteCallback?)  ->  ChangeOver {
+                _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
         
-        let audioComplete:AudioCompleteCallback = { (success) in
-            Logger.playing.debug("change over \(subtype) complete (\(success ? "with":"no") success)")
-            if subtype == .bouquet {
-                self.notifyChanged(SubInfo.metadata, clear: false)
-            }
-            if let userCompleteCallback = userAudioComplete {
-                DispatchQueue.global().async {
-                    userCompleteCallback(success)
-                }
-            }
+        let success = action()
+        guard let change = changeOverFactory?.create(with: subtype, userAudioComplete: userAudioComplete) else {
+            Logger.session.error("could not establish change over \(subtype)")
+            return false
+        }
+        change.ctrlComplete?()
+        
+        if !running {
+            change.audioComplete(success)
+            return false
         }
         
-        switch subtype {
-        case .timeshift:
-            return ChangeOver(subtype,
-                              ctrlComplete: { self.notifyChanged(SubInfo.timeshift, clear: false) },
-                              audioComplete: audioComplete )
-        case .metadata:
-            return ChangeOver(subtype, audioComplete: audioComplete)
-        case .bouquet:
-            return ChangeOver(subtype, audioComplete: audioComplete)
-        default:
-            return ChangeOver(subtype, audioComplete: audioComplete)
+        if !success {
+            change.audioComplete(false)
+            return false
         }
+        
+        changingOver = change
+        return true
     }
     
     var changingOver:ChangeOver? { didSet {
-        Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
-        if .timeshift == changingOver?.subInfo {
+        Logger.session.debug("change over type \(changingOver?.subtype.rawValue ?? "(nil)")")
+        if .timeshift == changingOver?.subtype {
             driver?.timeshifting = true
         } else {
             driver?.timeshifting = false
@@ -226,24 +205,24 @@ public class MediaSession {
         }
         subInfos.forEach{
             switch $0 {
-            case .metadata: notifyChangedMetadata()
+            case .metadata: notifyChangedMetadata(clear: clear)
             case .timeshift: notifyChangedOffset(clear: clear)
-            case .playout: notifyChangedPlayout()
-            case .bouquet: notifyChangedServices()
+            case .playout: notifyChangedPlayout(clear: clear)
+            case .bouquet: notifyChangedServices(clear: clear)
             }
         }
     }
     
-    private func notifyChangedMetadata() {
+    private func notifyChangedMetadata(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.metadata) == true,
             let metadata = mediaState?.metadata {
              DispatchQueue.global().async {
                  self.playerListener?.metadataChanged(metadata)
-                 self.mediaState?.clearChanged(SubInfo.metadata)
+                 if clear { self.mediaState?.clearChanged(SubInfo.metadata) }
              }
          }
      }
-     
+
      private func notifyChangedOffset(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.timeshift) == true,
             let ybridListener = self.playerListener as? YbridControlListener,
@@ -254,8 +233,8 @@ public class MediaSession {
              }
          }
      }
-     
-     private func notifyChangedPlayout() {
+
+     private func notifyChangedPlayout(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.playout) == true,
             let ybridListener = self.playerListener as? YbridControlListener {
              DispatchQueue.global().async {
@@ -263,18 +242,19 @@ public class MediaSession {
                      ybridListener.swapsChanged(swaps)
                  }
                  ybridListener.bitRateChanged(currentBitsPerSecond: self.mediaState?.currentBitRate, maxBitsPerSecond: self.mediaState?.maxBitRate)
-                 self.mediaState?.clearChanged(SubInfo.playout)
+                 if clear {self.mediaState?.clearChanged(SubInfo.playout) }
              }
          }
      }
-     
-     private func notifyChangedServices() {
+
+     private func notifyChangedServices(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.bouquet) == true,
             let ybridListener = self.playerListener as? YbridControlListener,
             let services = mediaState?.bouquet?.services {
              DispatchQueue.global().async {
                  ybridListener.servicesChanged(services)
-                 self.mediaState?.clearChanged(SubInfo.bouquet) }
+                 if clear { self.mediaState?.clearChanged(SubInfo.bouquet) }
+             }
          }
      }
     
