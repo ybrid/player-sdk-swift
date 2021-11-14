@@ -48,17 +48,18 @@ class MediaState  {
         if let _ = metadata {
             setChanged(SubInfo.metadata)
         }
+        if let service = metadata?.service, service != oldValue?.service {
+            setChanged(SubInfo.bouquet)
+        }
+        
     }}
     
     var bouquet:Bouquet? { didSet {
         if let services = bouquet?.services, services != oldValue?.services {
-//            Logger.session.notice("\(oldValue?.services) changed to \(services) ")
             setChanged(SubInfo.bouquet)
         }
         if let active = bouquet?.activeService, active != oldValue?.activeService {
-//            Logger.session.notice("active service changed to \(active) ")
 //            setChanged(SubInfo.bouquet)
-            
             metadata?.setService(active)
             setChanged(SubInfo.metadata)
         }

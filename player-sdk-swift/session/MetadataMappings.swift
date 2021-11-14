@@ -28,41 +28,46 @@ import Foundation
 
 class IcyMetadata : AbstractMetadata {
     
-    var streamUrl:String?
+    private let data:[String:String]
     
     init(icyData:[String:String]) {
-        super.init(current: IcyMetadata.createItem(icyData),
-                   service: IcyMetadata.createService(icyData))
-        streamUrl = icyData["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
+        self.data = icyData
+        super.init(service: IcyMetadata.createService(icyData))
     }
+    
+    var streamUrl:String? { get {
+        data["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
+    }}
+    
+    // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
+    override var currentItem: Item? { get {
+        guard let displayTitle = data["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {
+            return nil
+        }
+        
+        return Item(displayTitle:displayTitle)
+    }}
     
     // content of http-headers "icy-name" and "icy-genre" ("ice-*" were mapped to "icy-*")
     private static func createService(_ icy: [String:String]) -> Service? {
         guard let name = icy["icy-name"] else { return nil }
         return Service(identifier: name, displayName: name, genre: icy["icy-genre"])
     }
-        
-    // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
-    private static func createItem(_ icy: [String:String]) -> Item? {
-        guard let displayTitle = icy["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {
-            return nil
-        }
-        
-        return Item(displayTitle:displayTitle)
-    }
 }
 
 
 class OpusMetadata : AbstractMetadata {
+    private let vorbis:[String:String]
     init(vorbisComments:[String:String]) {
-        super.init(current: OpusMetadata.createItem(vorbis: vorbisComments) )
+        self.vorbis = vorbisComments
+        super.init()
     }
     
-    private static func createItem(vorbis: [String:String]) -> Item? {
+    override var currentItem: Item? { get {
         let displayTitle = OpusMetadata.combinedTitle(comments: vorbis)
         return Item(displayTitle:displayTitle, title:vorbis["TITLE"], artist:vorbis["ARTIST"],
                     album:vorbis["ALBUM"], version:vorbis["VERSION"])
-    }
+    }}
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"
     private static func combinedTitle(comments: [String:String]) -> String {
@@ -83,29 +88,36 @@ class OpusMetadata : AbstractMetadata {
 
 
 class YbridMetadata : AbstractMetadata {
-    
+    let v2:YbridV2Metadata
     init(ybridV2:YbridV2Metadata) {
-        super.init(current: YbridMetadata.createItem(ybrid: ybridV2.currentItem),
-                   next: YbridMetadata.createItem(ybrid: ybridV2.nextItem),
-                   service: YbridMetadata.createService(ybridV2.station) )
+        self.v2 = ybridV2
+        super.init(service: YbridMetadata.createService(ybridV2.station) )
     }
 
+    override var currentItem: Item? { get {
+        return createItem(ybrid: v2.currentItem)
+    }}
+    
+    override var nextItem: Item? { get {
+        return createItem(ybrid: v2.nextItem)
+    }}
+    
     // content of __responseObject.metatdata.station
     private static func createService(_ ybridStation: YbridStation) -> Service? {
         let name = ybridStation.name
         return Service(identifier: name, displayName: name, genre: ybridStation.genre)
     }
     
-    private static func createItem(ybrid: YbridItem) -> Item? {
-        let type = YbridMetadata.typeFrom(type: ybrid.type)
-        let displayTitle = YbridMetadata.combinedTitle(item: ybrid)
+    private func createItem(ybrid: YbridItem) -> Item? {
+        let type = typeFrom(type: ybrid.type)
+        let displayTitle = combinedTitle(item: ybrid)
         let playbackLength = TimeInterval( ybrid.durationMillis / 1_000 )
         return Item(displayTitle:displayTitle, identifier:ybrid.id, type:type,
                     title:ybrid.title, artist:ybrid.artist,
                     description:ybrid.description, playbackLength: playbackLength)
     }
     
-    private static func typeFrom(type: String) -> ItemType {
+    private func typeFrom(type: String) -> ItemType {
         if let type = ItemType(rawValue: type) {
             return type
         }
@@ -113,7 +125,7 @@ class YbridMetadata : AbstractMetadata {
     }
     
     // returns "$TITLE[ by $ARTIST]"
-    private static func combinedTitle(item: YbridItem) -> String {
+    private func combinedTitle(item: YbridItem) -> String {
         var result = item.title
         if !item.artist.isEmpty {
             result += "\nby \(item.artist)"

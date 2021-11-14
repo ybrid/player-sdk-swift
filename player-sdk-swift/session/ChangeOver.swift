@@ -65,6 +65,9 @@ class ChangeOverFactory {
             Logger.playing.debug("change over \(subtype) complete (\(success ? "successful":"flopped"))")
             
             notify(subtype, true)
+            if subtype == .bouquet {
+                notify(.metadata, true)
+            }
             
             if let userCompleteCallback = userAudioComplete {
                 DispatchQueue.global().async {
@@ -84,51 +87,11 @@ class ChangeOver {
     var ctrlComplete: (() -> ())?
     var audioComplete: AudioCompleteCallback
     
-//
-//    convenience init(_ subtype:SubInfo, _ notify: @escaping Notification, userAudioComplete: AudioCompleteCallback? ) {
-//        self.init(subtype, ChangeOver.createCtrlComplete(subtype, notify), audioComplete: ChangeOver.createAudioComplete(subtype, notify, userAudioComplete) )
-//    }
-    
     init(_ subtype:SubInfo, _ ctrlComplete: CtrlComplete?, audioComplete: @escaping AudioCompleteCallback ) {
         self.subtype = subtype
         self.ctrlComplete = ctrlComplete
         self.audioComplete = audioComplete
     }
-    
-    
-//    private static func createCtrlComplete(_ subtype:SubInfo, _ notify: @escaping Notification) -> (()->())? {
-//        let ctrlComplete: (()->())?
-//        switch subtype {
-//        case .metadata:
-//            ctrlComplete = nil
-//        case .timeshift:
-//            ctrlComplete = { notify(SubInfo.timeshift, false) }
-//        case .bouquet:
-//            ctrlComplete = nil
-//        default:
-//            ctrlComplete = nil
-//        }
-//        return ctrlComplete
-//    }
-//
-//    private static func createAudioComplete(_ subtype:SubInfo, _ notify: @escaping Notification, _ userAudioComplete:AudioCompleteCallback?) -> AudioCompleteCallback {
-//        let audioComplete:AudioCompleteCallback = { (success) in
-//            Logger.playing.debug("change over \(subtype) complete (\(success ? "successful":"flopped"))")
-//
-//
-//            notify(subtype, true)
-//
-//
-//            if let userCompleteCallback = userAudioComplete {
-//                DispatchQueue.global().async {
-//                    userCompleteCallback(success)
-//                }
-//            }
-//        }
-//        return audioComplete
-//
-//    }
-//
     
     func matches(to state:MediaState) -> AudioCompleteCallback? {
         var changed = state.hasChanged(subtype)
@@ -138,7 +101,7 @@ class ChangeOver {
         case .timeshift:
              Logger.session.notice("change over \(subtype), offset did \(changed ? "":"not ")change")
         case .bouquet:
-            changed = (changed || state.hasChanged(.metadata))
+            changed = state.hasChanged(.metadata)
             Logger.session.notice("change over \(subtype), active service did \(changed ? "":"not ")change")
         default:
             Logger.session.error("change over \(subtype) doesn't match to media state \(state)")

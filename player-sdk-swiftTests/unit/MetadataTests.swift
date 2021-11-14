@@ -44,6 +44,10 @@ class MetadataTests: XCTestCase {
 
     // icy examples
     let heyJudeIcyTitle = ["StreamTitle":"Beatles - Hey Jude"]
+    let swr3IcyName = ["icy-name":"SWR3","icy-genre":"Pop Music"]
+    let hr2IcyHeaders = ["icy-metaint": "16000", "icy-pub": "0", "icy-name": "hr2", "icy-url": "http://www.hr.de"]
+    
+    
     
     // vorbis commands examples
     let heyJudeWrongVorbisComments = ["title":"Hey Jude", "artist":"Beatles"]
@@ -55,8 +59,17 @@ class MetadataTests: XCTestCase {
     func testDisplayTitle_IcyOnly() {
         let metadata = IcyMetadata(icyData: heyJudeIcyTitle)
         XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle )
+        XCTAssertEqual("", metadata.service.identifier )
     }
-
+    
+    func testService_IcyOnly() {
+        let metadata = IcyMetadata(icyData: hr2IcyHeaders)
+        XCTAssertEqual("", metadata.displayTitle )
+        XCTAssertEqual("hr2", metadata.service.identifier )
+        XCTAssertEqual("hr2", metadata.service.displayName )
+    }
+    
+    
     func testDisplayTitle_VorbisCommandsAreCaseSensitive() {
         let metadata = OpusMetadata(vorbisComments: heyJudeWrongVorbisComments)
         XCTAssertEqual("", metadata.displayTitle )
@@ -65,6 +78,7 @@ class MetadataTests: XCTestCase {
     func testDisplayTitle_OpusOnly() {
         let metadata = OpusMetadata(vorbisComments: heyJudeVorbisComments)
         XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle )
+        XCTAssertEqual("", metadata.service.identifier )
     }
     
     func testDisplayTitle_OpusMaxSyntax() {
@@ -76,20 +90,32 @@ class MetadataTests: XCTestCase {
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         let metadata = YbridMetadata(ybridV2: ybridMD)
         XCTAssertEqual("Hey Jude\nby Beatles", metadata.displayTitle )
+        XCTAssertEqual("Ybrid demo", metadata.service.identifier )
+        XCTAssertEqual("Ybrid demo", metadata.service.displayName )
     }
 
-    func testDisplayTitle_icyAndYbrid_YbridWins() {
+    func testDisplayTitle_IcyTitleAndYbrid_YbridWins() {
         let metadata = IcyMetadata(icyData: heyJudeIcyTitle )
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
         XCTAssertEqual("Hey Jude\nby Beatles", metadata.displayTitle )
     }
     
+    func testDisplayTitle_IcyServiceAndYbrid_YbridWins() {
+        let metadata = IcyMetadata(icyData: hr2IcyHeaders )
+        let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
+        metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
+        XCTAssertEqual("Ybrid demo", metadata.service.identifier )
+    }
+    
+    
+    
     func testDisplayTitle_OpusAndYbrid_YbridWins() {
         let metadata = OpusMetadata(vorbisComments: heyJudeVorbisComments )
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
         XCTAssertEqual("Hey Jude\nby Beatles", metadata.displayTitle )
+        XCTAssertEqual("Ybrid demo", metadata.service.identifier )
     }
     
     
@@ -106,7 +132,7 @@ class MetadataTests: XCTestCase {
         XCTAssertEqual("All I Need",  metadata.current.title )
         XCTAssertEqual(ItemType.JINGLE,  metadata.next?.type )
         
-        XCTAssertEqual("",  metadata.service.displayName )
+        XCTAssertEqual("",  metadata.service.identifier )
     }
     
     func testYbridMetadata_CurrentNextService() {
@@ -126,14 +152,11 @@ class MetadataTests: XCTestCase {
 
 
     func testDisplayTitle_IcyAndYbrid_YbridService() {
-        var heyJudeIcyTitleExtended = heyJudeIcyTitle
-        heyJudeIcyTitleExtended["icy-name"] = "SWR3"
-        heyJudeIcyTitleExtended["icy-genre"] = "Pop Music"
-        let metadata = IcyMetadata(icyData: heyJudeIcyTitleExtended )
+        let metadata = IcyMetadata(icyData: hr2IcyHeaders )
         
-        XCTAssertEqual("SWR3", metadata.service.identifier )
-        XCTAssertEqual("SWR3", metadata.service.displayName )
-        XCTAssertEqual("Pop Music", metadata.service.genre )
+        XCTAssertEqual("hr2", metadata.service.identifier )
+        XCTAssertEqual("hr2", metadata.service.displayName )
+        XCTAssertNil(metadata.service.genre )
         
         let ybridMD = YbridV2Metadata(currentItem: heyJudeYbridItem, nextItem: noTitleYbridItem, station: ybridDemoYbridStation)
         metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
@@ -146,16 +169,14 @@ class MetadataTests: XCTestCase {
     }
 
     func testDisplayTitle_IcyAndOpus_IcyService() {
-        var heyJudeIcyTitleExtended = heyJudeIcyTitle
-        heyJudeIcyTitleExtended["icy-name"] = "SWR3"
-        heyJudeIcyTitleExtended["icy-genre"] = "Pop Music"
-        let metadata = IcyMetadata(icyData: heyJudeIcyTitleExtended )
+        let metadata = IcyMetadata(icyData: swr3IcyName )
         
-        XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle)
+        XCTAssertEqual("", metadata.displayTitle)
         
         XCTAssertEqual("SWR3", metadata.service.identifier )
         XCTAssertEqual("SWR3", metadata.service.displayName )
         XCTAssertEqual("Pop Music", metadata.service.genre )
+
         
         let opusMD = OpusMetadata(vorbisComments: heyJudeFullVorbisComments )
         metadata.delegate(with: opusMD)
@@ -164,5 +185,24 @@ class MetadataTests: XCTestCase {
         XCTAssertEqual("SWR3", metadata.service.identifier )
         XCTAssertEqual("SWR3", metadata.service.displayName )
         XCTAssertEqual("Pop Music", metadata.service.genre )
+    }
+    
+    func testService_IcyAndIcy_IcyService() {
+
+        let metadata = IcyMetadata(icyData: hr2IcyHeaders )
+        
+        XCTAssertEqual("", metadata.displayTitle)
+        
+        XCTAssertEqual("hr2", metadata.service.identifier )
+        XCTAssertEqual("hr2", metadata.service.displayName )
+        XCTAssertNil(metadata.service.genre )
+        
+        let opusMD = OpusMetadata(vorbisComments: heyJudeFullVorbisComments )
+        metadata.delegate(with: opusMD)
+        XCTAssertEqual("Love - Beatles - Hey Jude (Remastered 2015)", metadata.displayTitle )
+        
+        XCTAssertEqual("hr2", metadata.service.identifier )
+        XCTAssertEqual("hr2", metadata.service.displayName )
+        XCTAssertNil(metadata.service.genre )
     }
 }

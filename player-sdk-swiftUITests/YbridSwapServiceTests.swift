@@ -30,7 +30,7 @@ class YbridSwapServiceTests: XCTestCase {
 
     let swr3MinServicesCount = 5
     
-    let maxControlComplete:TimeInterval = 0.2
+    let maxControlComplete:TimeInterval = 0.21
     let maxAudioChanged:TimeInterval = 1.008
     
     let poller = Poller()
@@ -252,15 +252,17 @@ class YbridSwapServiceTests: XCTestCase {
   
     func test15_SwapSwapped__fails() throws {
         let test = TestYbridControl(ybridSwr3Endpoint)
+        test.listener.logBufferSize = false
+        test.listener.logPlayingSince = false
         var maxAudioComplete = maxAudioChanged
         test.playing{ (ybrid) in
             usleep(200_000)
             maxAudioComplete += test.listener.bufferDuration ?? 0
             test.swapServiceSynced(to: "swr-raka09", maxWait: maxAudioComplete)
-            test.swapServiceSynced(to: "swr-raka05", maxWait: maxAudioComplete)
+            test.swapServiceSynced(to: "swr-raka05", maxWait: maxAudioComplete) // icy trigger is too late --> maxAudioComplete + 10 succeeds
         }
 
         test.checkErrors(expected: 0)
-            .checkAllActions(confirm: 2, withinS: maxAudioComplete)
+            .checkAllActions(confirm: 2, withinS: maxAudioComplete)  // + 10 succeeds
     }
 }

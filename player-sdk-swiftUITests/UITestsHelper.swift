@@ -55,8 +55,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var logPlayingSince = true
     var logBufferSize = true
     var logMetadata = true
-    
-    
+
     func reset() {
         queue.async {
             self.metadatas.removeAll()
@@ -194,6 +193,9 @@ class Poller {
 
 class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
+    var logOffset = true
+    var logBitrate = true
+    
     override func reset() {
         queue.async { [self] in
             offsets.removeAll()
@@ -259,7 +261,9 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
-        Logger.testing.info("-- offset is \(offset.S)")
+        if logOffset {
+            Logger.testing.info("-- offset is \(offset.S)")
+        }
         queue.async {
             self.offsets.append(offset)
         }
@@ -280,14 +284,16 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     func bitRateChanged(currentBitsPerSecond: Int32?, maxBitsPerSecond: Int32?) {
-        Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitsPerSecond ?? -1)")
+        if logBitrate {
+            Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitsPerSecond ?? -1)")
+        }
         queue.async {
             self.bitrates.append((currentBitsPerSecond,maxBitsPerSecond))
         }
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- service \(String(describing: metadata.service.identifier))")
+        Logger.testing.info("-- service \(String(describing: metadata.service.identifier))")
         super.metadataChanged(metadata)
     }
 }
