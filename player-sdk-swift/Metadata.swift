@@ -95,16 +95,18 @@ public struct Service : Equatable {
 
 class AbstractMetadata : Metadata {
     
-    var currentItem:Item? { get { return nil }}
-    var nextItem:Item? { get { return nil }}
-    private var serviceInfo: Service?
+    internal var currentItem:Item? { get { return nil }}
+    internal var nextItem:Item? { get { return nil }}
+    internal var serviceInfo: Service? { get { return nil }}
+    
+    private var superiorService: Service?
     
     private var delegate:AbstractMetadata?
+    
     private static let noItem = Item(displayTitle: "")
     private static let noServie = Service(identifier: "")
     
-    init(service:Service? = nil) {
-        self.serviceInfo = service
+    init() {
     }
     
     func delegate(with other: AbstractMetadata) {
@@ -116,7 +118,7 @@ class AbstractMetadata : Metadata {
             delegate.setService(service)
             return
         }
-        serviceInfo = service
+        superiorService = service
     }
     
     public final var displayTitle: String {
@@ -135,7 +137,7 @@ class AbstractMetadata : Metadata {
     }
     
     public final var service: Service {
-        return delegate?.serviceInfo ?? serviceInfo ?? AbstractMetadata.noServie
+        return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.noServie
     }
     
 }
