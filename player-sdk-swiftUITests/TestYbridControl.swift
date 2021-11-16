@@ -301,13 +301,12 @@ class TestYbridControl : TestControl {
             self.swapServiceComplete(success, trace)
             mySema.signal()
         }
-        actionTraces.append(trace)
-        
         if let maxWait = maxWait {
             _ = mySema.wait(timeout: .now() + maxWait)
         } else {
             _ = mySema.wait(timeout: .distantFuture)
         }
+        actionTraces.append(trace)
     }
 
 

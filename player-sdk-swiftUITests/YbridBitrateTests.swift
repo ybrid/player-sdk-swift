@@ -34,14 +34,14 @@ import YbridPlayerSDK
  * endpointAvailableRates
  * *******************************************************************/
 
-//let testEndpoint = ybridStageSwr3Endpoint
-//let endpointAvailableRates:[Int32] = [64_000, 80_000, 128_000, 192_000]
+let testEndpoint = ybridDemoEndpoint
+let endpointAvailableRates:[Int32] = supportedBitratesKbps.map{ Int32($0 * 1000) }
 
 //let testEndpoint = ybridAdDemoEndpoint
 //let endpointAvailableRates:[Int32] = [128_000]
 
-let testEndpoint = ybridDemoEndpoint
-let endpointAvailableRates:[Int32] = supportedBitratesKbps.map{ Int32($0 * 1000) }
+//let testEndpoint = ybridStageSwr3Endpoint
+//let endpointAvailableRates:[Int32] = [64_000, 80_000, 128_000, 192_000]
 
 
 // constants
@@ -67,11 +67,13 @@ class YbridBitrateLimitTests: XCTestCase {
         listener.logPlayingSince = false
         listener.logBufferSize = false
         listener.logMetadata = false
+        listener.logOffset = false
+        listener.logSwapsLeft = false
         listener.reset()
     }
     override func tearDownWithError() throws {
         let bitrates = listener.bitrates
-        let maxRates = bitrates.map{ $0.max }
+        let maxRates = bitrates.map{ $0.limit }
         let currentRates = bitrates.map{ $0.current }
         Logger.testing.info("-- consumed max bit rates \(maxRates)")
         Logger.testing.info("-- consumed current bit rates \(currentRates)")
@@ -270,11 +272,13 @@ class YbridBitrateCurrentTests: XCTestCase {
         listener.logPlayingSince = false
         listener.logBufferSize = false
         listener.logMetadata = false
+        listener.logOffset = false
+        listener.logSwapsLeft = false
         listener.reset()
     }
     override func tearDownWithError() throws {
         let bitrates = listener.bitrates
-        let maxRates = bitrates.map{ $0.max }
+        let maxRates = bitrates.map{ $0.limit }
         let currentRates = bitrates.map{ $0.current }
         Logger.testing.info("-- consumed max bit rates \(maxRates)")
         Logger.testing.info("-- consumed current bit rates \(currentRates)")

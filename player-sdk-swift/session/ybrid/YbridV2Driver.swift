@@ -85,7 +85,7 @@ class YbridV2Driver : MediaDriver {
         if super.timeshifting {
             info()
         } else {
-            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
+            if let streamUrl = metadataIn.streamUrl {
                 showMeta(streamUrl)
             } else {
                 info()

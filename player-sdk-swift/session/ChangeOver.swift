@@ -87,8 +87,8 @@ class ChangeOverFactory {
 class ChangeOver {
     
     let subtype:SubInfo
-    var ctrlComplete: (() -> ())?
-    var audioComplete: AudioCompleteCallback
+    let ctrlComplete: (() -> ())?
+    let audioComplete: AudioCompleteCallback
     
     init(_ subtype:SubInfo, _ ctrlComplete: CtrlComplete?, audioComplete: @escaping AudioCompleteCallback ) {
         self.subtype = subtype
@@ -96,7 +96,7 @@ class ChangeOver {
         self.audioComplete = audioComplete
     }
     
-    func matches(to state:MediaState) -> AudioCompleteCallback? {
+    func matches(to state:MediaState) -> Bool {
         let changed = state.hasChanged(subtype)
         switch subtype {
         case .metadata:
@@ -109,9 +109,6 @@ class ChangeOver {
             Logger.session.error("change over \(subtype) doesn't match to media state \(state)")
         }
         
-        if changed {
-            return self.audioComplete
-        }
-        return nil
+        return changed
     }
 }

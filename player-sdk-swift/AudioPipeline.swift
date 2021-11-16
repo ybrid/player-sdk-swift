@@ -234,14 +234,13 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         Logger.loading.debug("\(metadata.self) displayTitle is '\(metadata.displayTitle)'")
         
+        let completeCallback:AudioCompleteCallback?
         if let fallback = fallbackMetadata {
             fallback.delegate(with: metadata)
-            session.setMetadata(metadata: fallback)
+            completeCallback = session.setMetadata(metadata: fallback)
         } else {
-            session.setMetadata(metadata: metadata)
+            completeCallback = session.setMetadata(metadata: metadata)
         }
-    
-        let completeCallback = session.triggeredAudioComplete(metadata)
         
         if buffer?.isEmpty ?? true {
             if let complete = completeCallback {

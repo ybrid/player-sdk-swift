@@ -35,10 +35,11 @@ class IcyMetadata : AbstractMetadata {
         super.init()
     }
     
-    var streamUrl:String? { get {
-        data["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
+    override var streamUrl:String? { get {
+        return super.delegate?.streamUrl ??
+            data["StreamUrl"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'"))
     }}
-    
+
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
     override var currentItem: Item? { get {
         guard let displayTitle = data["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {

@@ -110,8 +110,10 @@ public class MediaSession {
        
     // MARK: metadata
     
-    func setMetadata(metadata: AbstractMetadata) {
+    func setMetadata(metadata: AbstractMetadata) -> AudioCompleteCallback? {
         driver?.setMetadata(metadata: metadata)
+        
+        return triggeredAudioComplete(metadata)
     }
     
     private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
@@ -169,27 +171,28 @@ public class MediaSession {
         }
     }}
     
-    func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+    private func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
         
         guard let changeOver = changingOver else {
+            // no change over in progress
             return nil
         }
         
-        let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
+        let canTrigger = metadata.streamUrl != nil
         Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
         guard canTrigger else {
             return nil
         }
         
         guard let state = mediaState,
-           let completeCallback = changeOver.matches(to: state) else {
-               // no change over in progress or no media state change that matches
+              changeOver.matches(to: state) else {
+               // no matchng media state change
                return nil
         }
         
-        // execute callback when according audio is playing
         self.changingOver = nil
-        return completeCallback
+        // execute callback when according audio is playing
+        return changeOver.audioComplete
      }
     
     

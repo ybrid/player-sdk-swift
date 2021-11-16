@@ -207,4 +207,65 @@ class MetadataTests: XCTestCase {
         XCTAssertEqual("hr2", metadata.service.displayName )
         XCTAssertNil(metadata.service.genre )
     }
+    
+    // MARK: an icy stream url signals possible audio complete
+    
+    func testIcyNoStreamUrl() {
+        let metadata = IcyMetadata(icyData: heyJudeIcyTitle)
+        XCTAssertNil(metadata.streamUrl)
+        XCTAssertFalse(metadata.canTriggerAudioComplete)
+    }
+    
+    func testIcyWithStreamUrl() {
+        let streamUrl = "some url"
+        var icyDataEx = heyJudeIcyTitle
+        icyDataEx["StreamUrl"] = streamUrl
+        let icyData = IcyMetadata(icyData: icyDataEx)
+        XCTAssertEqual(icyData.streamUrl, streamUrl)
+        XCTAssertTrue(icyData.canTriggerAudioComplete)
+    }
+    
+    func testIcyServiceAndIcyWithStreamUrl() {
+        let metadata = IcyMetadata(icyData: swr3IcyName)
+        
+        let streamUrl = "some url"
+        var icyDataEx = heyJudeIcyTitle
+        icyDataEx["StreamUrl"] = streamUrl
+        let icyData = IcyMetadata(icyData: icyDataEx)
+        
+        metadata.delegate(with: icyData)
+        XCTAssertEqual(metadata.streamUrl, streamUrl)
+        XCTAssertTrue(metadata.canTriggerAudioComplete)
+        
+        let abstract = metadata as AbstractMetadata
+        XCTAssertEqual(abstract.streamUrl, streamUrl)
+        XCTAssertTrue(abstract.canTriggerAudioComplete)
+    }
+ 
+    
+    func testIcyServiceIcyStreamUrlYbrid() {
+        let streamUrl = "some url"
+        let metadata = IcyMetadata(icyData: swr3IcyName)
+        var icyDataEx = heyJudeIcyTitle
+        icyDataEx["StreamUrl"] = streamUrl
+        let icyData = IcyMetadata(icyData: icyDataEx)
+        metadata.delegate(with: icyData)
+        let abstract = metadata as AbstractMetadata
+        XCTAssertEqual(abstract.streamUrl, streamUrl)
+        
+        
+        let ybridMD = YbridV2Metadata(currentItem: noTitleYbridItem, nextItem:heyJudeYbridItem , station: ybridDemoYbridStation)
+        metadata.delegate(with: YbridMetadata(ybridV2: ybridMD))
+        XCTAssertEqual(abstract.streamUrl, streamUrl)
+        
+        XCTAssertEqual("", metadata.displayTitle )
+        
+        XCTAssertEqual("Ybrid demo", metadata.service.identifier )
+        XCTAssertEqual("Ybrid demo", metadata.service.displayName)
+        XCTAssertEqual("", metadata.service.genre)
+        
+        XCTAssertNotNil(metadata.next)
+        XCTAssertEqual("Hey Jude\nby Beatles", metadata.next?.displayTitle )
+    }
+    
 }

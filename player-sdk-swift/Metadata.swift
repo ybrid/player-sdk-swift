@@ -100,18 +100,28 @@ class AbstractMetadata : Metadata {
     internal var serviceInfo: Service? { get { return nil }}
     
     private var superiorService: Service?
-    
-    private var delegate:AbstractMetadata?
+
+    internal var delegate:AbstractMetadata? { didSet {
+        if streamUrl == nil, oldValue?.streamUrl != nil {
+            // TODO keep streamUrl
+        }
+    }}
     
     private static let noItem = Item(displayTitle: "")
     private static let noServie = Service(identifier: "")
     
-    init() {
-    }
+    init() {}
     
     func delegate(with other: AbstractMetadata) {
         self.delegate = other
     }
+    
+    var streamUrl:String? { get {
+        if let icyData = delegate as? IcyMetadata {
+            return icyData.streamUrl
+        }
+        return nil
+    }}
     
     func setService( _ service:Service) {
         if let delegate = delegate {

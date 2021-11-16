@@ -195,6 +195,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     var logOffset = true
     var logBitrate = true
+    var logSwapsLeft = true
     
     override func reset() {
         queue.async { [self] in
@@ -208,7 +209,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     var offsets:[TimeInterval] = []
     var services:[[Service]] = []
     var swaps:[Int] = []
-    var bitrates:[(current:Int32?,max:Int32?)] = []
+    var bitrates:[(current:Int32?,limit:Int32?)] = []
     
     // getting the latest recieved values for ...
     
@@ -224,7 +225,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }}
     var maxBitRate:Int32? { get {
         queue.sync {
-            return bitrates.last?.max
+            return bitrates.last?.limit
         }
     }}
     var currentBitRate:Int32? { get {
@@ -236,7 +237,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     var maxRateNotifications:Int { get {
         queue.sync {
-            return bitrates.map{ $0.max }.filter{ $0 != nil }.count
+            return bitrates.map{ $0.limit }.filter{ $0 != nil }.count
         }
     }}
     
@@ -277,7 +278,9 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     func swapsChanged(_ swapsLeft: Int) {
-        Logger.testing.info("-- swaps left \(swapsLeft)")
+        if logSwapsLeft {
+            Logger.testing.info("-- swaps left \(swapsLeft)")
+        }
         queue.async {
             self.swaps.append(swapsLeft)
         }
