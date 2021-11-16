@@ -59,8 +59,8 @@ class MediaState  {
             setChanged(SubInfo.bouquet)
         }
         if let active = bouquet?.activeService, active != oldValue?.activeService {
-//            setChanged(SubInfo.bouquet)
             metadata?.setService(active)
+            setChanged(SubInfo.bouquet)
             setChanged(SubInfo.metadata)
         }
     }}

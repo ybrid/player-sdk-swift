@@ -244,16 +244,20 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         let completeCallback = session.triggeredAudioComplete(metadata)
         
         if buffer?.isEmpty ?? true {
-            session.notifyChanged(SubInfo.metadata)
-            completeCallback?(true)
+            if let complete = completeCallback {
+                complete(true)
+            } else {
+                session.notifyChanged(SubInfo.metadata)
+            }
         } else {
             /// delay metadata notification until corresponding audio is scheduled
-            if let uuid = session.maintainMetadata() {
-                buffer?.put(cuePoint: uuid)
-            }
             if let complete = completeCallback {
                 buffer?.put(complete)
             }
+            if let uuid = session.maintainMetadata() {
+                buffer?.put(cuePoint: uuid)
+            }
+   
         }
         
         /// do not delay notifaction of playout states changes

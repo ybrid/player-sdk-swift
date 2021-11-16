@@ -127,14 +127,7 @@ public class MediaSession {
         mediaState?.clearChanged(SubInfo.metadata)
         return uuid
     }
-    
-    func notifyMetadata(uuid:UUID) {
-         if let metadata = metadataDict.pop(id:uuid) {
-             DispatchQueue.global().async {
-                 self.playerListener?.metadataChanged(metadata)
-             }
-         }
-     }
+
 
     // MARK: change over
     
@@ -201,6 +194,15 @@ public class MediaSession {
     
     
     // MARK: notify audio player listener
+  
+    /// TODO: find a better way than passing this closure to PlaybackBuffer
+    func notifyMetadata(uuid:UUID) {
+        if let metadata = metadataDict.pop(id:uuid) {
+            DispatchQueue.global().async {
+                self.playerListener?.metadataChanged(metadata)
+            }
+        }
+    }
     
     func notifyChanged(_ subInfo:SubInfo? = nil, clear:Bool = true) {
         var subInfos:[SubInfo] = SubInfo.allCases
@@ -217,6 +219,8 @@ public class MediaSession {
             }
         }
     }
+    
+
     
     private func notifyChangedMetadata(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.metadata) == true,

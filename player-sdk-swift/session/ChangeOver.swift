@@ -64,9 +64,12 @@ class ChangeOverFactory {
         let audioComplete:AudioCompleteCallback = { (success) in
             Logger.playing.debug("change over \(subtype) complete (\(success ? "successful":"flopped"))")
             
-            notify(subtype, true)
-            if subtype == .bouquet {
-                notify(.metadata, true)
+            switch subtype {
+            case .bouquet:
+                notify(.metadata, false) /// contains changed active service
+                notify(.bouquet, true)
+            default:
+                notify(subtype, true)
             }
             
             if let userCompleteCallback = userAudioComplete {
@@ -94,14 +97,13 @@ class ChangeOver {
     }
     
     func matches(to state:MediaState) -> AudioCompleteCallback? {
-        var changed = state.hasChanged(subtype)
+        let changed = state.hasChanged(subtype)
         switch subtype {
         case .metadata:
             Logger.session.notice("change over \(subtype), metadata did \(changed ? "":"not ")change")
         case .timeshift:
              Logger.session.notice("change over \(subtype), offset did \(changed ? "":"not ")change")
         case .bouquet:
-            changed = state.hasChanged(.metadata)
             Logger.session.notice("change over \(subtype), active service did \(changed ? "":"not ")change")
         default:
             Logger.session.error("change over \(subtype) doesn't match to media state \(state)")

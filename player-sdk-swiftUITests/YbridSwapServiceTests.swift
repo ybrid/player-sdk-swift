@@ -34,7 +34,6 @@ class YbridSwapServiceTests: XCTestCase {
     let maxAudioChanged:TimeInterval = 1.008
     
     let poller = Poller()
-//    let epCanSwapService = ybridDemoEndpoint
     
     func test01_AvailableServices_BeforePlay() throws {
         let test = TestYbridControl(ybridSwr3Endpoint)
@@ -70,7 +69,7 @@ class YbridSwapServiceTests: XCTestCase {
         
         _ = test.checkErrors(expected: 0)
         
-        XCTAssertEqual(test.listener.services.count, 1)
+        XCTAssertEqual(test.listener.services.count, 2) // one initially, one because of swap
         guard test.listener.services.count > 0 else {
             XCTFail("no changed swaps"); return
         }
@@ -160,7 +159,8 @@ class YbridSwapServiceTests: XCTestCase {
         test.playing{ [self] (ybridControl) in
             
             ybridControl.stop()
-            poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)
+            poller.wait(ybridControl, until: PlaybackState.stopped, maxSeconds: 2)            
+            XCTAssertEqual(test.listener.services.count, 1)
             
             var carriedOut = false
             ybridControl.swapService(to: "swr-raka09") { (success) in
@@ -185,7 +185,7 @@ class YbridSwapServiceTests: XCTestCase {
 
         _ = test.checkErrors(expected: 0)
         
-        XCTAssertEqual(test.listener.services.count, 1)
+        XCTAssertEqual(test.listener.services.count, 2) // one initially, one because of swap
         test.listener.services.forEach{
             XCTAssertGreaterThan($0.count, swr3MinServicesCount)
         }
