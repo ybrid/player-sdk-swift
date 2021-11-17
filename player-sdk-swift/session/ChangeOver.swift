@@ -33,7 +33,7 @@ typealias CtrlComplete = (()->())
 
 class ChangeOverFactory {
     
-    let notify:Notification
+    private let notify:Notification
     init(_ notify: @escaping Notification) {
         self.notify = notify
     }
@@ -79,9 +79,7 @@ class ChangeOverFactory {
             }
         }
         return audioComplete
-  
     }
-    
 }
 
 class ChangeOver {

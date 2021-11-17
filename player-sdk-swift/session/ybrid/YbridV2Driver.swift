@@ -77,7 +77,6 @@ class YbridV2Driver : MediaDriver {
     }
     
     override func setMetadata(metadata: AbstractMetadata) {
-        
         fetchMetadataSync(metadataIn: metadata)
     }
     

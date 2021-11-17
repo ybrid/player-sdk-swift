@@ -311,7 +311,7 @@ class UseAudioPlayerTests: XCTestCase {
                 sleep(2)
                 
                 control.skipBackward(ItemType.NEWS) { (success) in
-                    print("Now You listen to news. That's \(success).")
+                    print("Now you listen to news. That's \(success).")
                     XCTAssertTrue(success)
                 }
                 sleep(10) /// listen to the news

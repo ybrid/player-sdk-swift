@@ -51,7 +51,6 @@ class MediaState  {
         if let service = metadata?.service, service != oldValue?.service {
             setChanged(SubInfo.bouquet)
         }
-        
     }}
     
     var bouquet:Bouquet? { didSet {

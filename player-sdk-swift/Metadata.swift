@@ -95,30 +95,33 @@ public struct Service : Equatable {
 
 class AbstractMetadata : Metadata {
     
-    internal var currentItem:Item? { get { return nil }}
-    internal var nextItem:Item? { get { return nil }}
+    internal var currentInfo:Item? { get { return nil }}
+    internal var nextInfo:Item? { get { return nil }}
     internal var serviceInfo: Service? { get { return nil }}
-    
-    private var superiorService: Service?
 
     internal var delegate:AbstractMetadata? { didSet {
-        if streamUrl == nil, oldValue?.streamUrl != nil {
+        if streamUrl == nil, let _ = oldValue?.streamUrl {
             // TODO keep streamUrl
         }
     }}
     
-    private static let noItem = Item(displayTitle: "")
-    private static let noServie = Service(identifier: "")
+    private var superiorService: Service?
+    
+    internal var eligible:Bool { get {
+        return currentInfo != nil || nextInfo != nil || serviceInfo != nil
+        || streamUrl != nil || delegate?.eligible == true
+    }}
+    internal var description:String { get { return "\(type(of: self))" } }
     
     init() {}
     
-    func delegate(with other: AbstractMetadata) {
+    func delegate(to other: AbstractMetadata) {
         self.delegate = other
     }
     
     var streamUrl:String? { get {
-        if let icyData = delegate as? IcyMetadata {
-            return icyData.streamUrl
+        if let icyStreamUrl = (delegate as? IcyMetadata)?.streamUrl {
+            return icyStreamUrl
         }
         return nil
     }}
@@ -135,17 +138,19 @@ class AbstractMetadata : Metadata {
         if let delegate = delegate {
             return delegate.displayTitle
         }
-        return currentItem?.displayTitle ?? AbstractMetadata.noItem.displayTitle
+        return currentInfo?.displayTitle ?? AbstractMetadata.noItem.displayTitle
     }
     
+    private static let noServie = Service(identifier: "")
     public final var current: Item {
-        return delegate?.currentItem ?? currentItem ?? AbstractMetadata.noItem
+        return delegate?.currentInfo ?? currentInfo ?? AbstractMetadata.noItem
     }
     
     public final var next: Item?  {
-        return delegate?.nextItem ?? nextItem
+        return delegate?.nextInfo ?? nextInfo
     }
     
+    private static let noItem = Item(displayTitle: "")
     public final var service: Service {
         return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.noServie
     }

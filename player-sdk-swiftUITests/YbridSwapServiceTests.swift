@@ -225,18 +225,18 @@ class YbridSwapServiceTests: XCTestCase {
             .checkAllActions(confirm: 1, withinS: maxControlComplete)
     }
     
-    func test13_SwapFromAdDemo_NoService() throws {
+    func test13_SwapToWrongService() throws {
 
-        let test = TestYbridControl(ybridAdDemoEndpoint)
+        let test = TestYbridControl(ybridDemoEndpoint)
         test.playing{ (ybrid) in
-            test.swapServiceSynced(to: "adaptive-demo", maxWait: self.maxAudioChanged)
-         }
+            test.swapServiceSynced(to: "id-not-exists", maxWait: self.maxControlComplete)
+        }
 
         test.checkErrors(expected: 1)
-            .checkAllActions(confirm: 1, areCompleted:false, withinS: maxControlComplete)
+            .checkAllActions(confirm: 1, areCompleted:true, withinS: maxControlComplete)
     }
-  
-    func test14_SwapBackFromSwapped_InTime() throws {
+    
+    func test14_SwapBackFromSwapped() throws {
         let test = TestYbridControl(ybridSwr3Endpoint)
         var maxAudioComplete = maxAudioChanged
         test.playing{ (ybrid) in

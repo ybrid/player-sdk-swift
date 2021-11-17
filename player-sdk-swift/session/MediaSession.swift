@@ -81,7 +81,33 @@ public class MediaSession {
         driver?.refresh()
     }
     
-    // MARK: changes
+    func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
+                _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
+        
+        let success = action()
+        
+        guard let change = changeOverFactory?.create(with: subtype, userAudioComplete: userAudioComplete) else {
+            Logger.session.error("could not establish change over \(subtype)")
+            return false
+        }
+        change.ctrlComplete?()
+        
+        if !running {
+            change.audioComplete(success)
+            return false
+        }
+        
+        if !success {
+            change.audioComplete(false)
+            return false
+        }
+        
+        changingOver = change // waiting for trigger
+        return true
+    }
+ 
+    
+    // MARK: actions
        
     func maxBitRate(to bps:Int32) {
         driver?.maxBitRate(to: bps)
@@ -107,71 +133,41 @@ public class MediaSession {
     func swapService(id:String) -> Bool {
         return driver?.swapService(id: id) ?? false
     }
-       
-    // MARK: metadata
     
-    func setMetadata(metadata: AbstractMetadata) -> AudioCompleteCallback? {
+    // MARK: metadata handling
+    
+    func setMetadata(metadata: AbstractMetadata, direct:Bool,
+                     lineUp: (LineUp) -> () ) {
+        
         driver?.setMetadata(metadata: metadata)
         
-        return triggeredAudioComplete(metadata)
-    }
-    
-    private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
-        DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
-    )
-    
-    func maintainMetadata() -> UUID? {
-        guard let metadata = mediaState?.metadata else {
-            return nil
-        }
-        let uuid = UUID()
-        metadataDict.put(id: uuid, value: metadata)
-        mediaState?.clearChanged(SubInfo.metadata)
-        return uuid
-    }
-
-
-    // MARK: change over
-    
-    func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
-                _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
-        
-        let success = action()
-        
-        guard let change = changeOverFactory?.create(with: subtype, userAudioComplete: userAudioComplete) else {
-            Logger.session.error("could not establish change over \(subtype)")
-            return false
-        }
-        change.ctrlComplete?()
-        
-        if !running {
-            change.audioComplete(success)
-            return false
-        }
-        
-        if !success {
-            change.audioComplete(false)
-            return false
-        }
-        
-        changingOver = change // waiting for trigger
-        return true
-    }
-    
-    var changingOver:ChangeOver? { didSet {
-        if let type = changingOver?.subtype {
-            Logger.session.debug("change over \(type) in progress")
+        let changeComplete = triggeredChangeComplete(metadata)
+        if direct {
+            if let callback = changeComplete?.audioComplete {
+                callback(true)
+            } else {
+                notifyChanged(SubInfo.metadata)
+            }
         } else {
-            Logger.session.debug("change over \(oldValue?.subtype.rawValue ?? "(nil)") lined up")
+            if let changedMetadata = mediaState?.metadata {
+                mediaState?.clearChanged(SubInfo.metadata)
+                lineUp( LineUp(description: changedMetadata.displayTitle,
+                               callback: { (success) in
+                                    if success {
+                                        self.playerListener?.metadataChanged(changedMetadata)
+                                    }
+                                } )
+                        )
+            }
+            if let changed = changeComplete {
+                lineUp( LineUp(description: "\(changed.subtype) complete",
+                               callback: { (success) in changed.audioComplete(success)} )
+                )
+            }
         }
-        if .timeshift == changingOver?.subtype {
-            driver?.timeshifting = true
-        } else {
-            driver?.timeshifting = false
-        }
-    }}
+    }
     
-    private func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+    private func triggeredChangeComplete(_ metadata: AbstractMetadata) -> ChangeOver? {
         
         guard let changeOver = changingOver else {
             // no change over in progress
@@ -192,20 +188,26 @@ public class MediaSession {
         
         self.changingOver = nil
         // execute callback when according audio is playing
-        return changeOver.audioComplete
+        return changeOver
      }
     
+
+    // MARK: change over
+    
+    var changingOver:ChangeOver? { didSet {
+        if let type = changingOver?.subtype {
+            Logger.session.debug("change over \(type) in progress")
+        } 
+        if .timeshift == changingOver?.subtype {
+            driver?.timeshifting = true
+        } else {
+            driver?.timeshifting = false
+        }
+    }}
+    
+
     
     // MARK: notify audio player listener
-  
-    /// TODO: find a better way than passing this closure to PlaybackBuffer
-    func notifyMetadata(uuid:UUID) {
-        if let metadata = metadataDict.pop(id:uuid) {
-            DispatchQueue.global().async {
-                self.playerListener?.metadataChanged(metadata)
-            }
-        }
-    }
     
     func notifyChanged(_ subInfo:SubInfo? = nil, clear:Bool = true) {
         var subInfos:[SubInfo] = SubInfo.allCases

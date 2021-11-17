@@ -207,12 +207,7 @@ class MetadataExtractor {
             if let until = value.firstIndex(of: "\0") {
                 value = String(value[..<until])
             }
-            switch (key) {
-            case "StreamUrl", "StreamTitle":
-                result.updateValue(value, forKey: key)
-            default:
-                Logger.loading.debug("unused metadata key ’\(property[0])' with value '\(property[1])'")
-            }
+            result.updateValue(value, forKey: key)
         }
         return result
     }

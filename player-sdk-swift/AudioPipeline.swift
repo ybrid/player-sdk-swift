@@ -166,10 +166,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                 if let buffer = engine.start() {
                     self.pipelineListener.ready(playback: engine)
                     self.buffer = buffer
-                    
-                    buffer.onMetadataCue = { (metaCueId) in
-                        self.session.notifyMetadata(uuid: metaCueId)
-                    }
                 }
                 return
             }
@@ -234,30 +230,28 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         
         Logger.loading.debug("\(metadata.self) displayTitle is '\(metadata.displayTitle)'")
         
-        let completeCallback:AudioCompleteCallback?
+        
+        var adjustedMetadata = metadata
         if let fallback = fallbackMetadata {
-            fallback.delegate(with: metadata)
-            completeCallback = session.setMetadata(metadata: fallback)
-        } else {
-            completeCallback = session.setMetadata(metadata: metadata)
+            if metadata.eligible {
+                fallback.delegate(to: metadata)
+            } else {
+                Logger.loading.debug("dropping \(adjustedMetadata.description)")
+            }
+            adjustedMetadata = fallback
         }
         
-        if buffer?.isEmpty ?? true {
-            if let complete = completeCallback {
-                complete(true)
-            } else {
-                session.notifyChanged(SubInfo.metadata)
-            }
-        } else {
-            /// delay metadata notification until corresponding audio is scheduled
-            if let complete = completeCallback {
-                buffer?.put(complete)
-            }
-            if let uuid = session.maintainMetadata() {
-                buffer?.put(cuePoint: uuid)
-            }
-   
+        if !adjustedMetadata.eligible {
+            Logger.loading.notice("using \(adjustedMetadata.description)")
         }
+        
+        session.setMetadata(
+            metadata: adjustedMetadata,
+            direct: buffer?.isEmpty ?? true,
+            lineUp: { (lineUp) in
+                self.buffer?.put(lineUp)
+            }
+        )
         
         /// do not delay notifaction of playout states changes
         session.notifyChanged(SubInfo.playout)

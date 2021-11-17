@@ -29,6 +29,9 @@ import Foundation
 class IcyMetadata : AbstractMetadata {
     
     private let data:[String:String]
+    override var description:String { get {
+        return "\(type(of: self)) with keys \(data.keys)"
+    }}
     
     init(icyData:[String:String]) {
         self.data = icyData
@@ -41,7 +44,7 @@ class IcyMetadata : AbstractMetadata {
     }}
 
     // content of icy-data "StreamTitle", mostly "[$ARTIST - ]$TITLE"
-    override var currentItem: Item? { get {
+    override var currentInfo: Item? { get {
         guard let displayTitle = data["StreamTitle"]?.trimmingCharacters(in: CharacterSet.init(charactersIn: "'")) else {
             return nil
         }
@@ -59,19 +62,25 @@ class IcyMetadata : AbstractMetadata {
 
 class OpusMetadata : AbstractMetadata {
     private let vorbis:[String:String]
+    override var description:String { get {
+        return "\(type(of: self)) with vorbis comments \(vorbis.keys)"
+    }}
     init(vorbisComments:[String:String]) {
         self.vorbis = vorbisComments
         super.init()
     }
     
-    override var currentItem: Item? { get {
-        let displayTitle = combinedTitle(comments: vorbis)
+    override var currentInfo: Item? { get {
+        let displayTitle = combinedTitle(comments: vorbis) ?? ""
+//        guard let displayTitle = combinedTitle(comments: vorbis) else {
+//            return nil
+//        }
         return Item(displayTitle:displayTitle, title:vorbis["TITLE"], artist:vorbis["ARTIST"],
                     album:vorbis["ALBUM"], version:vorbis["VERSION"])
     }}
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"
-    private func combinedTitle(comments: [String:String]) -> String {
+    private func combinedTitle(comments: [String:String]) -> String? {
         let relevant:[String] = ["ALBUM", "ARTIST", "TITLE"]
         let playout = relevant
             .filter { comments[$0] != nil }
@@ -83,7 +92,7 @@ class OpusMetadata : AbstractMetadata {
         if result.count > 0 {
             return result
         }
-        return result
+        return nil
     }
 }
 
@@ -95,11 +104,11 @@ class YbridMetadata : AbstractMetadata {
         super.init()
     }
 
-    override var currentItem: Item? { get {
+    override var currentInfo: Item? { get {
         return createItem(ybrid: v2.currentItem)
     }}
     
-    override var nextItem: Item? { get {
+    override var nextInfo: Item? { get {
         return createItem(ybrid: v2.nextItem)
     }}
     
