@@ -55,7 +55,8 @@ class IcyMetadata : AbstractMetadata {
     // content of http-headers "icy-name" and "icy-genre" ("ice-*" were mapped to "icy-*")
     override var serviceInfo: Service? { get {
         guard let name = data["icy-name"] else { return nil }
-        return Service(identifier: name, displayName: name, genre: data["icy-genre"])
+        return Service(identifier: name, displayName: name, genre: data["icy-genre"],
+                       description: data["icy-description"], infoUri: data["icy-url"] )
     }}
 }
 
@@ -76,7 +77,8 @@ class OpusMetadata : AbstractMetadata {
 //            return nil
 //        }
         return Item(displayTitle:displayTitle, title:vorbis["TITLE"], artist:vorbis["ARTIST"],
-                    album:vorbis["ALBUM"], version:vorbis["VERSION"])
+                    album:vorbis["ALBUM"], version:vorbis["VERSION"],
+                    description:vorbis["DESCRIPTION"], genre:vorbis["GENRE"])
     }}
     
     // returns "[$ALBUM - ][$ARTIST - ]$TITLE[ ($VERSION)]"

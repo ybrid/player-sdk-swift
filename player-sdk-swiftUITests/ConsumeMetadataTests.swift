@@ -29,7 +29,6 @@ import YbridPlayerSDK
 class ConsumeMetadataTests: XCTestCase {
     
     var consumer = TestMetadataCallsConsumer()
-    var mediaSession:MediaSession?
     var player:PlaybackControl?
     var semaphore:DispatchSemaphore?
     override func setUpWithError() throws {
@@ -41,7 +40,7 @@ class ConsumeMetadataTests: XCTestCase {
         consumer = TestMetadataCallsConsumer()
     }
 
-
+    
     func test01_Ybrid_OnEachPlayAndInStream_FullCurrentNext() throws {
 
         try AudioPlayer.open (for: ybridDemoEndpoint, listener: consumer) {
@@ -117,6 +116,15 @@ class ConsumeMetadataTests: XCTestCase {
             guard let type = item.type else { XCTFail("expected a type"); return }
             print("\(item)")
             XCTAssertNotEqual(ItemType.UNKNOWN, type, "\(type) not expected")
+            
+            XCTAssertNotNil(item.identifier)
+            XCTAssertNotNil(item.title)
+            XCTAssertNotNil(item.artist)
+            XCTAssertNotNil(item.playbackLength)
+            XCTAssertNotNil(item.description)
+            XCTAssertNil(item.album)
+            XCTAssertNil(item.version)
+            XCTAssertNil(item.genre)
         }
         
         let nextItems = consumer.metadatas.filter{ return $0.next != nil }.map{ $0.next! }
@@ -132,11 +140,16 @@ class ConsumeMetadataTests: XCTestCase {
             XCTAssertEqual("swr3-live", service.identifier)
             XCTAssertEqual("SWR3 Live", service.displayName)
             XCTAssertNil(service.genre)
+            XCTAssertNil(service.description)
+            guard let iconUrl = service.iconUri else {
+                XCTFail("missing iconUri for swr3 (from Ybrid bouquet header icy-url)"); return
+            }
+            XCTAssertTrue(iconUrl.starts(with: "http"))
+            XCTAssertTrue(iconUrl.contains("swr"))
         }
     }
-
     
-    func test03_Icy_InStreamOnly_CurrentService() throws {
+    func test03_Icy_InStreamOnly_CurrentService_InfoUrl() throws {
         
         try AudioPlayer.open(for: icecastHr2Endpoint, listener: consumer) {
             [self] control in player = control
@@ -166,6 +179,14 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertEqual("hr2", service.identifier)
         XCTAssertEqual("hr2", service.displayName)
         XCTAssertNil(service.genre)
+        XCTAssertNil(service.description)
+        guard let infoUrl = service.infoUri else {
+            XCTFail("missing infoUrl for hr2 (from http header icy-url)"); return
+        }
+        // today it's http://www.hr.de but may change to something like https://www.hr2.de
+        XCTAssertTrue(infoUrl.starts(with: "http"))
+        XCTAssertTrue(infoUrl.contains("www.hr"))
+        XCTAssertNil(service.iconUri)
     }
     
     func test04_OpusDlf_InStreamOnly_CurrentService() throws {
@@ -195,9 +216,12 @@ class ConsumeMetadataTests: XCTestCase {
         guard let service = consumer.metadatas.first?.service else {
             XCTFail("This server supports icy-fields, 'icy-name' missing"); return
         }
-        XCTAssertEqual("Deutschlandfunk", service.identifier)
-        XCTAssertEqual("Deutschlandfunk", service.displayName)
-        XCTAssertEqual("Information", service.genre)
+        XCTAssertEqual(service.identifier, "Deutschlandfunk")
+        XCTAssertEqual(service.displayName, "Deutschlandfunk")
+        XCTAssertEqual(service.genre, "Information")
+        XCTAssertNil(service.iconUri)
+        XCTAssertEqual(service.description, "Alles von Relevanz.")
+        XCTAssertEqual(service.infoUri, "https://www.deutschlandfunk.de")
     }
     
     func test05_OpusCC_InStreamOnly_TitleArtistAlbumService() throws {
@@ -218,14 +242,15 @@ class ConsumeMetadataTests: XCTestCase {
         XCTAssertGreaterThan(currentItems.count, 1, "must be one current item")
         guard let item = currentItems.first else { XCTFail(); return }
         
-        XCTAssertNotNil(item.album)
+        XCTAssertNil(item.type)
+        XCTAssertNil(item.identifier)
+        XCTAssertNotNil(item.displayTitle)
         XCTAssertNotNil(item.title)
         XCTAssertNotNil(item.artist)
-        XCTAssertNotNil(item.displayTitle)
-        XCTAssertNil(item.description)
-        XCTAssertNil(item.identifier)
+        //        XCTAssertNotNil(item.album) /// depends on the track
         XCTAssertNil(item.version)
-        XCTAssertNil(item.type)
+        XCTAssertNil(item.description)
+        XCTAssertNotNil(item.genre)
         
         
         XCTAssertNil(consumer.metadatas[0].next, "icy usually doesn't include next item")
@@ -233,9 +258,12 @@ class ConsumeMetadataTests: XCTestCase {
         guard let service = consumer.metadatas.first?.service else {
             XCTFail("This server supports icy-fields, 'icy-name' missing"); return
         }
-        XCTAssertEqual("TheRadio.CC", service.identifier)
-        XCTAssertEqual("TheRadio.CC", service.displayName)
-        XCTAssertEqual("Creative Commons", service.genre)
+        XCTAssertEqual(service.identifier, "TheRadio.CC")
+        XCTAssertEqual(service.displayName, "TheRadio.CC")
+        XCTAssertEqual(service.genre, "Creative Commons")
+        XCTAssertNil(service.iconUri)
+        XCTAssertEqual(service.description, "The Radio CC - Euer Creative Commons-Webradio")
+        XCTAssertEqual(service.infoUri, "https://theradio.cc/")
     }
     
     func test06_OnDemand_OnBeginningNoneOnResume() throws {
@@ -254,10 +282,10 @@ class ConsumeMetadataTests: XCTestCase {
         let currentItems = consumer.metadatas.map{ $0.current }
         XCTAssertEqual(currentItems.count, 1, "must be one current item")
         guard let item = currentItems.first else { XCTFail(); return }
-        XCTAssertNotNil(item.album)
-        XCTAssertNotNil(item.title)
-        XCTAssertNotNil(item.artist)
-        XCTAssertNotNil(item.displayTitle)
+        XCTAssertEqual(item.album, "Lines Build Walls")
+        XCTAssertEqual(item.title, "Paper Lights")
+        XCTAssertEqual(item.artist, "Ehren Starks")
+        XCTAssertEqual(item.displayTitle, "Lines Build Walls - Ehren Starks - Paper Lights")
         XCTAssertNil(item.description)
         XCTAssertNil(item.identifier)
         XCTAssertNil(item.version)
