@@ -3,7 +3,7 @@
 
 import PackageDescription
 
-let version = "0.13.2"
+let version = "0.14.0"
 let package = Package(
     name: "YbridPlayerSDK",
     platforms: [
@@ -31,7 +31,7 @@ let package = Package(
         .binaryTarget(
            name: "YbridPlayerSDK",
            url: "https://github.com/ybrid/player-sdk-swift/releases/download/\(version)/YbridPlayerSDK.xcframework.zip",
-            checksum: "d2c4ec2ceb5272e6827714fa7ca64bbdc0182a4177a8c9b36921f97934628a26"
+            checksum: "91566514b059f7e6dfccb0db17a1f86f1d13050f5d5099d0c472896a11c1250b"
            )
     ]
 )
