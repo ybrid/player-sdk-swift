@@ -35,6 +35,9 @@
                   Identifier = "AudioPlaylistTests">
                </Test>
                <Test
+                  Identifier = "ListeningAACCompareTests">
+               </Test>
+               <Test
                   Identifier = "PlayerToggleStressTest">
                </Test>
                <Test
