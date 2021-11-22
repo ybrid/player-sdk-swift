@@ -59,7 +59,7 @@ class MetadataTests: XCTestCase {
     func testIcyOnly_Title() {
         let metadata = IcyMetadata(icyData: heyJudeIcyTitle)
         XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle )
-        XCTAssertEqual("", metadata.service.identifier )
+        XCTAssertEqual("default", metadata.service.identifier )
     }
     
     func testIcyOnly_Service() {
@@ -72,7 +72,7 @@ class MetadataTests: XCTestCase {
     func testVobisCommentsOnly_Title() {
         let metadata = OpusMetadata(vorbisComments: heyJudeVorbisComments)
         XCTAssertEqual("Beatles - Hey Jude", metadata.displayTitle )
-        XCTAssertEqual("", metadata.service.identifier )
+        XCTAssertEqual("default", metadata.service.identifier )
     }
     
     func testVorbisCommands_AreCaseSensitive() {

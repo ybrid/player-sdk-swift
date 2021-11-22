@@ -34,14 +34,14 @@ import YbridPlayerSDK
  * endpointAvailableRates
  * *******************************************************************/
 
-let testEndpoint = ybridDemoEndpoint
-let endpointAvailableRates:[Int32] = supportedBitratesKbps.map{ Int32($0 * 1000) }
+//let testEndpoint = ybridDemoEndpoint
+//let endpointAvailableRates:[Int32] = supportedBitratesKbps.map{ Int32($0 * 1000) }
 
 //let testEndpoint = ybridAdDemoEndpoint
 //let endpointAvailableRates:[Int32] = [128_000]
 
-//let testEndpoint = ybridStageSwr3Endpoint
-//let endpointAvailableRates:[Int32] = [64_000, 80_000, 128_000, 192_000]
+let testEndpoint = ybridStageSwr3Endpoint
+let endpointAvailableRates:[Int32] = [64_000, 80_000, 128_000, 192_000]
 
 
 // constants
@@ -161,7 +161,7 @@ class YbridBitrateLimitTests: XCTestCase {
             
             ybrid.maxBitRate(to:77)
             Thread.sleep(forTimeInterval: maxCtrlComplete)
-            XCTAssertEqual(1, listener.maxRateNotifications) // except on item changes
+            XCTAssertGreaterThanOrEqual(listener.maxRateNotifications, 1) // 1 except on item changes
             XCTAssertEqual(listener.maxBitRate!, endpointAvailableRates.min() ?? bitRatesRange.lowerBound)
         }
     }

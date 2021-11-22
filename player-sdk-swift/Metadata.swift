@@ -138,21 +138,21 @@ class AbstractMetadata : Metadata {
         if let delegate = delegate {
             return delegate.displayTitle
         }
-        return currentInfo?.displayTitle ?? AbstractMetadata.noItem.displayTitle
+        return currentInfo?.displayTitle ?? AbstractMetadata.dummyItem.displayTitle
     }
     
-    private static let noServie = Service(identifier: "")
+    private static let dummyItem = Item(displayTitle: "")
     public final var current: Item {
-        return delegate?.currentInfo ?? currentInfo ?? AbstractMetadata.noItem
+        return delegate?.currentInfo ?? currentInfo ?? AbstractMetadata.dummyItem
     }
     
     public final var next: Item?  {
         return delegate?.nextInfo ?? nextInfo
     }
     
-    private static let noItem = Item(displayTitle: "")
+    private static let defaultService = Service(identifier: "default")
     public final var service: Service {
-        return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.noServie
+        return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.defaultService
     }
     
 }

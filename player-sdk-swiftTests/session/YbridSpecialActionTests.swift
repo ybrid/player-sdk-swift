@@ -82,14 +82,15 @@ class YbridSpecialActionTests: XCTestCase {
 
     
     func test02_limitBitrates_AllMp3Supported() throws {
+        Logger.verbose = true
         let bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112,
                         128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
         
         let semaphore = DispatchSemaphore(value: 0)
         var adoptedRates:[Int32] = []
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: listener,
              playbackControl: { (c) in
-                return },
+            XCTFail(); semaphore.signal(); return },
              ybridControl: { (ybridControl) in
                 guard let ybrid = ybridControl as? YbridAudioPlayer else {
                     XCTFail(); semaphore.signal(); return
@@ -120,11 +121,11 @@ class YbridSpecialActionTests: XCTestCase {
         print("adopted bit rates are \(adoptedRates)")
     }
 
-    func test03_limitBitrateVague_ok() throws {
+    func test03_limitBitrateUnchanged_ok() throws {
         let semaphore = DispatchSemaphore(value: 0)
-        try AudioPlayer.open(for: ybridDemoEndpoint, listener: listener,
+        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: listener,
              playbackControl: { (_) in
-                return },
+                XCTFail(); semaphore.signal(); return },
              ybridControl: { [self] (ybridControl) in
                 guard let ybrid = ybridControl as? YbridAudioPlayer else {
                     XCTFail(); semaphore.signal(); return
@@ -135,33 +136,25 @@ class YbridSpecialActionTests: XCTestCase {
                 
                 ybrid.maxBitRate(to:77)
                 usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(8_000, ybrid.session.mediaState?.maxBitRate)
+                XCTAssertEqual(77, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:31_000)
                 usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(32_000, ybrid.session.mediaState?.maxBitRate)
-                
-                ybrid.maxBitRate(to:57_000)
-                usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(64_000, ybrid.session.mediaState?.maxBitRate)
-                
-                ybrid.maxBitRate(to:191_999)
-                usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(192_000, ybrid.session.mediaState?.maxBitRate)
-                
+                XCTAssertEqual(31_000, ybrid.session.mediaState?.maxBitRate)
+
                 ybrid.maxBitRate(to:447_000)
                 usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
+                XCTAssertEqual(447_000, ybrid.session.mediaState?.maxBitRate)
                 
                 
                 ybrid.maxBitRate(to:449_000)
                 usleep(maxCtrlCompleteUs)
                 // unchanged
-                XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
+                XCTAssertEqual(449_000, ybrid.session.mediaState?.maxBitRate)
                 
                 ybrid.maxBitRate(to:390291781)
                 usleep(maxCtrlCompleteUs)
-                XCTAssertEqual(448_000, ybrid.session.mediaState?.maxBitRate)
+                XCTAssertEqual(390291781, ybrid.session.mediaState?.maxBitRate)
                 
                 ybridControl.close()
                 usleep(maxCtrlCompleteUs)
