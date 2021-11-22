@@ -25,23 +25,21 @@
 
 import Foundation
 
-
-
-
 typealias Notification = ((SubInfo,_ clear:Bool) -> ())
 typealias CtrlComplete = (()->())
 
 class ChangeOverFactory {
     
     private let notify:Notification
-    init(_ notify: @escaping Notification) {
+
+    init(_ notify:@escaping Notification ) {
         self.notify = notify
     }
     
-    func create(with subtype:SubInfo, userAudioComplete: AudioCompleteCallback?) -> ChangeOver {
+    func create( _ action:@escaping ()->(Bool), type subtype:SubInfo, userAudioComplete: AudioCompleteCallback?) -> ChangeOver {
         let ctrlComplete = createCtrlComplete(subtype, notify)
         let audioComplete = createAudioComplete(subtype, notify, userAudioComplete)
-        return ChangeOver(subtype, ctrlComplete, audioComplete: audioComplete)
+        return ChangeOver(action, subtype, ctrlComplete, audioComplete: audioComplete)
     }
     
     
@@ -84,11 +82,13 @@ class ChangeOverFactory {
 
 class ChangeOver {
     
+    let action:()->(Bool)
     let subtype:SubInfo
     let ctrlComplete: (() -> ())?
     let audioComplete: AudioCompleteCallback
     
-    init(_ subtype:SubInfo, _ ctrlComplete: CtrlComplete?, audioComplete: @escaping AudioCompleteCallback ) {
+    init(_ action:@escaping ()->(Bool), _ subtype:SubInfo, _ ctrlComplete: CtrlComplete?, audioComplete: @escaping AudioCompleteCallback ) {
+        self.action = action
         self.subtype = subtype
         self.ctrlComplete = ctrlComplete
         self.audioComplete = audioComplete

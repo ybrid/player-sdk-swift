@@ -47,10 +47,16 @@ public class MediaSession {
     }}
     
     var changeOverFactory:ChangeOverFactory?
+    var running:(() -> (Bool))?
     
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
+        self.changeOverFactory = ChangeOverFactory(self.notifyChanged(_:clear:) )
+    }
+    
+    func allow( _ running:@escaping ()->(Bool) ) {
+        self.running = running
     }
     
     func connect() throws {
@@ -69,8 +75,6 @@ public class MediaSession {
                 throw playerError
             }
         }
-        
-        changeOverFactory = ChangeOverFactory(self.notifyChanged(_:clear:))
     }
     
     func close() {
@@ -81,18 +85,78 @@ public class MediaSession {
         driver?.refresh()
     }
     
-    func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
-                _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
-        
-        let success = action()
-        
-        guard let change = changeOverFactory?.create(with: subtype, userAudioComplete: userAudioComplete) else {
-            Logger.session.error("could not establish change over \(subtype)")
+    
+    // MARK: actions
+       
+    func maxBitRate(to bps:Int32) {
+        driver?.maxBitRate(to: bps)
+        notifyChanged( SubInfo.playout )
+    }
+    
+    func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.wind(by:by) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind by \(by.S)")
             return false
         }
+        return execute(changeOver)
+    }
+    
+    func windToLive(_ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.windToLive() ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind to live")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func wind(to:Date, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.wind(to:to) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind to \(to)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func skipForward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.skipForward(type) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            let msgTo = (type != nil) ? type!.rawValue : "item"
+            Logger.session.error("could not establish skip forward to \(msgTo)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func skipBackward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.skipBackward(type) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            let msgTo = (type != nil) ? type!.rawValue : "item"
+            Logger.session.error("could not establish skip back to \(msgTo)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func swapItem(_ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.swapItem() ?? false }, type: SubInfo.metadata, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish swap item")
+            return false
+        }
+        return execute(changeOver)
+    }
+
+    func swapService(id:String, audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.swapService(id: id) ?? false }, type: SubInfo.bouquet, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish swap to service \(id)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    private func execute(_ change:ChangeOver ) -> Bool {
+
+        let success = change.action()
         change.ctrlComplete?()
-        
-        if !running {
+
+        if (running?() ?? false) == false {
             change.audioComplete(success)
             return false
         }
@@ -104,34 +168,6 @@ public class MediaSession {
         
         changingOver = change // waiting for trigger
         return true
-    }
- 
-    
-    // MARK: actions
-       
-    func maxBitRate(to bps:Int32) {
-        driver?.maxBitRate(to: bps)
-    }
-    func wind(by:TimeInterval) -> Bool {
-        return driver?.wind(by: by) ?? false
-    }
-    func windToLive() -> Bool {
-        return driver?.windToLive() ?? false
-    }
-    func wind(to:Date) -> Bool {
-        return driver?.wind(to:to) ?? false
-    }
-    func skipForward(_ type:ItemType?) -> Bool {
-        return driver?.skipForward(type) ?? false
-    }
-    func skipBackward(_ type:ItemType?) -> Bool {
-        return driver?.skipBackward(type) ?? false
-    }
-    func swapItem() -> Bool {
-        return driver?.swapItem() ?? false
-    }
-    func swapService(id:String) -> Bool {
-        return driver?.swapService(id: id) ?? false
     }
     
     // MARK: metadata handling
