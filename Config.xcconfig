@@ -32,7 +32,7 @@
 // Product Version, PLEASE CHANGE HERE to affect all targets
 MARKETING_VERSION = 0.14.0
 // Build number, PLEASE CHANGE HERE to affect all targets
-CURRENT_PROJECT_VERSION = 49
+CURRENT_PROJECT_VERSION = 50
 
 // Product name, PLEASE CHANGE HERE to affect all targets
 PRODUCT_NAME = YbridPlayerSDK

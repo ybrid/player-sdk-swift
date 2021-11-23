@@ -29,7 +29,7 @@ import XCTest
 class YbridSpecialActionTests: XCTestCase {
     
     let maxCtrlCompleteUs:useconds_t = 1_500_000
-    
+    let poller = Poller()
     var listener = ErrorListener()
     override func setUpWithError() throws {
     }
@@ -80,48 +80,7 @@ class YbridSpecialActionTests: XCTestCase {
         }
     }
 
-    
-    func test02_limitBitrates_AllMp3Supported() throws {
-        Logger.verbose = true
-        let bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112,
-                        128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        var adoptedRates:[Int32] = []
-        try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: listener,
-             playbackControl: { (c) in
-            XCTFail(); semaphore.signal(); return },
-             ybridControl: { (ybridControl) in
-                guard let ybrid = ybridControl as? YbridAudioPlayer else {
-                    XCTFail(); semaphore.signal(); return
-                }
-                ybrid.play()
-                sleep(4)
-                
-                bitrates.forEach{
-                    let kbps = Int32($0)*1000
-                    ybrid.maxBitRate(to:kbps)
-                    usleep(self.maxCtrlCompleteUs)
-                    XCTAssertEqual(kbps, ybrid.session.mediaState?.maxBitRate)
-                    if kbps == ybrid.session.mediaState?.maxBitRate {
-                        adoptedRates.append(kbps)
-                    }
-                }
-                
-                ybridControl.close()
-                sleep(1)
-                semaphore.signal()
-             })
-        _ = semaphore.wait(timeout: .distantFuture)
-        let errCount = listener.errors.count
-        guard errCount == 0 else {
-            XCTFail("set max bit-rate raised error \(listener.errors)")
-            return
-        }
-        print("adopted bit rates are \(adoptedRates)")
-    }
-
-    func test03_limitBitrateUnchanged_ok() throws {
+    func test02_limitBitrates() throws {
         let semaphore = DispatchSemaphore(value: 0)
         try AudioPlayer.open(for: ybridStageSwr3Endpoint, listener: listener,
              playbackControl: { (_) in
@@ -166,7 +125,36 @@ class YbridSpecialActionTests: XCTestCase {
             XCTFail("set max bit-rate raised error \(listener.errors)")
             return
         }
-    }    
+    }
+    
+    
+    func test03_ShortFlac_400ms() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/flac/test400ms.flac?raw=true")
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
+            
+            control.play()
+            poller.wait(control, untilState: .playing, intervalMs: 50, maxS: 5)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+    }
+    
+    func test04_VeryShortMp3_10ms() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let shortEndpoint = MediaEndpoint(mediaUri: "https://github.com/ybrid/test-files/blob/main/mpeg-audio/sounds/test10ms.mp3?raw=true")
+        try AudioPlayer.open(for: shortEndpoint, listener: nil) { [self] (control) in
+            
+            control.play()
+            poller.wait(control, untilState: .playing, intervalMs: 5, maxS: 5)
+
+            poller.wait(control, untilState: .stopped, maxS: 2)
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .distantFuture)
+    }
     
 }
 

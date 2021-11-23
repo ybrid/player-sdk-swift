@@ -1,0 +1,19 @@
+{
+    "__responseHeader": {
+        "responseVersion": "v2",
+        "statusCode": 200,
+        "success": true,
+        "supportedVersions": [
+            "v1",
+            "v2"
+        ],
+        "timestamp": "2021-11-23T14:14:57.505Z"
+    },
+    "__responseObject": {
+        "requestedTimestamp": -1,
+        "requestedWindDuration": -1,
+        "effectiveWindDuration": 1511,
+        "timestampWindedTo": -1,
+        "totalOffset": -1008
+    }
+}

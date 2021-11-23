@@ -248,6 +248,25 @@ class YbridResponseTests : XCTestCase {
         XCTAssertNil(currentItem?.classifiedType)
     }
     
+    func testYbridV2Swr3Json_SkipBackToNews_ResponseMissingSomething() throws {
+        guard let jsonData = try readJsonFromFile("ybridSkipBackNewsResponse") else {
+            XCTFail(); return
+        }
+        
+        do {
+            _ = try decoder.decode(YbridWindResponse.self, from: jsonData )
+            XCTFail("should fail")
+        } catch {
+            XCTAssertNotNil(error)
+            guard let _ = error as? DecodingError else {
+                XCTFail("expected DecodingError"); return
+            }
+            print(error)
+            let description = "\(error)"
+            XCTAssertTrue(description.contains("newCurrentItem"))
+
+        }
+    }
 }
 
 extension Formatter {

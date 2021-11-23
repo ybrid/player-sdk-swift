@@ -149,64 +149,7 @@ class YbridBitrateLimitTests: XCTestCase {
     }
     
     
-    func test03_playing_maxBitRate_tooLow() throws {
-        
-        let test = TestYbridControl(testEndpoint, listener: listener)
-        test.playing() { [self] (ybrid) in
-            
-            XCTAssertNil(listener.maxBitRate)
-            XCTAssertEqual(0, listener.maxRateNotifications)
-            
-            XCTAssertGreaterThanOrEqual(listener.currentBitRate ?? 0, endpointAvailableRates.min() ?? bitRatesRange.lowerBound)
-            
-            ybrid.maxBitRate(to:77)
-            Thread.sleep(forTimeInterval: maxCtrlComplete)
-            XCTAssertGreaterThanOrEqual(listener.maxRateNotifications, 1) // 1 except on item changes
-            XCTAssertEqual(listener.maxBitRate!, endpointAvailableRates.min() ?? bitRatesRange.lowerBound)
-        }
-    }
-
-    func test04_playing_maxBitRate_tooHigh_fails() throws {
-        
-        let test = TestYbridControl(testEndpoint, listener: listener)
-        test.playing() { [self] (ybrid) in
-            
-            XCTAssertNil(listener.maxBitRate)
-            XCTAssertEqual(0, listener.maxRateNotifications)
-            
-            XCTAssertLessThanOrEqual(listener.currentBitRate ?? 0, bitRatesRange.upperBound)
-            
-            ybrid.maxBitRate(to:1_000_000)
-            Thread.sleep(forTimeInterval: maxCtrlComplete)
-            XCTAssertEqual(1, listener.maxRateNotifications) //  fails -1 from server leads to "no change" in SDK
-            XCTAssertNotNil(listener.maxBitRate) // fails, nothing (-1) is responded
-            XCTAssertEqual(listener.maxBitRate, endpointAvailableRates.max() ?? bitRatesRange.upperBound) //
-        }
-    }
-
-    // ok @ stagecast, fails @ democast
-    func test05_playing_maxBitRate_useLower_fails() throws {
-        
-        let test = TestYbridControl(testEndpoint, listener: listener)
-        test.playing() { [self] (ybrid) in
-            
-            XCTAssertNil(listener.maxBitRate)
-            XCTAssertEqual(0, listener.maxRateNotifications)
-            
-
-            ybrid.maxBitRate(to:70_000)
-            Thread.sleep(forTimeInterval: maxCtrlComplete)
-            XCTAssertEqual(listener.maxBitRate!, 64_000)
-            
-            
-            ybrid.maxBitRate(to:143_000)
-            Thread.sleep(forTimeInterval: maxCtrlComplete)
-            XCTAssertEqual(listener.maxBitRate!, 128_000)
-        }
-    }
-    
-    
-    func test06_playing_maxBitRate_Lowest() throws {
+    func test03_playing_maxBitRate_Lowest() throws {
         
         let test = TestYbridControl(testEndpoint, listener: listener)
         test.playing() { [self] (ybrid) in
@@ -218,9 +161,8 @@ class YbridBitrateLimitTests: XCTestCase {
             XCTAssertEqual(listener.maxBitRate, endpointAvailableRates.min() ?? bitRatesRange.lowerBound)
         }
     }
-
  
-    func test07_playing_maxBitRate_64k() throws {
+    func test04_playing_maxBitRate_64k() throws {
         
         let test = TestYbridControl(testEndpoint, listener: listener)
         test.playing() { [self] (ybrid) in
@@ -233,7 +175,7 @@ class YbridBitrateLimitTests: XCTestCase {
         }
     }
     
-    func test08_playing_maxBitRate_128k() throws {
+    func test05_playing_maxBitRate_128k() throws {
         
         let test = TestYbridControl(testEndpoint, listener: listener)
         test.playing() { [self] (ybrid) in
@@ -247,7 +189,7 @@ class YbridBitrateLimitTests: XCTestCase {
     }
     
     
-    func test09_playing_maxBitRate_Highest() throws {
+    func test06_playing_maxBitRate_Highest() throws {
         
         let test = TestYbridControl(testEndpoint, listener: listener)
         test.playing() { [self] (ybrid) in
@@ -258,7 +200,29 @@ class YbridBitrateLimitTests: XCTestCase {
             ybrid.maxBitRate(to:endpointAvailableRates.max() ?? bitRatesRange.upperBound)
             Thread.sleep(forTimeInterval: maxCtrlComplete)
             XCTAssertEqual(listener.maxBitRate, endpointAvailableRates.max() ?? bitRatesRange.upperBound)
- 
+        }
+    }
+    
+    func test10_limitBitrates_AllMp3Supported() throws {
+
+        let bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112,
+                        128, 160, 192, 224, 256, 320, 352, 384, 416, 448]
+        
+        let test = TestYbridControl(testEndpoint, listener: listener)
+        test.playing() { [self] (ybrid) in
+                bitrates.forEach{
+                    sleep(1)
+                    let kbps = Int32($0)*1000
+                    ybrid.maxBitRate(to:kbps)
+                    Thread.sleep(forTimeInterval: maxCtrlComplete)
+                    XCTAssertEqual(kbps, listener.maxBitRate)
+                }
+             }
+
+        let errCount = listener.errors.count
+        guard errCount == 0 else {
+            XCTFail("set max bit-rate raised error \(listener.errors)")
+            return
         }
     }
     
