@@ -48,7 +48,7 @@ class AbortBufferingTests: XCTestCase {
         Logger.verbose = false
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
-      }
+    }
 
     func testAbortMp3_until1sAfterConnectCleanedUp_ok() throws {
 

@@ -76,6 +76,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             audioComplete(false)
             session.changingOver = nil
         }
+        PlayerContext.unregisterMemoryListener(listener: self)
     }
     
     func dispose() {
@@ -83,7 +84,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         _ = self.accumulator?.reset()
         self.decoder?.dispose()
         self.buffer?.dispose()
-        PlayerContext.unregisterMemoryListener(listener: self)
     }
     
     func reset() {
@@ -205,6 +205,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         }
         
         buffer?.endOfStream()
+        stopProcessing()
     }
     
     

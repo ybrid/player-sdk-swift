@@ -65,10 +65,11 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         }else{
             Logger.testing.debug("-- executing tear down in other thread")
         }
-        
         Logger.testing.notice("-- triggered play \(self.triggeredPlay), stop \(self.triggeredStop)")
         Logger.testing.notice("-- end of toggling play and stop")
         Logger.testing.notice("------------------")
+        
+        player?.close()
         Logger.testing.notice("-- final rest for \(finalRestDuration.S) ")
         _ = waitingQueue.sync { sleep(UInt32(finalRestDuration)) }
         Logger.testing.notice("------------------")
@@ -150,6 +151,7 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         
         if self.player?.state != .stopped {
             self.player?.stop()
+            sleep(1)
         }
     }
     
