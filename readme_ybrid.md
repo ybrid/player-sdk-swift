@@ -70,7 +70,7 @@ public protocol YbridControl : PlaybackControl {
 }
 public typealias AudioCompleteCallback = ((_ success:Bool) -> ())
 ```
-If you call an action it'll take a short time until you hear the requested change of audio content. ```audioComplete``` hooks on an action are called when the requested changeover is fullfilled. If ```success == false``` the action won't change anything. Use these callbacks to express the change in the user interface.
+If you call an action it'll take a short time until you hear the requested change of audio content. `audioComplete` hooks on an action are called when the requested changeover is fullfilled. If `success == false` the action won't change anything. Use these callbacks to express the change in the user interface.
 
 Implement YbridControlListener and pass it via the listener parameter of `AudioPlayer.open`. You will receive the following notifications on startup and when the value changes
 
@@ -83,29 +83,6 @@ public protocol YbridControlListener : AudioPlayerListener {
 }
 ```
 
-## Metadata
-
-We do not \(yet\) guess metadata. We read metadata
-
-* encoded in the icyx transport layer, called icy-Metadata
-* encoded in the opus codec, called VorbisComments in OpusTags
-* maintained by the ybrid server. The data is taken in parallel to audio stream injection.
-
-In the context of ybrid metadata, we currently support the following `ItemTypes`
-
-```swift
-public enum ItemType : String  {
-    case ADVERTISEMENT = "ADVERTISEMENT"
-    case COMEDY = "COMEDY"
-    case JINGLE = "JINGLE"
-    case MUSIC = "MUSIC"
-    case NEWS = "NEWS"
-    case TRAFFIC = "TRAFFIC"
-    case VOICE = "VOICE"
-    case WEATHER = "WEATHER"
-    case UNKNOWN
-}
-```
 
 ## Ybrid docs
 

@@ -2,7 +2,7 @@
 
 ## player-sdk-swift
 
-This audio player SDK is written in Swift 4 and runs on iPhones and iPads from iOS 9 to iOS 14.
+This audio player SDK is written in Swift 4 and runs on iPhones and iPads from iOS 9 to now.
 
 An example app using this player SDK can be run from the XCode-Project in the repository [app-example-ios](https://github.com/ybrid/app-example-ios).
 
@@ -12,7 +12,7 @@ This audio player SDK offers
 
 * low latency live and on-demand file streaming
 * compatibility: currently supports audio codecs mp3, aac, and opus
-* metadata processing for Icecast, Vorbis commands and Ybrid 
+* metadata processing for Icecast, Vorbis comments and Ybrid 
 * active, user-centric handling of typical network problems
 * stability
 
@@ -37,7 +37,7 @@ try AudioPlayer.open(for: myEndpoint, listener: nil) {
 sleep(10) /// of course the program must not end here
 ```
 
-AudioPlayer.open first detects the transmission protocol and encoding of the audio content and metadata and then returns a playback control asynchronously. A media-specific control can be taken from the full `open` method, [see README\_Ybrid](readme_ybrid.md).
+AudioPlayer.open first detects the transmission protocol and encoding of the audio content and [metadata](readme_metadata.md) and then returns a playback control asynchronously. A media-specific control can be taken from the full `open` method, [see README\_Ybrid](readme_ybrid.md).
 
 Possible playback states of the player are
 
@@ -68,7 +68,9 @@ public protocol AudioPlayerListener : class {
 
 In case of network stalls, the state will change from playing to buffering at the time of exhausting audio buffer. Try it out! After reconnecting to a network, the player will resume.
 
-Errors are raised when occurring. Your handling may use the message, the code, or just `ErrorSeverity`.
+Errors are raised when occurring. Your handling may use the message, the `code`, or just `ErrorSeverity` of `AudioPlayerError`.
+
+Further interfaces concern [product version and handling of memory issues](readme_product.md). 
 
 ### Development environment
 
