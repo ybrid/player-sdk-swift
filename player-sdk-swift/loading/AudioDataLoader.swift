@@ -238,9 +238,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         
         if Logger.verbose { Logger.loading.debug("recieved \(data.count) bytes, total \(dataTask.countOfBytesReceived)") }
         
-        pipeline.decodingQueue.async {
-            self.pipeline.process(data: data)
-        }
+        pipeline.process(data: data)
         
         if dataTask.state == .running {
             stalled = false
@@ -257,10 +255,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         logMessage += ", state is \(describe(task.state))"
         Logger.loading.debug(logMessage)
         
-        pipeline.decodingQueue.async {
-            self.pipeline.endOfData()
-        }
-        
+        pipeline.endOfData()
         
         taskState = SessionTaskState.getSessionTaskState(task.state, error)
          

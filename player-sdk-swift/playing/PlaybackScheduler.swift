@@ -37,6 +37,7 @@ class PlaybackScheduler {
         guard let lastSample = playerNode.lastRenderTime else {
             return nil
         }
+            
         return lastSample
     }
     

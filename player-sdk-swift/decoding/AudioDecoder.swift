@@ -35,7 +35,7 @@ class AudioDecoder : AudioDataListener {
     
     static let factory = AudioDecoderFactory()
     
-    let listener: DecoderListener
+    weak var listener: DecoderListener?
     let notify: DecoderNotification?
     var pcmFormat: AVAudioFormat?
     
@@ -52,7 +52,7 @@ class AudioDecoder : AudioDataListener {
 
         do {
             let pcmFormat = try self.create(from: srcFormat)
-            listener.onFormatChanged(pcmFormat)
+            listener?.onFormatChanged(pcmFormat)
         } catch {
             if let decoderError = error as? DecoderError {
                 notify?(ErrorSeverity.fatal, decoderError)
@@ -63,7 +63,7 @@ class AudioDecoder : AudioDataListener {
     }
     
     func pcmReady(pcmBuffer: AVAudioPCMBuffer) {
-        listener.pcmReady(pcmBuffer: pcmBuffer)
+        listener?.pcmReady(pcmBuffer: pcmBuffer)
     }
 
     

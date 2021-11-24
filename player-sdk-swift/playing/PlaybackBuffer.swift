@@ -61,11 +61,11 @@ class PlaybackBuffer {
     }
     private func audioOn() {
         Logger.playing.notice()
-        engine.change(volume: 1)
+        engine?.change(volume: 1)
     }
     private func audioOff() {
         Logger.playing.notice()
-        engine.change(volume: 0)
+        engine?.change(volume: 0)
     }
     
     var isEmpty:Bool { get {
@@ -79,7 +79,7 @@ class PlaybackBuffer {
     private let buffer:ChunkedBuffer
     var scheduler:PlaybackScheduler /// visible for unit tests
 
-    let engine: PlaybackEngine
+    weak var engine: PlaybackEngine?
     weak var listener:BufferListener?
 
     private var buffering:TimeInterval { get {
@@ -261,7 +261,6 @@ class PlaybackBuffer {
     struct Chunk {
         let pcm:AVAudioPCMBuffer
         let duration:TimeInterval
-        var lineUp:LineUp? = nil
         var callback:AudioCompleteCallback? = nil
     }
     

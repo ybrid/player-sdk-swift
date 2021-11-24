@@ -124,12 +124,12 @@ class PlaybackEngine : Playback {
     func stop() {
         Logger.playing.debug()
         
-        if let playingSince = playbackBuffer?.playingSince {
-            DispatchQueue.global().async {
-                self.playerListener?.playingSince(playingSince)
-            }
-        }
-
+//        if let engine = playbackBuffer?.engine, let playingSince = playbackBuffer?.playingSince {
+//            DispatchQueue.global().async {
+//                self.playerListener?.playingSince(playingSince)
+//            }
+//        }
+//
         stopTimer()
         change(volume: 0)
         playerNode.stop()

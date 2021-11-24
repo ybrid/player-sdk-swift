@@ -149,7 +149,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         }
         if playbackState == .stopped {
             playbackState = .buffering
-            self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
+            pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
             let playbackUrl = URL(string: session.playbackUri)!
             playerQueue.async {
                 self.playWhenReady(playbackUrl)
@@ -211,6 +211,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     private func stopPlaying() {
         playback?.stop()
         loader?.stopRequestData()
+        pipeline?.stopProcessing()
         pipeline?.dispose()
     }
     

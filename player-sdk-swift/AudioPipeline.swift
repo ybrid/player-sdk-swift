@@ -52,7 +52,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     weak var playerListener:AudioPlayerListener?
     let session:MediaSession
 
-    let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
+    private let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession) {
@@ -124,24 +124,26 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     // MARK: "main" is to process data chunks
     
     func process(data: Data) {
-
-        if let mdExtractor = metadataExtractor {
-            mdExtractor.dispatch(payload: data, metadataReady: metadataReady, audiodataReady: audiodataReady)
-            return
-        }
+        decodingQueue.async { [self] in
+            if let mdExtractor = metadataExtractor {
+                mdExtractor.dispatch(payload: data, metadataReady: metadataReady, audiodataReady: audiodataReady)
+                return
+            }
         
-        audiodataReady(data)
+            audiodataReady(data)
+        }
     }
 
     func endOfData() {
         Logger.decoding.debug()
-        if let mdExtractor = metadataExtractor {
+        decodingQueue.async { [self] in
+            if let mdExtractor = metadataExtractor {
             mdExtractor.flush(audiodataReady)
-        }
-        if let audioData = accumulator?.reset() {
-            self.decode(data: audioData)
-        }
-        decodingQueue.async {
+            }
+            if let audioData = accumulator?.reset() {
+                self.decode(data: audioData)
+            }
+            
             guard let decoder = self.decoder else {
                 Logger.decoding.error("no decoder avaliable")
                 return
@@ -173,7 +175,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             if !resumed {
                 /// subsequent format change is detected
                 /// affects scheduler and connection to engine
-                buffer.engine.alterTarget(format: pcmTargetFormat)
+                buffer.engine?.alterTarget(format: pcmTargetFormat)
             } else {
                 /// recovered from network stall
                 buffer.reset()
@@ -199,13 +201,15 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
     
     func endOfStream() {
-        guard !self.stopping else {
-            Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
-            return
+        decodingQueue.async { [self] in
+            guard !self.stopping else {
+                Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
+                return
+            }
+            
+            stopProcessing()
+            buffer?.endOfStream()
         }
-        
-        buffer?.endOfStream()
-        stopProcessing()
     }
     
     
