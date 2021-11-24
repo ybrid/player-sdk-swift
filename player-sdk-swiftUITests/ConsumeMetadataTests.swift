@@ -299,7 +299,7 @@ class ConsumeMetadataTests: XCTestCase {
         ///
         let service = metadata.service
         XCTAssertEqual(service.identifier,"default")
-        XCTAssertNil(service.displayName, "This server does not support icy-fields")
+        XCTAssertEqual(service.displayName, "")
     }
     
     

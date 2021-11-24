@@ -150,7 +150,7 @@ class AbstractMetadata : Metadata {
         return delegate?.nextInfo ?? nextInfo
     }
     
-    private static let defaultService = Service(identifier: "default")
+    private static let defaultService = Service(identifier: "default", displayName: "")
     public final var service: Service {
         return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.defaultService
     }
