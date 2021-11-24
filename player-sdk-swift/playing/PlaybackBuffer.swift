@@ -90,7 +90,6 @@ class PlaybackBuffer {
     }}
 
     private let instant:BufferInstant
-    
     init(scheduling:PlaybackScheduler, engine: PlaybackEngine) {
         self.buffer = ChunkedBuffer()
         self.scheduler = scheduling
@@ -187,12 +186,13 @@ class PlaybackBuffer {
 
     
     private func ensurePlayback() {
-        guard state != .wait else {
-            return
-        }
         
         instant.buffered = buffering
         instant.scheduled = remaining
+
+        guard state != .wait else {
+            return
+        }
         
         if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         

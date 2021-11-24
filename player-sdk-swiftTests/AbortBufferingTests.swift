@@ -44,24 +44,24 @@ class AbortBufferingTests: XCTestCase {
     
     // MARK: abort playing mp3
 
-    func testAbortMp3_until200msAfterConnectCleanedUp_failsSometimesFrom25msTo35ms() throws {
+    func test01_AbortMp3_until200msAfterConnectCleanedUp_failsSometimesFrom25msTo35ms() throws {
         Logger.verbose = false
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
     }
 
-    func testAbortMp3_until1sAfterConnectCleanedUp_ok() throws {
+    func test02_AbortMp3_until1sAfterConnectCleanedUp_ok() throws {
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
     }
     
-    func testAbortOpus_0until100msAfterConnectCleanedUp_failsSometimesFrom15To40ms() throws {
+    func test03_AbortOpus_0until100msAfterConnectCleanedUp_failsSometimesFrom15To40ms() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
         Logger.testing.notice("\(failed) failed abortion tests")
     }
     
-    func testAbortOpus_until1sAfterConnect_CleanedUp_ok() throws {
+    func test04_AbortOpus_until1sAfterConnect_CleanedUp_ok() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
         Logger.testing.notice("\(failed) failed abortion tests")

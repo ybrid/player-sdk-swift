@@ -91,8 +91,8 @@ class PlayerToggleStressTest: XCTestCase, AudioPlayerListener {
         player = AudioPlayer.openSync(for: opusDlfEndpoint, listener: self)
         
         stepDuration = 10
-        rangeFrom = 1 /// on first step
-        rangeTo = 3 /// on first step
+        rangeFrom = 2 /// on first step
+        rangeTo = 5 /// on first step
         restBetweenSteps = 5
         stepsDecrease = 10
         

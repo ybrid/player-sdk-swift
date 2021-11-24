@@ -40,7 +40,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var started = Date()
     var resumed = false
     var firstPCM = true
-    var stopping = false
+    var stopping = false 
 
     private var metadataExtractor: MetadataExtractor?
     private var fallbackMetadata:IcyMetadata?
@@ -79,11 +79,15 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         PlayerContext.unregisterMemoryListener(listener: self)
     }
     
+    func stopPlaying() {
+        buffer?.engine?.stop()
+    }
+    
     func dispose() {
         Logger.decoding.debug("pre deinit")
-        _ = self.accumulator?.reset()
-        self.decoder?.dispose()
-        self.buffer?.dispose()
+        _ = accumulator?.reset()
+        decoder?.dispose()
+        buffer?.dispose()
     }
     
     func reset() {
@@ -202,12 +206,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     
     func endOfStream() {
         decodingQueue.async { [self] in
-            guard !self.stopping else {
-                Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
-                return
-            }
-            
-            stopProcessing()
             buffer?.endOfStream()
         }
     }
