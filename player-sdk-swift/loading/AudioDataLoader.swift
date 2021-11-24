@@ -96,8 +96,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     func stopRequestData() {
         Logger.loading.debug()
         endSession()
-        PlayerContext.unregister(listener: self)
-        PlayerContext.unregisterMemoryListener(listener: self)
         stalled = false
     }
     
@@ -118,6 +116,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             session.invalidateAndCancel()
             self.session = nil
         }
+        PlayerContext.unregister(listener: self)
+        PlayerContext.unregisterMemoryListener(listener: self)
     }
     
     // MARK: handling memory
@@ -261,6 +261,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             self.pipeline.endOfData()
         }
         
+        
         taskState = SessionTaskState.getSessionTaskState(task.state, error)
          
         guard let taskState = taskState else {
@@ -270,6 +271,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
         
         if taskState.completed {
             Logger.loading.debug("task \(task.taskIdentifier) \(taskState.message)")
+            endSession()
             return
         }
         
@@ -283,7 +285,7 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             let notice = LoadingError(ErrorKind.noError, taskState)
             pipeline.pipelineListener.notify(taskState.severity,notice)
         }
-
+        endSession()
     }
     
     /// not used but I want to see it

@@ -116,12 +116,12 @@ public class PlayerContext {
     static func register(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
         networkMonitor.listeners.put(id: id, value: listener)
-        if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
+        Logger.loading.debug("\(networkMonitor.listeners.count) network listeners")
     }
     static func unregister(listener: NetworkListener) {
         let id = UInt(bitPattern: ObjectIdentifier(listener))
         networkMonitor.listeners.remove(id: id)
-        if Logger.verbose { Logger.loading.debug("\(networkMonitor.listeners.count) network listeners") }
+        Logger.loading.debug("\(networkMonitor.listeners.count) network listeners")
     }
 
     class NetworkMonitor {
