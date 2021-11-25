@@ -34,11 +34,12 @@ class PlaybackScheduler {
     private var totalScheduled:TimeInterval = 0.0
     
     var nodeNow:AVAudioTime? {
-        guard let lastSample = playerNode.lastRenderTime else {
+        guard let _ = playerNode.engine else { // could prohibit a crash
+            Logger.playing.error("should not happen. AVAudioPlayerNode is missing AVAudioEngine.")
             return nil
         }
-            
-        return lastSample
+
+        return playerNode.lastRenderTime
     }
     
     var playerNow:AVAudioTime? {
