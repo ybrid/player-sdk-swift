@@ -96,6 +96,8 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
     func stopRequestData() {
         Logger.loading.debug()
         endSession()
+        PlayerContext.unregister(listener: self)
+        PlayerContext.unregisterMemoryListener(listener: self)
         stalled = false
     }
     
@@ -116,8 +118,6 @@ class AudioDataLoader: NSObject, URLSessionDataDelegate, NetworkListener, Memory
             session.invalidateAndCancel()
             self.session = nil
         }
-        PlayerContext.unregister(listener: self)
-        PlayerContext.unregisterMemoryListener(listener: self)
     }
     
     // MARK: handling memory
