@@ -54,6 +54,7 @@ class SystemDecoder : AudioDecoder {
             }}
         converter = nil
         cleanupConverterGarbage()
+        source = nil
     }
     
     override func create(from sourceFormat:AVAudioFormat) throws -> AVAudioFormat {
@@ -109,7 +110,7 @@ class SystemDecoder : AudioDecoder {
         Logger.decoding.debug()
         
         guard let newPackages = source?.packages.count, newPackages > 0 else {
-            listener.endOfStream()
+            listener?.endOfStream()
             return // nothing to convert
         }
 
@@ -122,7 +123,7 @@ class SystemDecoder : AudioDecoder {
             Logger.decoding.error("ignoring error in flushing residual \(newPackages) audio packasges")
         }
         
-        listener.endOfStream()
+        listener?.endOfStream()
     }
     
     private func convert(newPackages:Int) throws -> AVAudioPCMBuffer {

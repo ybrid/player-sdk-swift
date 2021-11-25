@@ -51,7 +51,13 @@
                   Identifier = "AudioPlaylistTests">
                </Test>
                <Test
+                  Identifier = "ListeningAACCompareTests">
+               </Test>
+               <Test
                   Identifier = "PlayerToggleStressTest">
+               </Test>
+               <Test
+                  Identifier = "YbridBitrateLimitTests/test10_limitBitrates_AllMp3Supported()">
                </Test>
                <Test
                   Identifier = "YbridTimeshiftTests/test21_windBack10Times()">

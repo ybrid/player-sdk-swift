@@ -115,7 +115,7 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
 
     override func endOfStream() {
         Logger.decoding.debug()
-        listener.endOfStream()
+        listener?.endOfStream()
     }
     
     
@@ -158,7 +158,7 @@ class OpusDecoder : AudioDecoder, OpusDataListener {
     // MARK: MetadataListener
     
     func metadataReady(_ metadata: AbstractMetadata) {
-        super.listener.metadataReady(metadata)
+        super.listener?.metadataReady(metadata)
     }
     
     // MARK: helpers

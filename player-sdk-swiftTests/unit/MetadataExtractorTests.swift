@@ -14,9 +14,7 @@ class MetadataExtractorTests: XCTestCase {
     class TestMetadataListener : MetadataListener {
         var titles:[String] = []
         func metadataReady(_ metadata: AbstractMetadata) {
-            if let title = metadata.displayTitle {
-                titles.append(title)
-            }
+            titles.append(metadata.displayTitle)
         }
         
         var datas:[Data] = []
@@ -160,7 +158,9 @@ class MetadataExtractorTests: XCTestCase {
         extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 2)
-        XCTAssertEqual(consumer.titles.count, 0)
+        XCTAssertEqual(consumer.titles.count, 1)
+        guard let title = consumer.titles.first else { XCTFail(); return }
+        XCTAssertEqual(title, "")
         
         XCTAssertEqual(consumer.datas.map { $0.count }.reduce(0, +), 5)
     }
@@ -171,7 +171,7 @@ class MetadataExtractorTests: XCTestCase {
         var input:Data = Data()
         let content: [UInt8] = [1,1,1,1,1]
         input.append(contentsOf: content)
-        input.append(createMetadataBlock(with: "bla"))
+        input.append(createMetadataBlock(with: "StreamTitle=bla"))
         input.append(contentsOf: content)
         XCTAssertEqual(input.count, 2*5+17)
         
@@ -179,7 +179,10 @@ class MetadataExtractorTests: XCTestCase {
         extractor.flush(consumer.audiodataReady)
         
         XCTAssertEqual(consumer.datas.count, 2)
-        XCTAssertEqual(consumer.titles.count, 0)
+        XCTAssertEqual(consumer.titles.count, 1)
+        guard let title = consumer.titles.first else { XCTFail(); return }
+        XCTAssertEqual(title, "bla")
+        
         
         XCTAssertEqual(consumer.datas.map { $0.count }.reduce(0, +), 10)
     }

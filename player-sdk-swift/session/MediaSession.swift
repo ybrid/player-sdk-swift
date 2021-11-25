@@ -46,12 +46,20 @@ public class MediaSession {
         return mediaState?.playbackUri ?? endpoint.uri
     }}
     
+    var changeOverFactory:ChangeOverFactory?
+    var running:(() -> (Bool))?
+    
     init(on endpoint:MediaEndpoint, playerListener:AudioPlayerListener?) {
         self.endpoint = endpoint
         self.playerListener = playerListener
+        self.changeOverFactory = ChangeOverFactory(self.notifyChanged(_:clear:) )
     }
     
-    func connect() throws  {
+    func allow( _ running:@escaping ()->(Bool) ) {
+        self.running = running
+    }
+    
+    func connect() throws {
         do {
             let created = try factory.create(self)
             self.driver = created.0
@@ -77,141 +85,163 @@ public class MediaSession {
         driver?.refresh()
     }
     
-    // MARK: changes
+    
+    // MARK: actions
        
-       func maxBitRate(to bps:Int32) {
-           driver?.maxBitRate(to: bps)
-       }
-       func wind(by:TimeInterval) -> Bool {
-           return driver?.wind(by: by) ?? false
-       }
-       func windToLive() -> Bool {
-           return driver?.windToLive() ?? false
-       }
-       func wind(to:Date) -> Bool {
-           return driver?.wind(to:to) ?? false
-       }
-       func skipForward(_ type:ItemType?) -> Bool {
-           return driver?.skipForward(type) ?? false
-       }
-       func skipBackward(_ type:ItemType?) -> Bool {
-           return driver?.skipBackward(type) ?? false
-       }
-       func swapItem() -> Bool {
-           return driver?.swapItem() ?? false
-       }
-       func swapService(id:String) -> Bool {
-           return driver?.swapService(id: id) ?? false
-       }
-       
-    // MARK: metadata
-    
-    func setMetadata(metadata: AbstractMetadata) {
-           driver?.setMetadata(metadata: metadata)
-       }
-    
-    private var metadataDict = ThreadsafeDictionary<UUID,AbstractMetadata>(
-        DispatchQueue(label: "io.ybrid.metadata.maintaining", qos: PlayerContext.processingPriority)
-    )
-    
-    func maintainMetadata() -> UUID? {
-        guard let metadata = mediaState?.metadata else {
-            return nil
-        }
-        let uuid = UUID()
-        metadataDict.put(id: uuid, value: metadata)
-        mediaState?.clearChanged(SubInfo.metadata)
-        return uuid
+    func maxBitRate(to bps:Int32) {
+        driver?.maxBitRate(to: bps)
+        notifyChanged( SubInfo.playout )
     }
     
-    func notifyMetadata(uuid:UUID) {
-         if let metadata = metadataDict.pop(id:uuid) {
-             DispatchQueue.global().async {
-                 self.playerListener?.metadataChanged(metadata)
-             }
-         }
-     }
-
-    // MARK: change over
+    func wind(by:TimeInterval, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.wind(by:by) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind by \(by.S)")
+            return false
+        }
+        return execute(changeOver)
+    }
     
-    func change(_ running:Bool, _ action:()->(Bool), _ subtype:SubInfo,
-                 _ userAudioComplete: AudioCompleteCallback? ) -> Bool {
-         
-         let success = action()
-         let change = newChangeOver(subtype, userAudioComplete)
-         change.ctrlComplete?()
-         
-         if !running {
-             change.audioComplete(success)
-             return false
-         }
-         
-         if !success {
-             change.audioComplete(false)
-             return false
-         }
+    func windToLive(_ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.windToLive() ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind to live")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func wind(to:Date, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.wind(to:to) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish wind to \(to)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func skipForward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.skipForward(type) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            let msgTo = (type != nil) ? type!.rawValue : "item"
+            Logger.session.error("could not establish skip forward to \(msgTo)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func skipBackward(_ type:ItemType?, _ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.skipBackward(type) ?? false }, type: SubInfo.timeshift, userAudioComplete: audioComplete) else {
+            let msgTo = (type != nil) ? type!.rawValue : "item"
+            Logger.session.error("could not establish skip back to \(msgTo)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    func swapItem(_ audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.swapItem() ?? false }, type: SubInfo.metadata, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish swap item")
+            return false
+        }
+        return execute(changeOver)
+    }
 
-         changingOver = change
-         return true
-     }
+    func swapService(id:String, audioComplete: AudioCompleteCallback?) -> Bool {
+        guard let changeOver = changeOverFactory?.create( { self.driver?.swapService(id: id) ?? false }, type: SubInfo.bouquet, userAudioComplete: audioComplete) else {
+            Logger.session.error("could not establish swap to service \(id)")
+            return false
+        }
+        return execute(changeOver)
+    }
+    
+    private func execute(_ change:ChangeOver ) -> Bool {
 
-    private func newChangeOver(_ subtype: SubInfo, _ userAudioComplete: AudioCompleteCallback?)  ->  ChangeOver {
+        let success = change.action()
+        change.ctrlComplete?()
+
+        if (running?() ?? false) == false {
+            change.audioComplete(success)
+            return false
+        }
         
-        let audioComplete:AudioCompleteCallback = { (success) in
-            Logger.playing.debug("change over \(subtype) complete (\(success ? "with":"no") success)")
-            if let userCompleteCallback = userAudioComplete {
-                DispatchQueue.global().async {
-                    userCompleteCallback(success)
-                }
+        if !success {
+            change.audioComplete(false)
+            return false
+        }
+        
+        changingOver = change // waiting for trigger
+        return true
+    }
+    
+    // MARK: metadata handling
+    
+    func setMetadata(metadata: AbstractMetadata, direct:Bool,
+                     lineUp: (LineUp) -> () ) {
+        
+        driver?.setMetadata(metadata: metadata)
+        
+        let changeComplete = triggeredChangeComplete(metadata)
+        if direct {
+            if let callback = changeComplete?.audioComplete {
+                callback(true)
+            } else {
+                notifyChanged(SubInfo.metadata)
+            }
+        } else {
+            if let changedMetadata = mediaState?.metadata {
+                mediaState?.clearChanged(SubInfo.metadata)
+                lineUp( LineUp(description: changedMetadata.displayTitle,
+                               callback: { (success) in
+                                    if success {
+                                        self.playerListener?.metadataChanged(changedMetadata)
+                                    }
+                                } )
+                        )
+            }
+            if let changed = changeComplete {
+                lineUp( LineUp(description: "\(changed.subtype) complete",
+                               callback: { (success) in changed.audioComplete(success)} )
+                )
             }
         }
-        
-        switch subtype {
-        case .timeshift:
-            return ChangeOver(subtype,
-                              ctrlComplete: { self.notifyChanged(SubInfo.timeshift, clear: false) },
-                              audioComplete: audioComplete )
-        case .metadata:
-            return ChangeOver(subtype, audioComplete: audioComplete)
-        case .bouquet:
-            return ChangeOver(subtype, audioComplete: audioComplete)
-        default:
-            return ChangeOver(subtype, audioComplete: audioComplete)
-        }
     }
     
-    var changingOver:ChangeOver? { didSet {
-        Logger.session.debug("change over type \(changingOver?.subInfo.rawValue ?? "(nil)")")
-        if .timeshift == changingOver?.subInfo {
-            driver?.timeshifting = true
-        } else {
-            driver?.timeshifting = false
-        }
-    }}
-    
-    func triggeredAudioComplete(_ metadata: AbstractMetadata) -> AudioCompleteCallback? {
+    private func triggeredChangeComplete(_ metadata: AbstractMetadata) -> ChangeOver? {
         
         guard let changeOver = changingOver else {
+            // no change over in progress
             return nil
         }
         
-        let canTrigger = (metadata as? IcyMetadata)?.streamUrl != nil
+        let canTrigger = metadata.streamUrl != nil
         Logger.loading.debug("\(canTrigger ?"could":"can't") trigger audio complete")
         guard canTrigger else {
             return nil
         }
         
         guard let state = mediaState,
-           let completeCallback = changeOver.matches(to: state) else {
-               // no change over in progress or no media state change that matches
+              changeOver.matches(to: state) else {
+               // no matchng media state change
                return nil
         }
         
-        // change over is completed
         self.changingOver = nil
-        return completeCallback
+        // execute callback when according audio is playing
+        return changeOver
      }
     
+
+    // MARK: change over
+    
+    var changingOver:ChangeOver? { didSet {
+        if let type = changingOver?.subtype {
+            Logger.session.debug("change over \(type) in progress")
+        } 
+        if .timeshift == changingOver?.subtype {
+            driver?.timeshifting = true
+        } else {
+            driver?.timeshifting = false
+        }
+    }}
+    
+
     
     // MARK: notify audio player listener
     
@@ -223,24 +253,26 @@ public class MediaSession {
         }
         subInfos.forEach{
             switch $0 {
-            case .metadata: notifyChangedMetadata()
+            case .metadata: notifyChangedMetadata(clear: clear)
             case .timeshift: notifyChangedOffset(clear: clear)
-            case .playout: notifyChangedPlayout()
-            case .bouquet: notifyChangedServices()
+            case .playout: notifyChangedPlayout(clear: clear)
+            case .bouquet: notifyChangedServices(clear: clear)
             }
         }
     }
     
-    private func notifyChangedMetadata() {
+
+    
+    private func notifyChangedMetadata(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.metadata) == true,
             let metadata = mediaState?.metadata {
              DispatchQueue.global().async {
                  self.playerListener?.metadataChanged(metadata)
-                 self.mediaState?.clearChanged(SubInfo.metadata)
+                 if clear { self.mediaState?.clearChanged(SubInfo.metadata) }
              }
          }
      }
-     
+
      private func notifyChangedOffset(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.timeshift) == true,
             let ybridListener = self.playerListener as? YbridControlListener,
@@ -251,8 +283,8 @@ public class MediaSession {
              }
          }
      }
-     
-     private func notifyChangedPlayout() {
+
+     private func notifyChangedPlayout(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.playout) == true,
             let ybridListener = self.playerListener as? YbridControlListener {
              DispatchQueue.global().async {
@@ -260,18 +292,19 @@ public class MediaSession {
                      ybridListener.swapsChanged(swaps)
                  }
                  ybridListener.bitRateChanged(currentBitsPerSecond: self.mediaState?.currentBitRate, maxBitsPerSecond: self.mediaState?.maxBitRate)
-                 self.mediaState?.clearChanged(SubInfo.playout)
+                 if clear {self.mediaState?.clearChanged(SubInfo.playout) }
              }
          }
      }
-     
-     private func notifyChangedServices() {
+
+     private func notifyChangedServices(clear:Bool = true) {
          if mediaState?.hasChanged(SubInfo.bouquet) == true,
             let ybridListener = self.playerListener as? YbridControlListener,
             let services = mediaState?.bouquet?.services {
              DispatchQueue.global().async {
                  ybridListener.servicesChanged(services)
-                 self.mediaState?.clearChanged(SubInfo.bouquet) }
+                 if clear { self.mediaState?.clearChanged(SubInfo.bouquet) }
+             }
          }
      }
     

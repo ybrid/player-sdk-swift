@@ -173,9 +173,9 @@ class MetadataExtractor {
         }
         lastMetadataHash = hashed
         let flatMd = String(decoding: metadata.data, as: UTF8.self)
-        Logger.loading.debug("changed icy metadata string is \(flatMd)")
+        if Logger.verbose { Logger.loading.debug("changed icy metadata string is \(flatMd)") }
         let metaDict = parseMetadata(mdString: flatMd)
-        if Logger.verbose { Logger.decoding.debug("extracted icy metadata is \(metaDict)") }
+        Logger.decoding.debug("extracted icy metadata fields \(metaDict.keys)" )
         return IcyMetadata(icyData: metaDict)
     }
     
@@ -207,12 +207,7 @@ class MetadataExtractor {
             if let until = value.firstIndex(of: "\0") {
                 value = String(value[..<until])
             }
-            switch (key) {
-            case "StreamUrl", "StreamTitle":
-                result.updateValue(value, forKey: key)
-            default:
-                Logger.loading.debug("unused metadata key ’\(property[0])' with value '\(property[1])'")
-            }
+            result.updateValue(value, forKey: key)
         }
         return result
     }

@@ -26,7 +26,7 @@
 import XCTest
 import YbridPlayerSDK
 
-class AudioCodecsAACCompareTests: XCTestCase {
+class ListeningAACCompareTests: XCTestCase {
     
 
     /*

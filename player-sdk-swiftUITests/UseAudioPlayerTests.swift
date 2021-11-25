@@ -275,12 +275,12 @@ class UseAudioPlayerTests: XCTestCase {
                 sleep(1)
                 
                 XCTAssertGreaterThan(playerListener.metadatas.count, 0)
-                guard playerListener.metadatas.count > 0 else {
+                guard let metadata = playerListener.metadatas.first else {
                     XCTFail("expected at least one metadata called");
                     self.semaphore?.signal(); return
                 }
-                let metadata = playerListener.metadatas[0]
-                XCTAssertNotNil(metadata.current?.displayTitle)
+                XCTAssertNotNil(metadata.current.displayTitle)
+                XCTAssertNotNil(metadata.service.identifier)
                 
                 self.semaphore?.signal()
             }
@@ -311,7 +311,7 @@ class UseAudioPlayerTests: XCTestCase {
                 sleep(2)
                 
                 control.skipBackward(ItemType.NEWS) { (success) in
-                    print("Now You listen to news. That's \(success).")
+                    print("Now you listen to news. That's \(success).")
                     XCTAssertTrue(success)
                 }
                 sleep(10) /// listen to the news

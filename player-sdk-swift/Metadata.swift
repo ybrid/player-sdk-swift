@@ -31,26 +31,45 @@ import Foundation
 
 public protocol Metadata {
 
-    var displayTitle: String? { get }
+    var displayTitle: String { get }
     
-    var station: Station? { get }
-    var current: Item? { get }
+    var current: Item { get }
     var next: Item? { get }
     
-    var activeService: Service? { get }
+    var service: Service { get }
 }
 
 public struct Item {
-    public let type: ItemType
     public let displayTitle: String
-    
     public let identifier: String?
+    public let type: ItemType?
     public let title: String?
-    public let version: String?
     public let artist: String?
     public let album: String?
+    public let version: String?
     public let description: String?
-    public let durationMillis: Int64?
+    public let playbackLength: TimeInterval?
+    public let genre: String?
+    public let infoUri: String?
+    public let companions: [String]?
+    
+    init(displayTitle: String, identifier: String? = nil, type: ItemType? = nil,
+         title: String? = nil, artist: String? = nil, album: String? = nil, version: String? = nil,
+         description: String? = nil, playbackLength: TimeInterval? = nil, genre: String? = nil,
+         infoUri: String? = nil, companions: [String]? = nil) {
+        self.displayTitle = displayTitle
+        self.identifier = identifier
+        self.type = type
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.version  = version
+        self.description = description
+        self.playbackLength = playbackLength
+        self.genre = genre
+        self.infoUri = infoUri
+        self.companions = companions
+      }
 }
 
 public enum ItemType : String  {
@@ -65,86 +84,75 @@ public enum ItemType : String  {
     case UNKNOWN
 }
 
-public struct Station {
-    public var name: String?
-    public var genre: String?
-}
-
 public struct Service : Equatable {
     public let identifier:String
-    public var displayName:String?
-    public var iconUri:String?
+    public var displayName:String? = nil
+    public var iconUri:String? = nil
+    public var genre: String? = nil
+    public var description: String? = nil
+    public var infoUri:String? = nil
 }
 
 class AbstractMetadata : Metadata {
     
-    private var currentItem:Item?
-    private var nextItem:Item?
-    private var stationInfo: Station?
-    private var delegate:AbstractMetadata?
+    internal var currentInfo:Item? { get { return nil }}
+    internal var nextInfo:Item? { get { return nil }}
+    internal var serviceInfo: Service? { get { return nil }}
+
+    internal var delegate:AbstractMetadata? { didSet {
+        if streamUrl == nil, let _ = oldValue?.streamUrl {
+            // TODO keep streamUrl
+        }
+    }}
     
-    init(current:Item? = nil, next:Item? = nil, station:Station? = nil) {
-        self.currentItem = current
-        self.nextItem = next
-        self.stationInfo = station
-    }
+    private var superiorService: Service?
     
-    func delegate(with other: AbstractMetadata) {
+    internal var eligible:Bool { get {
+        return currentInfo != nil || nextInfo != nil || serviceInfo != nil
+        || streamUrl != nil || delegate?.eligible == true
+    }}
+    internal var description:String { get { return "\(type(of: self))" } }
+    
+    init() {}
+    
+    func delegate(to other: AbstractMetadata) {
         self.delegate = other
     }
     
-    func setBroadcaster(_ broadcaster:String) {
-        guard let _ = stationInfo else {
-            stationInfo = Station(name:broadcaster)
+    var streamUrl:String? { get {
+        if let icyStreamUrl = (delegate as? IcyMetadata)?.streamUrl {
+            return icyStreamUrl
+        }
+        return nil
+    }}
+    
+    func setService( _ service:Service) {
+        if let delegate = delegate {
+            delegate.setService(service)
             return
         }
-        stationInfo!.name = broadcaster
+        superiorService = service
     }
     
-    func setGenre(_ genre:String) {
-        guard let _ = stationInfo else {
-            stationInfo = Station(genre:genre)
-            return
-        }
-        stationInfo!.genre = genre
-    }
-    
-    public final var displayTitle: String? {
+    public final var displayTitle: String {
         if let delegate = delegate {
             return delegate.displayTitle
         }
-        return current?.displayTitle
+        return currentInfo?.displayTitle ?? AbstractMetadata.dummyItem.displayTitle
     }
     
-    public final var station: Station?  {
-        if let delegate = delegate {
-            return delegate.station
-        }
-        return stationInfo
-    }
-    
-    public final var current: Item? {
-        if let delegate = delegate {
-            return delegate.current
-        }
-        return currentItem
+    private static let dummyItem = Item(displayTitle: "")
+    public final var current: Item {
+        return delegate?.currentInfo ?? currentInfo ?? AbstractMetadata.dummyItem
     }
     
     public final var next: Item?  {
-        if let delegate = delegate {
-            return delegate.next
-        }
-        return nextItem
+        return delegate?.nextInfo ?? nextInfo
     }
     
-    public final var activeService: Service? {
-        if let delegate = delegate {
-            return delegate.activeService
-        }
-        guard let ybrid = self as? YbridMetadata else {
-            return nil
-        }
-        return ybrid.currentService
+    private static let defaultService = Service(identifier: "default", displayName: "")
+    public final var service: Service {
+        return delegate?.superiorService ?? delegate?.serviceInfo ?? superiorService ?? serviceInfo ?? AbstractMetadata.defaultService
     }
     
 }

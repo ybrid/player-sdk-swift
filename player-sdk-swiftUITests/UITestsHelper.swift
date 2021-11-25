@@ -55,8 +55,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     var logPlayingSince = true
     var logBufferSize = true
     var logMetadata = true
-    
-    
+
     func reset() {
         queue.async {
             self.metadatas.removeAll()
@@ -71,7 +70,7 @@ class TestAudioPlayerListener : AbstractAudioPlayerListener {
     override func metadataChanged(_ metadata: Metadata) {
         super.metadataChanged(metadata)
         if logMetadata {
-            Logger.testing.info("-- metadata changed, display title is \(metadata.displayTitle ?? "(nil)")")
+            Logger.testing.info("-- metadata changed, display title is '\(metadata.displayTitle)'")
         }
         queue.async {
             self.metadatas.append(metadata)
@@ -147,7 +146,6 @@ class TimingListener : AudioPlayerListener {
         errors.removeAll()
     }
     
-    
     var buffers:[TimeInterval] = []
     func stateChanged(_ state: PlaybackState) {}
     func metadataChanged(_ metadata: Metadata) {}
@@ -195,6 +193,10 @@ class Poller {
 
 class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
+    var logOffset = true
+    var logBitrate = true
+    var logSwapsLeft = true
+    
     override func reset() {
         queue.async { [self] in
             offsets.removeAll()
@@ -207,7 +209,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     var offsets:[TimeInterval] = []
     var services:[[Service]] = []
     var swaps:[Int] = []
-    var bitrates:[(current:Int32?,max:Int32?)] = []
+    var bitrates:[(current:Int32?,limit:Int32?)] = []
     
     // getting the latest recieved values for ...
     
@@ -223,7 +225,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }}
     var maxBitRate:Int32? { get {
         queue.sync {
-            return bitrates.last?.max
+            return bitrates.last?.limit
         }
     }}
     var currentBitRate:Int32? { get {
@@ -235,13 +237,13 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     var maxRateNotifications:Int { get {
         queue.sync {
-            return bitrates.map{ $0.max }.filter{ $0 != nil }.count
+            return bitrates.map{ $0.limit }.filter{ $0 != nil }.count
         }
     }}
     
     func isItem(_ type:ItemType) -> Bool {
         queue.sync {
-            if let currentType = metadatas.last?.current?.type {
+            if let currentType = metadatas.last?.current.type {
                 return type == currentType
             }
             return false
@@ -250,7 +252,7 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     func isItem(of types:[ItemType]) -> Bool {
         queue.sync {
-            if let currentType = metadatas.last?.current?.type {
+            if let currentType = metadatas.last?.current.type {
                 return types.contains(currentType)
             }
             return false
@@ -260,7 +262,9 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     
     func offsetToLiveChanged(_ offset:TimeInterval?) {
         guard let offset = offset else { XCTFail(); return }
-        Logger.testing.info("-- offset is \(offset.S)")
+        if logOffset {
+            Logger.testing.info("-- offset is \(offset.S)")
+        }
         queue.async {
             self.offsets.append(offset)
         }
@@ -274,21 +278,25 @@ class TestYbridPlayerListener : TestAudioPlayerListener, YbridControlListener {
     }
     
     func swapsChanged(_ swapsLeft: Int) {
-        Logger.testing.info("-- swaps left \(swapsLeft)")
+        if logSwapsLeft {
+            Logger.testing.info("-- swaps left \(swapsLeft)")
+        }
         queue.async {
             self.swaps.append(swapsLeft)
         }
     }
     
     func bitRateChanged(currentBitsPerSecond: Int32?, maxBitsPerSecond: Int32?) {
-        Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitsPerSecond ?? -1)")
+        if logBitrate {
+            Logger.testing.info("-- bit rate current \(currentBitsPerSecond ?? -1), max \(maxBitsPerSecond ?? -1)")
+        }
         queue.async {
             self.bitrates.append((currentBitsPerSecond,maxBitsPerSecond))
         }
     }
     
     override func metadataChanged(_ metadata: Metadata) {
-        Logger.testing.notice("-- service \(String(describing: metadata.activeService?.identifier))")
+        Logger.testing.info("-- service \(String(describing: metadata.service.identifier))")
         super.metadataChanged(metadata)
     }
 }

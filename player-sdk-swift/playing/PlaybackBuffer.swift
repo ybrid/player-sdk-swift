@@ -29,6 +29,11 @@ protocol BufferListener: class {
     func stateChanged(_ bufferState: PlaybackBuffer.BufferState)
 }
 
+struct LineUp {
+    let description:String
+    let callback:AudioCompleteCallback
+}
+
 class PlaybackBuffer {
     
     private static let preBufferingS = 0.5
@@ -56,11 +61,11 @@ class PlaybackBuffer {
     }
     private func audioOn() {
         Logger.playing.notice()
-        engine.change(volume: 1)
+        engine?.change(volume: 1)
     }
     private func audioOff() {
         Logger.playing.notice()
-        engine.change(volume: 0)
+        engine?.change(volume: 0)
     }
     
     var isEmpty:Bool { get {
@@ -74,7 +79,7 @@ class PlaybackBuffer {
     private let buffer:ChunkedBuffer
     var scheduler:PlaybackScheduler /// visible for unit tests
 
-    let engine: PlaybackEngine
+    weak var engine: PlaybackEngine?
     weak var listener:BufferListener?
 
     private var buffering:TimeInterval { get {
@@ -85,9 +90,6 @@ class PlaybackBuffer {
     }}
 
     private let instant:BufferInstant
-    
-    var onMetadataCue:((UUID)->())?
-    
     init(scheduling:PlaybackScheduler, engine: PlaybackEngine) {
         self.buffer = ChunkedBuffer()
         self.scheduler = scheduling
@@ -117,18 +119,11 @@ class PlaybackBuffer {
     }
     
     static let emptyPcm = AVAudioPCMBuffer()
-    func put(cuePoint:UUID) {
-        let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cuePoint: cuePoint)
+    func put(_ linedUp: LineUp) {
+        let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, callback: linedUp.callback)
         buffer.put(chunk: chunk)
         
-        if Logger.verbose { Logger.playing.debug("metadata cue point --> \(cuePoint)") }
-    }
-    
-    func put(_ cueAudioComplete: @escaping AudioCompleteCallback) {
-        let chunk = Chunk(pcm: PlaybackBuffer.emptyPcm, duration: 0, cueAudioComplete: cueAudioComplete)
-        buffer.put(chunk: chunk)
-        
-        Logger.playing.debug("audio complete cue point --> \(String(describing: cueAudioComplete))")
+        Logger.playing.debug("lined up '\(linedUp.description)'")
     }
     
     // REVIEW pause and resume should net set calculated state
@@ -191,12 +186,13 @@ class PlaybackBuffer {
 
     
     private func ensurePlayback() {
-        guard state != .wait else {
-            return
-        }
         
         instant.buffered = buffering
         instant.scheduled = remaining
+
+        guard state != .wait else {
+            return
+        }
         
         if Logger.verbose { Logger.playing.debug("buffer is \(instant.description)") }
         
@@ -250,15 +246,9 @@ class PlaybackBuffer {
         guard let takenChunk = buffer.pop() else {
             return nil
         }
-        if let cue = takenChunk.cuePoint {
+        if let callback = takenChunk.callback {
             DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
-                self.onMetadataCue?(cue)
-            }
-            return 0.0
-        }
-        if let complete = takenChunk.cueAudioComplete {
-            DispatchQueue.global().asyncAfter(deadline: .now() + remaining) {
-                complete(true)
+                callback(true)
             }
             return 0.0
         }
@@ -271,8 +261,7 @@ class PlaybackBuffer {
     struct Chunk {
         let pcm:AVAudioPCMBuffer
         let duration:TimeInterval
-        var cuePoint:UUID? = nil
-        var cueAudioComplete:AudioCompleteCallback? = nil
+        var callback:AudioCompleteCallback? = nil
     }
     
     private class ChunkedBuffer : ThreadsafeDequeue<Chunk> {
@@ -297,8 +286,8 @@ class PlaybackBuffer {
             let cleared = duration
             
             super.all.forEach{ (chunk) in
-                if let complete = chunk.cueAudioComplete {
-                    complete(true)
+                if let complete = chunk.callback {
+                    complete(false)
                 }
             }
             super.clear()

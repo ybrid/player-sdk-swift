@@ -149,7 +149,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         }
         if playbackState == .stopped {
             playbackState = .buffering
-            self.pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
+            pipeline = AudioPipeline(pipelineListener: self, playerListener:                                     playerListener, session: session)
             let playbackUrl = URL(string: session.playbackUri)!
             playerQueue.async {
                 self.playWhenReady(playbackUrl)
@@ -162,15 +162,14 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         }
     }
     
-      // Stop, notify immediatly, stop playback and clean up asychronously.
+      // Stop processing immediately, stop playback and clean up asychronously.
     public func stop() {
         guard playbackState != .stopped  else {
             Logger.shared.debug("already stopped")
             return
         }
-        pipeline?.stopProcessing()
-        playerQueue.async {
-            self.stopPlaying()
+        
+        stopComponents() {
             self.playbackState = .stopped
         }
     }
@@ -194,9 +193,7 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
     // Stopping and releasing all ressources
     public func close() {
         if playbackState != .stopped {
-            pipeline?.stopProcessing()
-            playerQueue.async {
-                self.stopPlaying()
+            stopComponents() {
                 self.playbackState = .stopped
             }
         }
@@ -208,10 +205,22 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
         loader?.requestData(from: playbackUrl)
     }
     
-    private func stopPlaying() {
-        playback?.stop()
-        loader?.stopRequestData()
-        pipeline?.dispose()
+    private func stopComponents(_ completed: @escaping () -> () ) {
+        guard let stopping = pipeline else {
+            Logger.shared.error("should not happen. hopefully processing and playback are already stopped")
+            loader?.stopRequestData()
+            completed()
+            return
+        }
+        
+        stopping.stopProcessing()
+        playerQueue.async {
+            stopping.stopPlaying()
+            self.loader?.stopRequestData()
+            stopping.dispose()
+            completed()
+        }
+
     }
     
     // MARK: pipeline listener
@@ -230,10 +239,9 @@ public class AudioPlayer: PlaybackControl, BufferListener, PipelineListener {
             Logger.shared.error("should not play already.")
         case .stopped, .pausing:
             Logger.shared.error("is \(playbackState), should not begin playing.")
-            pipeline?.stopProcessing()
-            playback.stop()
-            loader?.stopRequestData()
-            pipeline?.dispose()
+            stopComponents() {
+                self.playbackState = .stopped
+            }
             return
         }
     }

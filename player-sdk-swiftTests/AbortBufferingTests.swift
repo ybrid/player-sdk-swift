@@ -44,24 +44,24 @@ class AbortBufferingTests: XCTestCase {
     
     // MARK: abort playing mp3
 
-    func testAbortMp3_until200msAfterConnectCleanedUp_failsSometimesFrom25msTo35ms() throws {
+    func test01_AbortMp3_until200msAfterConnectCleanedUp_failsSometimesFrom25msTo35ms() throws {
         Logger.verbose = false
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
-      }
+    }
 
-    func testAbortMp3_until1sAfterConnectCleanedUp_ok() throws {
+    func test02_AbortMp3_until1sAfterConnectCleanedUp_ok() throws {
 
         try executeYbrid(endpoint: ybridSwr3Endpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
     }
     
-    func testAbortOpus_0until100msAfterConnectCleanedUp_failsSometimesFrom20To60ms() throws {
+    func test03_AbortOpus_0until100msAfterConnectCleanedUp_failsSometimesFrom15To40ms() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.000, endInterval: 0.121, increaseInterval: 0.005, increaseInCaseOfFailure: 0.001)
         Logger.testing.notice("\(failed) failed abortion tests")
     }
     
-    func testAbortOpus_until1sAfterConnect_CleanedUp_ok() throws {
+    func test04_AbortOpus_until1sAfterConnect_CleanedUp_ok() throws {
 
         let failed = try executeIcy(endpoint: opusDlfEndpoint, startInterval: 0.010, endInterval: 1.001, increaseInterval: 0.050, increaseInCaseOfFailure: 0.011)
         Logger.testing.notice("\(failed) failed abortion tests")
@@ -80,12 +80,12 @@ class AbortBufferingTests: XCTestCase {
                     semaphore.signal()
             })
             _ = semaphore.wait(timeout: .distantFuture)
-            let lastInterval = interval-increaseInterval
             if passed {
-                Logger.testing.notice("passed stopping after \(lastInterval.S)")
+                Logger.testing.notice("passed stopping after \(interval.S)")
+                interval += increaseInterval
             } else {
-                Logger.testing.error("failed stopping after \(lastInterval.S)")
-                interval = lastInterval + increaseInCaseOfFailure
+                Logger.testing.error("failed stopping after \(interval.S)")
+                interval += increaseInCaseOfFailure
             }
         } while interval <= endInterval
     }
@@ -106,11 +106,11 @@ class AbortBufferingTests: XCTestCase {
             _ = semaphore.wait(timeout: .distantFuture)
             if passed {
                 Logger.testing.notice("passed stopping after \(interval.S)")
+                interval += increaseInterval
             } else {
                 failedCount += 1
-                interval -= increaseInterval
-                interval += increaseInCaseOfFailure
                 Logger.testing.error("failed stopping after \(interval.S)")
+                interval += increaseInCaseOfFailure
             }
         } while interval <= endInterval
         return failedCount

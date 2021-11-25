@@ -85,7 +85,9 @@ class YbridState : MediaState {
             }
         }
         let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = super.bouquet?.activeService
+        if let active = super.bouquet?.activeService {
+            ybridMD.setService( active )
+        }
         super.metadata = ybridMD
     }
     
@@ -93,7 +95,9 @@ class YbridState : MediaState {
         let ybridV2Metadata = YbridV2Metadata(currentItem: newCurrentItem, nextItem: YbridItem(id: "", artist: "", title: "", description: "", durationMillis: 0, type: ItemType.UNKNOWN.rawValue), station: YbridStation(genre: "", name: ""))
         
         let ybridMD = YbridMetadata(ybridV2: ybridV2Metadata)
-        ybridMD.currentService = super.bouquet?.activeService
+        if let active = super.bouquet?.activeService {
+            ybridMD.setService( active )
+        }
         super.metadata = ybridMD
     }
     

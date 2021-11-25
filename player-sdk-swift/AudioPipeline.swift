@@ -40,13 +40,10 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     var started = Date()
     var resumed = false
     var firstPCM = true
-    var stopping = false
-
-    var icyFields:[String:String]? { didSet {
-        Logger.loading.notice("icy fields \(icyFields ?? [:])")
-    }}
+    var stopping = false 
 
     private var metadataExtractor: MetadataExtractor?
+    private var fallbackMetadata:IcyMetadata?
     private var accumulator: DataAccumulator?
     private var decoder: AudioDecoder?
     private var buffer: PlaybackBuffer?
@@ -55,7 +52,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     weak var playerListener:AudioPlayerListener?
     let session:MediaSession
 
-    let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
+    private let decodingQueue = DispatchQueue(label: "io.ybrid.decoding", qos: PlayerContext.processingPriority)
     let metadataQueue = DispatchQueue(label: "io.ybrid.metadata", qos: PlayerContext.processingPriority)
     
     init(pipelineListener: PipelineListener, playerListener: AudioPlayerListener?, session: MediaSession) {
@@ -79,14 +76,18 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             audioComplete(false)
             session.changingOver = nil
         }
+        PlayerContext.unregisterMemoryListener(listener: self)
+    }
+    
+    func stopPlaying() {
+        buffer?.engine?.stop()
     }
     
     func dispose() {
         Logger.decoding.debug("pre deinit")
-        _ = self.accumulator?.reset()
-        self.decoder?.dispose()
-        self.buffer?.dispose()
-        PlayerContext.unregisterMemoryListener(listener: self)
+        _ = accumulator?.reset()
+        decoder?.dispose()
+        buffer?.dispose()
     }
     
     func reset() {
@@ -107,7 +108,11 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     func prepareDecoder(_ mimeType: String?, _ filename: String?) throws {
         self.decoder = try AudioDecoder.factory.createDecoder(mimeType, filename, listener: self, notify: self.pipelineListener.notify)
     }
-
+    
+    func setIcyService(_ icyService:IcyMetadata) {
+        self.fallbackMetadata = icyService
+    }
+    
     func setInfinite(_ infinite: Bool) {
         self.infinite = infinite
     }
@@ -123,24 +128,26 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     // MARK: "main" is to process data chunks
     
     func process(data: Data) {
-
-        if let mdExtractor = metadataExtractor {
-            mdExtractor.dispatch(payload: data, metadataReady: metadataReady, audiodataReady: audiodataReady)
-            return
-        }
+        decodingQueue.async { [self] in
+            if let mdExtractor = metadataExtractor {
+                mdExtractor.dispatch(payload: data, metadataReady: metadataReady, audiodataReady: audiodataReady)
+                return
+            }
         
-        audiodataReady(data)
+            audiodataReady(data)
+        }
     }
 
     func endOfData() {
         Logger.decoding.debug()
-        if let mdExtractor = metadataExtractor {
+        decodingQueue.async { [self] in
+            if let mdExtractor = metadataExtractor {
             mdExtractor.flush(audiodataReady)
-        }
-        if let audioData = accumulator?.reset() {
-            self.decode(data: audioData)
-        }
-        decodingQueue.async {
+            }
+            if let audioData = accumulator?.reset() {
+                self.decode(data: audioData)
+            }
+            
             guard let decoder = self.decoder else {
                 Logger.decoding.error("no decoder avaliable")
                 return
@@ -165,10 +172,6 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
                 if let buffer = engine.start() {
                     self.pipelineListener.ready(playback: engine)
                     self.buffer = buffer
-                    
-                    buffer.onMetadataCue = { (metaCueId) in
-                        self.session.notifyMetadata(uuid: metaCueId)
-                    }
                 }
                 return
             }
@@ -176,7 +179,7 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
             if !resumed {
                 /// subsequent format change is detected
                 /// affects scheduler and connection to engine
-                buffer.engine.alterTarget(format: pcmTargetFormat)
+                buffer.engine?.alterTarget(format: pcmTargetFormat)
             } else {
                 /// recovered from network stall
                 buffer.reset()
@@ -202,12 +205,9 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
     }
     
     func endOfStream() {
-        guard !self.stopping else {
-            Logger.decoding.debug("stopping pipeline, ignoring residual pcm data")
-            return
+        decodingQueue.async { [self] in
+            buffer?.endOfStream()
         }
-        
-        buffer?.endOfStream()
     }
     
     
@@ -224,44 +224,40 @@ class AudioPipeline : DecoderListener, MemoryListener, MetadataListener {
         self.decode(data: audioData)
     }
     
+    
     func metadataReady(_ metadata: AbstractMetadata) {
         guard !self.stopping else {
             Logger.decoding.debug("stopping pipeline, ignoring metadata")
             return
         }
         
-        Logger.loading.debug("metadata \(metadata.displayTitle ?? "(no title)")")
-
-        if let broadcaster = icyFields?["icy-name"] {
-            metadata.setBroadcaster(broadcaster)
-        }
-        if let genre = icyFields?["icy-genre"] {
-            metadata.setGenre(genre)
-        }
+        Logger.loading.debug("\(metadata.self) displayTitle is '\(metadata.displayTitle)'")
         
         
-        session.setMetadata(metadata: metadata)
-        
-        let completeCallback = session.triggeredAudioComplete(metadata)
-        
-        /// propagating changed states, includes clearing changed status
-        if buffer?.isEmpty ?? true {
-            session.notifyChanged(SubInfo.metadata)
-            completeCallback?(true)
-        } else {
-            /// delay metadata notification until corresponding audio is scheduled
-            if let uuid = session.maintainMetadata() {
-                buffer?.put(cuePoint: uuid)
+        var adjustedMetadata = metadata
+        if let fallback = fallbackMetadata {
+            if metadata.eligible {
+                fallback.delegate(to: metadata)
+            } else {
+                Logger.loading.debug("dropping \(adjustedMetadata.description)")
             }
-            if let complete = completeCallback {
-                buffer?.put(complete)
-            }
+            adjustedMetadata = fallback
         }
         
-        /// do not delay notifaction of other states changes
+        if !adjustedMetadata.eligible {
+            Logger.loading.notice("using \(adjustedMetadata.description)")
+        }
+        
+        session.setMetadata(
+            metadata: adjustedMetadata,
+            direct: buffer?.isEmpty ?? true,
+            lineUp: { (lineUp) in
+                self.buffer?.put(lineUp)
+            }
+        )
+        
+        /// do not delay notifaction of playout states changes
         session.notifyChanged(SubInfo.playout)
-        session.notifyChanged(SubInfo.timeshift)
-        session.notifyChanged(SubInfo.bouquet)
     }
     
     

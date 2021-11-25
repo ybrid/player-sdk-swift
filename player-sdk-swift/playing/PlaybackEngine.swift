@@ -160,6 +160,10 @@ class PlaybackEngine : Playback {
             self?.tick()
         })
         timer.resume()
+        if self.timer != nil {
+            Logger.playing.error("should not happen. removed an existing timer")
+            stopTimer()
+        }
         self.timer = timer
     }
     
@@ -170,18 +174,19 @@ class PlaybackEngine : Playback {
     
     @objc func tick() {
 
+        let bufferedS = playbackBuffer?.update()
+        
+        let avrgBuffS = metrics.averagedBufferS(bufferedS)
+        DispatchQueue.global().async {
+            self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
+        }
+
         if let playingSince = playbackBuffer?.playingSince {
             DispatchQueue.global().async {
                 self.playerListener?.playingSince(playingSince)
             }
         }
         
-        let bufferedS = playbackBuffer?.update()
-        let avrgBuffS = metrics.averagedBufferS(bufferedS)
-        DispatchQueue.global().async {
-            self.playerListener?.bufferSize(averagedSeconds: avrgBuffS, currentSeconds: bufferedS)
-        }
-
     }
     
     

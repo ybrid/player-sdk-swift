@@ -84,7 +84,7 @@ class YbridV2Driver : MediaDriver {
         if super.timeshifting {
             info()
         } else {
-            if let streamUrl = (metadataIn as? IcyMetadata)?.streamUrl {
+            if let streamUrl = metadataIn.streamUrl {
                 showMeta(streamUrl)
             } else {
                 info()
@@ -412,12 +412,16 @@ class YbridV2Driver : MediaDriver {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(baseUrl)")
         }
         var urlQueries:[URLQueryItem] = []
-        let tokenQuery = URLQueryItem(name: "session-id", value: state.token)
-        urlQueries.append(tokenQuery)
+        if let token =  state.token {
+            let tokenQuery = URLQueryItem(name: "session-id", value: token)
+            urlQueries.append(tokenQuery)
+        }
         if let queryParam = queryParam {
             urlQueries.append(queryParam)
         }
-        ctrlUrl.queryItems = urlQueries
+        if !urlQueries.isEmpty {
+            ctrlUrl.queryItems = urlQueries
+        }
         guard let url = ctrlUrl.url else {
             throw SessionError(ErrorKind.invalidUri, "cannot request \(actionString) on \(ctrlUrl.debugDescription)")
         }
