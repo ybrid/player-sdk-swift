@@ -9,4 +9,4 @@ PRODUCT_NAME = YbridPlayerSDK
 MARKETING_VERSION = 0.14.0
 
 # Value of AudioPlayer.configuration.bundleBuildNumber
-CURRENT_PROJECT_VERSION = 51
+CURRENT_PROJECT_VERSION = 52
