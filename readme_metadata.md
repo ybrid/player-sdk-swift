@@ -33,11 +33,11 @@ name and version of the collection (see [Vorbis Comments](https://xiph.org/vorbi
 - `description`, `infoUri`
 A text, an uri defining a page containing information coming along with the specific content.
 - `playbackLength`
-The duration of the content in milliseconds. It may be inaccurate and could change during playback until it ends. 
+The duration of the content in milliseconds. It may be inaccurate and could change during playback. 
 - `companions`
 An array of urls pointing to pictures coming along with the content. Still implementation specific.
 - `type`
-We currently support the following `ItemTypes`
+We currently support the following `ItemTypes`. It may be extended in future.
 ```swift
 public enum ItemType : String  {
     case ADVERTISEMENT = "ADVERTISEMENT"
@@ -54,10 +54,10 @@ public enum ItemType : String  {
 ## `service` metadata
 Data about source and delivery of audio items. A service is responsible for providing the seqeunce of items. 
 - `identifier`
-is mandatory. If we do know very little about the service we identify it with `'default'`, for example when playing a local audio file.  
+An id representing this service is mandatory. 
 - `displayName`
-User information about the source, for example the broadcaster or name of a playlist. Empty for default service.
-- `iconUrl`
+User information about the source, for example the broadcaster or name of a playlist. It may be an empty string.
+- `iconUri`
 Url to an icon that can represent this service in a gui. For example, the logo of the radio station.
 - `genre`
 Type of content beeing provided by this service - not equal to `item.genre`.
