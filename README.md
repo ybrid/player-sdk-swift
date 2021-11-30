@@ -8,13 +8,23 @@ An example app using this player SDK can be run from the XCode-Project in the re
 
 ### Why yet another player?
 
-This audio player SDK offers
+This audio player SDK offers low latency live and on-demand streaming with a high stability. All current features see below:
 
-* low latency live and on-demand file streaming
-* compatibility: currently supports audio codecs mp3, aac, and opus
-* metadata processing for Icecast, Vorbis comments and Ybrid 
-* active, user-centric handling of typical network problems
-* stability
+| Specifications                                            |                                                                                                                                                                                                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Audio Formats                                             | MP3, AAC, Ogg/Opus                                                                                                                                                                                                       |
+| Streaming Compatibility                                   | Icecast, ICY, Ybrid, HTTP, HTTPS, File                                                                                                                                                                                   |
+| Player features                                           | Play, Stop, Pause                                                                                                                                                                                                        |
+| [Ybrid features](readme\_ybrid.md#ybrid-features-are)     | Swap item, Swap service, max bit-rate                                                                                                                                                                                    |
+| [Timeshift features](readme\_ybrid.md#ybrid-features-are) | <p>Wind back, wind forward, wind to live, wind to date, skip back (to item type), skip forward (to item type)</p><p><em>ItemTypes: News, Music, Voice, Weather, Traffic, Jingle, Advertisement, Comedy, Unknown</em></p> |
+| Metadata                                                  | ICY (MP3, AAC), VorbisComments (Opus Tags), Ybrid (e.g. current, next)                                                                                                                                                   |
+| OS-compatibility                                          | iOS 9 - now                                                                                                                                                                                                              |
+| Runtime / language requirement                            | ≥ Swift 4                                                                                                                                                                                                                |
+| Loggin                                                    | Unified Logging System                                                                                                                                                                                                   |
+| SDK Integration                                           | [Swift Package Manager](./#integration), [CocoaPods](./#integration)                                                                                                                                                     |
+| Device storage limit                                      | 128 MB (adjustable)                                                                                                                                                                                                      |
+| Flow control & playback                                   | Buffer status reporting, Automatic handling of network problems                                                                                                                                                          |
+| Monetization                                              | ≥ VAST 3.0                                                                                                                                                                                                               |
 
 ### How to use
 
@@ -37,7 +47,7 @@ try AudioPlayer.open(for: myEndpoint, listener: nil) {
 sleep(10) /// of course the program must not end here
 ```
 
-AudioPlayer.open first detects the transmission protocol and encoding of the audio content and [metadata](readme_metadata.md) and then returns a playback control asynchronously. A media-specific control can be taken from the full `open` method, [see README\_Ybrid](readme_ybrid.md).
+AudioPlayer.open first detects the transmission protocol and encoding of the audio content and [metadata](readme\_metadata.md) and then returns a playback control asynchronously. A media-specific control can be taken from the full `open` method, [see README\_Ybrid](readme\_ybrid.md).
 
 Possible playback states of the player are
 
@@ -70,7 +80,7 @@ In case of network stalls, the state will change from playing to buffering at th
 
 Errors are raised when occurring. Your handling may use the message, the `code`, or just `ErrorSeverity` of `AudioPlayerError`.
 
-Further interfaces concern [product version and handling of memory issues](readme_product.md). 
+Further interfaces concern [product version and handling of memory issues](readme\_product.md).
 
 ### Development environment
 
@@ -82,7 +92,7 @@ To generate the release artifact 'YbridPlayerSDK.xcframework', we use a shell sc
 
 'YbridPlayerSDK.xcframework' uses 'YbridOpus.xcframework' and 'YbridOgg.xcframework'.
 
-#### If you use CocoaPods
+#### If you use Cocoapods <a href="#integration_cocoapods" id="integration_cocoapods"></a>
 
 The Cocoa Podfile of a project using this audio player should look like
 
@@ -94,9 +104,12 @@ target 'app-example-ios' do
   pod 'YbridPlayerSDK'
 end
 ```
-### If you use Swift Packages
+
+#### If you use Swift Packages <a href="#integration_swiftpackagemanager" id="integration_swiftpackagemanager"></a>
+
 A Swift Package uses YbridPlayerSDK as Swift Package with the following lines (three Packages) in Package.swift:
-```swift 
+
+```swift
 // swift-tools-version:5.3
   ...
   dependencies: [
@@ -115,13 +128,15 @@ A Swift Package uses YbridPlayerSDK as Swift Package with the following lines (t
         from: "0.13.1"),
   ...
 ```
-Or in a Xcode project, choose "File" -> "Swift Packages" -> "Add Package Dependency" three times and pass url, version and name above. Have a look at the properties editor, and ensure the Packages are shown in section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. 
+
+Or in a Xcode project, choose "File" -> "Swift Packages" -> "Add Package Dependency" three times and pass url, version and name above. Have a look at the properties editor, and ensure the Packages are shown in section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab.
 
 #### If you don't use CocoaPods or Swift Packages
 
-If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release 
-1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases) 
-2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)  
+If you manage packages in another way, you may manually download the necessary XCFramewoks and embed them into your project. Take the following assets from the latest release
+
+1. YbridPlayerSDK.xcframework.zip from [this repository/releases](https://github.com/ybrid/player-sdk-swift/releases)
+2. YbridOgg.xcframework.zip from [ybrid/ogg-swift/releases](https://github.com/ybrid/ogg-swift/releases)
 3. YbridOpus.xcframework.zip from [ybrid/opus-swift/releases](https://github.com/ybrid/opus-swift/releases)
 
 Unzip the files into a directory called 'Frameworks' of your XCode project. In the properties editor, drag and drop the directories into the section 'Frameworks, Libraries and Embedded Content' of the target's 'General' tab. Please report any issue to tell us your need.
@@ -134,9 +149,8 @@ For a deeper insight into the structure of metadata and the power of ybrid [see 
 
 ### Contributing
 
-You are welcome to [contribute](https://github.com/ybrid/player-sdk-swift/blob/master/CONTRIBUTING.md) in many ways.
+You are welcome to [contribute](CONTRIBUTING.md) in many ways.
 
 ## Licenses
 
-This project uses [ogg-swift](https://github.com/ybrid/ogg-swift) and [opus-swift](https://github.com/ybrid/opus-swift) which are MIT licensed. Ogg and Opus carry BSD licenses, see 3rd party section in the [LICENSE](https://github.com/ybrid/player-sdk-swift/blob/master/LICENSE) file.
-
+This project uses [ogg-swift](https://github.com/ybrid/ogg-swift) and [opus-swift](https://github.com/ybrid/opus-swift) which are MIT licensed. Ogg and Opus carry BSD licenses, see 3rd party section in the [LICENSE](LICENSE/) file.

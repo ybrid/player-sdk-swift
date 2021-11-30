@@ -1,23 +1,26 @@
-# more interfaces
+# More interfaces
 
-## product version
-Using
+### product version
+
+If we're talking about the product version it's easy to get the evolution of the SDK using the following:
+
 ```swift
 AudioPlayer.productName
 AudioPlayer.productVersion
 AudioPlayer.productBuildNumber
 ```
-it should be it easy to talk about the evolution of this SDK.
 
-## memory issues 
+### memory issues
+
 The SDK offers a way to prohibit crashes when running out of memory.
 
-Call `PlayerContext.handleMemoryLimit()` on the first sign of trouble. If the memory footprint of the whole app exceeds `PlayerContext.memoryLimitMB`, the SDK will stop loading audio content. As a result the audio will be truncated and the problem is communicated via `AudioPlayerListener.error`. 
+Call `PlayerContext.handleMemoryLimit()` on the first sign of trouble. If the memory footprint of the whole app exceeds `PlayerContext.memoryLimitMB`, the SDK will stop loading audio content. As a result the audio will be truncated and the problem is communicated via `AudioPlayerListener.error`.
 
-The default value of `memoryLimitMB` is 128 megabytes. You should adjust the value to your need, if you use `handleMemoryLimit`. 
+The default value of `memoryLimitMB` is 128 megabytes. You should adjust the value to your need, if you use `handleMemoryLimit`.
 
-An example of handling out of memory in your app could look like this in your `ViewController` 
-```swift 
+An example of handling out of memory in your app could look like this in your `ViewController`
+
+```swift
 override func didReceiveMemoryWarning() {
     Logger.shared.notice()
     if PlayerContext.handleMemoryLimit() {
@@ -26,5 +29,3 @@ override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
 }
 ```
-
-
